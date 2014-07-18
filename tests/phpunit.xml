@@ -1,0 +1,35 @@
+<phpunit bootstrap="bootstrap.inc"
+		colors="true">
+	<testsuites>
+		<testsuite name="base">
+			<directory>util</directory>
+			<directory>cache</directory>
+			<directory>debug</directory>
+			<directory>event</directory>
+			<directory>log/writer</directory>
+			<directory>log</directory>
+		</testsuite>
+		<testsuite name="depinjection">
+			<directory>depinjection</directory>
+		</testsuite>
+		<testsuite name="context">
+			<directory>context</directory>
+		</testsuite>
+		<testsuite name="db">
+			<file>db/QueryTest.php</file>
+			<directory>db/orm</directory>
+		</testsuite>
+		<testsuite name="console">
+			<directory>console/controller</directory>
+			<file>console/DispatcherTest.php</file>
+		</testsuite>
+		<testsuite name="web">
+			<directory>web/view</directory>
+			<directory>web/controller</directory>
+			<file>web/DispatcherTest.php</file>
+		</testsuite>
+		<testsuite name="kernel">
+			<file>KernelTest.php</file>
+		</testsuite>
+	</testsuites>
+</phpunit>

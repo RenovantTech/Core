@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<context namespace="mock.console">
+	<objects>
+		<!-- Dispatcher -->
+		<object id="mock.console.Dispatcher" class="metadigit\core\console\Dispatcher">
+			<properties>
+				<property name="mappings" type="array">
+					<item key="db">mock.console.AbstractController</item>
+					<item key="mod1">mock.console.ActionController</item>
+					<item key="cron">mock.console.SimpleController</item>
+				</property>
+				<property name="resourcesDir">templates/</property>
+			</properties>
+		</object>
+		<!-- controllers -->
+		<object id="mock.console.SimpleController" class="mock\console\controller\SimpleController">
+		</object>
+		<object id="mock.console.ActionController" class="mock\console\controller\ActionController">
+		</object>
+		<object id="mock.console.AbstractController" class="mock\console\controller\AbstractController">
+		</object>
+	</objects>
+</context>

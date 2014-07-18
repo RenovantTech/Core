@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects>
+	<object id="mock.Mock" class="mock\GlobalMock">
+		<properties>
+			<property name="Child" type="object">system.Mock</property>
+			<property name="name">LocalMock</property>
+		</properties>
+	</object>
+</objects>
