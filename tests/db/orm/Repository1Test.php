@@ -305,7 +305,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @depends testConstructor
 	 */
-	function __testInsert(Repository $UsersRepository) {
+	function testInsert(Repository $UsersRepository) {
 		$lastTime = new DateTime();
 
 		// INSERT full object
@@ -373,12 +373,11 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('Brown2', $User1->surname);
 		$this->assertSame(7.5, $User1->score);
 		$this->assertNotEquals('2000-01-01 00:00:00', $User1->updatedAt->format('Y-m-d H:i:s'));
-return;
 		// 2 - pass new values array
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update(2, ['surname'=>'Yellow2']));
 		$User2 = $UsersRepository->fetch(2);
 		$this->assertSame('Yellow2', $User2->surname);
-		$this->assertSame(7.1, $User2->score);
+		$this->assertSame(8.1, $User2->score);
 		// 2bis - pass new values array
 		$User3 = $UsersRepository->fetch(3);
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User3, ['surname'=>'Green2']));
