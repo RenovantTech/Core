@@ -22,6 +22,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	const FETCH_OBJ		= 1;
 	/** FETCH MODE as array (with data type mapping) */
 	const FETCH_ARRAY	= 2;
+	/** FETCH MODE as array for JSON output (with data type mapping) */
+	const FETCH_JSON	= 3;
 	/** Entity class
 	 * @var string */
 	protected $class;

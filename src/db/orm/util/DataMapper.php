@@ -132,6 +132,34 @@ class DataMapper {
 	}
 
 	/**
+	 * Inject SQL types into array data ready for JSON conversion, converting to proper PHP types.
+	 * @param array $data
+	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @return array
+	 */
+	static function sql2json(array $data, $Metadata) {
+		$prop = $Metadata->properties();
+		foreach($data as $k=>&$v) {
+			if(!isset($prop[$k])) {
+				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
+				continue;
+			}
+			if($prop[$k]['null'] && is_null($v)) continue;
+			switch($prop[$k]['type']) {
+				case 'string': break;
+				case 'integer': $v = (int) $v; break;
+				case 'float': $v = (float) $v; break;
+				case 'boolean': $v = (bool) $v; break;
+				case 'date': break;
+				case 'datetime': $v = date(DateTime::W3C, strtotime($v)); break;
+				case 'object': $v = unserialize($v); break;
+				case 'array': $v = unserialize($v); break;
+			}
+		}
+		return $data;
+	}
+
+	/**
 	 * Inject SQL types into Entity data, converting to proper PHP types.
 	 * @param string $class Entity class
 	 * @param array $data
