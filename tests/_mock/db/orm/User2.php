@@ -29,9 +29,11 @@ class User2 {
 	protected $age = 20;
 	/** @orm(type="float") */
 	protected $score;
+	/** @orm(null)
+	 * @validate(null, email) */
+	protected $email;
 	/** @orm(type="datetime", null) */
 	protected $lastTime = null;
-
 	/** @validate(regex="/^(OPEN|CLOSED)$/") */
 	protected $notORM = 'OPEN';
 
