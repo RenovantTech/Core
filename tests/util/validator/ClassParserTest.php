@@ -13,5 +13,8 @@ class ClassParserTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(['min'=>5], $props['id']);
 		$this->assertArrayHasKey('active', $props);
 		$this->assertEquals(['true'=>true], $props['active']);
+		// check null
+		$nulls = $metadata['nullable'];
+		$this->assertContains('email', $nulls);
 	}
 }

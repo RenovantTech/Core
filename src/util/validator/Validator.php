@@ -24,9 +24,10 @@ class Validator {
 			$ReflProp = new \ReflectionProperty($class, $prop);
 			$ReflProp->setAccessible(true);
 			$value = $ReflProp->getValue($Object);
+			if(in_array($prop, $metadata['nullable']) && is_null($value)) continue;
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
-					$errors[$prop] = 'Error';
+					$errors[$prop] = $func;
 					TRACE and Kernel::trace(LOG_DEBUG, 0, __METHOD__, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")');
 				}
 			}
