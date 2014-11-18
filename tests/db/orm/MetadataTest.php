@@ -40,7 +40,7 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 
 		// properties
 		$properties = $Metadata->properties();
-		$this->assertCount(8, $properties);
+		$this->assertCount(9, $properties);
 		$this->assertArrayHasKey('id', $properties);
 		$this->assertTrue($properties['id']['autoincrement']);
 		$this->assertTrue($properties['id']['primarykey']);

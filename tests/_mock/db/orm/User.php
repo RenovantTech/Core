@@ -26,6 +26,9 @@ class User {
 	protected $age = 20;
 	/** @orm(type="float") */
 	protected $score;
+	/** @orm(null)
+	 * @validate(null, email) */
+	protected $email;
 	/** @orm(type="datetime", null) */
 	protected $lastTime = null;
 	/** @orm(type="datetime", readonly) */
