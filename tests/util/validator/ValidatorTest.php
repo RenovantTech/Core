@@ -18,5 +18,11 @@ class ValidatorTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayNotHasKey('name', Validator::validate($Object));
 		$Object->surname = 'Dalton';
 		$this->assertCount(0, Validator::validate($Object));
+		// check null
+		$Object->email = 'test@';
+		$this->assertCount(1, Validator::validate($Object));
+		$this->assertArrayHasKey('email', Validator::validate($Object));
+		$Object->email = 'test@example.com';
+		$this->assertCount(0, Validator::validate($Object));
 	}
 }

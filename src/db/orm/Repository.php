@@ -22,6 +22,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	const FETCH_OBJ		= 1;
 	/** FETCH MODE as array (with data type mapping) */
 	const FETCH_ARRAY	= 2;
+	/** FETCH MODE as array for JSON output (with data type mapping) */
+	const FETCH_JSON	= 3;
 	/** Entity class
 	 * @var string */
 	protected $class;
@@ -114,7 +116,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object Entity
 	 */
 	function create(array $data=[]) {
-		return new $this->class($data);
+		return DataMapper::array2object($this->class, $data, $this->Metadata);
 	}
 
 	/**
@@ -354,8 +356,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetch=true) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-		foreach($data as $k=>$v)
-			if(isset($this->Metadata->properties()[$k])) $Entity->$k = $v;
+		DataMapper::array2object($Entity, $data, $this->Metadata);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
@@ -371,7 +372,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				return $Entity;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(100, __FUNCTION__, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(100, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -388,8 +389,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetch=true) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
-			foreach($data as $k=>$v)
-				if(isset($this->Metadata->properties()[$k])) $Entity->$k = $v;
+			DataMapper::array2object($Entity, $data, $this->Metadata);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes
 			$criteria = [];

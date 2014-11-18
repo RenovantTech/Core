@@ -90,7 +90,6 @@ class ExcelWriterTest extends \PHPUnit_Framework_TestCase {
 
 		ob_start();
 		$ExcelWriter->write('php://output');
-		echo ob_get_clean();
 		$XML = new \SimpleXMLElement(str_replace('nowrap','',ob_get_clean()));
 		$this->assertSame('Age', (string) $XML->tr[0]->th[2]);
 		$this->assertSame('GREEN', (string) $XML->tr[3]->td[1]);

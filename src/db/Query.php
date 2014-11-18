@@ -39,6 +39,12 @@ class Query {
 	/** SQL target (table or tables join, aka the FROM/INTO clause)
 	 * @var string */
 	protected $target;
+	/** SQL GROUP BY
+	 * @var string */
+	protected $groupBy;
+	/** SQL HAVING
+	 * @var string */
+	protected $having;
 	/** SQL OFFSET
 	 * @var string */
 	protected $offset;
@@ -48,6 +54,9 @@ class Query {
 	/** SQL LIMIT
 	 * @var string */
 	protected $limit;
+	/** SQL WITH ROLLUP
+	 * @var boolean */
+	protected $withRollup = false;
 	/** Trace method
 	 * @var string */
 	protected $_tm;
@@ -159,6 +168,11 @@ class Query {
 	 */
 	function execSelect(array $params=[]) {
 		$sql = sprintf('SELECT %s FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
+		if(!empty($this->groupBy)) {
+			$sql .= ' GROUP BY '.$this->groupBy;
+			if($this->withRollup) $sql .= ' WITH ROLLUP ';
+		}
+		if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
 		if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
 		if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
 		if(!empty($this->offset)) $sql .= ' OFFSET '.$this->offset;
@@ -203,6 +217,28 @@ class Query {
 	 */
 	function criteriaExp($criteriaExp) {
 		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, $criteriaExp));
+		return $this;
+	}
+
+	/**
+	 * Set GROUP BY
+	 * @param string $groupBy
+	 * @return $this
+	 */
+	function groupBy($groupBy) {
+		$this->PDOStatement = null;
+		$this->groupBy = $groupBy;
+		return $this;
+	}
+
+	/**
+	 * Set HAVING
+	 * @param string $having
+	 * @return $this
+	 */
+	function having($having) {
+		$this->PDOStatement = null;
+		$this->having = $having;
 		return $this;
 	}
 
@@ -254,6 +290,16 @@ class Query {
 			$orderBy[] = str_replace('.',' ',$oExp);
 		}
 		$this->orderBy = implode(', ',$orderBy);
+		return $this;
+	}
+
+	/**
+	 * Set WITH ROLLUP
+	 * @return $this
+	 */
+	function withRollup() {
+		$this->PDOStatement = null;
+		$this->withRollup = true;
 		return $this;
 	}
 

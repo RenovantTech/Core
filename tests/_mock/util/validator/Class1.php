@@ -13,6 +13,8 @@ class Class1 {
 	protected $surname;
 	/** @validate(max=50) */
 	protected $age = 20;
+	/** @validate(null, email) */
+	protected $email;
 
 	function __set($k, $v) {
 		$this->$k = $v;

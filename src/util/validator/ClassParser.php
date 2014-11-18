@@ -22,7 +22,7 @@ class ClassParser {
 	function parse($class) {
 		$metadata = [
 			'properties' => [],
-			'methods' => []
+			'nullable' => []
 		];
 		$ReflClass = new ReflectionClass($class);
 		// properties constraints
@@ -32,7 +32,13 @@ class ClassParser {
 			if($DocComment->hasTag('validate')) {
 				$metadata['properties'][$prop] = [];
 				$values = $DocComment->getTagValues('validate');
-				foreach($values as $value) $metadata['properties'][$prop] = array_merge($metadata['properties'][$prop], $value);
+				foreach($values as $value) {
+					if(array_key_exists('null',$value)) {
+						$metadata['nullable'][] = $prop;
+						unset($value['null']);
+					}
+					$metadata['properties'][$prop] = array_merge($metadata['properties'][$prop], $value);
+				}
 			}
 		}
 		return $metadata;

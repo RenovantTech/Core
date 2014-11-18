@@ -92,6 +92,9 @@ class QueryRunner {
 				case Repository::FETCH_ARRAY:
 					$Entity = DataMapper::sql2array($data, $Metadata);
 					break;
+				case Repository::FETCH_JSON:
+					$Entity = DataMapper::sql2json($data, $Metadata);
+					break;
 			}
 			return $Entity;
 		} else return false;
@@ -121,6 +124,9 @@ class QueryRunner {
 					break;
 				case Repository::FETCH_ARRAY:
 					$entities[] = DataMapper::sql2array($data, $Metadata);
+					break;
+				case Repository::FETCH_JSON:
+					$entities[] = DataMapper::sql2json($data, $Metadata);
 					break;
 			}
 		}

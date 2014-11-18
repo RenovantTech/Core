@@ -42,12 +42,12 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 	protected function setUp() {
 		Kernel::pdo('mysql')->exec('
 			TRUNCATE `people`;
-			INSERT INTO `people` (id, name, surname, age, score) VALUES (1, "Albert",		"Brown", 21, 32.5);
+			INSERT INTO `people` (id, name, surname, age, score) VALUES (1, "Albert",	"Brown", 21, 32.5);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (2, "Barbara",	"Yellow",25, 8.6);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (3, "Carl",		"Green", 21, 15.4);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (4, "Don",		"Green", 17, 25);
-			INSERT INTO `people` (id, name, surname, age, score) VALUES (5, "Emily",		"Red",   18, 28);
-			INSERT INTO `people` (id, name, surname, age, score) VALUES (6, "Franz",		"Green", 28, 19.5);
+			INSERT INTO `people` (id, name, surname, age, score) VALUES (5, "Emily",	"Red",   18, 28);
+			INSERT INTO `people` (id, name, surname, age, score) VALUES (6, "Franz",	"Green", 28, 19.5);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (7, "Gen",		"Green", 25, 12);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (8, "Hugh",		"Red",   23, 23.4);
 		');
@@ -143,6 +143,22 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$Query = (new Query('mysql'))->on('people')->criteriaExp('age,GTE,20|score,GT,:score');
 		$this->assertCount(2, $Query->execSelect(['score'=>20])->fetchAll(\PDO::FETCH_ASSOC));
 		$this->assertCount(1, $Query->execSelect(['score'=>30])->fetchAll(\PDO::FETCH_ASSOC));
+
+		// GROUP BY
+		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(6, $data);
+		$this->assertEquals(['age'=>21, 'n'=>2], $data[2]);
+
+		// GROUP BY HAVING
+		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->having('age > 23')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(2, $data);
+		$this->assertEquals(['age'=>25, 'n'=>2], $data[0]);
+
+		// GROUP BY WITH ROLLUP
+		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->withRollup()->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(7, $data);
+		$this->assertEquals(['age'=>'', 'n'=>8], $data[6]);
+
 	}
 
 	function testExecUpdate() {
