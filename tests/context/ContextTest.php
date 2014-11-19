@@ -48,7 +48,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testFactory() {
 		$Context = Context::factory('mock.context');
 		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-		$this->assertTrue(Kernel::getCache()->has('mock.context.Context'));
+		$this->assertInstanceOf('metadigit\core\context\Context', Kernel::getCache()->get('mock.context.Context'));
 		return $Context;
 	}
 
