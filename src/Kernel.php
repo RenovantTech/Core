@@ -149,7 +149,7 @@ class Kernel {
 			}
 		}
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
-		self::$Cache = new cache\SqliteCache('kernel-cache', 'cache');
+		self::$Cache = new cache\SqliteCache('kernel-cache', 'cache', true);
 		set_exception_handler(function() {
 			call_user_func_array('metadigit\core\KernelDebugger::onException', func_get_args());
 		});
@@ -207,6 +207,7 @@ class Kernel {
 	 */
 	static function shutdown() {
 		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
+		cache\SqliteCache::shutdown();
 		$err = error_get_last();
 		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
 			self::$traceError = KernelDebugger::E_ERROR;
