@@ -1,3 +1,16 @@
+<a name="2.0.2"></a>
+# 2.0.2 (2014-11-20)
+
+### Features
+
+- **cache\SqliteCache:** add optional write buffer, INSERT queries are delayed till shutdown
+
+### Performance improvements
+
+- **Kernel cache:** now use SqliteCache write buffer. This should resolve the initial big bang when kernel cache is empty, many concurrent requests arrive, causing sqlite insert queries overlapping.
+
+
+
 <a name="2.0.1"></a>
 # 2.0.1 (2014-11-18)
 
