@@ -64,11 +64,11 @@ class SqliteCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($pdo, $table='cache', $writeBuffer=false) {
-		$this->_oid = $pdo.'.Cache';
+		$this->_oid = $pdo.'#'.$table;
 		$this->pdo = $pdo;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		TRACE and $this->trace(LOG_DEBUG, TRACE_CACHE, __FUNCTION__, 'initialize cache storage [Sqlite]');
+		TRACE and $this->trace(LOG_DEBUG, TRACE_CACHE, __FUNCTION__, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table);
 		Kernel::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 		if($writeBuffer) {
 			$this->writeBuffer = true;
@@ -158,8 +158,8 @@ class SqliteCache implements CacheInterface {
 	 */
 	static function shutdown() {
 		foreach(self::$_buffer as $k=>$buffer) {
-			if(!isset($buffer['pdoSt'])) continue;
-			Kernel::trace(LOG_DEBUG, TRACE_CACHE, __METHOD__, '[STORE] BUFFER '.$k.' '.count($buffer['store']));
+			if(!isset($buffer['pdoSt']) || !isset($buffer['store'])) continue;
+			Kernel::trace(LOG_DEBUG, TRACE_CACHE, __METHOD__, '[STORE] BUFFER: '.count($buffer['store']).' items on '.$k);
 			foreach($buffer['store'] as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
