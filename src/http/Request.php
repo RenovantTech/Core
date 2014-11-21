@@ -17,10 +17,13 @@ class Request {
 	protected $attrs = [];
 	/** Request parameters (contents of $_GET, $_POST & $_COOKIE).
 	 * @var	array */
-	protected $data = [];
+	protected $params = [];
 	/** Request HTTP headers
 	 * @var	array */
 	protected $headers = [];
+	/** HTTP method
+	 * @var string */
+	protected $method;
 	/** HTTP Request query
 	 * @var string */
 	protected $QUERY;
@@ -33,21 +36,33 @@ class Request {
 
 	/**
 	 * Constructor: create a new HTTP Request
-	 * @param array|null $data Request arguments. If not supplied, $_GET & $_POST will be used
+	 * @param string $uri the HTTP URI
+	 * @param string $method the HTTP method
+	 * @param array $params the GET/POST parameters
+	 * @param array $headers
+	 * @param string $data the raw body data
 	 */
-	function __construct(array $data=null) {
+	function __construct($uri=null, $method=null, array $params=null, array $headers=null, $data=null) {
+		$this->URI = strstr(($uri ? : $_SERVER['REQUEST_URI']).'?','?',true);
+		$this->method = $method ? : $_SERVER['REQUEST_METHOD'];
 		// @FIXME avoid memory duplication
-		$this->data = $data ?: array_merge($_GET,$_POST);
-		$this->rawData = file_get_contents('php://input');
-		$this->URI = strstr($_SERVER['REQUEST_URI'].'?','?',true);
+		$this->params = $params ? : array_merge($_GET,$_POST);
+		$this->rawData = $data ? : file_get_contents('php://input');
 		$this->QUERY = $_SERVER['QUERY_STRING'];
-		foreach($_SERVER as $key=>$value) {
-			if(substr($key,0,5)!='HTTP_') continue;
-			$key = strtolower(str_replace('_','-',substr($key,5)));
-			$this->headers[$key]=$value;
+		if($headers) {
+			foreach($headers as $key=>$value) {
+				if(substr($key,0,5)=='HTTP_') $key = substr($key,5);
+				$this->headers[strtolower(str_replace('_','-',$key))] = $value;
+			}
+		} else {
+			foreach($_SERVER as $key=>$value) {
+				if(substr($key,0,5)!='HTTP_') continue;
+				$key = strtolower(str_replace('_','-',substr($key,5)));
+				$this->headers[$key]=$value;
+			}
 		}
 		if(isset($this->headers['content-type']) && substr($this->headers['content-type'],0,16)=='application/json') {
-			$this->data = array_merge($this->data, (array) json_decode($this->rawData));
+			$this->params = array_merge($this->params, (array) json_decode($this->rawData));
 		}
 	}
 
@@ -57,7 +72,7 @@ class Request {
 	 * @return mixed|null
 	 */
 	function get($p) {
-		return isset($this->data[$p]) ? $this->data[$p] : null;
+		return isset($this->params[$p]) ? $this->params[$p] : null;
 	}
 
 	function getAttribute($k) {
@@ -70,7 +85,7 @@ class Request {
 	 * @param mixed $v parameter value
 	 */
 	function set($p, $v) {
-		$this->data[$p]=$v;
+		$this->params[$p]=$v;
 	}
 
 	function setAttribute($k, $v) {
@@ -102,11 +117,11 @@ class Request {
 	}
 
 	/**
-	 * Returns the name of the HTTP method with which this request was made, for example, GET, POST, or PUT.
-	 * @return string
+	 * Get the HTTP method (GET, POST, PUT, ...)
+	 * @return string HTTP method
 	 */
 	function getMethod() {
-		return $_SERVER['REQUEST_METHOD'];
+		return $this->method;
 	}
 
 	/**
@@ -120,7 +135,7 @@ class Request {
 	 * @return array POST data
 	 */
 	function getPutData() {
-		return ($_SERVER['REQUEST_METHOD'] == 'PUT') ? $this->rawData : null;
+		return ($this->method == 'PUT') ? $this->rawData : null;
 	}
 
 	function getRawData() {
@@ -131,13 +146,13 @@ class Request {
 	 * @return boolean TRUE if Request method = GET
 	 */
 	function isGet() {
-		return ($_SERVER['REQUEST_METHOD']=='GET');
+		return ($this->method=='GET');
 	}
 
 	/**
 	 * @return boolean TRUE if Request method = GET
 	 */
 	function isPost() {
-		return ($_SERVER['REQUEST_METHOD']=='POST');
+		return ($this->method=='POST');
 	}
 }
