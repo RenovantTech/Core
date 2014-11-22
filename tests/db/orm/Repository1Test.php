@@ -111,12 +111,26 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	function testDelete(Repository $UsersRepository) {
 		// passing Entity
 		$User = $UsersRepository->fetch(2);
-		$this->assertTrue($UsersRepository->delete($User));
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->delete($User));
 		$this->assertFalse($UsersRepository->fetch(2));
 
 		// passing key
-		$this->assertTrue($UsersRepository->delete(3));
+		$this->assertInstanceOf('mock\db\orm\User',$UsersRepository->delete(3));
 		$this->assertFalse($UsersRepository->fetch(3));
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->delete(6, false));
+
+		$data = $UsersRepository->delete(7, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Gen', $data['name']);
+		$this->assertSame('2013-01-15 18:40:00', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->delete(8, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Hugh', $data['name']);
+		$this->assertSame('2013-02-15T18:40:00+00:00', $data['lastTime']);
 	}
 
 	/**
@@ -438,15 +452,14 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 		// test FETCH MODES
 
-		$User6 = $UsersRepository->fetch(6);
-		$this->assertTrue($UsersRepository->update($User6, ['name'=>'Franz2', 'lastTime'=>date_create('2012-03-18 14:25:36')], true, false));
+		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>date_create('2012-03-18 14:25:36')], true, false));
 
-		$data = $UsersRepository->update($User6, [ 'name'=>'Franz3', 'lastTime'=>date_create('2012-03-31 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>date_create('2012-03-31 14:25:36') ], true, Repository::FETCH_ARRAY);
 		$this->assertInternalType('array', $data);
 		$this->assertSame('Franz3', $data['name']);
 		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
-		$data = $UsersRepository->update($User6, [ 'name'=>'Franz4', 'lastTime'=>date_create('2012-02-02 16:10:36') ], true, Repository::FETCH_JSON);
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>date_create('2012-02-02 16:10:36') ], true, Repository::FETCH_JSON);
 		$this->assertInternalType('array', $data);
 		$this->assertSame('Franz4', $data['name']);
 		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);

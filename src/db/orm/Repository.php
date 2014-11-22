@@ -122,17 +122,19 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Delete Entity from DB
 	 * @param mixed $EntityOrKey object or its primary keys
-	 * @return boolean TRUE on success
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch before delete
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function delete($EntityOrKey) {
+	function delete($EntityOrKey, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
 			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
 		}
-		return $this->execDeleteOne(__FUNCTION__, $Entity);
+		return $this->execDeleteOne(__FUNCTION__, $Entity, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -196,8 +198,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @throws Exception
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
 	 */
 	function insert($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
@@ -225,8 +227,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset	 * @return object|false $Entity, FALSE on failure
-	 * @throws Exception
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
 	 */
 	function update($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
@@ -259,17 +261,24 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Delete Entity using a Query.
 	 * @param string $method fetch method (used for trace)
 	 * @param mixed $Entity object or its primary keys
-	 * @return boolean TRUE on success
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execDeleteOne($method, $Entity) {
+	protected function execDeleteOne($method, $Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
 			if(QueryRunner::deleteOne($this->pdo, $this->Metadata, $Entity, $OrmEvent->getCriteriaExp())) {
 				$this->_onDelete->invoke($Entity);
 				$this->Context->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
-				return true;
+				switch($fetchMode) {
+					case self::FETCH_OBJ: return $Entity; break;
+					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $this->Metadata, $fetchSubset); break;
+					case self::FETCH_JSON: return DataMapper::object2json($Entity, $this->Metadata, $fetchSubset); break;
+					case false: return true;
+				}
 			} else return false;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
@@ -354,8 +363,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @throws Exception
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
 	 */
 	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
@@ -390,8 +399,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param bool $validate
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @throws Exception
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
 	 */
 	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
