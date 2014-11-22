@@ -233,7 +233,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(14.0, $Stats->score);
 		// test without re-fetch
 		$Stats = $StatsRepository->fetch(['AA', 2014]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>4.2]), ['fetch'=>false]);
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>4.2]), true, false);
 		$this->assertSame(4.2, $Stats->score);
 	}
 }

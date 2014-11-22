@@ -359,6 +359,20 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('Chao', $Entity20->name);
 		$this->assertSame('Xing', $Entity20->surname);
 		$this->assertNull($Entity20->lastTime);
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->insert(21, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, false));
+
+		$data = $UsersRepository->insert(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->insert(23, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
 	}
 
 	/**
@@ -421,5 +435,20 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User5, ['surname'=>'Johnson2', 'score'=>4.2]), ['fetch'=>false]);
 		$this->assertSame('Johnson2', $User5->surname);
 		$this->assertSame(5.2, $User5->score);
+
+		// test FETCH MODES
+
+		$User6 = $UsersRepository->fetch(6);
+		$this->assertTrue($UsersRepository->update($User6, ['name'=>'Franz2', 'lastTime'=>date_create('2012-03-18 14:25:36')], true, false));
+
+		$data = $UsersRepository->update($User6, [ 'name'=>'Franz3', 'lastTime'=>date_create('2012-03-31 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Franz3', $data['name']);
+		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->update($User6, [ 'name'=>'Franz4', 'lastTime'=>date_create('2012-02-02 16:10:36') ], true, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Franz4', $data['name']);
+		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);
 	}
 }
