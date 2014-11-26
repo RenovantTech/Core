@@ -137,26 +137,6 @@ class QueryRunner {
 	 * @param string $pdo
 	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param object $Entity
-	 * @param string $subset
-	 * @return void
-	 */
-	static function reFetch($pdo, $Metadata, $Entity, $subset=null) {
-		$criteria = [];
-		foreach($Metadata->pkeys() as $k)
-			$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
-		$subset = ($subset) ? implode(', ', $Metadata->subset()[$subset]) : '*';
-		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), $subset);
-		$data = $Query->criteriaExp(implode('|',$criteria))->execSelect()->fetch(\PDO::FETCH_ASSOC);
-		$data = DataMapper::sql2array($data, $Metadata);
-		foreach($data as  $k=>$v) {
-			$Entity->$k =$v;
-		}
-	}
-
-	/**
-	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
-	 * @param object $Entity
 	 * @return boolean
 	 */
 	static function insert($pdo, $Metadata, $Entity) {

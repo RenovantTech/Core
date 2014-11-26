@@ -48,6 +48,9 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('surname', $properties);
 		$this->assertEquals('string', $properties['surname']['type']);
 		$this->assertFalse($properties['surname']['null']);
+		$this->assertArrayHasKey('age', $properties);
+		$this->assertEquals('integer', $properties['age']['type']);
+		$this->assertTrue($properties['age']['null']);
 		$this->assertArrayHasKey('lastTime', $properties);
 		$this->assertEquals('datetime', $properties['lastTime']['type']);
 		$this->assertTrue($properties['lastTime']['null']);

@@ -66,11 +66,11 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 	function testDelete(Repository $StatsRepository) {
 		// passing Entity
 		$Stats = $StatsRepository->fetch(['AA',2013]);
-		$this->assertTrue($StatsRepository->delete($Stats));
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->delete($Stats));
 		$this->assertFalse($StatsRepository->fetch(['AA',2013]));
 
 		// passing key
-		$this->assertTrue($StatsRepository->delete(['BB',2013]));
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->delete(['BB',2013]));
 		$this->assertFalse($StatsRepository->fetch(['BB',2013]));
 	}
 
@@ -233,7 +233,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(14.0, $Stats->score);
 		// test without re-fetch
 		$Stats = $StatsRepository->fetch(['AA', 2014]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>4.2]), ['fetch'=>false]);
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>4.2]), true, false);
 		$this->assertSame(4.2, $Stats->score);
 	}
 }

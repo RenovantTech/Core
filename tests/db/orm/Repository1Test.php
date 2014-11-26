@@ -16,13 +16,13 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		');
 		Kernel::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `users` (
-				id			smallint unsigned not NULL AUTO_INCREMENT,
-				active		tinyint(1) unsigned,
+				id			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
+				active		tinyint(1) UNSIGNED NOT NULL,
 				name		varchar(20),
 				surname		varchar(20),
-				age			tinyint unsigned,
-				score		decimal(4,2) unsigned,
-				email		varchar(30) NULL default NULL,
+				age			tinyint UNSIGNED NOT NULL,
+				score		decimal(4,2) UNSIGNED NOT NULL,
+				email		varchar(30) NULL DEFAULT NULL,
 				lastTime	datetime NULL,
 				updatedAt	timestamp not NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 				PRIMARY KEY(id)
@@ -111,12 +111,26 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	function testDelete(Repository $UsersRepository) {
 		// passing Entity
 		$User = $UsersRepository->fetch(2);
-		$this->assertTrue($UsersRepository->delete($User));
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->delete($User));
 		$this->assertFalse($UsersRepository->fetch(2));
 
 		// passing key
-		$this->assertTrue($UsersRepository->delete(3));
+		$this->assertInstanceOf('mock\db\orm\User',$UsersRepository->delete(3));
 		$this->assertFalse($UsersRepository->fetch(3));
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->delete(6, false));
+
+		$data = $UsersRepository->delete(7, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Gen', $data['name']);
+		$this->assertSame('2013-01-15 18:40:00', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->delete(8, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Hugh', $data['name']);
+		$this->assertSame('2013-02-15T18:40:00+00:00', $data['lastTime']);
 	}
 
 	/**
@@ -359,6 +373,20 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame('Chao', $Entity20->name);
 		$this->assertSame('Xing', $Entity20->surname);
 		$this->assertNull($Entity20->lastTime);
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->insert(21, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, false));
+
+		$data = $UsersRepository->insert(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->insert(23, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
 	}
 
 	/**
@@ -421,5 +449,19 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User5, ['surname'=>'Johnson2', 'score'=>4.2]), ['fetch'=>false]);
 		$this->assertSame('Johnson2', $User5->surname);
 		$this->assertSame(5.2, $User5->score);
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>date_create('2012-03-18 14:25:36')], true, false));
+
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>date_create('2012-03-31 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Franz3', $data['name']);
+		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>date_create('2012-02-02 16:10:36') ], true, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Franz4', $data['name']);
+		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);
 	}
 }

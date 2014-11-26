@@ -122,17 +122,19 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Delete Entity from DB
 	 * @param mixed $EntityOrKey object or its primary keys
-	 * @return boolean TRUE on success
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch before delete
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function delete($EntityOrKey) {
+	function delete($EntityOrKey, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
 			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
 		}
-		return $this->execDeleteOne(__FUNCTION__, $Entity);
+		return $this->execDeleteOne(__FUNCTION__, $Entity, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -165,7 +167,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object Entity, NULL if not found
+	 * @return object|array|null Entity, NULL if not found
 	 */
 	function fetchOne($offset, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		return $this->execFetchOne(__FUNCTION__, $offset-1, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
@@ -193,11 +195,13 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $EntityOrKey object or its primary keys
 	 * @param array $data new Entity data
-	 * @param array $options
+	 * @param bool $validate FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @return object|false $Entity, FALSE on failure
 	 */
-	function insert($EntityOrKey, array $data=[], array $options=[]) {
+	function insert($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
@@ -210,8 +214,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				$Entity->$k = $EntityOrKey;
 			}
 		}
-		$options = array_merge(['fetch'=>true, 'validate'=>true], $options);
-		return $this->execInsertOne(__FUNCTION__, $Entity, $data, $options['validate'], $options['fetch']);
+		return $this->execInsertOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -221,19 +224,20 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $EntityOrKey object or its primary keys
 	 * @param array $data new Entity data
-	 * @param array $options
-	 * @return object|false $Entity, FALSE on failure
+	 * @param bool $validate FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset	 * @return object|false $Entity, FALSE on failure
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function update($EntityOrKey, array $data=[], array $options=[]) {
+	function update($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
 			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
 		}
-		$options = array_merge(['fetch'=>true, 'validate'=>true], $options);
-		return $this->execUpdateOne(__FUNCTION__, $Entity, $data, $options['validate'], $options['fetch']);
+		return $this->execUpdateOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -249,7 +253,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
 			return QueryRunner::count($this->pdo, $this->Metadata, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
-			throw new Exception(200, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -257,20 +261,27 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Delete Entity using a Query.
 	 * @param string $method fetch method (used for trace)
 	 * @param mixed $Entity object or its primary keys
-	 * @return boolean TRUE on success
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execDeleteOne($method, $Entity) {
+	protected function execDeleteOne($method, $Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
 			if(QueryRunner::deleteOne($this->pdo, $this->Metadata, $Entity, $OrmEvent->getCriteriaExp())) {
 				$this->_onDelete->invoke($Entity);
 				$this->Context->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
-				return true;
+				switch($fetchMode) {
+					case self::FETCH_OBJ: return $Entity; break;
+					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $this->Metadata, $fetchSubset); break;
+					case self::FETCH_JSON: return DataMapper::object2json($Entity, $this->Metadata, $fetchSubset); break;
+					case false: return true;
+				}
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(400, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -291,7 +302,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(400, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -315,7 +326,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $Entity;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -340,7 +351,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $entities;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -349,12 +360,13 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param string $method fetch method (used for trace)
 	 * @param object $Entity Entity
 	 * @param array $data new Entity data
-	 * @param bool $validate
-	 * @param bool $fetch re-fetch object after
+	 * @param bool $validate FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @return object|false $Entity, FALSE on failure
 	 */
-	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetch=true) {
+	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		DataMapper::array2object($Entity, $data, $this->Metadata);
 		try {
@@ -365,14 +377,17 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				if(!empty($this->errors)) return false;
 			}
 			if(QueryRunner::insert($this->pdo, $this->Metadata, $Entity)) {
-				if($fetch) {
-					QueryRunner::reFetch($this->pdo, $this->Metadata, $Entity);
-				}
+				if($fetchMode) {
+					foreach($this->Metadata->pkeys() as $k)
+						$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
+					$criteriaExp = implode('|',$criteria);
+					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_INSERT, null, null, $OrmEvent);
-				return $Entity;
+				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(100, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(100, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 
@@ -382,11 +397,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param object $Entity Entity
 	 * @param array $data new Entity data
 	 * @param bool $validate
-	 * @param bool $fetch
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @return object|false $Entity, FALSE on failure
 	 */
-	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetch=true) {
+	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			DataMapper::array2object($Entity, $data, $this->Metadata);
@@ -423,14 +439,17 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				if(!empty($this->errors)) return false;
 			}
 			if(QueryRunner::update($this->pdo, $this->Metadata, $Entity, $changes)) {
-				if($fetch) {
-					QueryRunner::reFetch($this->pdo, $this->Metadata, $Entity);
-				}
+				if($fetchMode) {
+					foreach($this->Metadata->pkeys() as $k)
+						$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
+					$criteriaExp = implode('|',$criteria);
+					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_UPDATE, null, null, $OrmEvent);
-				return $Entity;
+				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(300, $method, $this->_oid, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(300, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
 		}
 	}
 

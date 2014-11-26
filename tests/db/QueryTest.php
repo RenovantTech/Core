@@ -29,6 +29,35 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 				SET p_id = LAST_INSERT_ID();
 				SET p_time = NOW();
 			END;
+			CREATE TABLE IF NOT EXISTS `sales` (
+				year		YEAR NOT NULL,
+				product_id	INTEGER UNSIGNED NOT NULL,
+				sales1		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales2		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales3		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales4		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales5		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales6		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales7		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales8		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales9		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales10		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales11		DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales12		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target1		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target2		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target3		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target4		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target5		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target6		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target7		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target8		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target9		DECIMAL(10,2) UNSIGNED NOT NULL,
+				target10	DECIMAL(10,2) UNSIGNED NOT NULL,
+				target11	DECIMAL(10,2) UNSIGNED NOT NULL,
+				target12	DECIMAL(10,2) UNSIGNED NOT NULL,
+				PRIMARY KEY(year, product_id)
+			) 	ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		');
 	}
 
@@ -50,6 +79,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (6, "Franz",	"Green", 28, 19.5);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (7, "Gen",		"Green", 25, 12);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (8, "Hugh",		"Red",   23, 23.4);
+			TRUNCATE `sales`;
 		');
 	}
 
@@ -115,6 +145,21 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
 		$this->assertEquals(1, $Query->execInsert(['name'=>'Dick', 'surname'=>'Foo']));
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
+
+		$Query = (new Query('mysql'))->on('sales', 'year, product_id, sales1, sales2, sales3, sales4, sales5, sales6, sales7, sales8, sales9, sales10, sales11, sales12');
+		$this->assertEquals(1, $Query->execInsert(['year'=>2014, 'product_id'=>1, 'sales1'=>25500, 'sales2'=>0, 'sales3'=>32000, 'sales4'=>28450.50, 'sales5'=>0, 'sales6'=>0, 'sales7'=>0, 'sales8'=>0, 'sales9'=>0, 'sales10'=>0, 'sales11'=>0, 'sales12'=>0]));
+		$this->assertEquals(1, (new Query('mysql'))->on('sales')->criteria('year = 2014 AND product_id = 1')->execCount());
+	}
+
+	function testExecInsertException() {
+		try {
+			$Query = (new Query('mysql'))->on('sales', 'year, product_id, sales1, sales2, sales3, sales4, sales5, sales6, sales7, sales8, sales9, sales10, sales11, sales12');
+			$Query->execInsert(['year'=>2014, 'product_id'=>1, 'sales1'=>null, 'sales2'=>0, 'sales3'=>32000, 'sales4'=>28450.50, 'sales5'=>0, 'sales6'=>0, 'sales7'=>0, 'sales8'=>0, 'sales9'=>0, 'sales10'=>0, 'sales11'=>0, 'sales12'=>0]);
+			$this->fail('Expected PDOException not thrown');
+		} catch(\PDOException $Ex) {
+			$this->assertEquals(23000, $Ex->getCode());
+			$this->assertRegExp('/cannot be null/', $Ex->getMessage());
+		}
 	}
 
 	function testExecSelect() {

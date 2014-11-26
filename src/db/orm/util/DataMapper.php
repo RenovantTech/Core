@@ -28,7 +28,7 @@ class DataMapper {
 				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
 				continue;
 			}
-			if($prop[$k]['null'] && (is_null($v) || $v=='')) {
+			if($prop[$k]['null'] && (is_null($v) || $v==='')) {
 				$v = null;
 				continue;
 			}
@@ -58,6 +58,23 @@ class DataMapper {
 		$data = [];
 		foreach($prop as $k=>$v) {
 			if($subset && !in_array($k, $Metadata->subset()[$subset])) continue;
+			$data[$k] = $Entity->$k;
+		}
+		return $data;
+	}
+
+	/**
+	 * Convert Entity from PHP object to data array ready to JSON.
+	 * @param object $Entity
+	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string|null $subset
+	 * @return array
+	 */
+	static function object2json($Entity, $Metadata, $subset=null) {
+		$prop = $Metadata->properties();
+		$data = [];
+		foreach($prop as $k=>$v) {
+			if($subset && !in_array($k, $Metadata->subset()[$subset])) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':
@@ -66,7 +83,7 @@ class DataMapper {
 					$data[$k] = $Entity->$k;
 					break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
-				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s'); break;
+				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format(DateTime::W3C); break;
 				case 'object': $data[$k] = serialize($Entity->$k); break;
 				case 'array': $data[$k] = serialize($Entity->$k); break;
 			}

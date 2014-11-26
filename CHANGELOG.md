@@ -1,3 +1,16 @@
+<a name="2.0.3"></a>
+# 2.0.3 (2014-11-26)
+
+### Features
+
+- **db\orm\Repository:** add FETCH_* mode to insert/update/delete operations
+
+### Bug Fixes
+
+- **db\orm:** fix support for NULL values
+
+
+
 <a name="2.0.2"></a>
 # 2.0.2 (2014-11-20)
 
