@@ -28,7 +28,7 @@ class DataMapper {
 				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
 				continue;
 			}
-			if($prop[$k]['null'] && (is_null($v) || $v=='')) {
+			if($prop[$k]['null'] && (is_null($v) || $v==='')) {
 				$v = null;
 				continue;
 			}
