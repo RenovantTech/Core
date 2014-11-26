@@ -16,13 +16,13 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		');
 		Kernel::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `users` (
-				id			smallint unsigned not NULL AUTO_INCREMENT,
-				active		tinyint(1) unsigned,
+				id			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
+				active		tinyint(1) UNSIGNED NOT NULL,
 				name		varchar(20),
 				surname		varchar(20),
-				age			tinyint unsigned,
-				score		decimal(4,2) unsigned,
-				email		varchar(30) NULL default NULL,
+				age			tinyint UNSIGNED NOT NULL,
+				score		decimal(4,2) UNSIGNED NOT NULL,
+				email		varchar(30) NULL DEFAULT NULL,
 				lastTime	datetime NULL,
 				updatedAt	timestamp not NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 				PRIMARY KEY(id)
