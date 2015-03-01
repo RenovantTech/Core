@@ -13,7 +13,7 @@ abstract class XMLValidator {
 	static function relaxNG($xml, $rng) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->relaxNGValidate($rng)) throw new XMLException(3, self::errors(), $xml, $rng);
+		if(!$dom->relaxNGValidate($rng)) throw new XMLException(3, [self::errors(), $xml, $rng]);
 		return true;
 	}
 
@@ -27,7 +27,7 @@ abstract class XMLValidator {
 	static function relaxNGSource($xml, $rng) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->relaxNGValidateSource($rng)) throw new XMLException(3, self::errors(), $xml, $rng);
+		if(!$dom->relaxNGValidateSource($rng)) throw new XMLException(3, [self::errors(), $xml, $rng]);
 		return true;
 	}
 
@@ -41,7 +41,7 @@ abstract class XMLValidator {
 	static function schema($xml, $xsd) {
 		$dom = new \DOMDocument();
 		$dom->load($xml);
-		if(!$dom->schemaValidate($xsd)) throw new XMLException(2, self::errors(), $xml, $xsd);
+		if(!$dom->schemaValidate($xsd)) throw new XMLException(2, [self::errors(), $xml, $xsd]);
 		return true;
 	}
 
@@ -55,7 +55,7 @@ abstract class XMLValidator {
 	static function schemaSource($xml, $xsd) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->schemaValidateSource($xsd)) throw new XMLException(2, self::errors(), $xml, $xsd);
+		if(!$dom->schemaValidateSource($xsd)) throw new XMLException(2, [self::errors(), $xml, $xsd]);
 		return true;
 	}
 

@@ -109,6 +109,6 @@ abstract class ActionController implements \metadigit\core\web\ControllerInterfa
 		}
 		if(isset($this->_actions[$action])) return $action;
 		http_response_code(404);
-		throw new Exception(111, $this->_oid, $action.'Action');
+		throw new Exception(111, [$this->_oid, $action.'Action']);
 	}
 }

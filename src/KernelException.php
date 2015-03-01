@@ -12,5 +12,5 @@ namespace metadigit\core;
  */
 class KernelException extends Exception {
 	/* Dispatcher */
-	const COD1 = 'Unable to dispatch {1} Request with URI: {2}';
+	const COD1 = 'Unable to dispatch %s Request with URI: %s';
 }

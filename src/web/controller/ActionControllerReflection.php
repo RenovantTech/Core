@@ -31,7 +31,7 @@ class ActionControllerReflection {
 			$methodClass = $ReflMethod->getDeclaringClass()->getName();
 			// check signature of preHanlde & postHanlde hooks
 			if(in_array($methodName, ['preHandle','postHandle'])) {
-				if(!$ReflMethod->isProtected()) throw new Exception(101, $methodClass,$methodName);
+				if(!$ReflMethod->isProtected()) throw new Exception(101, [$methodClass,$methodName]);
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
 			} elseif($ReflMethod->isPublic() && substr($methodName,-6)=='Action') {
 				$action = substr($methodName,0,-6);
@@ -57,11 +57,11 @@ class ActionControllerReflection {
 					switch($i){
 						case 0:
 							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Request')
-								throw new Exception(102,$methodClass,$methodName,$i+1,'metadigit\core\http\Request');
+								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Request']);
 							break;
 						case 1:
 							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Response')
-								throw new Exception(102,$methodClass,$methodName,$i+1,'metadigit\core\http\Response');
+								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Response']);
 							break;
 						default:
 							$actions[$action]['params'][$i]['name'] = $ReflParam->getName();

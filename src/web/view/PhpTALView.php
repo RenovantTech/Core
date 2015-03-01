@@ -36,7 +36,7 @@ class PhpTALView implements \metadigit\core\web\ViewInterface {
 				return;
 			}
 		}
-		throw new Exception(201, 'PHPTal Template', $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIXS);
+		throw new Exception(201, ['PHPTal Template', $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIXS]);
 	}
 
 	function setPreFilter($class) {

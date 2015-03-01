@@ -45,8 +45,8 @@ class Session {
 		if(session_status() != 2) throw new SessionException(51);
 		if(static::FORCE_NAMESPACE) $this->_namespace = static::FORCE_NAMESPACE;
 		else $this->_namespace = (!is_null($namespace)) ? $namespace : static::DEFAULT_NAMESPACE;
-		if(!preg_match('/^[a-zA-Z]{1}[_a-zA-Z0-9]*[a-zA-Z0-9]{1}$/', $this->_namespace)) throw new SessionException(52,$this->_namespace);
-		if(isset(self::$_singletons[$this->_namespace])) throw new SessionException(53, $this->_namespace);
+		if(!preg_match('/^[a-zA-Z]{1}[_a-zA-Z0-9]*[a-zA-Z0-9]{1}$/', $this->_namespace)) throw new SessionException(52, [$this->_namespace]);
+		if(isset(self::$_singletons[$this->_namespace])) throw new SessionException(53, [$this->_namespace]);
 		if(static::FORCE_SINGLETON || $isSingleton === true) self::$_singletons[$this->_namespace] = true;
 		if (isset($_SESSION['_METADATA_'])) $this->expireData();
 	}
@@ -65,7 +65,7 @@ class Session {
 
 	final function __set($k, $v){
 		if($k==='') throw new SessionException("The '$k' key must be a non-empty string");
-		if($this->_isLocked) throw new SessionException(61, $this->_namespace);
+		if($this->_isLocked) throw new SessionException(61, [$this->_namespace]);
 		if(method_exists($this, $method ='set'.ucfirst($k))) $this->$method($v);
 		else $_SESSION[$this->_namespace][(string)$k] = $v;
 	}

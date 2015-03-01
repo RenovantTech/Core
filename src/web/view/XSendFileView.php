@@ -18,7 +18,7 @@ class XSendFileView implements \metadigit\core\web\ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	function render(Request $Req, Response $Res, $resource) {
-		if(!file_exists($resource)) throw new Exception(201, 'X-SendFile', $resource);
+		if(!file_exists($resource)) throw new Exception(201, ['X-SendFile', $resource]);
 		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'file: '.$resource);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
 		$Res->reset();

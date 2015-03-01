@@ -253,7 +253,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
 			return QueryRunner::count($this->pdo, $this->Metadata, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
-			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -281,7 +281,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				}
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -302,7 +302,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -326,7 +326,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $Entity;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -351,7 +351,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $entities;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -387,7 +387,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(100, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(100, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
@@ -449,7 +449,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(300, $this->_oid, $method, $Ex->getCode(), $Ex->getMessage());
+			throw new Exception(300, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
