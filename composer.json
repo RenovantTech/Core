@@ -12,7 +12,8 @@
 		"psr-0": { "metadigit\\core\\": "src/" }
 	},
 	"require": {
-		"php": ">=5.4"
+		"php": ">=5.4",
+		"phpunit/phpunit": "4.4.*"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",
