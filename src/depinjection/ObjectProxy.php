@@ -39,6 +39,6 @@ class ObjectProxy {
 	function __call($method, $args) {
 		if(is_null($this->_Obj)) $this->_Obj = Kernel::getCache()->get($this->_container)->get($this->_oid, null, Container::FAILURE_SILENT);
 		if(is_object($this->_Obj)) return call_user_func_array([$this->_Obj, $method], $args);
-		throw new ContainerException(4, $this->_oid);
+		throw new ContainerException(4, [$this->_oid]);
 	}
 }

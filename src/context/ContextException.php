@@ -12,13 +12,13 @@ namespace metadigit\core\context;
  */
 class ContextException extends \metadigit\core\Exception {
 	// runtime Container
-	const COD1 = '{1}: object OID "{2}" is NOT defined';
-	const COD2 = '{1}: object OID "{2}" NOT implementing required class/interface {2}';
+	const COD1 = '%s: object OID "%s" is NOT defined';
+	const COD2 = '%1$s: object OID "%2$s" NOT implementing required class/interface %2$s';
 	// configuration
-	const COD11 = '{1}: XML config file NOT FOUND in path {2}';
-	const COD12 = 'Context: invalid XML configuration, XSD not validated: {1}';
-	const COD13 = '{1}: invalid context namespace in XML: namespace={2}';
-	const COD14 = '{1}: invalid object ID namespace in XML: <object id="{2}">, must be inside namespace "{3}"';
-	const COD15 = '{1}: invalid object constructor reference: <arg name="{2}" type="object">{3}</arg>, must be inside available namespaces: {4}';
-	const COD16 = '{1}: invalid object property reference: <property name="{2}" type="object">{3}</property>, must be inside available namespaces: {4}';
+	const COD11 = '%s: XML config file NOT FOUND in path %s';
+	const COD12 = 'Context: invalid XML configuration, XSD not validated: %s';
+	const COD13 = '%s: invalid context namespace in XML: namespace=%s';
+	const COD14 = '%s: invalid object ID namespace in XML: <object id="%s">, must be inside namespace "%s"';
+	const COD15 = '%s: invalid object constructor reference: <arg name="%s" type="object">%s</arg>, must be inside available namespaces: %s';
+	const COD16 = '%s: invalid object property reference: <property name="%s" type="object">%s</property>, must be inside available namespaces: %s';
 }

@@ -98,6 +98,6 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 		if(isset($this->_actions[$action])) return $action;
 		if(isset($this->_actions[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
 		http_response_code(404);
-		throw new Exception(111, $this->_oid, $action.'Action');
+		throw new Exception(111, [$this->_oid, $action.'Action']);
 	}
 }

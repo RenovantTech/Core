@@ -21,7 +21,7 @@ $RefClass = new ReflectionClass($entityClass);
 
 // SQL source / target / functions
 $DocComment = $RefClass->getDocComment();
-if(!$tags = $DocComment->getTagValues('orm')) throw new Exception(602, $entityClass);
+if(!$tags = $DocComment->getTagValues('orm')) throw new Exception(602, [$entityClass]);
 $tag = [];
 foreach($tags as $t) $tag = array_merge($tag, $t);
 if(isset($tag['source'])) {
@@ -40,7 +40,7 @@ if(isset($tag['deleteFn'])) {
 	$this->sql['deleteFn'] = $tag['deleteFn'];
 }
 foreach($this->sql as $k=>$v) {
-	if(is_null($v)) throw new Exception(603, $entityClass, $k);
+	if(is_null($v)) throw new Exception(603, [$entityClass, $k]);
 }
 
 // ORM criteria
@@ -74,7 +74,7 @@ foreach($RefClass->getProperties() as $RefProperty) {
 	if(!$DocComment->hasTag('orm')) continue;
 	$this->properties[$prop] = ['type'=>'string', 'null'=>false, 'readonly'=>false];
 	if($tag = $DocComment->getTag('orm')) {
-		if(isset($tag['type']) && !in_array($tag['type'], ['string','integer','float','boolean','date','datetime','object','array'])) throw new Exception(604, $entityClass, $prop, $tag['type']);
+		if(isset($tag['type']) && !in_array($tag['type'], ['string','integer','float','boolean','date','datetime','object','array'])) throw new Exception(604, [$entityClass, $prop, $tag['type']]);
 		$this->properties[$prop] = array_merge($this->properties[$prop], (array)$tag);
 		if(isset($tag['primarykey'])) $this->pkeys[] = $prop;
 	}

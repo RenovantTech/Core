@@ -14,29 +14,30 @@ class Exception extends \Exception {
 
 	const LEVEL = E_USER_ERROR;
 
-	protected $args;
+	protected $data;
 
-	final function __construct($msg, $code=0) {
-		$this->args = func_get_args();
-		if(is_int($msg)) {
-			$code = $msg;
+	/**
+	 * @param int $code
+	 * @param string|array $message
+	 * @param mixed $data
+	 */
+	final function __construct($code=0, $message, $data=null) {
+		$this->data = $data;
+		if(is_array($message)) {
 			$msg = constant(get_class($this)."::COD$code");
-			$n_args = func_num_args()-1;
-			// iterate on arguments, setting values in message
-			//@FIXME use sprintf http://www.php.net/manual/en/function.sprintf.php
-			if($n_args>=1) {
-				for($i=1; $i<=$n_args; $i++) {
-					$val = func_get_arg($i);
-					if(is_array($val)) {
-						foreach($val as $k=>$v) {
-							$msg = str_replace('{'.$i.$k.'}',$v,$msg);
-						}
-					} else $msg = str_replace('{'.$i.'}',$val,$msg);
-				}
-			}
+			array_unshift($message, $msg);
+			$msg = call_user_func_array('sprintf', $message);
+			$message = $msg;
 		}
-		parent::__construct((string)$msg, (int)$code);
+		parent::__construct((string)$message, (int)$code);
 		TRACE and Kernel::trace(TRACE_DEFAULT, 1, get_class($this), '[CODE '.$this->getCode().'] '.$this->getMessage());
+	}
+
+	/**
+	 * @return mixed|null
+	 */
+	function getData() {
+		return $this->data;
 	}
 
 	/**

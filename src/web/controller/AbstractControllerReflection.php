@@ -33,7 +33,7 @@ class AbstractControllerReflection {
 			if(fnmatch('metadigit\core\*', $methodClass, FNM_NOESCAPE)) continue;
 			// check signature of preHanlde & postHanlde hooks
 			if(in_array($methodName, ['preHandle','postHandle'])) {
-				if(!$ReflMethod->isProtected()) throw new Exception(101,$methodClass,$methodName);
+				if(!$ReflMethod->isProtected()) throw new Exception(101, [$methodClass,$methodName]);
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
 			} elseif($ReflMethod->isPublic() && $methodName=='doHandle') {
 				// routing
@@ -50,11 +50,11 @@ class AbstractControllerReflection {
 					switch($i){
 						case 0:
 							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Request')
-								throw new Exception(102,$methodClass,$methodName,$i+1,'metadigit\core\http\Request');
+								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Request']);
 							break;
 						case 1:
 							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Response')
-								throw new Exception(102,$methodClass,$methodName,$i+1,'metadigit\core\http\Response');
+								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Response']);
 							break;
 						default:
 							$config['params'][$i]['name'] = $ReflParam->getName();

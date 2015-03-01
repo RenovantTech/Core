@@ -12,15 +12,15 @@ namespace metadigit\core\db\orm;
  */
 class Exception extends \metadigit\core\Exception {
 	// C (create)
-	const COD100 = 'INSERT {1}->{2}() - PDOException: {3} - {4}';
+	const COD100 = 'INSERT %s->%s() - PDOException: %s - %s';
 	// R (read)
-	const COD200 = 'SELECT {1}->{2}() - PDOException: {3} - {4}';
+	const COD200 = 'SELECT %s->%s() - PDOException: %s - %s';
 	// U (update)
-	const COD300 = 'UPDATE {1}->{2}() - PDOException: {3} - {4}';
+	const COD300 = 'UPDATE %s->%s() - PDOException: %s - %s';
 	// D (delete)
-	const COD400 = 'DELETE {1}->{2}() - PDOException: {3} - {4}';
+	const COD400 = 'DELETE %s->%s() - PDOException: %s - %s';
 	// configuration (annotation)
-	const COD602 = '{1} invalid configuration: missing @orm tag into Entity class declaration';
-	const COD603 = '{1} invalid configuration: must have @orm(source="?") OR alternatives (target, insertFn, updateFn, deleteFn) into Entity class declaration';
-	const COD604 = '{1} invalid configuration: property "{2}" has invalid tag @orm(type="{3}")';
+	const COD602 = '%s invalid configuration: missing @orm tag into Entity class declaration';
+	const COD603 = '%s invalid configuration: must have @orm(source="?") OR alternatives (target, insertFn, updateFn, deleteFn) into Entity class declaration';
+	const COD604 = '%s invalid configuration: property "%s" has invalid tag @orm(type="%s")';
 }

@@ -193,7 +193,7 @@ class Kernel {
 					}
 				}
 		}
-		if(is_null($app)) throw new KernelException(1, PHP_SAPI, ($api=='cli') ? self::$Req->CMD() : self::$Req->URI());
+		if(is_null($app)) throw new KernelException(1, [PHP_SAPI, ($api=='cli') ? self::$Req->CMD() : self::$Req->URI()]);
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
