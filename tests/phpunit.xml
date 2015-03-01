@@ -29,6 +29,7 @@
 			<file>web/DispatcherTest.php</file>
 		</testsuite>
 		<testsuite name="kernel">
+			<file>ExceptionTest.php</file>
 			<file>KernelTest.php</file>
 		</testsuite>
 	</testsuites>
