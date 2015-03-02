@@ -30,9 +30,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/** owner Context
 	 * @var \metadigit\core\context\Context */
 	protected $Context;
-	/** Entity errors
-	 * @var array */
-	protected $errors;
 	/** Entity ORM metadata
 	 * @var Metadata */
 	protected $Metadata;
@@ -73,14 +70,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$this->_onSave->setAccessible(true);
 		$this->_onDelete = new \ReflectionMethod($this->class, 'onDelete');
 		$this->_onDelete->setAccessible(true);
-	}
-
-	/**
-	 * Returns array of invalid fields.
-	 * @return array
-	 */
-	function getErrors() {
-		return $this->errors;
 	}
 
 	/**
@@ -241,6 +230,16 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	}
 
 	/**
+	 * Validate Entity.
+	 * Empty implementation, can be overridden by subclasses
+	 * @param $Entity
+	 * @return array map of properties & error codes, empty if VALID
+	 */
+	function validate($Entity) {
+		return [];
+	}
+
+	/**
 	 * Count entities using a Query.
 	 * @param string $method count method (used for trace)
 	 * @param string|null $criteriaExp CRITERIA expression
@@ -373,8 +372,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
 			if($validate) {
-				$this->errors = Validator::validate($Entity);
-				if(!empty($this->errors)) return false;
+				$errors = array_merge(Validator::validate($Entity), $this->validate($Entity));
+				if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 			}
 			if(QueryRunner::insert($this->pdo, $this->Metadata, $Entity)) {
 				if($fetchMode) {
@@ -435,8 +434,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			// validate
 			if($validate) {
-				$this->errors = Validator::validate($Entity);
-				if(!empty($this->errors)) return false;
+				$errors = array_merge(Validator::validate($Entity), $this->validate($Entity));
+				if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 			}
 			if(QueryRunner::update($this->pdo, $this->Metadata, $Entity, $changes)) {
 				if($fetchMode) {
