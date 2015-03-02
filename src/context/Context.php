@@ -83,8 +83,8 @@ class Context implements EventDispatcherInterface {
 		$this->namespace = $namespace;
 		$this->xmlPath = $xmlPath;
 		if(!is_null($xmlPath)) {
-			if(!file_exists($xmlPath)) throw new ContextException(11, $this->_oid, $xmlPath);
-			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, $xmlPath);
+			if(!file_exists($xmlPath)) throw new ContextException(11, [$this->_oid, $xmlPath]);
+			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
 			TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[START] parsing Context XML');
 			$this->getXmlParser()->verify();
 			$this->includedNamespaces = $this->getXmlParser()->getIncludes();
@@ -149,7 +149,7 @@ class Context implements EventDispatcherInterface {
 				if(!is_null($ctxNamespace))
 					$Obj = self::factory($ctxNamespace)->get($id, $class);
 			}
-			if(is_null($Obj)) throw new ContextException(1, $this->_oid, $id);
+			if(is_null($Obj)) throw new ContextException(1, [$this->_oid, $id]);
 			$this->objects[$id] = $Obj;
 			return $Obj;
 		} catch(ContainerException $Ex) {

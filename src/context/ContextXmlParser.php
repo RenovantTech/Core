@@ -49,10 +49,10 @@ class ContextXmlParser {
 	function verify() {
 		$namespace = (string)$this->XML['namespace'];
 		$availableNamespaces = implode(', ', array_merge((array)$namespace, $this->includes));
-		if($this->namespace != $namespace) throw new ContextException(13, $this->_oid, $namespace);
+		if($this->namespace != $namespace) throw new ContextException(13, [$this->_oid, $namespace]);
 		foreach($this->XML->xpath('//objects/object') as $objXML){
 			$id = (string)$objXML['id'];
-			if(strpos($id, $this->namespace) !== 0) throw new ContextException(14, $this->_oid, $id, $this->namespace);
+			if(strpos($id, $this->namespace) !== 0) throw new ContextException(14, [$this->_oid, $id, $this->namespace]);
 		}
 		foreach($this->XML->xpath('//objects/object/constructor/arg[@type="object"]') as $objXML){
 			$id = (string)$objXML;
@@ -60,7 +60,7 @@ class ContextXmlParser {
 			foreach($this->includes as $ns) {
 				if(strpos($id, $ns.'.') === 0) continue 2;
 			}
-			throw new ContextException(15, $this->_oid, (string)$objXML['name'], $id, $availableNamespaces);
+			throw new ContextException(15, [$this->_oid, (string)$objXML['name'], $id, $availableNamespaces]);
 		}
 		foreach($this->XML->xpath('//objects/object/properties/property[@type="object"]') as $objXML){
 			$id = (string)$objXML;
@@ -68,7 +68,7 @@ class ContextXmlParser {
 			foreach($this->includes as $ns) {
 				if(strpos($id, $ns.'.') === 0) continue 2;
 			}
-			throw new ContextException(16, $this->_oid, (string)$objXML['name'], $id, $availableNamespaces);
+			throw new ContextException(16, [$this->_oid, (string)$objXML['name'], $id, $availableNamespaces]);
 		}
 		return true;
 	}

@@ -12,14 +12,14 @@ namespace metadigit\core\console;
  */
 class Exception extends \metadigit\core\Exception {
 	/* Dispatcher */
-	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL/CMD: {1}';
-	const COD12 = 'Dispatcher Exception - could not resolve view with name: {1}, resource: {2}';
+	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL/CMD: %s';
+	const COD12 = 'Dispatcher Exception - could not resolve view with name: %s, resource: %s';
 	const COD13 = 'Dispatcher Exception - View neither contains a view name nor a View object';
 	/* Controller - compile-time (user defined code checks) */
-	const COD101 = 'Code Sintax Exception - Controller {1}->{2}() method MUST be declared "protected"';
-	const COD102 = 'Code Sintax Exception - Controller method {1}->{2}(), parameter n°{3} must be of type {4}';
+	const COD101 = 'Code Sintax Exception - Controller %s->%s() method MUST be declared "protected"';
+	const COD102 = 'Code Sintax Exception - Controller method %s->%s(), parameter n°%s must be of type %s';
 	/* Controller - run-time */
-	const COD111 = 'Controller Exception - invalid handler method {1}->{2}()';
+	const COD111 = 'Controller Exception - invalid handler method %s->%s()';
 	/* View */
-	const COD201 = 'View Exception - can not find resource, type: "{1}", requested path: {2}';
+	const COD201 = 'View Exception - can not find resource, type: "%s", requested path: %s';
 }

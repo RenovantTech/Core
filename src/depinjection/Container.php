@@ -56,8 +56,8 @@ class Container {
 		$this->namespace = $namespace;
 		$this->includes = $includes;
 		$this->xmlPath = $xmlPath;
-		if(!file_exists($xmlPath)) throw new ContainerException(11, $this->_oid, $xmlPath);
-		if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, $xmlPath);
+		if(!file_exists($xmlPath)) throw new ContainerException(11, [$this->_oid, $xmlPath]);
+		if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, [$xmlPath]);
 		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[START] parsing Container XML');
 		list($this->id2classMap, $this->class2idMap) = $this->getXmlParser()->parseMaps();
 		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[END] Container ready');
@@ -79,8 +79,8 @@ class Container {
 		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, $id);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
-			if(!$this->has($id)) throw new ContainerException(1, $this->_oid, $id);
-			if(!$this->has($id, $class)) throw new ContainerException(2, $this->_oid, $id, $class);
+			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);
+			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_oid, $id, $class]);
 			$objClass = $this->getXmlParser()->getClass($id);
 			$args = $this->getXmlParser()->parseObjectConstructorArgs($id, $this->_oid);
 			$ReflClass = new \ReflectionClass($objClass);
@@ -130,7 +130,7 @@ class Container {
 	 */
 	function getType($id) {
 		if(isset($this->id2classMap[$id])) return $this->id2classMap[$id][0];
-		throw new ContainerException(1, $this->_oid, $id);
+		throw new ContainerException(1, [$this->_oid, $id]);
 	}
 
 	/**

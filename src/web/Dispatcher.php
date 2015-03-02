@@ -88,7 +88,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 			}
 		}
 		http_response_code(404);
-		throw new Exception(11, $Req->getAttribute('APP_URI'));
+		throw new Exception(11, [$Req->getAttribute('APP_URI')]);
 	}
 
 	/**
@@ -107,7 +107,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 				$resource = str_replace('//','/', (substr($resource,0,1) != '/' ) ? dirname($Req->getAttribute('APP_URI').'*').'/'.$resource : $resource);
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
-			if(!isset($this->viewEngines[$engine])) throw new Exception(12, $view, $resource);
+			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
 			$this->trace(LOG_DEBUG, 1, __FUNCTION__, sprintf('view "%s", resource "%s"', $view, $resource));
 			$class = $this->viewEngines[$engine];
 			$View = new $class;

@@ -49,7 +49,7 @@ class ContainerXmlParser {
 	 */
 	function getClass($id) {
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
-		if(!$objXML) throw new ContainerException(1, $this->xmlPath, $id);
+		if(!$objXML) throw new ContainerException(1, [$this->xmlPath, $id]);
 		return (string)$objXML['class'];
 	}
 
@@ -92,7 +92,7 @@ class ContainerXmlParser {
 	function parseObjectConstructorArgs($id, $containerOID) {
 		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, 'parsing constructor args for object `'.$id.'`');
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
-		if(!$objXML) throw new ContainerException(1, $containerOID, $id);
+		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$args = [];
 		foreach ($objXML->xpath('constructor/arg') as $xmlArg) {
 			switch(self::parseType($xmlArg)) {
@@ -154,7 +154,7 @@ class ContainerXmlParser {
 	function parseObjectProperties($id, $containerOID) {
 		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, 'parsing properties for object `'.$id.'`');
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
-		if(!$objXML) throw new ContainerException(1, $containerOID, $id);
+		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$properties = [];
 		foreach ($objXML->xpath('properties/property') as $xmlProp) {
 			switch (self::parseType($xmlProp)) {

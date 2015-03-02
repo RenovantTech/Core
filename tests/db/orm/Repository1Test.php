@@ -2,6 +2,7 @@
 namespace test\db\orm;
 use metadigit\core\Kernel,
 	metadigit\core\context\Context,
+	metadigit\core\db\orm\Exception,
 	metadigit\core\db\orm\Repository,
 	metadigit\core\util\DateTime;
 
@@ -392,15 +393,22 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @depends testConstructor
 	 */
-	function testInsertError(Repository $UsersRepository) {
+	function testInsertException(Repository $UsersRepository) {
 		$lastTime = new DateTime();
-
-		$this->assertFalse($UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']));
-		$this->assertArrayHasKey('email', $UsersRepository->getErrors());
-
-		$this->assertFalse($UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']));
-		$this->assertArrayHasKey('age', $UsersRepository->getErrors());
-		$this->assertEquals(['age'=>'min'], $UsersRepository->getErrors());
+		try {
+			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
+			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
+		}
+		try {
+			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
+			$this->assertEquals([ 'age'=>'min'], $Ex->getData());
+		}
 	}
 
 	/**
@@ -463,5 +471,25 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertInternalType('array', $data);
 		$this->assertSame('Franz4', $data['name']);
 		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);
+	}
+
+	/**
+	 * @depends testConstructor
+	 */
+	function testUpdateException(Repository $UsersRepository) {
+		try {
+			$UsersRepository->update(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@']);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
+			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
+		}
+		try {
+			$UsersRepository->insert(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@', 'age'=>10]);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: age, email', $Ex->getMessage());
+			$this->assertEquals([ 'age'=>'min', 'email'=>'email'], $Ex->getData());
+		}
 	}
 }
