@@ -53,7 +53,7 @@ class ExcelWriter {
 	 */
 	function setData(array $data) {
 		$this->_data = $data;
-		$this->iteratorMode = (is_object($data[0])) ? self::ITERATE_OBJECT : self::ITERATE_ARRAY;
+		$this->iteratorMode = (isset($data[0]) && is_object($data[0])) ? self::ITERATE_OBJECT : self::ITERATE_ARRAY;
 		return $this;
 	}
 
