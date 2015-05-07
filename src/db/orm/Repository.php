@@ -215,7 +215,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param array $data new Entity data
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset	 * @return object|false $Entity, FALSE on failure
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */

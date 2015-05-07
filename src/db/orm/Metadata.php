@@ -12,19 +12,27 @@ namespace metadigit\core\db\orm;
  */
 class Metadata {
 
+	/** SQL metadata: source, target, insertFn, updateFn, deleteFn
+	 * @var array */
 	protected $sql = [];
-
-	protected $pkeys;
-
+	/** Primary keys
+	 * @var array */
+	protected $pkeys = [];
+	/** PK criteriaExp
+	 * @var string */
 	protected $pkCriteria;
-
+	/** Entity properties definition
+	 * @var array*/
 	protected $properties = [];
-
+	/** Custom criteriaExp definitions
+	 * @var array */
 	protected $criteria = [];
-
+	/** Custom orderBy definitions
+	 * @var array */
 	protected $order = [];
-
-	protected $subset = [];
+	/** Fetch subsets definition
+	 * @var array */
+	protected $subsets = [];
 
 	function __construct($entityClass) {
 		include(__DIR__.'/Metadata.construct.inc');

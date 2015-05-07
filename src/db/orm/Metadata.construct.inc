@@ -8,15 +8,6 @@
 use metadigit\core\db\orm\Exception,
 	metadigit\core\util\reflection\ReflectionClass;
 
-
-$data = new \ArrayObject([
-		'sql' => [
-				'source'=>null,
-				'target'=>null,
-		],
-		'pkeys' => null,
-		'properties' => [],
-]);
 $RefClass = new ReflectionClass($entityClass);
 
 // SQL source / target / functions
