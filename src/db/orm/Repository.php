@@ -184,7 +184,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $EntityOrKey object or its primary keys
 	 * @param array $data new Entity data
-	 * @param bool $validate FALSE to skip validation
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
@@ -213,7 +213,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $EntityOrKey object or its primary keys
 	 * @param array $data new Entity data
-	 * @param bool $validate FALSE to skip validation
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
@@ -233,9 +233,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Validate Entity.
 	 * Empty implementation, can be overridden by subclasses
 	 * @param $Entity
+	 * @param string|null $validateMode
 	 * @return array map of properties & error codes, empty if VALID
 	 */
-	function validate($Entity) {
+	function validate($Entity, $validateMode) {
 		return [];
 	}
 
@@ -371,10 +372,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
-			if($validate) {
-				$errors = array_merge(Validator::validate($Entity), $this->validate($Entity));
-				if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
-			}
+			// validate
+			if($validate) $this->doValidate($Entity, $validate);
+			// run INSERT
 			if(QueryRunner::insert($this->pdo, $this->Metadata, $Entity)) {
 				if($fetchMode) {
 					foreach($this->Metadata->pkeys() as $k)
@@ -433,10 +433,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 					$changes[$k] = $newData[$k];
 			}
 			// validate
-			if($validate) {
-				$errors = array_merge(Validator::validate($Entity), $this->validate($Entity));
-				if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
-			}
+			if($validate) $this->doValidate($Entity, $validate);
+			// run UPDATE
 			if(QueryRunner::update($this->pdo, $this->Metadata, $Entity, $changes)) {
 				if($fetchMode) {
 					foreach($this->Metadata->pkeys() as $k)
@@ -457,6 +455,20 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	function setContext(Context $Context) {
 		$this->Context = $Context;
+	}
+
+	/**
+	 * @param $Entity
+	 * @param bool|string $validateMode, TRUE or a named @orm-validate-subset
+	 * @throws Exception
+	 */
+	protected function doValidate($Entity, $validateMode) {
+		$validateSubset = (is_string($validateMode)) ? $this->Metadata->validateSubset($validateMode) : null;
+		$validateMode = (is_string($validateMode)) ? $validateMode : null;
+		$errorsByTags = Validator::validate($Entity, $validateSubset);
+		$errorsByFn = $this->validate($Entity, $validateMode);
+		$errors = array_merge($errorsByTags, $errorsByFn);
+		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 	}
 }
 Kernel::autoload('metadigit\core\db\orm\util\DataMapper');
