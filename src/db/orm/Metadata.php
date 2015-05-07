@@ -12,19 +12,30 @@ namespace metadigit\core\db\orm;
  */
 class Metadata {
 
+	/** SQL metadata: source, target, insertFn, updateFn, deleteFn
+	 * @var array */
 	protected $sql = [];
-
-	protected $pkeys;
-
+	/** Primary keys
+	 * @var array */
+	protected $pkeys = [];
+	/** PK criteriaExp
+	 * @var string */
 	protected $pkCriteria;
-
+	/** Entity properties definition
+	 * @var array*/
 	protected $properties = [];
-
+	/** Custom criteriaExp definitions
+	 * @var array */
 	protected $criteria = [];
-
+	/** Custom orderBy definitions
+	 * @var array */
 	protected $order = [];
-
-	protected $subset = [];
+	/** Fetch subsets definition
+	 * @var array */
+	protected $fetchSubsets = [];
+	/** Validate subsets definition
+	 * @var array */
+	protected $validateSubsets = [];
 
 	function __construct($entityClass) {
 		include(__DIR__.'/Metadata.construct.inc');
@@ -38,11 +49,21 @@ class Metadata {
 		return $this->order;
 	}
 
+	/** Primary keys
+	 * @return array */
 	function pkeys() {
 		return $this->pkeys;
 	}
 
-	function pkCriteria($keys) {
+	/** CriteriaExp based on PKs
+	 * @param mixed $EntityOrKeys
+	 * @return string criteriaExp
+	 */
+	function pkCriteria($EntityOrKeys) {
+		if(is_object($EntityOrKeys)) {
+			$keys = [];
+			foreach($this->pkeys as $k) $keys[] = $EntityOrKeys->$k;
+		} else $keys = $EntityOrKeys;
 		return preg_replace(array_fill(0, count($this->pkeys), '/\?/'), $keys, $this->pkCriteria, 1);
 	}
 
@@ -54,7 +75,15 @@ class Metadata {
 		return isset($this->sql[$k]) ? $this->sql[$k] : null;
 	}
 
-	function subset() {
-		return $this->subset;
+	function fetchSubset($name) {
+		if(isset($this->fetchSubsets[$name])) return $this->fetchSubsets[$name];
+		trigger_error('Invalid FETCH SUBSET requested: '.$name, E_USER_ERROR);
+		return '*';
+	}
+
+	function validateSubset($name) {
+		if(isset($this->validateSubsets[$name])) return explode(',', $this->validateSubsets[$name]);
+		trigger_error('Invalid VALIDATE SUBSET requested: '.$name, E_USER_ERROR);
+		return array_keys($this->properties);
 	}
 }

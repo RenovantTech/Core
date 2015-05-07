@@ -5,8 +5,10 @@ namespace mock\db\orm;
  * @orm(source="users")
  * @orm-criteria(activeAge="active,EQ,1|age,GTE,?1", dateMonth="YEAR(lastTime) = ?1 AND MONTH(lastTime) = ?2")
  * @orm-order-by(nameASC="name ASC, surname ASC")
- * @orm-subset(mini="id, name, score", medium="id, active, name, score")
- * @orm-subset(large="id, active, name, age, score")
+ * @orm-fetch-subset(mini="id, name, score", medium="id, active, name, score")
+ * @orm-fetch-subset(large="id, active, name, age, score")
+ * @orm-validate-subset(main="active, name, surname")
+ * @orm-validate-subset(extra="age, score, email")
  */
 class User {
 	use \metadigit\core\db\orm\EntityTrait;
