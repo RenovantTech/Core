@@ -50,14 +50,14 @@ class DataMapper {
 	 * Convert Entity from PHP object to data array.
 	 * @param object $Entity
 	 * @param \metadigit\core\db\orm\Metadata $Metadata
-	 * @param string|null $subset
+	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2array($Entity, $Metadata, $subset=null) {
+	static function object2array($Entity, $Metadata, $fetchSubset=null) {
 		$prop = $Metadata->properties();
 		$data = [];
 		foreach($prop as $k=>$v) {
-			if($subset && !in_array($k, $Metadata->subset()[$subset])) continue;
+			if($fetchSubset && strstr($Metadata->fetchSubset($fetchSubset),$k)===false) continue;
 			$data[$k] = $Entity->$k;
 		}
 		return $data;
@@ -67,14 +67,14 @@ class DataMapper {
 	 * Convert Entity from PHP object to data array ready to JSON.
 	 * @param object $Entity
 	 * @param \metadigit\core\db\orm\Metadata $Metadata
-	 * @param string|null $subset
+	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2json($Entity, $Metadata, $subset=null) {
+	static function object2json($Entity, $Metadata, $fetchSubset=null) {
 		$prop = $Metadata->properties();
 		$data = [];
 		foreach($prop as $k=>$v) {
-			if($subset && !in_array($k, $Metadata->subset()[$subset])) continue;
+			if($fetchSubset && strstr($Metadata->fetchSubset($fetchSubset),$k)===false) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':

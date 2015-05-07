@@ -82,7 +82,7 @@ class QueryRunner {
 	 * @return object|false
 	 */
 	static function fetchOne($pdo, $Metadata, $class, $offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
-		$subset = ($fetchSubset) ? implode(', ', $Metadata->subset()[$fetchSubset]) : '*';
+		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), $subset)->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
 		if($data = $Query->orderByExp($orderExp)->criteriaExp($criteriaExp)->limit(1)->offset($offset)->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
@@ -113,7 +113,7 @@ class QueryRunner {
 	 * @return array
 	 */
 	static function fetchAll($pdo, $Metadata, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
-		$subset = ($fetchSubset) ? implode(', ', $Metadata->subset()[$fetchSubset]) : '*';
+		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), $subset)->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
 		$St = $Query->orderByExp($orderExp)->criteriaExp($criteriaExp)->limit($limit)->offset($offset)->execSelect();
 		$entities = [];

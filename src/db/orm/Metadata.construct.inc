@@ -50,11 +50,11 @@ if($DocComment->hasTag('orm-order-by')) {
 	}
 }
 
-// ORM subset
-if($DocComment->hasTag('orm-subset')) {
-	$tagValues = $DocComment->getTagValues('orm-subset');
+// ORM fetchSubset
+if($DocComment->hasTag('orm-fetch-subset')) {
+	$tagValues = $DocComment->getTagValues('orm-fetch-subset');
 	foreach($tagValues as $value) {
-		foreach($value as $k => $v) $this->subset[$k] = explode(',',str_replace(' ','',$v));
+		foreach($value as $k => $v) $this->fetchSubsets[$k] = trim($v);
 	}
 }
 

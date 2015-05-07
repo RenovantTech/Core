@@ -32,7 +32,7 @@ class Metadata {
 	protected $order = [];
 	/** Fetch subsets definition
 	 * @var array */
-	protected $subsets = [];
+	protected $fetchSubsets = [];
 
 	function __construct($entityClass) {
 		include(__DIR__.'/Metadata.construct.inc');
@@ -62,7 +62,9 @@ class Metadata {
 		return isset($this->sql[$k]) ? $this->sql[$k] : null;
 	}
 
-	function subset() {
-		return $this->subset;
+	function fetchSubset($name) {
+		if(isset($this->fetchSubsets[$name])) return $this->fetchSubsets[$name];
+		trigger_error('Invalid FETCH SUBSET requested: '.$name, E_USER_ERROR);
+		return '*';
 	}
 }

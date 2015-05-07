@@ -30,13 +30,10 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('nameASC', $orderBy);
 		$this->assertEquals('name ASC, surname ASC', $orderBy['nameASC']);
 
-		// subsets
-		$subsets = $Metadata->subset();
-		$this->assertCount(3, $subsets);
-		$this->assertArrayHasKey('mini', $subsets);
-		$this->assertEquals(['id','name','score'], $subsets['mini']);
-		$this->assertArrayHasKey('large', $subsets);
-		$this->assertEquals(['id','active','name','age','score'], $subsets['large']);
+		// fetch subsets
+		$this->assertEquals('id, name, score', $Metadata->fetchSubset('mini'));
+		$this->assertEquals('id, active, name, age, score', $Metadata->fetchSubset('large'));
+		$this->assertEquals('*', $Metadata->fetchSubset('xxx'));
 
 		// properties
 		$properties = $Metadata->properties();
