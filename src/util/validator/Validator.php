@@ -13,7 +13,12 @@ use metadigit\core\Kernel;
  */
 class Validator {
 
-	static function validate($Object) {
+	/**
+	 * @param $Object
+	 * @param array|null $validateSubset
+	 * @return array
+	 */
+	static function validate($Object, $validateSubset=null) {
 		$class = get_class($Object);
 		if(!$metadata = Kernel::getCache()->get('validator#'.$class)) {
 			$metadata = (new ClassParser)->parse($class);
@@ -21,6 +26,7 @@ class Validator {
 		}
 		$errors = [];
 		foreach($metadata['properties'] as $prop => $constraints) {
+			if($validateSubset && !in_array($prop, $validateSubset)) continue;
 			$ReflProp = new \ReflectionProperty($class, $prop);
 			$ReflProp->setAccessible(true);
 			$value = $ReflProp->getValue($Object);
