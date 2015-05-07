@@ -414,6 +414,42 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @depends testConstructor
 	 */
+	function testDoValidate(Repository $UsersRepository) {
+
+		// skip validation on "age"
+		$data = ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10];
+		$User = $UsersRepository->insert(null, $data, 'main');
+		$this->assertInstanceOf('mock\db\orm\User', $User);
+
+		// skip validation on "name"
+		$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>20];
+		$User = $UsersRepository->insert(null, $data, 'extra');
+		$this->assertInstanceOf('mock\db\orm\User', $User);
+
+		// skip validation on "age", exception on "name"
+		try {
+			$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>10];
+			$UsersRepository->insert(null, $data, 'main');
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: name', $Ex->getMessage());
+			$this->assertEquals([ 'name'=>'minLength'], $Ex->getData());
+		}
+
+		// skip validation on "name", exception on "age"
+		try {
+			$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>10];
+			$UsersRepository->insert(null, $data, 'extra');
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
+			$this->assertEquals([ 'age'=>'min'], $Ex->getData());
+		}
+	}
+
+	/**
+	 * @depends testConstructor
+	 */
 	function testInsertWithEmptyNull(Repository $UsersRepository) {
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'', 'lastTime'=>'', 'updatedAt'=>'2000-01-01 00:00:00']));
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>null, 'lastTime'=>null, 'updatedAt'=>'2000-01-01 00:00:00']));

@@ -8,15 +8,6 @@
 use metadigit\core\db\orm\Exception,
 	metadigit\core\util\reflection\ReflectionClass;
 
-
-$data = new \ArrayObject([
-		'sql' => [
-				'source'=>null,
-				'target'=>null,
-		],
-		'pkeys' => null,
-		'properties' => [],
-]);
 $RefClass = new ReflectionClass($entityClass);
 
 // SQL source / target / functions
@@ -59,11 +50,19 @@ if($DocComment->hasTag('orm-order-by')) {
 	}
 }
 
-// ORM subset
-if($DocComment->hasTag('orm-subset')) {
-	$tagValues = $DocComment->getTagValues('orm-subset');
+// ORM fetch subsets
+if($DocComment->hasTag('orm-fetch-subset')) {
+	$tagValues = $DocComment->getTagValues('orm-fetch-subset');
 	foreach($tagValues as $value) {
-		foreach($value as $k => $v) $this->subset[$k] = explode(',',str_replace(' ','',$v));
+		foreach($value as $k => $v) $this->fetchSubsets[$k] = trim($v);
+	}
+}
+
+// ORM validate subsets
+if($DocComment->hasTag('orm-validate-subset')) {
+	$tagValues = $DocComment->getTagValues('orm-validate-subset');
+	foreach($tagValues as $value) {
+		foreach($value as $k => $v) $this->validateSubsets[$k] = trim(str_replace(' ','',$v));
 	}
 }
 

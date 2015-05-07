@@ -30,13 +30,15 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('nameASC', $orderBy);
 		$this->assertEquals('name ASC, surname ASC', $orderBy['nameASC']);
 
-		// subsets
-		$subsets = $Metadata->subset();
-		$this->assertCount(3, $subsets);
-		$this->assertArrayHasKey('mini', $subsets);
-		$this->assertEquals(['id','name','score'], $subsets['mini']);
-		$this->assertArrayHasKey('large', $subsets);
-		$this->assertEquals(['id','active','name','age','score'], $subsets['large']);
+		// fetch subsets
+		$this->assertEquals('id, name, score', $Metadata->fetchSubset('mini'));
+		$this->assertEquals('id, active, name, age, score', $Metadata->fetchSubset('large'));
+		$this->assertEquals('*', $Metadata->fetchSubset('xxx'));
+
+		// validate subsets
+		$this->assertEquals(['active', 'name', 'surname'], $Metadata->validateSubset('main'));
+		$this->assertEquals(['age', 'score', 'email'], $Metadata->validateSubset('extra'));
+		$this->assertEquals(['id', 'active', 'name', 'surname', 'age', 'score', 'email', 'lastTime', 'updatedAt'], $Metadata->validateSubset('xxx'));
 
 		// properties
 		$properties = $Metadata->properties();
@@ -80,5 +82,17 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertTrue($properties['year']['primarykey']);
 		$this->assertArrayHasKey('score', $properties);
 		$this->assertEquals('float', $properties['score']['type']);
+	}
+
+	function testPkCriteria() {
+		$Metadata = new Metadata('mock\db\orm\User');
+		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(1));
+		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(847));
+		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>1])));
+		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>847])));
+
+		$Metadata = new Metadata('mock\db\orm\Stats');
+		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(['AA', 2014]));
+		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(new \mock\db\orm\Stats(['code'=>'AA', 'year'=>2014])));
 	}
 }
