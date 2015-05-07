@@ -1,4 +1,15 @@
-<a name="2.0.3"></a>
+<a name="2.0.5"></a>
+# 2.0.5 (2015-05-07)
+
+### Features
+- **db\orm\Repository:** add support for validation subsets via @orm-validate-subset
+
+### Breaking changes
+- **db\orm\Repository:** rename @orm-subset to @orm-fetch-subset
+
+
+
+<a name="2.0.4"></a>
 # 2.0.4 (2015-03-02)
 
 ### Features
