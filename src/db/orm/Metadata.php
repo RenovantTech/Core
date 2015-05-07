@@ -33,6 +33,9 @@ class Metadata {
 	/** Fetch subsets definition
 	 * @var array */
 	protected $fetchSubsets = [];
+	/** Validate subsets definition
+	 * @var array */
+	protected $validateSubsets = [];
 
 	function __construct($entityClass) {
 		include(__DIR__.'/Metadata.construct.inc');
@@ -66,5 +69,11 @@ class Metadata {
 		if(isset($this->fetchSubsets[$name])) return $this->fetchSubsets[$name];
 		trigger_error('Invalid FETCH SUBSET requested: '.$name, E_USER_ERROR);
 		return '*';
+	}
+
+	function validateSubset($name) {
+		if(isset($this->validateSubsets[$name])) return explode(',', $this->validateSubsets[$name]);
+		trigger_error('Invalid VALIDATE SUBSET requested: '.$name, E_USER_ERROR);
+		return array_keys($this->properties);
 	}
 }

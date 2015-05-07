@@ -35,6 +35,11 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('id, active, name, age, score', $Metadata->fetchSubset('large'));
 		$this->assertEquals('*', $Metadata->fetchSubset('xxx'));
 
+		// validate subsets
+		$this->assertEquals(['active', 'name', 'surname'], $Metadata->validateSubset('main'));
+		$this->assertEquals(['age', 'score', 'email'], $Metadata->validateSubset('extra'));
+		$this->assertEquals(['id', 'active', 'name', 'surname', 'age', 'score', 'email', 'lastTime', 'updatedAt'], $Metadata->validateSubset('xxx'));
+
 		// properties
 		$properties = $Metadata->properties();
 		$this->assertCount(9, $properties);

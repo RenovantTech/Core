@@ -7,6 +7,8 @@ namespace mock\db\orm;
  * @orm-order-by(nameASC="name ASC, surname ASC")
  * @orm-fetch-subset(mini="id, name, score", medium="id, active, name, score")
  * @orm-fetch-subset(large="id, active, name, age, score")
+ * @orm-validate-subset(main="active, name, surname")
+ * @orm-validate-subset(extra="age, score, email")
  */
 class User {
 	use \metadigit\core\db\orm\EntityTrait;
