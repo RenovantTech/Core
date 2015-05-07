@@ -83,4 +83,16 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('score', $properties);
 		$this->assertEquals('float', $properties['score']['type']);
 	}
+
+	function testPkCriteria() {
+		$Metadata = new Metadata('mock\db\orm\User');
+		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(1));
+		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(847));
+		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>1])));
+		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>847])));
+
+		$Metadata = new Metadata('mock\db\orm\Stats');
+		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(['AA', 2014]));
+		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(new \mock\db\orm\Stats(['code'=>'AA', 'year'=>2014])));
+	}
 }

@@ -49,11 +49,21 @@ class Metadata {
 		return $this->order;
 	}
 
+	/** Primary keys
+	 * @return array */
 	function pkeys() {
 		return $this->pkeys;
 	}
 
-	function pkCriteria($keys) {
+	/** CriteriaExp based on PKs
+	 * @param mixed $EntityOrKeys
+	 * @return string criteriaExp
+	 */
+	function pkCriteria($EntityOrKeys) {
+		if(is_object($EntityOrKeys)) {
+			$keys = [];
+			foreach($this->pkeys as $k) $keys[] = $EntityOrKeys->$k;
+		} else $keys = $EntityOrKeys;
 		return preg_replace(array_fill(0, count($this->pkeys), '/\?/'), $keys, $this->pkCriteria, 1);
 	}
 

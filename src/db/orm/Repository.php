@@ -377,9 +377,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			// run INSERT
 			if(QueryRunner::insert($this->pdo, $this->Metadata, $Entity)) {
 				if($fetchMode) {
-					foreach($this->Metadata->pkeys() as $k)
-						$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
-					$criteriaExp = implode('|',$criteria);
+					$criteriaExp = $this->Metadata->pkCriteria($Entity);
 					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_INSERT, null, null, $OrmEvent);
@@ -403,14 +401,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
+		DataMapper::array2object($Entity, $data, $this->Metadata);
+		$criteriaExp = $this->Metadata->pkCriteria($Entity);
 		try {
-			DataMapper::array2object($Entity, $data, $this->Metadata);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes
-			$criteria = [];
-			foreach($this->Metadata->pkeys() as $k)
-				$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
-			$dbData = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, 0, null, implode('|',$criteria), self::FETCH_ARRAY);
+			$dbData = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
 			$newData = DataMapper::object2sql($Entity, $this->Metadata);
 			$changes = [];
 			$props = $this->Metadata->properties();
@@ -437,9 +433,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			// run UPDATE
 			if(QueryRunner::update($this->pdo, $this->Metadata, $Entity, $changes)) {
 				if($fetchMode) {
-					foreach($this->Metadata->pkeys() as $k)
-						$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
-					$criteriaExp = implode('|',$criteria);
 					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_UPDATE, null, null, $OrmEvent);

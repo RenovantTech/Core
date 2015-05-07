@@ -23,8 +23,11 @@ class QueryRunner {
 	 * @return int
 	 */
 	static function count($pdo, $Metadata, $criteriaExp=null) {
-		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), '*')->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
-		$Query->criteriaExp($criteriaExp);
+		$Query = (new Query($pdo, 2))
+			->on($Metadata->sql('source'), '*')
+			->setCriteriaDictionary($Metadata->criteria())
+			->setOrderByDictionary($Metadata->order())
+			->criteriaExp($criteriaExp);
 		return (int) $Query->execCount();
 	}
 
@@ -48,11 +51,10 @@ class QueryRunner {
 			$Query->execCall($execParams);
 			return true;
 		} else {
-			$criteria = [];
-			foreach($Metadata->pkeys() as $k)
-				$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
-			$Query = (new Query($pdo, 2))->on($Metadata->sql('target'));
-			$Query->criteriaExp(implode('|',$criteria))->criteriaExp($criteriaExp);
+			$Query = (new Query($pdo, 2))
+				->on($Metadata->sql('target'))
+				->criteriaExp($Metadata->pkCriteria($Entity))
+				->criteriaExp($criteriaExp);
 			return ($Query->execDelete()==1 && $Query->errorCode()=='000000') ? true:false;
 		}
 	}
@@ -66,8 +68,14 @@ class QueryRunner {
 	 * @return integer
 	 */
 	static function deleteAll($pdo, $Metadata, $limit, $orderExp, $criteriaExp) {
-		$Query = (new Query($pdo, 2))->on($Metadata->sql('target'))->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
-		return $Query->orderByExp($orderExp)->criteriaExp($criteriaExp)->limit($limit)->execDelete();
+		$Query = (new Query($pdo, 2))
+			->on($Metadata->sql('target'))
+			->setCriteriaDictionary($Metadata->criteria())
+			->setOrderByDictionary($Metadata->order())
+			->orderByExp($orderExp)
+			->criteriaExp($criteriaExp)
+			->limit($limit);
+		return $Query->execDelete();
 	}
 
 	/**
@@ -83,8 +91,15 @@ class QueryRunner {
 	 */
 	static function fetchOne($pdo, $Metadata, $class, $offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
-		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), $subset)->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
-		if($data = $Query->orderByExp($orderExp)->criteriaExp($criteriaExp)->limit(1)->offset($offset)->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
+		$Query = (new Query($pdo, 2))
+			->on($Metadata->sql('source'), $subset)
+			->setCriteriaDictionary($Metadata->criteria())
+			->setOrderByDictionary($Metadata->order())
+			->orderByExp($orderExp)
+			->criteriaExp($criteriaExp)
+			->limit(1)
+			->offset($offset);
+		if($data = $Query->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
 				case Repository::FETCH_OBJ:
 					$Entity = DataMapper::sql2object($class, $data, $Metadata);
@@ -114,8 +129,15 @@ class QueryRunner {
 	 */
 	static function fetchAll($pdo, $Metadata, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
-		$Query = (new Query($pdo, 2))->on($Metadata->sql('source'), $subset)->setCriteriaDictionary($Metadata->criteria())->setOrderByDictionary($Metadata->order());
-		$St = $Query->orderByExp($orderExp)->criteriaExp($criteriaExp)->limit($limit)->offset($offset)->execSelect();
+		$Query = (new Query($pdo, 2))
+			->on($Metadata->sql('source'), $subset)
+			->setCriteriaDictionary($Metadata->criteria())
+			->setOrderByDictionary($Metadata->order())
+			->orderByExp($orderExp)
+			->criteriaExp($criteriaExp)
+			->limit($limit)
+			->offset($offset);
+		$St = $Query->execSelect();
 		$entities = [];
 		while($data = $St->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
@@ -187,13 +209,11 @@ class QueryRunner {
 			$Query->execCall($execParams);
 			return true;
 		} else {
-			$criteria = [];
-			foreach($Metadata->pkeys() as $k)
-				$criteria[] = sprintf('%s,EQ,%s', $k, $Entity->$k);
 			$data = DataMapper::object2sql($Entity, $Metadata, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
-			$Query = (new Query($pdo, 2))->on($Metadata->sql('target'), $fields);
-			$Query->criteriaExp(implode('|',$criteria));
+			$Query = (new Query($pdo, 2))
+				->on($Metadata->sql('target'), $fields)
+				->criteriaExp($Metadata->pkCriteria($Entity));
 			return ($Query->execUpdate($data)==1 && $Query->errorCode()=='000000') ? true:false;
 		}
 	}
