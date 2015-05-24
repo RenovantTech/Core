@@ -30,7 +30,8 @@ class Validator {
 			$ReflProp = new \ReflectionProperty($class, $prop);
 			$ReflProp->setAccessible(true);
 			$value = $ReflProp->getValue($Object);
-			if(in_array($prop, $metadata['nullable']) && is_null($value)) continue;
+			if(in_array($prop, $metadata['null']) && is_null($value)) continue;
+			if(in_array($prop, $metadata['empty']) && empty($value)) continue;
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
 					$errors[$prop] = $func;
@@ -91,6 +92,16 @@ class Validator {
 	static function range($value, $range) {
 		list($min, $max) = explode(',', $range);
 		return ($value >= $min && $value <= $max);
+	}
+
+	// ====== date & time constraints ===============================
+
+	static function date($value) {
+		return (boolean) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $value);
+	}
+
+	static function datetime($value) {
+		return (boolean) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
 	}
 
 	// ====== other constraints =====================================

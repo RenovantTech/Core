@@ -3,7 +3,7 @@ namespace mock\util\validator;
 
 class Class1 {
 
-	/** @validate(min=5) */
+	/** @validate(min=5, max=15) */
 	protected $id;
 	/** @validate(true) */
 	protected $active = false;
@@ -13,8 +13,18 @@ class Class1 {
 	protected $surname;
 	/** @validate(max=50) */
 	protected $age = 20;
+	/** @validate(email) */
+	protected $email1;
 	/** @validate(null, email) */
-	protected $email;
+	protected $email2;
+	/** @validate(empty, email) */
+	protected $email3;
+	/** @validate(date) */
+	protected $date1;
+	/** @validate(null, date) */
+	protected $date2;
+	/** @validate(datetime) */
+	protected $datetime;
 
 	function __set($k, $v) {
 		$this->$k = $v;
