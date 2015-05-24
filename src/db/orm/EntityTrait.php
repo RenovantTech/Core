@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
-use metadigit\core\util\DateTime;
+use metadigit\core\util\Date,
+	metadigit\core\util\DateTime;
 /**
  * Entity trait class must use to make ORM Repository work.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -43,7 +44,7 @@ trait EntityTrait {
 				case 'integer': $this->$k = (int) $v; break;
 				case 'float': $this->$k = (float) $v; break;
 				case 'boolean': $this->$k = (bool) $v; break;
-				case 'date': $this->$k = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
+				case 'date': $this->$k = ($v instanceof \DateTime) ? $v : new Date($v); break;
 				case 'datetime': $this->$k = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
 				case 'object': $this->$k = (is_object($v)) ? $v : unserialize($v); break;
 				case 'array': $this->$k = (is_array($v)) ? $v : unserialize($v); break;

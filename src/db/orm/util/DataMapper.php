@@ -7,6 +7,7 @@
  */
 namespace metadigit\core\db\orm\util;
 use metadigit\core\db\orm\Metadata,
+	metadigit\core\util\Date,
 	metadigit\core\util\DateTime;
 /**
  * ORM data hydrate helper
@@ -107,7 +108,7 @@ class DataMapper {
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = new DateTime($v); break;
+				case 'date': $v = new Date($v); break;
 				case 'datetime': $v = new DateTime($v); break;
 				case 'object': $v = unserialize($v); break;
 				case 'array': $v = unserialize($v); break;

@@ -38,11 +38,11 @@ class MetadataTest extends \PHPUnit_Framework_TestCase {
 		// validate subsets
 		$this->assertEquals(['active', 'name', 'surname'], $Metadata->validateSubset('main'));
 		$this->assertEquals(['age', 'score', 'email'], $Metadata->validateSubset('extra'));
-		$this->assertEquals(['id', 'active', 'name', 'surname', 'age', 'score', 'email', 'lastTime', 'updatedAt'], $Metadata->validateSubset('xxx'));
+		$this->assertEquals(['id', 'active', 'name', 'surname', 'age', 'birthday', 'score', 'email', 'lastTime', 'updatedAt'], $Metadata->validateSubset('xxx'));
 
 		// properties
 		$properties = $Metadata->properties();
-		$this->assertCount(9, $properties);
+		$this->assertCount(10, $properties);
 		$this->assertArrayHasKey('id', $properties);
 		$this->assertTrue($properties['id']['autoincrement']);
 		$this->assertTrue($properties['id']['primarykey']);

@@ -22,6 +22,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 				name		varchar(20),
 				surname		varchar(20),
 				age			tinyint UNSIGNED NOT NULL,
+				birthday	date NULL DEFAULT NULL,
 				score		decimal(4,2) UNSIGNED NOT NULL,
 				email		varchar(30) NULL DEFAULT NULL,
 				lastTime	datetime NULL DEFAULT NULL,
@@ -165,7 +166,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// FETCH_ARRAY
 		$userData = $UsersRepository->fetch(1, Repository::FETCH_ARRAY);
 		$this->assertTrue(is_array($userData));
-		$this->assertCount(9, $userData);
+		$this->assertCount(10, $userData);
 		$this->assertSame(1, $userData['id']);
 		$this->assertSame('Albert', $userData['name']);
 		$this->assertSame('Brown', $userData['surname']);
@@ -206,7 +207,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// FETCH_ARRAY
 		$entityData = $UsersRepository->fetchOne(2, 'name ASC', 'age,LTE,18', Repository::FETCH_ARRAY);
 		$this->assertTrue(is_array($entityData));
-		$this->assertCount(9, $entityData);
+		$this->assertCount(10, $entityData);
 		$this->assertSame(5, $entityData['id']);
 		$this->assertSame('Emily', $entityData['name']);
 		$this->assertSame('Green', $entityData['surname']);
@@ -299,7 +300,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// no subset
 		$User = $UsersRepository->fetch(1);
 		$data = $UsersRepository->toArray($User);
-		$this->assertCount(9, $data);
+		$this->assertCount(10, $data);
 		$this->assertSame(1, $data['id']);
 		$this->assertSame('Albert', $data['name']);
 		$this->assertSame(6.5, $data['score']);

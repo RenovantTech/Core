@@ -26,6 +26,9 @@ class User {
 	/** @orm(type="integer", null)
 	 * @validate(min=15) */
 	protected $age = 20;
+	/** @orm(type="date", null)
+	 * @validate(null, date) */
+	protected $birthday;
 	/** @orm(type="float") */
 	protected $score;
 	/** @orm(null)
