@@ -20,10 +20,7 @@ class Validator {
 	 */
 	static function validate($Object, $validateSubset=null) {
 		$class = get_class($Object);
-		if(!$metadata = Kernel::getCache()->get('validator#'.$class)) {
-			$metadata = (new ClassParser)->parse($class);
-			Kernel::getCache()->set('validator#'.$class, $metadata, null, 'validator');
-		}
+		$metadata = self::metadata($Object);
 		$errors = [];
 		foreach($metadata['properties'] as $prop => $constraints) {
 			if($validateSubset && !in_array($prop, $validateSubset)) continue;
@@ -40,6 +37,18 @@ class Validator {
 			}
 		}
 		return $errors;
+	}
+
+	static protected function metadata($Object) {
+		static $cache = [];
+		$class = get_class($Object);
+		if(isset($cache[$class])) return $cache[$class];
+		$k = '#'.$class.'#validator';
+		if(!$cache[$class] = Kernel::getCache()->get($k)) {
+			$cache[$class] = (new ClassParser)->parse($class);
+			Kernel::getCache()->set($k, $cache[$class], null, 'validator');
+		}
+		return $cache[$class];
 	}
 
 	// ====== basic constraints =====================================

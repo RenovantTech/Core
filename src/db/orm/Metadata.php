@@ -93,12 +93,14 @@ class Metadata {
 	 * @return Metadata
 	 */
 	static function get($entity) {
+		static $cache = [];
 		if(is_object($entity)) $entity = get_class($entity);
-		$k = '#ORM-metadata#'.$entity;
-		if(!$Metadata = Kernel::getCache()->get($k)) {
-			$Metadata = new Metadata($entity);
-			Kernel::getCache()->set($k, $Metadata, null, 'ORM-metadata');
+		if(isset($cache[$entity])) return $cache[$entity];
+		$k = '#'.$entity.'#ORM-metadata';
+		if(!$cache[$entity] = Kernel::getCache()->get($k)) {
+			$cache[$entity] = new Metadata($entity);
+			Kernel::getCache()->set($k, $cache[$entity], null, 'ORM-metadata');
 		}
-		return $Metadata;
+		return $cache[$entity];
 	}
 }

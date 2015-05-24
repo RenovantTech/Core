@@ -444,6 +444,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	protected function doValidate($Entity, $validateMode) {
+		TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'subset: '.$validateMode);
 		$validateSubset = (is_string($validateMode)) ? Metadata::get($this->class)->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
