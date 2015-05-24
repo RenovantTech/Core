@@ -87,9 +87,9 @@ class QueryRunner {
 	 * @param string $criteriaExp
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object|false
+	 * @return object|array|false
 	 */
-	static function fetchOne($pdo, $Metadata, $class, $offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
+	static function fetchOne($pdo, $Metadata, $class, $offset, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('source'), $subset)
@@ -101,15 +101,14 @@ class QueryRunner {
 			->offset($offset);
 		if($data = $Query->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
-				case Repository::FETCH_OBJ:
-					$Entity = DataMapper::sql2object($class, $data, $Metadata);
-					break;
 				case Repository::FETCH_ARRAY:
 					$Entity = DataMapper::sql2array($data, $Metadata);
 					break;
 				case Repository::FETCH_JSON:
 					$Entity = DataMapper::sql2json($data, $Metadata);
 					break;
+				default: // Repository::FETCH_OBJ
+					$Entity = DataMapper::sql2object($class, $data, $Metadata);
 			}
 			return $Entity;
 		} else return false;
@@ -127,7 +126,7 @@ class QueryRunner {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 */
-	static function fetchAll($pdo, $Metadata, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode, $fetchSubset=null) {
+	static function fetchAll($pdo, $Metadata, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('source'), $subset)
@@ -147,9 +146,8 @@ class QueryRunner {
 				case Repository::FETCH_ARRAY:
 					$entities[] = DataMapper::sql2array($data, $Metadata);
 					break;
-				case Repository::FETCH_JSON:
+				default: // Repository::FETCH_JSON:
 					$entities[] = DataMapper::sql2json($data, $Metadata);
-					break;
 			}
 		}
 		return $entities;
