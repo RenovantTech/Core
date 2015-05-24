@@ -8,6 +8,7 @@
 namespace metadigit\core\db\orm\util;
 use metadigit\core\Kernel,
 	metadigit\core\db\Query,
+	metadigit\core\db\orm\Metadata,
 	metadigit\core\db\orm\Repository;
 /**
  * ORM QueryRunner
@@ -18,11 +19,12 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string $class
 	 * @param string $criteriaExp
 	 * @return int
 	 */
-	static function count($pdo, $Metadata, $criteriaExp=null) {
+	static function count($pdo, $class, $criteriaExp=null) {
+		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('source'), '*')
 			->setCriteriaDictionary($Metadata->criteria())
@@ -33,14 +35,15 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string $class
 	 * @param object $Entity
 	 * @param string $criteriaExp
 	 * @return boolean
 	 */
-	static function deleteOne($pdo, $Metadata, $Entity, $criteriaExp=null) {
+	static function deleteOne($pdo, $class, $Entity, $criteriaExp=null) {
+		$Metadata = Metadata::get($class);
 		if($deleteFn = $Metadata->sql('deleteFn')) {
-			$data = DataMapper::object2sql($Entity, $Metadata);
+			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$deleteFn));
 			$procedure = array_shift($params);
 			$Query = (new Query($pdo, 2))->on($procedure, implode(',',$params));
@@ -61,13 +64,14 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string $class
 	 * @param integer $limit
 	 * @param string $orderExp
 	 * @param string $criteriaExp
 	 * @return integer
 	 */
-	static function deleteAll($pdo, $Metadata, $limit, $orderExp, $criteriaExp) {
+	static function deleteAll($pdo, $class, $limit, $orderExp, $criteriaExp) {
+		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('target'))
 			->setCriteriaDictionary($Metadata->criteria())
@@ -80,7 +84,6 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param string $class
 	 * @param integer $offset
 	 * @param string $orderExp
@@ -89,7 +92,8 @@ class QueryRunner {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|false
 	 */
-	static function fetchOne($pdo, $Metadata, $class, $offset, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('source'), $subset)
@@ -102,13 +106,13 @@ class QueryRunner {
 		if($data = $Query->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
 				case Repository::FETCH_ARRAY:
-					$Entity = DataMapper::sql2array($data, $Metadata);
+					$Entity = DataMapper::sql2array($data, $class);
 					break;
 				case Repository::FETCH_JSON:
-					$Entity = DataMapper::sql2json($data, $Metadata);
+					$Entity = DataMapper::sql2json($data, $class);
 					break;
 				default: // Repository::FETCH_OBJ
-					$Entity = DataMapper::sql2object($class, $data, $Metadata);
+					$Entity = DataMapper::sql2object($data, $class);
 			}
 			return $Entity;
 		} else return false;
@@ -116,7 +120,6 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param string $class
 	 * @param integer $offset
 	 * @param integer $limit
@@ -126,7 +129,8 @@ class QueryRunner {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 */
-	static function fetchAll($pdo, $Metadata, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
 			->on($Metadata->sql('source'), $subset)
@@ -141,13 +145,13 @@ class QueryRunner {
 		while($data = $St->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
 				case Repository::FETCH_OBJ:
-					$entities[] = DataMapper::sql2object($class, $data, $Metadata);
+					$entities[] = DataMapper::sql2object($data, $class);
 					break;
 				case Repository::FETCH_ARRAY:
-					$entities[] = DataMapper::sql2array($data, $Metadata);
+					$entities[] = DataMapper::sql2array($data, $class);
 					break;
 				default: // Repository::FETCH_JSON:
-					$entities[] = DataMapper::sql2json($data, $Metadata);
+					$entities[] = DataMapper::sql2json($data, $class);
 			}
 		}
 		return $entities;
@@ -155,12 +159,12 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param object $Entity
 	 * @return boolean
 	 */
-	static function insert($pdo, $Metadata, $Entity) {
-		$data = DataMapper::object2sql($Entity, $Metadata);
+	static function insert($pdo, $Entity) {
+		$Metadata = Metadata::get($Entity);
+		$data = DataMapper::object2sql($Entity);
 		if($insertFn = $Metadata->sql('insertFn')) {
 			$params = explode(',',str_replace(' ','',$insertFn));
 			$procedure = array_shift($params);
@@ -189,14 +193,14 @@ class QueryRunner {
 
 	/**
 	 * @param string $pdo
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param object $Entity
 	 * @param array $changes
 	 * @return boolean
 	 */
-	static function update($pdo, $Metadata, $Entity, $changes) {
+	static function update($pdo, $Entity, $changes) {
+		$Metadata = Metadata::get($Entity);
 		if($updateFn = $Metadata->sql('updateFn')) {
-			$data = DataMapper::object2sql($Entity, $Metadata);
+			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$updateFn));
 			$procedure = array_shift($params);
 			$Query = (new Query($pdo, 2))->on($procedure, implode(',',$params));
@@ -207,7 +211,7 @@ class QueryRunner {
 			$Query->execCall($execParams);
 			return true;
 		} else {
-			$data = DataMapper::object2sql($Entity, $Metadata, array_keys($changes));
+			$data = DataMapper::object2sql($Entity, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
 			$Query = (new Query($pdo, 2))
 				->on($Metadata->sql('target'), $fields)
