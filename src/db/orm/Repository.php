@@ -182,28 +182,16 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Options:
 	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after INSERT
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
-	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function insert($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		if(is_object($EntityOrKey)) {
-			$Entity = $EntityOrKey;
-		} else {
-			$Entity = new $this->class();
-			if(is_array($EntityOrKey)) {
-				foreach($this->Metadata->pkeys() as $i=>$k)
-					$Entity->$k = $EntityOrKey[$i];
-			} else {
-				$k = $this->Metadata->pkeys()[0];
-				$Entity->$k = $EntityOrKey;
-			}
-		}
-		return $this->execInsertOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
+	function insert($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		return $this->execInsertOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -353,18 +341,22 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Insert Entity using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param object $Entity Entity
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-		DataMapper::array2object($Entity, $data, $this->Metadata);
+	protected function execInsertOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		try {
+			$Entity = (is_object($data)) ? $data : DataMapper::array2object($this->class, $data, $this->Metadata);
+			// inject primary key(s)
+			if($id) {
+				$Entity->__construct(array_combine($this->Metadata->pkeys(), (array)$id));
+			}
+			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
 			// validate

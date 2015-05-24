@@ -169,31 +169,23 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testInsert(Repository $StatsRepository) {
-		// INSERT full object
+		// INSERT null key & object
 		$Stats = new \mock\db\orm\Stats(['code'=>'EE', 'year'=>2015, 'score'=>9.5]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert($Stats));
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(null, $Stats));
 		$Stats = $StatsRepository->fetch(['EE', 2015]);
 		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
 		$this->assertSame('EE', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(9.5, $Stats->score);
 
-		// INSERT empty object passing values
+		// INSERT null key & values
 		$Stats = new \mock\db\orm\Stats;
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert($Stats, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
 		$Stats = $StatsRepository->fetch(['FF', 2015]);
 		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
 		$this->assertSame('FF', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(8.4, $Stats->score);
-
-		// INSERT null key & values
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'GG', 'year'=>2015, 'score'=>null ]));
-		$Stats = $StatsRepository->fetch(['GG', 2015]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
-		$this->assertSame('GG', $Stats->code);
-		$this->assertSame(2015, $Stats->year);
-		$this->assertSame(0.0, $Stats->score);
 
 		// INSERT key & values
 		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(['HH', 2015], [ 'score'=>null ]));
