@@ -1,3 +1,17 @@
+<a name="2.0.6"></a>
+# 2.0.6 (2015-05-25)
+
+### Features
+- **db\orm\EntityTrait:** perform type casting inside __construct() and __set()
+- **util\Validator:** new validators: date, datetime, year
+- **util\Validator:** add support for empty values: @validate(empty)
+
+### Breaking changes
+- **db\orm\Repository:** new API insert(mixed $id, array|object $data, $validate, $fetchMode, $fetchSubset)
+- **db\orm\Repository:** new API update(mixed $id, array|object $data, $validate, $fetchMode, $fetchSubset)
+
+
+
 <a name="2.0.5"></a>
 # 2.0.5 (2015-05-07)
 
