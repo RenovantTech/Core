@@ -9,42 +9,11 @@ namespace metadigit\core\db\orm\util;
 use metadigit\core\db\orm\Metadata,
 	metadigit\core\util\DateTime;
 /**
- * ORM data hydrator
+ * ORM data hydrate helper
  * Helper class that hydrate/dehydrate Entity data.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class DataMapper {
-
-	/**
-	 * Inject array into Entity data, converting to proper PHP types.
-	 * @param mixed $EntityOrClass Entity or class
-	 * @param array $data
-	 * @return object
-	 */
-	static function array2object($EntityOrClass, array $data) {
-		$prop = Metadata::get($EntityOrClass)->properties();
-		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && (is_null($v) || $v==='')) {
-				$v = null;
-				continue;
-			}
-			switch($prop[$k]['type']) {
-				case 'string': break;
-				case 'integer': $v = (int) $v; break;
-				case 'float': $v = (float) $v; break;
-				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
-				case 'datetime': $v = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
-				case 'object': $v = (is_object($v)) ? $v : unserialize($v); break;
-				case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
-			}
-		}
-		return (is_object($EntityOrClass)) ? $EntityOrClass->__construct($data) : new $EntityOrClass($data);
-	}
 
 	/**
 	 * Convert Entity from PHP object to data array.
@@ -173,33 +142,5 @@ class DataMapper {
 			}
 		}
 		return $data;
-	}
-
-	/**
-	 * Inject SQL types into Entity data, converting to proper PHP types.
-	 * @param array $data
-	 * @param string $class
-	 * @return object
-	 */
-	static function sql2object(array $data, $class) {
-		$prop = Metadata::get($class)->properties();
-		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && is_null($v)) continue;
-			switch($prop[$k]['type']) {
-				case 'string': break;
-				case 'integer': $v = (int) $v; break;
-				case 'float': $v = (float) $v; break;
-				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = new DateTime($v); break;
-				case 'datetime': $v = new DateTime($v); break;
-				case 'object': $v = unserialize($v); break;
-				case 'array': $v = unserialize($v); break;
-			}
-		}
-		return new $class($data);
 	}
 }

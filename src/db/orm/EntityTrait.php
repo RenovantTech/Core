@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
+use metadigit\core\util\DateTime;
 /**
  * Entity trait class must use to make ORM Repository work.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -17,7 +18,7 @@ trait EntityTrait {
 	 * @param array $data Entity data
 	 */
 	function __construct(array $data=[]) {
-		foreach($data as $k=>$v) $this->$k = $v;
+		$this->__invoke($data);
 		$this->onInit();
 	}
 
@@ -25,8 +26,33 @@ trait EntityTrait {
 		return $this->$k;
 	}
 
+	function __invoke(array $data=[]) {
+		static $prop = null;
+		if(!$prop) $prop = Metadata::get($this)->properties();
+		foreach($data as $k=>$v) {
+			if(!isset($prop[$k])) {
+				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
+				continue;
+			}
+			if($prop[$k]['null'] && (is_null($v) || $v==='')) {
+				$this->$k = null;
+				continue;
+			}
+			switch($prop[$k]['type']) {
+				case 'string': $this->$k = $v; break;
+				case 'integer': $this->$k = (int) $v; break;
+				case 'float': $this->$k = (float) $v; break;
+				case 'boolean': $this->$k = (bool) $v; break;
+				case 'date': $this->$k = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
+				case 'datetime': $this->$k = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
+				case 'object': $this->$k = (is_object($v)) ? $v : unserialize($v); break;
+				case 'array': $this->$k = (is_array($v)) ? $v : unserialize($v); break;
+			}
+		}
+	}
+
 	function __set($k, $v) {
-		$this->$k = $v;
+		$this([$k => $v]);
 	}
 
 	protected function onInit() {}

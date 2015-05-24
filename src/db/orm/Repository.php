@@ -101,7 +101,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object Entity
 	 */
 	function create(array $data=[]) {
-		return DataMapper::array2object($this->class, $data);
+		return new $this->class($data);
 	}
 
 	/**
@@ -348,7 +348,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execInsertOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($this->class);
 		try {
-			$Entity = (is_object($data)) ? $data : DataMapper::array2object($this->class, $data);
+			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
 			if($id) {
 				$Entity->__construct(array_combine($Metadata->pkeys(), (array)$id));
@@ -390,7 +390,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		try {
 			$dbData = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
 			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->class);
-			$Entity = DataMapper::array2object($this->class, $newData);
+			$Entity = new $this->class($newData);
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes

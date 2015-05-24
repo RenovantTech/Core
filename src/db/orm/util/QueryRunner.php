@@ -92,7 +92,7 @@ class QueryRunner {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|false
 	 */
-	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
@@ -112,7 +112,7 @@ class QueryRunner {
 					$Entity = DataMapper::sql2json($data, $class);
 					break;
 				default: // Repository::FETCH_OBJ
-					$Entity = DataMapper::sql2object($data, $class);
+					$Entity = new $class($data);
 			}
 			return $Entity;
 		} else return false;
@@ -129,7 +129,7 @@ class QueryRunner {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 */
-	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=null, $fetchSubset=null) {
+	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo, 2))
@@ -144,14 +144,14 @@ class QueryRunner {
 		$entities = [];
 		while($data = $St->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
-				case Repository::FETCH_OBJ:
-					$entities[] = DataMapper::sql2object($data, $class);
-					break;
 				case Repository::FETCH_ARRAY:
 					$entities[] = DataMapper::sql2array($data, $class);
 					break;
-				default: // Repository::FETCH_JSON:
+				case Repository::FETCH_JSON:
 					$entities[] = DataMapper::sql2json($data, $class);
+					break;
+				default: // Repository::FETCH_OBJ:
+					$entities[] = new $class($data);
 			}
 		}
 		return $entities;
