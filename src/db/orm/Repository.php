@@ -211,22 +211,16 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Options:
 	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after UPDATE
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
-	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function update($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		if(is_object($EntityOrKey)) {
-			$Entity = $EntityOrKey;
-		} else {
-			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
-			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
-		}
-		return $this->execUpdateOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
+	function update($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		return $this->execUpdateOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -279,7 +273,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 					case self::FETCH_JSON: return DataMapper::object2json($Entity, $this->Metadata, $fetchSubset); break;
 					case false: return true;
 				}
-			} else return false;
+			}
+			return false;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -391,22 +386,24 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Update Entity using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param object $Entity Entity
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-		DataMapper::array2object($Entity, $data, $this->Metadata);
-		$criteriaExp = $this->Metadata->pkCriteria($Entity);
+	protected function execUpdateOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		$criteriaExp = $this->Metadata->pkCriteria($id);
+		if(is_object($data)) $data = DataMapper::object2array($data, $this->Metadata);
 		try {
+			$dbData = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
+			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->Metadata);
+			$Entity = DataMapper::array2object($this->class, $newData, $this->Metadata);
+			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes
-			$dbData = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
 			$newData = DataMapper::object2sql($Entity, $this->Metadata);
 			$changes = [];
 			$props = $this->Metadata->properties();
@@ -418,7 +415,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'SKIP update, Entity not modified');
 				return true;
 			}
-			// onSAve callback
+			// onSave callback
 			$this->_onSave->invoke($Entity);
 			// re-check changes after onSave()
 			$newData = DataMapper::object2sql($Entity, $this->Metadata);
@@ -445,6 +442,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * @see ContextAwareInterface
+	 * @param Context $Context
 	 */
 	function setContext(Context $Context) {
 		$this->Context = $Context;

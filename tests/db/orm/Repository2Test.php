@@ -208,32 +208,21 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testUpdate(Repository $StatsRepository) {
+
 		// 1 - change Entity directly
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$Stats->score = 12;
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats));
+		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update(['AA', 2013], $Stats));
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$this->assertSame(12.0, $Stats->score);
+
 		// 2 - pass new values array
 		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update(['BB',2013], ['score'=>11]));
 		$Stats = $StatsRepository->fetch(['BB', 2013]);
 		$this->assertSame(11.0, $Stats->score);
-		// 2bis - pass new values array
-		$Stats = $StatsRepository->fetch(['CC', 2013]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>13]));
-		$this->assertSame(13.0, $Stats->score);
-		$Stats = $StatsRepository->fetch(['CC', 2013]);
-		$this->assertSame(13.0, $Stats->score);
-		// 1+2 - change Entity & pass new values
-		$Stats = $StatsRepository->fetch(['DD', 2013]);
-		$Stats->score = 15;
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>14]));
-		$this->assertSame(14.0, $Stats->score);
-		$Stats = $StatsRepository->fetch(['DD', 2013]);
-		$this->assertSame(14.0, $Stats->score);
+
 		// test without re-fetch
 		$Stats = $StatsRepository->fetch(['AA', 2014]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update($Stats, ['score'=>4.2]), true, false);
-		$this->assertSame(4.2, $Stats->score);
+		$this->assertTrue($StatsRepository->update(['AA', 2014], ['score'=>4.2], true, false));
 	}
 }
