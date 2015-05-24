@@ -113,6 +113,10 @@ class Validator {
 		return (boolean) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
 	}
 
+	static function year($value) {
+		return (boolean) preg_match('/^([0-9]{4})$/', $value);
+	}
+
 	// ====== other constraints =====================================
 
 	static function callback($value, $callback) {
