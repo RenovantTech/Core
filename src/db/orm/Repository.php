@@ -30,9 +30,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/** owner Context
 	 * @var \metadigit\core\context\Context */
 	protected $Context;
-	/** Entity ORM metadata
-	 * @var Metadata */
-	protected $Metadata;
 	/** PDO instance ID
 	 * @var string */
 	protected $pdo = 'master';
@@ -49,7 +46,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$this->class = $class;
 		$this->pdo = $pdo;
 		class_exists($class);
-		$this->Metadata = new Metadata($class);
 		$this->_onInit = new \ReflectionMethod($class, 'onInit');
 		$this->_onInit->setAccessible(true);
 		$this->_onSave = new \ReflectionMethod($class, 'onSave');
@@ -59,7 +55,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	}
 
 	function __sleep() {
-		return ['_oid', 'class', 'Metadata', 'pdo'];
+		return ['_oid', 'class', 'pdo'];
 	}
 
 	function __wakeup() {
@@ -82,10 +78,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$data = [];
 		if(is_array($entities)) {
 			foreach($entities as $Entity) {
-				$data[] = DataMapper::object2array($Entity, $this->Metadata, $subset);
+				$data[] = DataMapper::object2array($Entity, $subset);
 			}
 		} elseif(is_object($entities))
-			$data = DataMapper::object2array($entities, $this->Metadata, $subset);
+			$data = DataMapper::object2array($entities, $subset);
 		else trigger_error('Invalid data');
 		return $data;
 	}
@@ -105,7 +101,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object Entity
 	 */
 	function create(array $data=[]) {
-		return DataMapper::array2object($this->class, $data, $this->Metadata);
+		return new $this->class($data);
 	}
 
 	/**
@@ -120,7 +116,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
-			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
+			$criteriaExp = Metadata::get($this->class)->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
 		}
 		return $this->execDeleteOne(__FUNCTION__, $Entity, $fetchMode, $fetchSubset);
@@ -145,7 +141,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object|false Entity, false if not found
 	 */
 	function fetch($id, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$criteriaExp = $this->Metadata->pkCriteria($id);
+		$criteriaExp = Metadata::get($this->class)->pkCriteria($id);
 		return $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
@@ -182,28 +178,16 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Options:
 	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after INSERT
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
-	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function insert($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		if(is_object($EntityOrKey)) {
-			$Entity = $EntityOrKey;
-		} else {
-			$Entity = new $this->class();
-			if(is_array($EntityOrKey)) {
-				foreach($this->Metadata->pkeys() as $i=>$k)
-					$Entity->$k = $EntityOrKey[$i];
-			} else {
-				$k = $this->Metadata->pkeys()[0];
-				$Entity->$k = $EntityOrKey;
-			}
-		}
-		return $this->execInsertOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
+	function insert($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		return $this->execInsertOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -211,22 +195,16 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Options:
 	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after UPDATE
 	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
-	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function update($EntityOrKey, array $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		if(is_object($EntityOrKey)) {
-			$Entity = $EntityOrKey;
-		} else {
-			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
-			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
-		}
-		return $this->execUpdateOne(__FUNCTION__, $Entity, $data, $validate, $fetchMode, $fetchSubset);
+	function update($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		return $this->execUpdateOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -251,7 +229,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
-			return QueryRunner::count($this->pdo, $this->Metadata, $OrmEvent->getCriteriaExp());
+			return QueryRunner::count($this->pdo, $this->class, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -270,16 +248,17 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
-			if(QueryRunner::deleteOne($this->pdo, $this->Metadata, $Entity, $OrmEvent->getCriteriaExp())) {
+			if(QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp())) {
 				$this->_onDelete->invoke($Entity);
 				$this->Context->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
 				switch($fetchMode) {
 					case self::FETCH_OBJ: return $Entity; break;
-					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $this->Metadata, $fetchSubset); break;
-					case self::FETCH_JSON: return DataMapper::object2json($Entity, $this->Metadata, $fetchSubset); break;
+					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset); break;
+					case self::FETCH_JSON: return DataMapper::object2json($Entity, $fetchSubset); break;
 					case false: return true;
 				}
-			} else return false;
+			}
+			return false;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -298,7 +277,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE_ALL, null, null, $OrmEvent);
-			$n = QueryRunner::deleteAll($this->pdo, $this->Metadata, $limit, $orderExp, $OrmEvent->getCriteriaExp());
+			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $OrmEvent->getCriteriaExp());
 			$this->Context->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
 		} catch(\PDOException $Ex) {
@@ -321,7 +300,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
-			if($Entity = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, $offset, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->Context->trigger(OrmEvent::EVENT_POST_FETCH, null, null, $OrmEvent->setEntity($Entity));
 			}
 			return $Entity;
@@ -346,7 +325,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
-			if($entities = QueryRunner::fetchAll($this->pdo, $this->Metadata, $this->class, $offset,  $limit, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->Context->trigger(OrmEvent::EVENT_POST_FETCH_ALL, null, null, $OrmEvent->setEntities($entities));
 			}
 			return $entities;
@@ -358,27 +337,32 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Insert Entity using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param object $Entity Entity
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execInsertOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-		DataMapper::array2object($Entity, $data, $this->Metadata);
+	protected function execInsertOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		$Metadata = Metadata::get($this->class);
 		try {
+			$Entity = (is_object($data)) ? $data : new $this->class($data);
+			// inject primary key(s)
+			if($id) {
+				$Entity->__construct(array_combine($Metadata->pkeys(), (array)$id));
+			}
+			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run INSERT
-			if(QueryRunner::insert($this->pdo, $this->Metadata, $Entity)) {
+			if(QueryRunner::insert($this->pdo, $Entity)) {
 				if($fetchMode) {
-					$criteriaExp = $this->Metadata->pkCriteria($Entity);
-					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+					$criteriaExp = $Metadata->pkCriteria($Entity);
+					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_INSERT, null, null, $OrmEvent);
 				return $response;
@@ -391,25 +375,28 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Update Entity using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param object $Entity Entity
-	 * @param array $data new Entity data
+	 * @param mixed $id primary key(s)
+	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execUpdateOne($method, $Entity, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-		DataMapper::array2object($Entity, $data, $this->Metadata);
-		$criteriaExp = $this->Metadata->pkCriteria($Entity);
+	protected function execUpdateOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		$Metadata = Metadata::get($this->class);
+		$criteriaExp = $Metadata->pkCriteria($id);
+		if(is_object($data)) $data = DataMapper::object2array($data);
 		try {
+			$dbData = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
+			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->class);
+			$Entity = new $this->class($newData);
+			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes
-			$dbData = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
-			$newData = DataMapper::object2sql($Entity, $this->Metadata);
+			$newData = DataMapper::object2sql($Entity);
 			$changes = [];
-			$props = $this->Metadata->properties();
+			$props = $Metadata->properties();
 			foreach($newData as $k=>$v) {
 				if($dbData[$k] != $v && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
 					$changes[$k] = $newData[$k];
@@ -418,12 +405,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'SKIP update, Entity not modified');
 				return true;
 			}
-			// onSAve callback
+			// onSave callback
 			$this->_onSave->invoke($Entity);
 			// re-check changes after onSave()
-			$newData = DataMapper::object2sql($Entity, $this->Metadata);
+			$newData = DataMapper::object2sql($Entity);
 			$changes = [];
-			$props = $this->Metadata->properties();
+			$props = $Metadata->properties();
 			foreach($newData as $k=>$v) {
 				if($dbData[$k] != $v && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
 					$changes[$k] = $newData[$k];
@@ -431,9 +418,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run UPDATE
-			if(QueryRunner::update($this->pdo, $this->Metadata, $Entity, $changes)) {
+			if(QueryRunner::update($this->pdo, $Entity, $changes)) {
 				if($fetchMode) {
-					$response = QueryRunner::fetchOne($this->pdo, $this->Metadata, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
 				$this->Context->trigger(OrmEvent::EVENT_POST_UPDATE, null, null, $OrmEvent);
 				return $response;
@@ -445,6 +432,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * @see ContextAwareInterface
+	 * @param Context $Context
 	 */
 	function setContext(Context $Context) {
 		$this->Context = $Context;
@@ -456,7 +444,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	protected function doValidate($Entity, $validateMode) {
-		$validateSubset = (is_string($validateMode)) ? $this->Metadata->validateSubset($validateMode) : null;
+		TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'subset: '.$validateMode);
+		$validateSubset = (is_string($validateMode)) ? Metadata::get($this->class)->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
 		$errorsByFn = $this->validate($Entity, $validateMode);

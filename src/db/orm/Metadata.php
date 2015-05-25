@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
+use metadigit\core\Kernel;
 /**
  * ORM Metadata
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -85,5 +86,21 @@ class Metadata {
 		if(isset($this->validateSubsets[$name])) return explode(',', $this->validateSubsets[$name]);
 		trigger_error('Invalid VALIDATE SUBSET requested: '.$name, E_USER_ERROR);
 		return array_keys($this->properties);
+	}
+
+	/**
+	 * @param string|object $entity class or Entity
+	 * @return Metadata
+	 */
+	static function get($entity) {
+		static $cache = [];
+		if(is_object($entity)) $entity = get_class($entity);
+		if(isset($cache[$entity])) return $cache[$entity];
+		$k = '#'.$entity.'#ORM-metadata';
+		if(!$cache[$entity] = Kernel::getCache()->get($k)) {
+			$cache[$entity] = new Metadata($entity);
+			Kernel::getCache()->set($k, $cache[$entity], null, 'ORM-metadata');
+		}
+		return $cache[$entity];
 	}
 }

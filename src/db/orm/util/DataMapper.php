@@ -6,54 +6,24 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm\util;
-use metadigit\core\util\DateTime;
+use metadigit\core\db\orm\Metadata,
+	metadigit\core\util\Date,
+	metadigit\core\util\DateTime;
 /**
- * ORM data hydrator
+ * ORM data hydrate helper
  * Helper class that hydrate/dehydrate Entity data.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class DataMapper {
 
 	/**
-	 * Inject array into Entity data, converting to proper PHP types.
-	 * @param mixed $EntityOrClass Entity or class
-	 * @param array $data
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
-	 * @return object
-	 */
-	static function array2object($EntityOrClass, array $data, $Metadata) {
-		$prop = $Metadata->properties();
-		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && (is_null($v) || $v==='')) {
-				$v = null;
-				continue;
-			}
-			switch($prop[$k]['type']) {
-				case 'string': break;
-				case 'integer': $v = (int) $v; break;
-				case 'float': $v = (float) $v; break;
-				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
-				case 'datetime': $v = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
-				case 'object': $v = (is_object($v)) ? $v : unserialize($v); break;
-				case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
-			}
-		}
-		return (is_object($EntityOrClass)) ? $EntityOrClass->__construct($data) : new $EntityOrClass($data);
-	}
-
-	/**
 	 * Convert Entity from PHP object to data array.
 	 * @param object $Entity
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2array($Entity, $Metadata, $fetchSubset=null) {
+	static function object2array($Entity, $fetchSubset=null) {
+		$Metadata = Metadata::get($Entity);
 		$prop = $Metadata->properties();
 		$data = [];
 		foreach($prop as $k=>$v) {
@@ -66,11 +36,11 @@ class DataMapper {
 	/**
 	 * Convert Entity from PHP object to data array ready to JSON.
 	 * @param object $Entity
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2json($Entity, $Metadata, $fetchSubset=null) {
+	static function object2json($Entity, $fetchSubset=null) {
+		$Metadata = Metadata::get($Entity);
 		$prop = $Metadata->properties();
 		$data = [];
 		foreach($prop as $k=>$v) {
@@ -94,12 +64,11 @@ class DataMapper {
 	/**
 	 * Convert Entity from PHP object to proper SQL types array.
 	 * @param object $Entity
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
 	 * @param array $changes changed values on update
 	 * @return array
 	 */
-	static function object2sql($Entity, $Metadata, array $changes=[]) {
-		$prop = $Metadata->properties();
+	static function object2sql($Entity, array $changes=[]) {
+		$prop = Metadata::get($Entity)->properties();
 		$data = [];
 		foreach($prop as $k=>$v) {
 			if($changes && !in_array($k, $changes)) continue;
@@ -123,11 +92,11 @@ class DataMapper {
 	/**
 	 * Inject SQL types into array data, converting to proper PHP types.
 	 * @param array $data
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string $class
 	 * @return array
 	 */
-	static function sql2array(array $data, $Metadata) {
-		$prop = $Metadata->properties();
+	static function sql2array(array $data, $class) {
+		$prop = Metadata::get($class)->properties();
 		foreach($data as $k=>&$v) {
 			if(!isset($prop[$k])) {
 				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
@@ -139,7 +108,7 @@ class DataMapper {
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = new DateTime($v); break;
+				case 'date': $v = new Date($v); break;
 				case 'datetime': $v = new DateTime($v); break;
 				case 'object': $v = unserialize($v); break;
 				case 'array': $v = unserialize($v); break;
@@ -151,11 +120,11 @@ class DataMapper {
 	/**
 	 * Inject SQL types into array data ready for JSON conversion, converting to proper PHP types.
 	 * @param array $data
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
+	 * @param string $class
 	 * @return array
 	 */
-	static function sql2json(array $data, $Metadata) {
-		$prop = $Metadata->properties();
+	static function sql2json(array $data, $class) {
+		$prop = Metadata::get($class)->properties();
 		foreach($data as $k=>&$v) {
 			if(!isset($prop[$k])) {
 				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
@@ -174,34 +143,5 @@ class DataMapper {
 			}
 		}
 		return $data;
-	}
-
-	/**
-	 * Inject SQL types into Entity data, converting to proper PHP types.
-	 * @param string $class Entity class
-	 * @param array $data
-	 * @param \metadigit\core\db\orm\Metadata $Metadata
-	 * @return object
-	 */
-	static function sql2object($class, array $data, $Metadata) {
-		$prop = $Metadata->properties();
-		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && is_null($v)) continue;
-			switch($prop[$k]['type']) {
-				case 'string': break;
-				case 'integer': $v = (int) $v; break;
-				case 'float': $v = (float) $v; break;
-				case 'boolean': $v = (bool) $v; break;
-				case 'date': $v = new DateTime($v); break;
-				case 'datetime': $v = new DateTime($v); break;
-				case 'object': $v = unserialize($v); break;
-				case 'array': $v = unserialize($v); break;
-			}
-		}
-		return new $class($data);
 	}
 }

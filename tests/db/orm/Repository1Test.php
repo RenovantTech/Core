@@ -22,9 +22,10 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 				name		varchar(20),
 				surname		varchar(20),
 				age			tinyint UNSIGNED NOT NULL,
+				birthday	date NULL DEFAULT NULL,
 				score		decimal(4,2) UNSIGNED NOT NULL,
 				email		varchar(30) NULL DEFAULT NULL,
-				lastTime	datetime NULL,
+				lastTime	datetime NULL DEFAULT NULL,
 				updatedAt	timestamp not NULL default CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 				PRIMARY KEY(id)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -165,7 +166,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// FETCH_ARRAY
 		$userData = $UsersRepository->fetch(1, Repository::FETCH_ARRAY);
 		$this->assertTrue(is_array($userData));
-		$this->assertCount(9, $userData);
+		$this->assertCount(10, $userData);
 		$this->assertSame(1, $userData['id']);
 		$this->assertSame('Albert', $userData['name']);
 		$this->assertSame('Brown', $userData['surname']);
@@ -206,7 +207,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// FETCH_ARRAY
 		$entityData = $UsersRepository->fetchOne(2, 'name ASC', 'age,LTE,18', Repository::FETCH_ARRAY);
 		$this->assertTrue(is_array($entityData));
-		$this->assertCount(9, $entityData);
+		$this->assertCount(10, $entityData);
 		$this->assertSame(5, $entityData['id']);
 		$this->assertSame('Emily', $entityData['name']);
 		$this->assertSame('Green', $entityData['surname']);
@@ -299,7 +300,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// no subset
 		$User = $UsersRepository->fetch(1);
 		$data = $UsersRepository->toArray($User);
-		$this->assertCount(9, $data);
+		$this->assertCount(10, $data);
 		$this->assertSame(1, $data['id']);
 		$this->assertSame('Albert', $data['name']);
 		$this->assertSame(6.5, $data['score']);
@@ -316,99 +317,6 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertCount(2, $data);
 		$this->assertSame(1, $data[0]['id']);
 		$this->assertSame(3, $data[1]['id']);
-	}
-
-	/**
-	 * @depends testConstructor
-	 */
-	function testInsert(Repository $UsersRepository) {
-		$lastTime = new DateTime();
-
-		// INSERT full object
-		$User9 = new \mock\db\orm\User(['name'=>'Zack', 'surname'=>'Orange', 'lastTime'=>$lastTime, 'email'=>'test@example.com', 'updatedAt'=>'2000-01-01 00:00:00']);
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert($User9));
-		$User9 = $UsersRepository->fetch(9);
-		$this->assertInstanceOf('mock\db\orm\User', $User9);
-		$this->assertSame(9, $User9->id);
-		$this->assertSame('Zack', $User9->name);
-		$this->assertSame('Orange', $User9->surname);
-		$this->assertSame(20, $User9->age);
-		$this->assertSame(1.0, $User9->score);
-		$this->assertEquals($lastTime, $User9->lastTime);
-		$this->assertNotEquals('2000-01-01 00:00:00', $User9->updatedAt->format('Y-m-d H:i:s'));
-
-		// INSERT empty object passing values
-		$User10 = new \mock\db\orm\User;
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert($User10, [ 'name'=>'Zack', 'surname'=>'Johnson', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ]));
-		$User10 = $UsersRepository->fetch(10);
-		$this->assertInstanceOf('mock\db\orm\User', $User10);
-		$this->assertSame(10, $User10->id);
-		$this->assertSame('Zack', $User10->name);
-		$this->assertSame('Johnson', $User10->surname);
-		$this->assertSame('2012-03-18 14:25:36', $User10->lastTime->format('Y-m-d H:i:s'));
-
-		// INSERT empty object passing values
-		$User11 = new \mock\db\orm\User;
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert($User11, [ 'name'=>'Zack', 'surname'=>'Johnson', 'email'=>'test@example.com', 'lastTime'=>null ]));
-		$User11 = $UsersRepository->fetch(11);
-		$this->assertInstanceOf('mock\db\orm\User', $User11);
-		$this->assertSame(11, $User11->id);
-		$this->assertSame('Zack', $User11->name);
-		$this->assertSame('Johnson', $User11->surname);
-		$this->assertNull($User11->lastTime);
-
-		// INSERT null key & values
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
-		$User12 = $UsersRepository->fetch(12);
-		$this->assertInstanceOf('mock\db\orm\User', $User12);
-		$this->assertSame(12, $User12->id);
-		$this->assertSame('Chao', $User12->name);
-		$this->assertSame('Xing', $User12->surname);
-		$this->assertNull($User12->lastTime);
-
-		// INSERT key & values
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(20, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
-		$Entity20 = $UsersRepository->fetch(20);
-		$this->assertInstanceOf('mock\db\orm\User', $Entity20);
-		$this->assertSame(20, $Entity20->id);
-		$this->assertSame('Chao', $Entity20->name);
-		$this->assertSame('Xing', $Entity20->surname);
-		$this->assertNull($Entity20->lastTime);
-
-		// test FETCH MODES
-
-		$this->assertTrue($UsersRepository->insert(21, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, false));
-
-		$data = $UsersRepository->insert(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_ARRAY);
-		$this->assertInternalType('array', $data);
-		$this->assertSame('Chao', $data['name']);
-		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
-
-		$data = $UsersRepository->insert(23, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ], true, Repository::FETCH_JSON);
-		$this->assertInternalType('array', $data);
-		$this->assertSame('Chao', $data['name']);
-		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
-	}
-
-	/**
-	 * @depends testConstructor
-	 */
-	function testInsertException(Repository $UsersRepository) {
-		$lastTime = new DateTime();
-		try {
-			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
-		} catch(Exception $Ex) {
-			$this->assertEquals(500, $Ex->getCode());
-			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
-			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
-		}
-		try {
-			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
-		} catch(Exception $Ex) {
-			$this->assertEquals(500, $Ex->getCode());
-			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
-			$this->assertEquals([ 'age'=>'min'], $Ex->getData());
-		}
 	}
 
 	/**
@@ -450,6 +358,89 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @depends testConstructor
 	 */
+	function testInsert(Repository $UsersRepository) {
+		$lastTime = new DateTime();
+
+		// INSERT null key & object
+		$User9 = new \mock\db\orm\User(['name'=>'Zack', 'surname'=>'Orange', 'lastTime'=>$lastTime, 'email'=>'test@example.com', 'updatedAt'=>date_create('2000-01-01 00:00:00')]);
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, $User9));
+		$User9 = $UsersRepository->fetch(9);
+		$this->assertInstanceOf('mock\db\orm\User', $User9);
+		$this->assertSame(9, $User9->id);
+		$this->assertSame('Zack', $User9->name);
+		$this->assertSame('Orange', $User9->surname);
+		$this->assertSame(20, $User9->age);
+		$this->assertSame(1.0, $User9->score);
+		$this->assertEquals($lastTime, $User9->lastTime);
+		$this->assertNotEquals('2000-01-01 00:00:00', $User9->updatedAt->format('Y-m-d H:i:s'));
+
+		// INSERT null key & values
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
+		$User10 = $UsersRepository->fetch(10);
+		$this->assertInstanceOf('mock\db\orm\User', $User10);
+		$this->assertSame(10, $User10->id);
+		$this->assertSame('Chao', $User10->name);
+		$this->assertSame('Xing', $User10->surname);
+		$this->assertNull($User10->lastTime);
+
+		// INSERT key & object
+		$User21 = new \mock\db\orm\User([ 'name'=>'Zack', 'surname'=>'Johnson', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ]);
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(21, $User21));
+		$User21 = $UsersRepository->fetch(21);
+		$this->assertInstanceOf('mock\db\orm\User', $User21);
+		$this->assertSame(21, $User21->id);
+		$this->assertSame('Zack', $User21->name);
+		$this->assertSame('Johnson', $User21->surname);
+		$this->assertSame('2012-03-18 14:25:36', $User21->lastTime->format('Y-m-d H:i:s'));
+
+		// INSERT key & values
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
+		$User22 = $UsersRepository->fetch(22);
+		$this->assertInstanceOf('mock\db\orm\User', $User22);
+		$this->assertSame(22, $User22->id);
+		$this->assertSame('Chao', $User22->name);
+		$this->assertSame('Xing', $User22->surname);
+		$this->assertNull($User22->lastTime);
+
+		// test FETCH MODES
+
+		$this->assertTrue($UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, false));
+
+		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_ARRAY);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
+
+		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_JSON);
+		$this->assertInternalType('array', $data);
+		$this->assertSame('Chao', $data['name']);
+		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
+	}
+
+	/**
+	 * @depends testConstructor
+	 */
+	function testInsertException(Repository $UsersRepository) {
+		$lastTime = new DateTime();
+		try {
+			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
+			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
+		}
+		try {
+			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+		} catch(Exception $Ex) {
+			$this->assertEquals(500, $Ex->getCode());
+			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
+			$this->assertEquals([ 'age'=>'min'], $Ex->getData());
+		}
+	}
+
+	/**
+	 * @depends testConstructor
+	 */
 	function testInsertWithEmptyNull(Repository $UsersRepository) {
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'', 'lastTime'=>'', 'updatedAt'=>'2000-01-01 00:00:00']));
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>null, 'lastTime'=>null, 'updatedAt'=>'2000-01-01 00:00:00']));
@@ -459,51 +450,43 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testUpdate(Repository $UsersRepository) {
+
 		// 1 - change Entity directly
 		$User1 = $UsersRepository->fetch(1);
 		$User1->surname = 'Brown2';
 		$User1->updatedAt = '2000-01-01 00:00:00';
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User1));
+		$User1->lastTime = null;
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update(1, $User1));
 		$User1 = $UsersRepository->fetch(1);
 		$this->assertSame('Brown2', $User1->surname);
 		$this->assertSame(7.5, $User1->score);
 		$this->assertNotEquals('2000-01-01 00:00:00', $User1->updatedAt->format('Y-m-d H:i:s'));
+		$this->assertNull($User1->lastTime);
+
 		// 2 - pass new values array
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update(2, ['surname'=>'Yellow2']));
 		$User2 = $UsersRepository->fetch(2);
 		$this->assertSame('Yellow2', $User2->surname);
 		$this->assertSame(8.1, $User2->score);
-		// 2bis - pass new values array
-		$User3 = $UsersRepository->fetch(3);
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User3, ['surname'=>'Green2']));
-		$this->assertSame('Green2', $User3->surname);
-		$this->assertSame(6.8, $User3->score);
-		// 1+2 - change Entity & pass new values
-		$User4 = $UsersRepository->fetch(4);
-		$User4->surname = 'Green2';
-		$User4->score = 1.2;
-		$User4->lastTime = null;
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User4, ['name'=>'Don2']));
-		$this->assertSame('Don2', $User4->name);
-		$this->assertSame('Green2', $User4->surname);
-		$this->assertSame(2.2, $User4->score);
-		$this->assertNull($User4->lastTime);
+
 		// test without re-fetch
 		$User5 = $UsersRepository->fetch(5);
-		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update($User5, ['surname'=>'Johnson2', 'score'=>4.2]), ['fetch'=>false]);
+		$User5->surname = 'Johnson2';
+		$User5->score = 4.2;
+		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->update(5, $User5), ['fetch'=>false]);
 		$this->assertSame('Johnson2', $User5->surname);
-		$this->assertSame(5.2, $User5->score);
+		$this->assertSame(4.2, $User5->score);
 
 		// test FETCH MODES
 
-		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>date_create('2012-03-18 14:25:36')], true, false));
+		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>'2012-03-18 14:25:36'], true, false));
 
-		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>date_create('2012-03-31 14:25:36') ], true, Repository::FETCH_ARRAY);
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>'2012-03-31 14:25:36' ], true, Repository::FETCH_ARRAY);
 		$this->assertInternalType('array', $data);
 		$this->assertSame('Franz3', $data['name']);
 		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
-		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>date_create('2012-02-02 16:10:36') ], true, Repository::FETCH_JSON);
+		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>'2012-02-02 16:10:36' ], true, Repository::FETCH_JSON);
 		$this->assertInternalType('array', $data);
 		$this->assertSame('Franz4', $data['name']);
 		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);

@@ -20,17 +20,15 @@ class Validator {
 	 */
 	static function validate($Object, $validateSubset=null) {
 		$class = get_class($Object);
-		if(!$metadata = Kernel::getCache()->get('validator#'.$class)) {
-			$metadata = (new ClassParser)->parse($class);
-			Kernel::getCache()->set('validator#'.$class, $metadata, null, 'validator');
-		}
+		$metadata = self::metadata($Object);
 		$errors = [];
 		foreach($metadata['properties'] as $prop => $constraints) {
 			if($validateSubset && !in_array($prop, $validateSubset)) continue;
 			$ReflProp = new \ReflectionProperty($class, $prop);
 			$ReflProp->setAccessible(true);
 			$value = $ReflProp->getValue($Object);
-			if(in_array($prop, $metadata['nullable']) && is_null($value)) continue;
+			if(in_array($prop, $metadata['null']) && is_null($value)) continue;
+			if(in_array($prop, $metadata['empty']) && empty($value)) continue;
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
 					$errors[$prop] = $func;
@@ -39,6 +37,18 @@ class Validator {
 			}
 		}
 		return $errors;
+	}
+
+	static protected function metadata($Object) {
+		static $cache = [];
+		$class = get_class($Object);
+		if(isset($cache[$class])) return $cache[$class];
+		$k = '#'.$class.'#validator';
+		if(!$cache[$class] = Kernel::getCache()->get($k)) {
+			$cache[$class] = (new ClassParser)->parse($class);
+			Kernel::getCache()->set($k, $cache[$class], null, 'validator');
+		}
+		return $cache[$class];
 	}
 
 	// ====== basic constraints =====================================
@@ -91,6 +101,20 @@ class Validator {
 	static function range($value, $range) {
 		list($min, $max) = explode(',', $range);
 		return ($value >= $min && $value <= $max);
+	}
+
+	// ====== date & time constraints ===============================
+
+	static function date($value) {
+		return (boolean) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $value);
+	}
+
+	static function datetime($value) {
+		return (boolean) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
+	}
+
+	static function year($value) {
+		return (boolean) preg_match('/^([0-9]{4})$/', $value);
 	}
 
 	// ====== other constraints =====================================
