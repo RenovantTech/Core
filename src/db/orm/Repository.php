@@ -107,7 +107,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Delete Entity from DB
 	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch before delete
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch before delete
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
@@ -128,6 +128,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer n° of deleted entities
+	 * @throws Exception
 	 */
 	function deleteAll($limit, $orderExp=null, $criteriaExp=null) {
 		return $this->execDeleteAll(__FUNCTION__, $limit, $orderExp, $criteriaExp);
@@ -136,9 +137,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Fetch an Entity by its primary key
 	 * @param mixed $id Entity primary key (single or array)
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
+	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|false Entity, false if not found
+	 * @throws Exception
 	 */
 	function fetch($id, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$criteriaExp = Metadata::get($this->class)->pkCriteria($id);
@@ -150,9 +152,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param integer|null $offset (starting from 1)
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
+	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|null Entity, NULL if not found
+	 * @throws Exception
 	 */
 	function fetchOne($offset, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		return $this->execFetchOne(__FUNCTION__, $offset-1, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
@@ -164,9 +167,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param int $pageSize page size
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
+	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
+	 * @throws Exception
 	 */
 	function fetchAll($page, $pageSize, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$offset = $pageSize * $page - $pageSize;
@@ -175,13 +179,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * Insert Entity into DB
-	 * Options:
-	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after INSERT
-	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
@@ -192,13 +193,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * Update Entity into DB
-	 * Options:
-	 * - fetch: boolean, default TRUE to re-fetch Entity from DB after UPDATE
-	 * - validate: boolean, default TRUE to verify validation rules, FALSE to skip
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
@@ -239,7 +237,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * Delete Entity using a Query.
 	 * @param string $method fetch method (used for trace)
 	 * @param mixed $Entity object or its primary keys
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
@@ -291,10 +289,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param integer $offset OFFSET
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
+	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @throws Exception
 	 * @return object Entity
+	 * @throws Exception
 	 */
 	protected function execFetchOne($method, $offset, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -316,7 +314,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param int $limit LIMIT
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
+	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array entities
 	 * @throws Exception
@@ -340,7 +338,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate FALSE to skip validation
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
@@ -378,7 +376,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_RAW), FALSE to skip fetch after insert
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
