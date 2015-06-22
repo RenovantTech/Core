@@ -21,13 +21,15 @@ class Exception extends \Exception {
 	 * @param string|array $message
 	 * @param mixed $data
 	 */
-	final function __construct($code=0, $message, $data=null) {
+	final function __construct($code=0, $message=null, $data=null) {
 		$this->data = $data;
-		if(is_array($message)) {
-			$msg = constant(get_class($this)."::COD$code");
-			array_unshift($message, $msg);
-			$msg = call_user_func_array('sprintf', $message);
-			$message = $msg;
+		if($tpl = @constant(get_class($this)."::COD$code")) {
+			if(is_array($message)) {
+				array_unshift($message, $tpl);
+				$message = call_user_func_array('sprintf', $message);
+			} elseif(is_null($message)) {
+				$message = $tpl;
+			}
 		}
 		parent::__construct((string)$message, (int)$code);
 		TRACE and Kernel::trace(TRACE_DEFAULT, 1, get_class($this), '[CODE '.$this->getCode().'] '.$this->getMessage());
