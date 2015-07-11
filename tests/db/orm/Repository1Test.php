@@ -236,12 +236,19 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertSame(5, $User->id);
 		$this->assertSame('Emily', $User->name);
 		$this->assertSame('Green', $User->surname);
-
 		$User = $UsersRepository->fetchOne(2, 'name ASC', 'dateMonth,2013,02');
 		$this->assertInstanceOf('mock\db\orm\User', $User);
 		$this->assertSame(8, $User->id);
 		$this->assertSame('Hugh', $User->name);
 		$this->assertSame('Green', $User->surname);
+
+		// offset
+		$User = $UsersRepository->fetchOne(1, 'name ASC', 'activeAge,18');
+		$this->assertInstanceOf('mock\db\orm\User', $User);
+		$this->assertSame(1, $User->id);
+		$User = $UsersRepository->fetchOne(null, 'name ASC', 'activeAge,18');
+		$this->assertInstanceOf('mock\db\orm\User', $User);
+		$this->assertSame(1, $User->id);
 	}
 
 	/**
@@ -291,6 +298,16 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		// with OrderBy Dictionary
 		$users = $UsersRepository->fetchAll(1, 20, 'age.DESC', 'surname,EQ,Green');
 		$this->assertSame(6, $users[0]->id);
+
+		// page & pageSize
+		$users = $UsersRepository->fetchAll(null, null, 'name.DESC');
+		$this->assertCount(8, $users);
+		$users = $UsersRepository->fetchAll(1, 4, 'name.DESC', null, Repository::FETCH_ARRAY);
+		$this->assertCount(4, $users);
+		$this->assertSame(8, $users[0]['id']);
+		$users = $UsersRepository->fetchAll(2, 4, 'name.DESC', null, Repository::FETCH_ARRAY);
+		$this->assertCount(4, $users);
+		$this->assertSame(4, $users[0]['id']);
 	}
 
 	/**

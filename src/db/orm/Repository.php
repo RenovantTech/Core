@@ -149,7 +149,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * Fetch an Entity by a set of Criteria and ORDER BY
-	 * @param integer|null $offset (starting from 1)
+	 * @param int|null $offset (starting from 1)
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
@@ -157,14 +157,15 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object|array|null Entity, NULL if not found
 	 * @throws Exception
 	 */
-	function fetchOne($offset, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		return $this->execFetchOne(__FUNCTION__, $offset-1, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
+	function fetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		if($offset) $offset--;
+		return $this->execFetchOne(__FUNCTION__, $offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
 	/**
 	 * Fetch an array of entities by a set of Criteria and ORDER BY
-	 * @param int $page page n°
-	 * @param int $pageSize page size
+	 * @param int|null $page page n°
+	 * @param int|null $pageSize page size, NULL to fetch all
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
@@ -172,8 +173,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return array
 	 * @throws Exception
 	 */
-	function fetchAll($page, $pageSize, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$offset = $pageSize * $page - $pageSize;
+	function fetchAll($page=null, $pageSize=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
 		return $this->execFetchAll(__FUNCTION__, $offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
@@ -286,7 +287,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Fetch an Entity using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param integer $offset OFFSET
+	 * @param int|null $offset OFFSET
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
@@ -294,7 +295,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object Entity
 	 * @throws Exception
 	 */
-	protected function execFetchOne($method, $offset, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchOne($method, $offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
@@ -310,8 +311,8 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/**
 	 * Fetch entities using a Query.
 	 * @param string $method fetch method (used for trace)
-	 * @param int $offset OFFSET
-	 * @param int $limit LIMIT
+	 * @param int|null $offset OFFSET
+	 * @param int|null $limit LIMIT
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
@@ -319,7 +320,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return array entities
 	 * @throws Exception
 	 */
-	protected function execFetchAll($method, $offset, $limit, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchAll($method, $offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
