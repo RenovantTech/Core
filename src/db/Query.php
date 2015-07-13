@@ -333,7 +333,7 @@ class Query {
 		$PDO = Kernel::pdo($this->pdo);
 		$execParams = $this->params;
 		foreach($params as $k=>$v) {
-			if($keys = array_keys($execParams, ':'.$k)) {
+			if($keys = array_keys($execParams, ':'.$k, true)) {
 				foreach($keys as $key) {
 					$execParams[$key] = $v;
 				}
