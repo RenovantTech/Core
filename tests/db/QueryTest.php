@@ -162,6 +162,14 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		}
 	}
 
+	function testExecInsertUpdate() {
+		$Query = (new Query('mysql'))->on('people','id,name,surname,age');
+		$this->assertEquals(2, $Query->execInsertUpdate(['id'=>1, 'name'=>'Albert', 'surname'=>'Brown', 'age'=>22],['id'])); // row count ON DUPLICATE is 2 !!!
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('id = 1 AND age = 22')->execCount());
+		$this->assertEquals(1, $Query->execInsertUpdate(['id'=>9, 'name'=>'Dick', 'surname'=>'Foo'],['id']));
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
+	}
+
 	function testExecSelect() {
 		// criteria() values
 		$items = (new Query('mysql'))->on('people')->criteria('surname = "Green"')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
