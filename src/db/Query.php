@@ -162,6 +162,29 @@ class Query {
 	}
 
 	/**
+	 * Execute INSERT .. ON DUPLICATE KEY UPDATE statement
+	 * @param array $params PDO params
+	 * @param array $keys table PRIMARY/UNIQUE keys
+	 * @return int n° of inserted rows
+	 */
+	function execInsertUpdate(array $params, array $keys) {
+		$sql1 = $sql2 = $sql3 = '';
+		$fields = explode(',',str_replace(' ','',$this->fields));
+		foreach($fields as $k=>$v) {
+			$k++;
+			$sql1 .= ', `'.$v.'`';
+			$sql2 .= ', :'.$v.'_'.$k;
+			$this->params[$v.'_'.$k] = ':'.$v;
+			if(!in_array($v, $keys)) {
+				$sql3 .= ', '.$v.' = :'.$v.'__'.$k;
+				$this->params[$v.'__'.$k] = ':'.$v;
+			}
+		}
+		$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
+		return (int) $this->doExec($sql, $params)->rowCount();
+	}
+
+	/**
 	 * Execute SELECT statement
 	 * @param array $params PDO params
 	 * @return \PDOStatement
@@ -333,7 +356,7 @@ class Query {
 		$PDO = Kernel::pdo($this->pdo);
 		$execParams = $this->params;
 		foreach($params as $k=>$v) {
-			if($keys = array_keys($execParams, ':'.$k)) {
+			if($keys = array_keys($execParams, ':'.$k, true)) {
 				foreach($keys as $key) {
 					$execParams[$key] = $v;
 				}

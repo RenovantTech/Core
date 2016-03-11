@@ -1,3 +1,15 @@
+<a name="2.0.7"></a>
+# 2.0.7 (2016-03-11)
+
+### Features
+- **db\orm\Repository:** add support for NULL page/pageSize, retrieving all records
+- **db\Query:** add method execInsertUpdate() for "INSERT ... ON DUPLICATE KEY UPDATE ..." statements
+
+### Bug Fixes
+- **db\Query:** fix params parsing
+
+
+
 <a name="2.0.6"></a>
 # 2.0.6 (2015-05-25)
 
