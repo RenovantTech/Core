@@ -18,11 +18,11 @@ class ACL {
 
 	const SQL_MATCH_ACTION_USER		= 'SELECT COUNT(*) FROM %s_actions_2_users WHERE action_id = :action_id AND user_id = :user_id';
 	const SQL_MATCH_ACTION_GROUP	= 'SELECT COUNT(*) FROM %s_actions_2_groups WHERE action_id = :action_id AND group_id IN ( SELECT group_id FROM %s WHERE user_id = :user_id )';
-	const SQL_MATCH_FILTER_USER		= 'SELECT val FROM %s_filters_2_users WHERE filter_id = :filter_id AND user_id = :user_id';
-	const SQL_MATCH_FILTER_GROUP	= 'SELECT val FROM %s_filters_2_groups WHERE filter_id = :filter_id AND group_id IN ( SELECT group_id FROM %s WHERE user_id = :user_id )';
+	const SQL_MATCH_FILTER_USER		= 'SELECT data FROM %s_filters_2_users WHERE filter_id = :filter_id AND user_id = :user_id';
+	const SQL_MATCH_FILTER_GROUP	= 'SELECT data FROM %s_filters_2_groups WHERE filter_id = :filter_id AND group_id IN ( SELECT group_id FROM %s WHERE user_id = :user_id )';
 
-	const SQL_FETCH_ACTION = 'SELECT name FROM %s_actions WHERE id = %u';
-	const SQL_FETCH_FILTER = 'SELECT name FROM %s_filters WHERE id = %u';
+	const SQL_FETCH_ACTION_CODE = 'SELECT code FROM %s_actions WHERE id = %u';
+	const SQL_FETCH_FILTER_CODE = 'SELECT code FROM %s_filters WHERE id = %u';
 	const SQL_FETCH_QUERY = 'SELECT query FROM %s_filters_sql WHERE id = %u';
 
 
@@ -97,7 +97,7 @@ class ACL {
 	}
 
 	protected function checkAction(array $acl) {
-		$actionName = $this->pdoQuery(sprintf(self::SQL_FETCH_ACTION, $this->tables['acl'], $acl['action']))->fetchColumn();
+		$actionCode = $this->pdoQuery(sprintf(self::SQL_FETCH_ACTION_CODE, $this->tables['acl'], $acl['action']))->fetchColumn();
 		if(
 			!$this->pdoStExecute(sprintf(self::SQL_MATCH_ACTION_USER, $this->tables['acl']),
 				['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
@@ -105,16 +105,16 @@ class ACL {
 			!$this->pdoStExecute(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2g']),
 				['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
 		) {
-//echo "\t ACTION [$acl[action]] $actionName => EXCEPTION 100 \n";
-			throw new Exception(100, [$actionName]);
+//echo "\t ACTION [$acl[action]] $actionCode => EXCEPTION 100 \n";
+			throw new Exception(100, [$actionCode]);
 		} else {
-			TRACE and $this->trace(LOG_DEBUG, 1, __METHOD__, "$acl[type] $acl[target] $acl[method] - ACTION: $actionName => OK ");
-//echo "\t ACTION [$acl[action]] $actionName => OK \n";
+			TRACE and $this->trace(LOG_DEBUG, 1, __METHOD__, "$acl[type] $acl[target] $acl[method] - ACTION: $actionCode => OK ");
+//echo "\t ACTION [$acl[action]] $actionCode => OK \n";
 		}
 	}
 
 	protected function checkFilter(array $acl) {
-		$filterName = $this->pdoQuery(sprintf(self::SQL_FETCH_FILTER, $this->tables['acl'], $acl['filter']))->fetchColumn();
+		$filterCode = $this->pdoQuery(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
 		$values1 = (array) $this->pdoStExecute(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']),
 			['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
 
@@ -124,14 +124,14 @@ class ACL {
 		$values = array_merge($values1, $values2);
 //var_dump($values);
 		if(empty($values)) {
-//echo "\t FILTER [$acl[filter]] $filterName => EXCEPTION 200 \n";
-			throw new Exception(200, [$filterName]);
+//echo "\t FILTER [$acl[filter]] $filterCode => EXCEPTION 200 \n";
+			throw new Exception(200, [$filterCode]);
 		} elseif(array_search('*', $values) !== false) {
-			TRACE and $this->trace(LOG_DEBUG, 1, __METHOD__, "$acl[type] $acl[target] $acl[method] - FILTER: $filterName VALUE: * => OK ");
-//echo "\t FILTER [$acl[filter]] $filterName * => OK \n";
+			TRACE and $this->trace(LOG_DEBUG, 1, __METHOD__, "$acl[type] $acl[target] $acl[method] - FILTER: $filterCode VALUE: * => OK ");
+//echo "\t FILTER [$acl[filter]] $filterCode * => OK \n";
 			return true;
 		} else {
-//echo "\t FILTER [$acl[filter]] $filterName VALUES: ".implode(' ', $values)." \n";
+//echo "\t FILTER [$acl[filter]] $filterCode VALUES: ".implode(' ', $values)." \n";
 			$query = $this->pdoQuery(sprintf(self::SQL_FETCH_QUERY, $this->tables['acl'], $acl['filter_sql']))->fetchColumn();
 //echo "\t QUERY: $query \n";
 
@@ -149,7 +149,7 @@ class ACL {
 						return true;
 					} else {
 //echo "\t QUERY $r => EXCEPTION 201 \n";
-						throw new Exception(201, [$filterName, $query]);
+						throw new Exception(201, [$filterCode, $query]);
 					}
 			}
 		}

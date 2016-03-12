@@ -24,14 +24,15 @@ CREATE TABLE IF NOT EXISTS t_u2g (
 
 CREATE TABLE IF NOT EXISTS acl_actions (
 	id		INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	name	VARCHAR(30) NOT NULL,
-	description	VARCHAR(100),
+	code	VARCHAR(40) NOT NULL,
+	label	VARCHAR(100) NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS acl_filters (
 	id		INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
-	name	VARCHAR(30) NOT NULL,
+	code	VARCHAR(40) NOT NULL,
+	label	VARCHAR(100) NOT NULL,
 	PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -76,8 +77,8 @@ CREATE TABLE IF NOT EXISTS acl_actions_2_groups (
 CREATE TABLE IF NOT EXISTS acl_filters_2_users (
 	filter_id	INTEGER UNSIGNED NOT NULL,
 	user_id		INTEGER UNSIGNED NOT NULL,
-	val			VARCHAR(50) NULL,
-	PRIMARY KEY (filter_id, user_id, val),
+	data		VARCHAR(50) NULL,
+	PRIMARY KEY (filter_id, user_id, data),
 	CONSTRAINT fk_acl_filters_2_users_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
 	CONSTRAINT fk_acl_filters_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -85,8 +86,8 @@ CREATE TABLE IF NOT EXISTS acl_filters_2_users (
 CREATE TABLE IF NOT EXISTS acl_filters_2_groups (
 	filter_id	INTEGER UNSIGNED NOT NULL,
 	group_id	INTEGER UNSIGNED NOT NULL,
-	val			VARCHAR(50) NULL,
-	PRIMARY KEY (filter_id, group_id, val),
+	data		VARCHAR(50) NULL,
+	PRIMARY KEY (filter_id, group_id, data),
 	CONSTRAINT fk_acl_filters_2_groups_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
 	CONSTRAINT fk_acl_filters_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

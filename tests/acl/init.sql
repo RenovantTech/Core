@@ -19,7 +19,7 @@ INSERT INTO sys_users_2_groups (user_id, group_id) VALUES
 	(4, 3)
 ;
 /* ACTION */
-INSERT INTO sys_acl_actions (id, name) VALUES
+INSERT INTO sys_acl_actions (id, code) VALUES
 	(1, 'api.users'),
 	(2, 'api.users.insert'),
 	(3, 'service.Foo'),
@@ -28,7 +28,7 @@ INSERT INTO sys_acl_actions (id, name) VALUES
 	(6, 'data.UserRepository.FETCH')
 ;
 /* FILTERS */
-INSERT INTO sys_acl_filters (id, name) VALUES
+INSERT INTO sys_acl_filters (id, code) VALUES
 	(5, 'data.UserRepository'),
 	(6, 'data.UserRepository.FETCH')
 ;
@@ -63,12 +63,12 @@ INSERT INTO sys_acl_actions_2_groups (action_id, group_id) VALUES
 	(1, 2)
 ;
 /* FILTERS 2 USERS */
-INSERT INTO sys_acl_filters_2_users (filter_id, user_id, val) VALUES
+INSERT INTO sys_acl_filters_2_users (filter_id, user_id, data) VALUES
 --	(5, 1, '*' ),
 	(5, 4, 123),
 	(6, 4, 123)
 ;
-INSERT INTO sys_acl_filters_2_groups (filter_id, group_id, val) VALUES
+INSERT INTO sys_acl_filters_2_groups (filter_id, group_id, data) VALUES
 --	(5, 1, 123 ),
 	(5, 1, '*' ),
 	(6, 1, '*')
