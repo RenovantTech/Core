@@ -24,13 +24,13 @@ INSERT INTO sys_acl_actions (id, name) VALUES
 	(2, 'api.users.insert'),
 	(3, 'service.Foo'),
 	(4, 'service.Bar'),
-	(5, 'data.UserRepository.FETCH'),
-	(6, 'data.UserRepository.DELETE')
+	(5, 'data.UserRepository'),
+	(6, 'data.UserRepository.FETCH')
 ;
 /* FILTERS */
 INSERT INTO sys_acl_filters (id, name) VALUES
-	(5, 'data.UserRepository.FETCH'),
-	(6, 'data.UserRepository.DELETE')
+	(5, 'data.UserRepository'),
+	(6, 'data.UserRepository.FETCH')
 ;
 /* FILTERS SQL */
 INSERT INTO sys_acl_filters_sql (id, query) VALUES
@@ -39,17 +39,19 @@ INSERT INTO sys_acl_filters_sql (id, query) VALUES
 ;
 /* ACL */
 INSERT INTO sys_acl (type, target, method, params_regex, action, filter, filter_sql) VALUES
-	('URL',		'^/api/users/$',		'GET',		'', 1, NULL, NULL),
+	('URL',		'^/api/users/',			NULL,		'', 1, NULL, NULL),
 	('URL',		'^/api/users/$',		'POST',		'', 2, NULL, NULL),
 	('OBJECT',	'service.Foo',			'index',	'', 3, NULL, NULL),
 	('OBJECT',	'service.Bar',			'index',	'', 4, NULL, NULL),
-	('ORM',		'data.UserRepository',	'FETCH',	'', 5, 5, 5),
-	('ORM',		'data.UserRepository',	'DELETE',	'', 6, 6, 6)
+	('ORM',		'data.UserRepository',	NULL,		'', 5, 5, 5),
+	('ORM',		'data.UserRepository',	'FETCH',	'', 6, 6, 6)
 ;
 /* ACTION 2 USERS */
 INSERT INTO sys_acl_actions_2_users (action_id, user_id) VALUES
 	(5, 2),
-	(5, 4)
+	(5, 4),
+	(6, 2),
+	(6, 4)
 ;
 INSERT INTO sys_acl_actions_2_groups (action_id, group_id) VALUES
 	(1, 1),
@@ -64,9 +66,10 @@ INSERT INTO sys_acl_actions_2_groups (action_id, group_id) VALUES
 INSERT INTO sys_acl_filters_2_users (filter_id, user_id, val) VALUES
 --	(5, 1, '*' ),
 	(5, 4, 123),
-	(5, 4, 456)
+	(6, 4, 123)
 ;
 INSERT INTO sys_acl_filters_2_groups (filter_id, group_id, val) VALUES
 --	(5, 1, 123 ),
-	(5, 1, '*' )
+	(5, 1, '*' ),
+	(6, 1, '*')
 ;

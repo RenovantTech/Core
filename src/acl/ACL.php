@@ -56,34 +56,43 @@ class ACL {
 	function onRoute(Request $Req) {
 		$target = $Req->URI();
 		$method =$Req->getMethod();
-		$acl = null;
+		$matches = [];
 		$aclArray = $this->pdoStExecute(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']),
 			['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 		foreach($aclArray as $item) {
 			$item['target'] = str_replace('/', '\\/', $item['target']);
 			if(preg_match('/'.$item['target'].'/', $target)) {
-				$acl = $item;
+				$matches[] = $item;
 				break;
 			}
 		}
-		if($acl && !empty($acl['action'])) $this->checkAction($acl);
-		if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		foreach($matches as $acl) {
+//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		}
 		return true;
 	}
 
 	function onObject($target, $method) {
-		$acl = $this->pdoStExecute(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']),
-			['target'=>$target, 'method'=>$method])->fetch(\PDO::FETCH_ASSOC);
-		if($acl && !empty($acl['action'])) $this->checkAction($acl);
-		if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		$matches = $this->pdoStExecute(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']),
+			['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
+		foreach($matches as $acl) {
+//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		}
 		return true;
 	}
 
 	function onOrm($target, $method) {
-		$acl = $this->pdoStExecute(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']),
-			['target'=>$target, 'method'=>$method])->fetch(\PDO::FETCH_ASSOC);
-		if($acl && !empty($acl['action'])) $this->checkAction($acl);
-		if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		$matches = $this->pdoStExecute(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']),
+			['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
+		foreach($matches as $acl) {
+//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+		}
 		return true;
 	}
 
