@@ -4,11 +4,11 @@
 		<object id="system.ACL" class="metadigit\core\acl\ACL">
 			<constructor>
 				<arg name="pdo">mysql</arg>
-				<arg name="dbConf" type="array">
-					<item key="t_prefix"	>sys_acl</item>
-					<item key="t_users"		>sys_users</item>
-					<item key="t_groups"	>sys_groups</item>
-					<item key="t_u2g"		>sys_users_2_groups</item>
+				<arg name="tables" type="array">
+					<item key="acl"		>sys_acl</item>
+					<item key="users"	>sys_users</item>
+					<item key="groups"	>sys_groups</item>
+					<item key="u2g"		>sys_users_2_groups</item>
 				</arg>
 			</constructor>
 		</object>
