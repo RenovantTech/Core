@@ -46,9 +46,9 @@ CREATE TABLE IF NOT EXISTS acl (
 	target		VARCHAR(100) NOT NULL,
 	method		VARCHAR(40) NOT NULL,
 	params_regex VARCHAR(100) NOT NULL,
-	action		INTEGER UNSIGNED NOT NULL,
-	filter		INTEGER UNSIGNED NOT NULL,
-	filter_sql	INTEGER UNSIGNED NOT NULL,
+	action		INTEGER UNSIGNED NULL,
+	filter		INTEGER UNSIGNED NULL,
+	filter_sql	INTEGER UNSIGNED NULL,
 	PRIMARY KEY (type, target, method),
 	CONSTRAINT fk_acl_actions FOREIGN KEY (action) REFERENCES acl_actions (id),
 	CONSTRAINT fk_acl_filters FOREIGN KEY (filter) REFERENCES acl_filters (id),
@@ -62,8 +62,8 @@ CREATE TABLE IF NOT EXISTS acl_filters_2_users (
 	user_id		INTEGER UNSIGNED NOT NULL,
 	value		VARCHAR(50) NULL,
 	PRIMARY KEY (filter_id, user_id),
-	CONSTRAINT fk_acl_filters_2_users_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id),
-	CONSTRAINT fk_acl_filters_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id)
+	CONSTRAINT fk_acl_filters_2_users_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_filters_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS acl_filters_2_groups (
@@ -71,24 +71,22 @@ CREATE TABLE IF NOT EXISTS acl_filters_2_groups (
 	group_id	INTEGER UNSIGNED NOT NULL,
 	value		VARCHAR(50) NULL,
 	PRIMARY KEY (filter_id, group_id),
-	CONSTRAINT fk_acl_filters_2_groups_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id),
-	CONSTRAINT fk_acl_filters_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id)
+	CONSTRAINT fk_acl_filters_2_groups_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_filters_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS acl_actions_2_users (
 	action_id	INTEGER UNSIGNED NOT NULL,
 	user_id		INTEGER UNSIGNED NOT NULL,
-	value		VARCHAR(50) NULL,
 	PRIMARY KEY (action_id, user_id),
-	CONSTRAINT fk_acl_actions_2_users_action FOREIGN KEY (action_id) REFERENCES acl_actions (id),
-	CONSTRAINT fk_acl_actions_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id)
+	CONSTRAINT fk_acl_actions_2_users_action FOREIGN KEY (action_id) REFERENCES acl_actions (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_actions_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS acl_actions_2_groups (
 	action_id	INTEGER UNSIGNED NOT NULL,
 	group_id	INTEGER UNSIGNED NOT NULL,
-	value		VARCHAR(50) NULL,
 	PRIMARY KEY (action_id, group_id),
-	CONSTRAINT fk_acl_actions_2_groups_action FOREIGN KEY (action_id) REFERENCES acl_actions (id),
-	CONSTRAINT fk_acl_actions_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id)
+	CONSTRAINT fk_acl_actions_2_groups_action FOREIGN KEY (action_id) REFERENCES acl_actions (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_actions_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

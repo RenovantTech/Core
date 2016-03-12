@@ -3,8 +3,8 @@
 	<objects>
 		<object id="system.ACL" class="metadigit\core\acl\ACL">
 			<constructor>
+				<arg name="pdo">mysql</arg>
 				<arg name="dbConf" type="array">
-					<item key="pdo"			>mysql</item>
 					<item key="t_prefix"	>sys_acl</item>
 					<item key="t_users"		>sys_users</item>
 					<item key="t_groups"	>sys_groups</item>
