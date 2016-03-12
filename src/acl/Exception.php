@@ -12,7 +12,8 @@ namespace metadigit\core\acl;
  */
 class Exception extends \metadigit\core\Exception {
 	// ACTIONS
-	const COD100 = 'ACTION denied';
+	const COD100 = '[ACTION] "%s" DENIED';
 	// FILTERS
-	const COD200 = 'FILTER violated';
+	const COD200 = '[FILTER] "%s" value MISSING';
+	const COD201 = '[FILTER] "%s" QUERY %s KO';
 }

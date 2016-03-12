@@ -57,24 +57,6 @@ CREATE TABLE IF NOT EXISTS acl (
 
 /* ACL mappings */
 
-CREATE TABLE IF NOT EXISTS acl_filters_2_users (
-	filter_id	INTEGER UNSIGNED NOT NULL,
-	user_id		INTEGER UNSIGNED NOT NULL,
-	value		VARCHAR(50) NULL,
-	PRIMARY KEY (filter_id, user_id),
-	CONSTRAINT fk_acl_filters_2_users_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
-	CONSTRAINT fk_acl_filters_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE IF NOT EXISTS acl_filters_2_groups (
-	filter_id	INTEGER UNSIGNED NOT NULL,
-	group_id	INTEGER UNSIGNED NOT NULL,
-	value		VARCHAR(50) NULL,
-	PRIMARY KEY (filter_id, group_id),
-	CONSTRAINT fk_acl_filters_2_groups_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
-	CONSTRAINT fk_acl_filters_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS acl_actions_2_users (
 	action_id	INTEGER UNSIGNED NOT NULL,
 	user_id		INTEGER UNSIGNED NOT NULL,
@@ -89,4 +71,22 @@ CREATE TABLE IF NOT EXISTS acl_actions_2_groups (
 	PRIMARY KEY (action_id, group_id),
 	CONSTRAINT fk_acl_actions_2_groups_action FOREIGN KEY (action_id) REFERENCES acl_actions (id) ON DELETE CASCADE,
 	CONSTRAINT fk_acl_actions_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS acl_filters_2_users (
+	filter_id	INTEGER UNSIGNED NOT NULL,
+	user_id		INTEGER UNSIGNED NOT NULL,
+	val			VARCHAR(50) NULL,
+	PRIMARY KEY (filter_id, user_id, val),
+	CONSTRAINT fk_acl_filters_2_users_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_filters_2_users_user FOREIGN KEY (user_id) REFERENCES t_users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS acl_filters_2_groups (
+	filter_id	INTEGER UNSIGNED NOT NULL,
+	group_id	INTEGER UNSIGNED NOT NULL,
+	val			VARCHAR(50) NULL,
+	PRIMARY KEY (filter_id, group_id, val),
+	CONSTRAINT fk_acl_filters_2_groups_filter FOREIGN KEY (filter_id) REFERENCES acl_filters (id) ON DELETE CASCADE,
+	CONSTRAINT fk_acl_filters_2_groups_group FOREIGN KEY (group_id) REFERENCES t_groups (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

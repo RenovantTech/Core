@@ -54,11 +54,12 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @expectedException \metadigit\core\acl\Exception
-	 * @expectedExceptionCode 100
 	 * @param ACL $ACL
 	 */
 	function testOnRouteException(ACL $ACL) {
+		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectExceptionCode(100);
+		$this->expectExceptionMessage('[ACTION] "api.users.insert" DENIED');
 		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
 		$_SESSION['UID'] = 2;
 		$this->assertTrue($ACL->onRoute($Req));
@@ -72,13 +73,15 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 		$_SESSION['UID'] = 1;
 		$this->assertTrue($ACL->onObject('service.Foo', 'index'));
 	}
+
 	/**
 	 * @depends testConstruct
-	 * @expectedException \metadigit\core\acl\Exception
-	 * @expectedExceptionCode 100
 	 * @param ACL $ACL
 	 */
 	function testOnObjectException(ACL $ACL) {
+		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectExceptionCode(100);
+		$this->expectExceptionMessage('[ACTION] "service.Foo" DENIED');
 		$_SESSION['UID'] = 2;
 		$this->assertTrue($ACL->onObject('service.Foo', 'index'));
 	}
@@ -89,17 +92,21 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testOnOrm(ACL $ACL) {
 		$_SESSION['UID'] = 1;
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'INSERT'));
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
+
+		$_SESSION['UID'] = 4;
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
 	}
+
 	/**
 	 * @depends testConstruct
-	 * @expectedException \metadigit\core\acl\Exception
-	 * @expectedExceptionCode 100
 	 * @param ACL $ACL
 	 */
 	function testOnOrmException(ACL $ACL) {
+		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectExceptionCode(200);
+		$this->expectExceptionMessage('[FILTER] "data.UserRepository.FETCH" value MISSING');
 		$_SESSION['UID'] = 2;
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'INSERT'));
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
 	}
-
 }
