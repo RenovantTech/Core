@@ -3,13 +3,13 @@
 	<objects>
 		<object id="system.ACL" class="metadigit\core\acl\ACL">
 			<constructor>
-				<arg name="pdo">mysql</arg>
 				<arg name="tables" type="array">
 					<item key="acl"		>sys_acl</item>
 					<item key="users"	>sys_users</item>
 					<item key="groups"	>sys_groups</item>
 					<item key="u2g"		>sys_users_2_groups</item>
 				</arg>
+				<arg name="pdo">mysql</arg>
 			</constructor>
 		</object>
 		<object id="system.Mock" class="mock\GlobalMock">

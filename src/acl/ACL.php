@@ -37,18 +37,18 @@ class ACL {
 
 	/**
 	 * ACL constructor.
-	 * @param string $pdo PDO instance ID
 	 * @param array $tables DB tables
+	 * @param string $pdo PDO instance ID, default to "master"
 	 */
-	function __construct($pdo, array $tables) {
+	function __construct(array $tables, $pdo='master') {
+		$this->tables = array_merge($this->tables, $tables);
 		$this->pdo = $pdo;
-		$this->tables = $tables;
 		TRACE and $this->trace(LOG_DEBUG, 1, __METHOD__, 'initialize ACL storage');
-		$PDO = Kernel::pdo($pdo);
+		$PDO = Kernel::pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
 			['acl', 't_u2g', 't_users', 't_groups'],
-			[$tables['acl'], $tables['u2g'], $tables['users'], $tables['groups']],
+			[$this->tables['acl'], $this->tables['u2g'], $this->tables['users'], $this->tables['groups']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
 	}
