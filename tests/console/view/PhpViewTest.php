@@ -14,14 +14,13 @@ class PhpViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param PhpView $PhpView
 	 */
 	function testRender(PhpView $PhpView) {
 		$this->expectOutputRegex('/<title>index<\/title>/');
 		$Req = new Request;
 		$Res = new Response;
 		$PhpView->render($Req, $Res, MOCK_DIR.'/console/templates/index');
-		$matcher = ['tag' => 'title', 'content' => 'index'];
-		$this->assertTag($matcher, $Res->getContent(), '->assertTag() <title>index</title>');
 		$Res->send();
 	}
 }
