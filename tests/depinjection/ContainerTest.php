@@ -25,19 +25,27 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testGet(Container $Container) {
 		// only ID
-		$Mock = $Container->get('mock.Mock');
-		$this->assertInstanceOf('mock\GlobalMock', $Mock);
-		$ReflProp = new \ReflectionProperty('mock\GlobalMock', 'name');
+		$Mock = $Container->get('mock.depinjection.Mock1');
+		$this->assertInstanceOf('mock\depinjection\Mock1', $Mock);
+		$ReflProp = new \ReflectionProperty('mock\depinjection\Mock1', 'name');
 		$ReflProp->setAccessible(true);
 		$name = $ReflProp->getValue($Mock);
-		$this->assertEquals('LocalMock', $name);
+		$this->assertEquals('Mock1', $name);
 		// ID & class
-		$Mock = $Container->get('mock.Mock','mock\GlobalMock');
-		$this->assertInstanceOf('mock\GlobalMock', $Mock);
-		$ReflProp = new \ReflectionProperty('mock\GlobalMock', 'name');
+		$Mock = $Container->get('mock.depinjection.Mock1','mock\depinjection\Mock1');
+		$this->assertInstanceOf('mock\depinjection\Mock1', $Mock);
+		$ReflProp = new \ReflectionProperty('mock\depinjection\Mock1', 'name');
 		$ReflProp->setAccessible(true);
 		$name = $ReflProp->getValue($Mock);
-		$this->assertEquals('LocalMock', $name);
+		$this->assertEquals('Mock1', $name);
+
+		// only ID
+		$Mock = $Container->get('mock.depinjection.Mock2');
+		$this->assertInstanceOf('mock\depinjection\Mock2', $Mock);
+		$ReflProp = new \ReflectionProperty('mock\depinjection\Mock2', 'name');
+		$ReflProp->setAccessible(true);
+		$name = $ReflProp->getValue($Mock);
+		$this->assertEquals('Mock2', $name);
 	}
 
 	/**
@@ -53,19 +61,19 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testHas(Container $Container) {
-		$this->assertTrue($Container->has('mock.Mock'));
-		$this->assertFalse($Container->has('mock.NotExists'));
-		$this->assertTrue($Container->has('mock.Mock', 'mock\GlobalMock'));
-		$this->assertFalse($Container->has('mock.Mock', 'Exception'));
+		$this->assertTrue($Container->has('mock.depinjection.Mock1'));
+		$this->assertFalse($Container->has('mock.depinjection.NotExists'));
+		$this->assertTrue($Container->has('mock.depinjection.Mock1', 'mock\depinjection\Mock1'));
+		$this->assertFalse($Container->has('mock.depinjection.Mock1', 'Exception'));
 	}
 
 	/**
 	 * @depends testConstructor
 	 */
 	function testGetListByType(Container $Container) {
-		$ids = $Container->getListByType('mock\GlobalMock');
+		$ids = $Container->getListByType('mock\depinjection\Mock1');
 		$this->assertNotEmpty($ids);
-		$this->assertEquals('mock.Mock', $ids[0]);
+		$this->assertEquals('mock.depinjection.Mock1', $ids[0]);
 		$this->assertEmpty($Container->getListByType('Exception'));
 	}
 
@@ -73,9 +81,9 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetAllByType(Container $Container) {
-		$objs = $Container->getAllByType('mock\GlobalMock');
+		$objs = $Container->getAllByType('mock\depinjection\Mock1');
 		$this->assertNotEmpty($objs);
-		$this->assertInstanceOf('mock\GlobalMock', $objs[0]);
+		$this->assertInstanceOf('mock\depinjection\Mock1', $objs[0]);
 		$this->assertEmpty($Container->getAllByType('Exception'));
 	}
 
@@ -83,7 +91,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetType(Container $Container) {
-		$this->assertEquals('mock\GlobalMock', $Container->getType('mock.Mock'));
+		$this->assertEquals('mock\depinjection\Mock1', $Container->getType('mock.depinjection.Mock1'));
 	}
 
 	/**
@@ -92,6 +100,6 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 	 * @expectedExceptionCode	1
 	 */
 	function testGetTypeException(Container $Container) {
-		$Container->getType('mock.NotExists');
+		$Container->getType('mock.depinjection.NotExists');
 	}
 }
