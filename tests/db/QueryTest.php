@@ -8,20 +8,21 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 	static function setUpBeforeClass() {
 		Kernel::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `people` (
-				id			smallint unsigned not NULL AUTO_INCREMENT,
-				name		varchar(20),
-				surname		varchar(20),
-				age			integer ,
-				score		decimal(4,2) unsigned,
+				id			SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+				name		VARCHAR(20),
+				surname		VARCHAR(20),
+				age			INTEGER UNSIGNED NOT NULL DEFAULT 0,
+				score		DECIMAL(4,2) UNSIGNED NOT NULL DEFAULT 0,
 				PRIMARY KEY(id)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+			
 			CREATE PROCEDURE sp_people (
-				IN p_name		varchar(20),
-				IN p_surname	varchar(20),
-				IN p_age		integer,
-				IN p_score		decimal,
-				OUT p_id		integer,
-				OUT p_time		datetime
+				IN p_name		VARCHAR(20),
+				IN p_surname	VARCHAR(20),
+				IN p_age		INTEGER UNSIGNED,
+				IN p_score		DECIMAL(4,2),
+				OUT p_id		INTEGER UNSIGNED,
+				OUT p_time		DATETIME
 			)
 			BEGIN
 				DECLARE LID integer;
@@ -29,35 +30,36 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 				SET p_id = LAST_INSERT_ID();
 				SET p_time = NOW();
 			END;
+			
 			CREATE TABLE IF NOT EXISTS `sales` (
 				year		YEAR NOT NULL,
 				product_id	INTEGER UNSIGNED NOT NULL,
-				sales1		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales2		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales3		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales4		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales5		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales6		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales7		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales8		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales9		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales10		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales11		DECIMAL(10,2) UNSIGNED NOT NULL,
-				sales12		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target1		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target2		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target3		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target4		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target5		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target6		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target7		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target8		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target9		DECIMAL(10,2) UNSIGNED NOT NULL,
-				target10	DECIMAL(10,2) UNSIGNED NOT NULL,
-				target11	DECIMAL(10,2) UNSIGNED NOT NULL,
-				target12	DECIMAL(10,2) UNSIGNED NOT NULL,
+				sales1		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales2		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales3		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales4		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales5		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales6		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales7		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales8		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales9		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales10		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales11		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				sales12		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target1		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target2		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target3		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target4		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target5		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target6		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target7		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target8		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target9		DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target10	DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target11	DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
+				target12	DECIMAL(10,2) UNSIGNED NOT NULL DEFAULT 0,
 				PRIMARY KEY(year, product_id)
-			) 	ENGINE=MyISAM DEFAULT CHARSET=utf8;
+			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		');
 	}
 
@@ -83,7 +85,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		');
 	}
 
-	function testExecCount() {
+	function __testExecCount() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people')->criteria('name LIKE "%ra%"')->execCount();
 		$this->assertEquals(2, $count);
@@ -111,7 +113,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $Query->execCount(['score'=>30]));
 	}
 
-	function testExecDelete() {
+	function __testExecDelete() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people')->criteria('surname = "Brown"')->execDelete();
 		$this->assertEquals(1, $count);
@@ -139,7 +141,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $Query->execDelete(['score'=>11]));
 	}
 
-	function testExecInsert() {
+	function __testExecInsert() {
 		$Query = (new Query('mysql'))->on('people','name,surname');
 		$this->assertEquals(1, $Query->execInsert(['name'=>'John', 'surname'=>'Foo']));
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
@@ -151,7 +153,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, (new Query('mysql'))->on('sales')->criteria('year = 2014 AND product_id = 1')->execCount());
 	}
 
-	function testExecInsertException() {
+	function __testExecInsertException() {
 		try {
 			$Query = (new Query('mysql'))->on('sales', 'year, product_id, sales1, sales2, sales3, sales4, sales5, sales6, sales7, sales8, sales9, sales10, sales11, sales12');
 			$Query->execInsert(['year'=>2014, 'product_id'=>1, 'sales1'=>null, 'sales2'=>0, 'sales3'=>32000, 'sales4'=>28450.50, 'sales5'=>0, 'sales6'=>0, 'sales7'=>0, 'sales8'=>0, 'sales9'=>0, 'sales10'=>0, 'sales11'=>0, 'sales12'=>0]);
@@ -166,11 +168,12 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$Query = (new Query('mysql'))->on('people','id,name,surname,age');
 		$this->assertEquals(2, $Query->execInsertUpdate(['id'=>1, 'name'=>'Albert', 'surname'=>'Brown', 'age'=>22],['id'])); // row count ON DUPLICATE is 2 !!!
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('id = 1 AND age = 22')->execCount());
+		$Query = (new Query('mysql'))->on('people','id,name,surname');
 		$this->assertEquals(1, $Query->execInsertUpdate(['id'=>9, 'name'=>'Dick', 'surname'=>'Foo'],['id']));
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
 	}
 
-	function testExecSelect() {
+	function __testExecSelect() {
 		// criteria() values
 		$items = (new Query('mysql'))->on('people')->criteria('surname = "Green"')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertCount(4, $items);
@@ -214,7 +217,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 
 	}
 
-	function testExecUpdate() {
+	function __testExecUpdate() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people','name,surname')->criteria('age = 25')->execUpdate(['name'=>'Zack', 'surname'=>'Black']);
 		$this->assertEquals(2, $count);
@@ -238,13 +241,13 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('surname = "Ping" AND age >= 21 AND score >= 20')->execCount());
 	}
 
-	function testExecCall() {
+	function __testExecCall() {
 		$Query = (new Query('mysql'))->on('sp_people','name, surname, age, score, @id, @time');
 		$data = $Query->execCall(['name'=>'Xiao', 'surname'=>'Ming', 'score'=>30, 'age'=>25]);
 		$this->assertEquals(9, $data['id']);
 	}
 
-	function testCriteriaExp() {
+	function __testCriteriaExp() {
 		// EQ
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('surname,EQ,Red')->execCount());
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('surname,EQ,:name')->execCount(['name'=>'Red']));
@@ -268,7 +271,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(3, (new Query('mysql'))->on('people')->criteriaExp('age,IN,21,22,23')->execCount());
 	}
 
-	function testSetCriteriaDictionary() {
+	function __testSetCriteriaDictionary() {
 		$dictionary = [
 			'ageGTE' => 'age >= ?1',
 			'scoreXY' => 'score,BTW,?1,?2',
@@ -289,7 +292,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('ageGTE,20|scoreXYbis,:min,:max')->execCount(['min'=>20, 'max'=>40]));
 	}
 
-	function testSetOrderByDictionary() {
+	function __testSetOrderByDictionary() {
 		$dictionary = [
 			'surnameASC' => 'surname ASC, name ASC',
 			'surnameDESC' => 'surname DESC, name DESC'
