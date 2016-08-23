@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\log\writer;
-use metadigit\core\Kernel;
+use metadigit\core\Kernel,
+	metadigit\core\log\Logger;
 /**
  * Writes logs to sqlite database
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -51,6 +52,6 @@ class SqliteWriter implements \metadigit\core\log\LogWriterInterface {
 	 */
 	function write($time, $message, $level=LOG_INFO, $facility=null) {
 		if(is_null($this->_pdo_insert)) $this->_pdo_insert = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
-		$this->_pdo_insert->execute(['date'=>$time, 'level'=>$level, 'facility'=>$facility, 'message'=>$message]);
+		$this->_pdo_insert->execute(['date'=>$time, 'level'=>Logger::LABELS[$level], 'facility'=>$facility, 'message'=>$message]);
 	}
 }

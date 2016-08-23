@@ -23,17 +23,17 @@ class SqliteWriterTest extends \PHPUnit_Framework_TestCase {
 		$pdostm = Kernel::pdo('sqlite')->query('SELECT * FROM `log`', \PDO::FETCH_ASSOC);
 
 		$row = $pdostm->fetch();
-		$this->assertEquals(LOG_INFO, $row['level']);
+		$this->assertEquals('INFO', $row['level']);
 		$this->assertEquals(null, $row['facility']);
 		$this->assertEquals('test message INFO', $row['message']);
 
 		$row = $pdostm->fetch();
-		$this->assertEquals(LOG_WARNING, $row['level']);
+		$this->assertEquals('WARNING', $row['level']);
 		$this->assertEquals(null, $row['facility']);
 		$this->assertEquals('test message WARNING', $row['message']);
 
 		$row = $pdostm->fetch();
-		$this->assertEquals(LOG_EMERG, $row['level']);
+		$this->assertEquals('EMERG', $row['level']);
 		$this->assertEquals('kernel', $row['facility']);
 		$this->assertEquals('test message EMERG', $row['message']);
 	}
