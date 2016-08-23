@@ -12,10 +12,10 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'apps');
 		$ReflProp->setAccessible(true);
 		$apps = $ReflProp->getValue();
-		$this->assertArrayHasKey('-', $apps['HTTP']);
-		$this->assertEquals(8080,					$apps['HTTP']['-']['httpPort']);
-		$this->assertEquals('/',					$apps['HTTP']['-']['baseUrl']);
-		$this->assertEquals('metadigit.webconsole',	$apps['HTTP']['-']['namespace']);
+		$this->assertArrayHasKey('webconsole', $apps['HTTP']);
+		$this->assertEquals(8080,					$apps['HTTP']['webconsole']['httpPort']);
+		$this->assertEquals('/',					$apps['HTTP']['webconsole']['baseUrl']);
+		$this->assertEquals('metadigit.webconsole',	$apps['HTTP']['webconsole']['namespace']);
 		$this->assertArrayHasKey('CP', $apps['HTTP']);
 		$this->assertEquals(80,					$apps['HTTP']['CP']['httpPort']);
 		$this->assertEquals('/ControlPanel/',	$apps['HTTP']['CP']['baseUrl']);
@@ -40,7 +40,7 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$ReflProp->setAccessible(true);
 		$dbConf = $ReflProp->getValue();
 		$this->assertArrayHasKey('kernel-cache', $dbConf);
-		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/kernel-cache.sqlite|null|null', $dbConf['kernel-cache']);
+		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/kernel-cache.sqlite', $dbConf['kernel-cache']['dns']);
 	}
 
 	/**

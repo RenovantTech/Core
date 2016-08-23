@@ -76,9 +76,7 @@ class Logger {
 		if(is_null(self::$Logger)) {
 			self::$Logger = new Logger;
 			foreach($conf as $k => $v) {
-				list($_level, $_facility, $class, $param1, $param2) = explode('|',$v);
-				(empty($_facility)) ? $_facility = null : null;
-				self::$Logger->addWriter(new $class($param1, $param2), constant($_level), $_facility);
+				self::$Logger->addWriter(new $v['class']($v['param1'], $v['param2']), constant($v['level']), $v['facility']);
 			}
 		}
 		foreach($log as $l) call_user_func_array([self::$Logger,'log'], $l);

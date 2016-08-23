@@ -33,7 +33,7 @@ defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'P
  */
 class Kernel {
 
-	const CONFIG_FILE	= 'metadigit-core.ini';
+	const CONFIG_FILE		= 'metadigit-core.yaml';
 	const EVENT_INIT		= 'kernel:init';
 	const EVENT_SHUTDOWN	= 'kernel:shutdown';
 
@@ -45,7 +45,10 @@ class Kernel {
 	static protected $Cache;
 	/** Database PDO configurations
 	 * @var array */
-	static protected $dbConf;
+	static protected $dbConf = [
+		'kernel-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'kernel-cache.sqlite' ],
+		'kernel-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'kernel-trace.sqlite' ]
+	];
 	/** System Context
 	 * @var \metadigit\core\context\Context */
 	static protected $SystemContext;
@@ -80,7 +83,7 @@ class Kernel {
 	 * It has the following functions:
 	 * * set user defined constants;
 	 * * set global php settings (TimeZone, charset);
-	 * * initialize classes autoloading;
+	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
 	 * @param string $configFile configuration .ini path, relative to BASE_DIR
 	 * @return void
@@ -88,66 +91,42 @@ class Kernel {
 	static function init($configFile=self::CONFIG_FILE) {
 		TRACE and self::trace(LOG_DEBUG, 1, __METHOD__);
 		// ENVIRONMENT FIX
-		if(PHP_SAPI!='cli' && strpos($_SERVER['SERVER_SOFTWARE'],'lighttpd')!==false) {
-			$_SERVER['SERVER_NAME']=strstr($_SERVER['SERVER_NAME'].':',':',true);
-			$_SERVER['QUERY_STRING']=parse_url($_SERVER['REQUEST_URI'],PHP_URL_QUERY);
-			parse_str($_SERVER['QUERY_STRING'],$_GET);
-			$_REQUEST=array_merge($_REQUEST,$_GET);
-		}
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
-		//ini_set('display_errors',1); // @TODO boh! probably useless!!!
 		ini_set('upload_tmp_dir', TMP_DIR);
 		spl_autoload_register(__CLASS__.'::autoload');
 		register_shutdown_function(__CLASS__.'::shutdown');
-		if(!$config = parse_ini_file(BASE_DIR.$configFile, true)) die('Invalid Core configuration file: '.$configFile);
-		foreach($config as $section => $data) {
-			switch($section) {
-				case 'settings':
-					self::$settings = array_replace(self::$settings, $data);
-					date_default_timezone_set(self::$settings['timeZone']);
-					setlocale(LC_ALL,self::$settings['locale']);
-					ini_set('default_charset',self::$settings['charset']);
-					self::$traceLevel = self::$settings['traceLevel'];
-					break;
-				case 'namespaces':
-					foreach($data as $k => $dir) {
-						$dir = rtrim($dir,DIRECTORY_SEPARATOR);
-						if(substr($dir,0,7)=='phar://') {
-							if($dir[7]!='/') $dir = 'phar://'.BASE_DIR.substr($dir,7);
-							preg_match('/^phar:\/\/([0-9a-zA-Z._\-\/]+.phar)/', $dir, $matches);
-							include($matches[1]);
-						} else {
-							if($dir[0]!='/') $dir = BASE_DIR.$dir;
-						}
-						self::$namespaces[$k] = $dir;
-					}
-					break;
-				case 'apps-http':
-					foreach($data as $k => $v) {
-						list($httpPort, $baseUrl, $namespace) = explode('|',$v);
-						self::$apps['HTTP'][$k]['httpPort']		= (int) $httpPort;
-						self::$apps['HTTP'][$k]['baseUrl']		= $baseUrl;
-						self::$apps['HTTP'][$k]['namespace']	= $namespace;
-					}
-					break;
-				case 'apps-cli':
-					foreach($data as $k => $v) self::$apps['CLI'][$k] = $v;
-					break;
-				case 'constants':
-					foreach($data as $k => $v) define($k, $v);
-					break;
-				case 'databases':
-					self::$dbConf = array_merge([
-						'kernel-cache'=>'sqlite:'.CACHE_DIR.'kernel-cache.sqlite|null|null',
-						'kernel-trace'=>'sqlite:'.DATA_DIR.'kernel-trace.sqlite|null|null'
-					], $data);
-					break;
-				case 'logs':
-					self::$logConf = $data;
-					break;
+
+		if(!$config = yaml_parse_file(BASE_DIR.$configFile)) die('Invalid Core configuration file: '.$configFile);
+
+		// settings
+		self::$settings = array_replace(self::$settings, $config['settings']);
+		date_default_timezone_set(self::$settings['timeZone']);
+		setlocale(LC_ALL,self::$settings['locale']);
+		ini_set('default_charset',self::$settings['charset']);
+		self::$traceLevel = self::$settings['traceLevel'];
+		// namespaces
+		foreach($config['namespaces'] as $k => $dir) {
+			$dir = rtrim($dir,DIRECTORY_SEPARATOR);
+			if(substr($dir,0,7)=='phar://') {
+				if($dir[7]!='/') $dir = 'phar://'.BASE_DIR.substr($dir,7);
+				preg_match('/^phar:\/\/([0-9a-zA-Z._\-\/]+.phar)/', $dir, $matches);
+				include($matches[1]);
+			} else {
+				if($dir[0]!='/') $dir = BASE_DIR.$dir;
 			}
+			self::$namespaces[$k] = $dir;
 		}
+		// APPS HTTP/CLI
+		self::$apps['HTTP'] = $config['apps'];
+		self::$apps['CLI'] = $config['cli'];
+		// constants
+		foreach($config['constants'] as $k => $v) define($k, $v);
+		// databases
+		self::$dbConf = array_merge($config['databases'], self::$dbConf);
+		// logs
+		self::$logConf = $config['logs'];
+
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
 		self::$Cache = new cache\SqliteCache('kernel-cache', 'cache', true);
 		set_exception_handler(function() {
@@ -228,9 +207,9 @@ class Kernel {
 	 */
 	static function pdo($id='master', $raw=true) {
 		if(!isset(self::$_pdo[$id])) {
-			list($dns,$user,$pw) = @explode('|',self::$dbConf[$id]);
-			TRACE and self::trace(LOG_DEBUG, TRACE_DB, __METHOD__, sprintf('open db "%s": %s', $id, $dns));
-			$pdo = new \PDO($dns,$user,$pw);
+			$cnf = self::$dbConf[$id];
+			TRACE and self::trace(LOG_DEBUG, TRACE_DB, __METHOD__, sprintf('open db "%s": %s', $id, $cnf['dns']));
+			$pdo = new \PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd']);
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE,\PDO::ERRMODE_EXCEPTION);
 			if('sqlite'==$pdo->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
 				if(file_exists(TMP_DIR.$id.'.vacuum')) unlink(TMP_DIR.$id.'.vacuum') && $pdo->exec('VACUUM');
@@ -299,7 +278,7 @@ class Kernel {
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, str_replace('metadigit','\\',$function), $msg, $data];
 	}
 
-	// === AUTOLOADING SYSTEM =====================================================================
+	// === AUTO-LOADING SYSTEM ====================================================================
 
 	/**
 	 * __autoload() implementation
