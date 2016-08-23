@@ -19,6 +19,6 @@ class BufferWriter implements \metadigit\core\log\LogWriterInterface {
 	 * {@inheritdoc}
 	 */
 	function write($time, $message, $level=LOG_INFO, $facility=null) {
-		$this->buffer[] = sprintf("%s [%s] %s\n\r", date('r',$time), Logger::getLevelName($level), $message);
+		$this->buffer[] = sprintf("%s [%s] %s\n\r", date('r',$time), Logger::LABELS[$level], $message);
 	}
 }

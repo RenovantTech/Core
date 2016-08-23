@@ -48,6 +48,6 @@ class FileTreeWriter implements \metadigit\core\log\LogWriterInterface {
 			$this->_fh = fopen($this->directory.date('/Y/m/d/').$this->filename, 'a', 0);
 		}
 		if($facility) $message = $facility.': '.$message;
-		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::getLevelName($level), $message));
+		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::LABELS[$level], $message));
 	}
 }

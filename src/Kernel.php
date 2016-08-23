@@ -250,7 +250,16 @@ class Kernel {
 	}
 
 	static function logFlush() {
-		if(!empty(self::$log)) log\Logger::kernelLog(self::$logConf, self::$log);
+		static $Logger;
+		if(!$Logger) {
+			$Logger = new log\Logger();
+			foreach(self::$logConf as $k => $cnf)
+				$Logger->addWriter(new $cnf['class']($cnf['param1'], $cnf['param2']), constant($cnf['level']), $cnf['facility']);
+		}
+		if(!empty(self::$log)) {
+			foreach(self::$log as $log)
+				call_user_func_array([$Logger,'log'], $log);
+		}
 	}
 
 	// === TRACE SYSTEM ===========================================================================

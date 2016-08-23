@@ -16,7 +16,7 @@ namespace metadigit\core\log;
 class Logger {
 	use \metadigit\core\CoreTrait;
 
-	static $labels = [
+	const LABELS = [
 		LOG_DEBUG => 'DEBUG',
 		LOG_INFO => 'INFO',
 		LOG_NOTICE => 'NOTICE',
@@ -64,21 +64,5 @@ class Logger {
 			if($level <= $_level && ( is_null($this->facilities[$k]) || $this->facilities[$k] == $facility ))
 				$this->writers[$k]->write($time, $message, $level, $facility);
 		}
-	}
-
-	static function getLevelName($level) {
-		return self::$labels[$level];
-	}
-
-	static protected $Logger;
-
-	static function kernelLog(array $conf, array $log) {
-		if(is_null(self::$Logger)) {
-			self::$Logger = new Logger;
-			foreach($conf as $k => $v) {
-				self::$Logger->addWriter(new $v['class']($v['param1'], $v['param2']), constant($v['level']), $v['facility']);
-			}
-		}
-		foreach($log as $l) call_user_func_array([self::$Logger,'log'], $l);
 	}
 }

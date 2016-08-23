@@ -41,6 +41,6 @@ class FileWriter implements \metadigit\core\log\LogWriterInterface {
 	function write($time, $message, $level=LOG_INFO, $facility=null) {
 		if(is_null($this->_fh)) $this->_fh = fopen($this->filename, 'a', 0);
 		if($facility) $message = $facility.': '.$message;
-		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::getLevelName($level), $message));
+		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::LABELS[$level], $message));
 	}
 }
