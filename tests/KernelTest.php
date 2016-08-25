@@ -69,8 +69,8 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testInit
 	 */
 	function testPdo() {
-		$this->assertInstanceOf('PDO', Kernel::pdo('kernel-cache'));
-		$this->assertInstanceOf('PDO', Kernel::pdo('mysql'));
+		$this->assertInstanceOf('metadigit\core\db\PDO', Kernel::pdo('kernel-cache'));
+		$this->assertInstanceOf('metadigit\core\db\PDO', Kernel::pdo('mysql'));
 	}
 
 	/**

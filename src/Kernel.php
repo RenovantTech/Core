@@ -202,22 +202,13 @@ class Kernel {
 	/**
 	 * Return shared PDO instance
 	 * @param string $id database ID, default "master"
-	 * @param boolean $raw TRUE for a native Php PDO, FALSE for a metadigit\core\db\PDO
 	 * @return \PDO
 	 */
-	static function pdo($id='master', $raw=true) {
+	static function pdo($id='master') {
 		if(!isset(self::$_pdo[$id])) {
 			$cnf = self::$dbConf[$id];
 			TRACE and self::trace(LOG_DEBUG, TRACE_DB, __METHOD__, sprintf('open db "%s": %s', $id, $cnf['dns']));
-			$pdo = new \PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd']);
-			$pdo->setAttribute(\PDO::ATTR_ERRMODE,\PDO::ERRMODE_EXCEPTION);
-			if('sqlite'==$pdo->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
-				if(file_exists(TMP_DIR.$id.'.vacuum')) unlink(TMP_DIR.$id.'.vacuum') && $pdo->exec('VACUUM');
-				$pdo->exec('PRAGMA journal_mode = WAL');
-				$pdo->exec('PRAGMA temp_store = MEMORY');
-				$pdo->exec('PRAGMA synchronous = OFF');
-				$pdo->exec('PRAGMA foreign_keys = ON');
-			}
+			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']);
 			self::$_pdo[$id] = $pdo;
 		}
 		return self::$_pdo[$id];
