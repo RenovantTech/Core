@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\view;
+use function metadigit\core\trace;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\Exception;
@@ -19,7 +20,7 @@ class XSendFileView implements \metadigit\core\web\ViewInterface {
 
 	function render(Request $Req, Response $Res, $resource) {
 		if(!file_exists($resource)) throw new Exception(201, ['X-SendFile', $resource]);
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'file: '.$resource);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'file: '.$resource);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
 		$Res->reset();
 		$Res->setContentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
@@ -30,7 +31,7 @@ class XSendFileView implements \metadigit\core\web\ViewInterface {
 				$resource = str_replace(\metadigit\core\DATA_DIR, '/', $resource);
 				break;
 		}
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'X-Sendfile: '.$resource);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'X-Sendfile: '.$resource);
 		header('X-Accel-Redirect: '.$resource);
 		header('X-Sendfile: '.$resource);
 	}

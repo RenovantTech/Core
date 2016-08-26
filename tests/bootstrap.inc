@@ -13,6 +13,8 @@ define('metadigit\core\UPLOAD_DIR',	'/tmp/metadigit-core/upload/');
 
 define('MOCK_DIR', __DIR__.'/_mock');
 
+require __DIR__.'/../src/CoreProxy.php';
+require __DIR__.'/../src/CoreTrait.php';
 require __DIR__.'/../src/Kernel.php';
 require __DIR__.'/../vendor/autoload.php';
 

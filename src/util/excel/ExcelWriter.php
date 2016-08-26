@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\excel;
+use function metadigit\core\trace;
 /**
  * Excel Writer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -62,7 +63,7 @@ class ExcelWriter {
 	 * @param string $file output file
 	 */
 	function write($file) {
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'output file: '.$file);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'output file: '.$file);
 		$fh = fopen($file, 'w');
 		// header
 		$output = '<table>'.chr(10);

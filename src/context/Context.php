@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
+use function metadigit\core\trace;
 use metadigit\core\Kernel,
 	metadigit\core\depinjection\Container,
 	metadigit\core\depinjection\ContainerException,
@@ -38,7 +39,7 @@ class Context implements EventDispatcherInterface {
 		elseif($useCache && $Context = Kernel::getCache()->get($namespace.'.Context'))
 			return self::$_instances[$namespace] = $Context;
 		else {
-			TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEPINJ, __METHOD__, $namespace);
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $namespace, null, __METHOD__);
 			list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.','\\', $namespace.'.Context'));
 			if(empty($dirName))
 				$xmlPath = \metadigit\core\BASE_DIR.$namespace.'-context.xml';
@@ -85,11 +86,11 @@ class Context implements EventDispatcherInterface {
 		if(!is_null($xmlPath)) {
 			if(!file_exists($xmlPath)) throw new ContextException(11, [$this->_oid, $xmlPath]);
 			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
-			TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[START] parsing Context XML');
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML');
 			$this->getXmlParser()->verify();
 			$this->includedNamespaces = $this->getXmlParser()->getIncludes();
 			$this->getXmlParser()->parseEventListeners($this);
-			TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[END] Context ready');
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready');
 			$XML = simplexml_load_file($xmlPath);
 		}
 		// create Container
@@ -133,7 +134,7 @@ class Context implements EventDispatcherInterface {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, $id);
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $id);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
@@ -173,7 +174,7 @@ class Context implements EventDispatcherInterface {
 		if(TRACE) {
 			$trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
 			$func = ((isset($trace['object'])) ? $trace['object']->_oid().'->' : $trace['class'].'::').$trace['function'];
-			Kernel::trace(LOG_DEBUG, TRACE_EVENT, $func, strtoupper($eventName));
+			trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName), null, $func);
 		}
 		$params['Context'] = $this;
 		if(is_null($Event)) $Event = new Event($target, $params);

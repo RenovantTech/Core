@@ -6,8 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\session;
-use metadigit\core\context\Context,
-	metadigit\core\web\Dispatcher;
+use function metadigit\core\trace;
+use metadigit\core\context\Context;
 /**
  * HTTP Session Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -62,7 +62,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 	 * Destroys all of the data associated with the current session.
 	 */
 	function destroy() {
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
 		session_destroy();
 		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* strtotime('1980-01-01')*/, $this->path, $this->domain, $this->secure);
 	}

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
+use function metadigit\core\trace;
 use metadigit\core\KernelDebugger,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
@@ -76,7 +77,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 	protected function resolveController(Request $Req, Response $Res) {
 		foreach($this->mappings as $cmd => $controllerID) {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
-				$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'matched CMD: '.$cmd.' => Controller: '.$controllerID);
+				TRACE and trace(LOG_DEBUG, 1, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $this->Context->get($controllerID);
 			}
@@ -103,7 +104,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
-			$this->trace(LOG_DEBUG, 1, __FUNCTION__, sprintf('view "%s", resource "%s"', $view, $resource));
+			TRACE and trace(LOG_DEBUG, 1, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
 			$class = $this->viewEngines[$engine];
 			$View = new $class;
 			return [$View, $resource];

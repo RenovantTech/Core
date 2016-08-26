@@ -105,7 +105,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$ReflProp = new \ReflectionProperty('mock\context\Mock1', 'Child');
 		$ReflProp->setAccessible(true);
 		$Child = $ReflProp->getValue($Mock);
-		$this->assertInstanceOf('metadigit\core\depinjection\ObjectProxy', $Child);
+		$this->assertInstanceOf('metadigit\core\CoreProxy', $Child);
 		return $Context;
 	}
 

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
+use function metadigit\core\trace;
 use metadigit\core\Kernel,
 	metadigit\core\context\Context,
 	metadigit\core\db\orm\util\DataMapper,
@@ -401,7 +402,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 					$changes[$k] = $newData[$k];
 			}
 			if(!count($changes)) {
-				TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'SKIP update, Entity not modified');
+				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'SKIP update, Entity not modified');
 				return true;
 			}
 			// onSave callback
@@ -443,7 +444,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	protected function doValidate($Entity, $validateMode) {
-		TRACE and $this->trace(LOG_DEBUG, 1, __FUNCTION__, 'subset: '.$validateMode);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'subset: '.$validateMode);
 		$validateSubset = (is_string($validateMode)) ? Metadata::get($this->class)->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);

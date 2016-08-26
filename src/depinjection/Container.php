@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\depinjection;
+use function metadigit\core\trace;
 use metadigit\core\util\xml\XMLValidator;
 /**
  * Dependency Injection Container
@@ -32,7 +33,7 @@ class Container {
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** Container reference for ObjectProxy
+	/** Container reference for CoreProxy
 	 * @var string */
 	protected $proxyRef;
 	/** XML Parser
@@ -58,9 +59,9 @@ class Container {
 		$this->xmlPath = $xmlPath;
 		if(!file_exists($xmlPath)) throw new ContainerException(11, [$this->_oid, $xmlPath]);
 		if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, [$xmlPath]);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[START] parsing Container XML');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Container XML');
 		list($this->id2classMap, $this->class2idMap) = $this->getXmlParser()->parseMaps();
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, '[END] Container ready');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Container ready');
 	}
 
 	function __sleep() {
@@ -76,7 +77,7 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, $id);
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $id);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);

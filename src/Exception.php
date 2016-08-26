@@ -32,7 +32,7 @@ class Exception extends \Exception {
 			}
 		}
 		parent::__construct((string)$message, (int)$code);
-		TRACE and Kernel::trace(TRACE_DEFAULT, 1, get_class($this), '[CODE '.$this->getCode().'] '.$this->getMessage());
+		TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT, '[CODE '.$this->getCode().'] '.$this->getMessage(), null, get_class($this));
 	}
 
 	/**

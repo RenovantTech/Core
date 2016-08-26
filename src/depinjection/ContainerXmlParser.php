@@ -6,6 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\depinjection;
+use function metadigit\core\trace;
+use metadigit\core\CoreProxy;
 /**
  * Dependency Injection ContainerParser
  * @internal
@@ -90,7 +92,7 @@ class ContainerXmlParser {
 	 * @throws ContainerException
 	 */
 	function parseObjectConstructorArgs($id, $containerOID) {
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, 'parsing constructor args for object `'.$id.'`');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`');
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
 		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$args = [];
@@ -115,7 +117,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new ObjectProxy((string)$xmlItem);
+								$value = new CoreProxy((string)$xmlItem);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
@@ -137,7 +139,7 @@ class ContainerXmlParser {
 					foreach($this->namespaces as $ns) {
 						if(strpos($id, $ns.'.') === 0) $namespace = $ns;
 					}
-					$args[(string)$xmlArg['name']] = new ObjectProxy($id, $this->proxyRef);
+					$args[(string)$xmlArg['name']] = new CoreProxy($id, $this->proxyRef);
 					break;
 			}
 		}
@@ -152,7 +154,7 @@ class ContainerXmlParser {
 	 * @throws ContainerException
 	 */
 	function parseObjectProperties($id, $containerOID) {
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DEPINJ, __FUNCTION__, 'parsing properties for object `'.$id.'`');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`');
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
 		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$properties = [];
@@ -177,7 +179,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new ObjectProxy((string)$xmlItem);
+								$value = new CoreProxy((string)$xmlItem);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
@@ -199,7 +201,7 @@ class ContainerXmlParser {
 					foreach($this->namespaces as $ns) {
 						if(strpos($id, $ns.'.') === 0) $namespace = $ns;
 					}
-					$properties[(string)$xmlProp['name']] = new ObjectProxy($id, $this->proxyRef);
+					$properties[(string)$xmlProp['name']] = new CoreProxy($id, $this->proxyRef);
 					break;
 			}
 		}

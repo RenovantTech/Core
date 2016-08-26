@@ -20,12 +20,25 @@ define('TRACE_EVENT',		6);
 defined('PROFILER')						or define('PROFILER', false);
 // system
 define('EOL', "\r\n");
-define('metadigit\core\VERSION',		'2.0.6');
+define('metadigit\core\VERSION',		'3.0.0');
 defined('metadigit\core\BOOTSTRAP')		or die('BOOTSTRAP not defined!');
 defined('metadigit\core\BASE_DIR')		or die('BASE_DIR not defined!');
 define('metadigit\core\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 // environment
 defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'PROD');
+
+/**
+ * Trace helper
+ * @param integer $level trace level, use a LOG_? constant value
+ * @param integer $type trace type, use a TRACE_? constant value
+ * @param string $msg the trace message
+ * @param mixed $data the trace data
+ * @param string $function the calling object method
+ * @return void
+ */
+function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $function=null) {
+	Kernel::trace($level, $type, $msg, $data, $function);
+}
 
 /**
  * Kernel
@@ -89,7 +102,7 @@ class Kernel {
 	 * @return void
 	 */
 	static function init($configFile=self::CONFIG_FILE) {
-		TRACE and self::trace(LOG_DEBUG, 1, __METHOD__);
+		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
@@ -177,7 +190,7 @@ class Kernel {
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
 		self::$Req->setAttribute('APP_DIR', $parse[2].'/');
-		TRACE and self::trace(LOG_DEBUG, 1, __METHOD__, $dispatcherID);
+		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, $dispatcherID, null, __METHOD__);
 		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
@@ -207,8 +220,8 @@ class Kernel {
 	static function pdo($id='master') {
 		if(!isset(self::$_pdo[$id])) {
 			$cnf = self::$dbConf[$id];
-			TRACE and self::trace(LOG_DEBUG, TRACE_DB, __METHOD__, sprintf('open db "%s": %s', $id, $cnf['dns']));
-			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']);
+			TRACE and self::trace(LOG_DEBUG, TRACE_DB, sprintf('open db "%s": %s', $id, $cnf['dns']), null, __METHOD__);
+			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[]);
 			self::$_pdo[$id] = $pdo;
 		}
 		return self::$_pdo[$id];
@@ -236,7 +249,7 @@ class Kernel {
 	 * @param string $facility log facility
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		TRACE and self::trace(LOG_DEBUG, 1, __METHOD__, sprintf('[%s] %s: %s', log\Logger::$labels[$level], $facility, $message));
+		TRACE and self::trace(LOG_DEBUG, 1, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}
 
@@ -258,24 +271,38 @@ class Kernel {
 	/** backtrace store
 	 * @var array */
 	static protected $trace = [];
-	/** framework internal backtrace Error level, incremented by errors & exceptions
+	/** backtrace Error level, incremented by errors & exceptions
 	 * @var integer */
 	static protected $traceError = 0;
 	/** backtrace level
 	 * @var integer */
 	static protected $traceLevel = LOG_DEBUG;
+	/** backtrace current scope
+	 * @var string */
+	static protected $traceFn;
 
 	/**
 	 * Kernel trace function.
 	 * @param integer $level trace level, use a LOG_? constant value
 	 * @param integer $type trace type, use a TRACE_? constant value
-	 * @param string $function the tracing object method / function
 	 * @param string $msg the trace message
 	 * @param mixed $data the trace data
+	 * @param string $function the tracing object method / function
 	 */
-	static function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $function, $msg=null, $data=null) {
+	static function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $function=null) {
 		if($level > self::$traceLevel) return;
-		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, str_replace('metadigit','\\',$function), $msg, $data];
+		$fn = str_replace('metadigit', '\\', $function?:self::$traceFn);
+		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, print_r($data,true)];
+	}
+
+	/**
+	 * Setter/getter backtrace current scope
+	 * @param string|null $fn
+	 * @return string
+	 */
+	static function traceFn($fn=null) {
+		if($fn) self::$traceFn = $fn;
+		return self::$traceFn;
 	}
 
 	// === AUTO-LOADING SYSTEM ====================================================================
@@ -288,16 +315,16 @@ class Kernel {
 	static function autoload($class) {
 		list($namespace, $className, $dir, $file) = self::parseClassName($class);
 		if(@file_exists($path = $dir.'/all.cache.inc')) {
-			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, __METHOD__, $namespace.'\*');
+			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, $namespace.'\*', null, __METHOD__);
 			require_once($path);
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
 		if(@file_exists($file = $dir.'/'.$file.'.php')) {
-			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, __METHOD__, $class);
+			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, $class, null, __METHOD__);
 			require($file);
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
-		TRACE and self::trace(LOG_ERR, TRACE_ERROR, __METHOD__, 'FAILED loading '.$class);
+		TRACE and self::trace(LOG_ERR, TRACE_ERROR, 'FAILED loading '.$class, null, __METHOD__);
 		self::$traceError = 3;
 		self::log(sprintf('ERROR loading class %s',$class ), LOG_ERR, 'kernel');
 	}

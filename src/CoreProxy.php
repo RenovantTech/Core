@@ -5,13 +5,14 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\depinjection;
-use metadigit\core\Kernel;
+namespace metadigit\core;
+use metadigit\core\depinjection\Container,
+	metadigit\core\depinjection\ContainerException;
 /**
  * Proxy for injected objects.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class ObjectProxy {
+class CoreProxy {
 
 	/** parent Container/Context OID
 	 * @var string */
@@ -19,7 +20,7 @@ class ObjectProxy {
 	/** Object OID
 	 * @var string */
 	protected $_oid;
-	/** Proxed Object instance
+	/** Proxy-ed Object instance
 	 * @var Object */
 	protected $_Obj = null;
 
@@ -37,8 +38,20 @@ class ObjectProxy {
 	}
 
 	function __call($method, $args) {
-		if(is_null($this->_Obj)) $this->_Obj = Kernel::getCache()->get($this->_container)->get($this->_oid, null, Container::FAILURE_SILENT);
-		if(is_object($this->_Obj)) return call_user_func_array([$this->_Obj, $method], $args);
-		throw new ContainerException(4, [$this->_oid]);
+		$prevTraceFn = Kernel::traceFn();
+		try {
+			if(is_null($this->_Obj)) $this->_Obj = Kernel::getCache()->get($this->_container)->get($this->_oid, null, Container::FAILURE_SILENT);
+			if(is_object($this->_Obj)) {
+				Kernel::traceFn($this->_oid.'->'.$method);
+				TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT);
+				$r = call_user_func_array([$this->_Obj, $method], $args);
+				Kernel::traceFn($prevTraceFn);
+				return $r;
+			}
+			throw new ContainerException(4, [$this->_oid]);
+		} catch (\Exception $Ex) {
+			Kernel::traceFn($prevTraceFn);
+			throw $Ex;
+		}
 	}
 }

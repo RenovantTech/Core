@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\view;
+use function metadigit\core\trace;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\Exception;
@@ -31,7 +32,7 @@ class PhpTALView implements \metadigit\core\web\ViewInterface {
 		$suffixs = explode('|', static::TEMPLATE_SUFFIXS);
 		foreach($suffixs as $suffix) {
 			if(file_exists($template = $Req->getAttribute('RESOURCES_DIR').$resource.$suffix)) {
-				$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'template: '.$template);
+				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'template: '.$template);
 				$this->execTemplate($template, $Res);
 				return;
 			}
@@ -56,11 +57,11 @@ class PhpTALView implements \metadigit\core\web\ViewInterface {
 		//chown(CACHE_DIR.'phptal','apache');
 		$PhpTAL->setPhpCodeDestination(\metadigit\core\CACHE_DIR.'phptal');
 		if(!is_null($class = $this->preFilterClass)) {
-			$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'set preFilter: '.$class);
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'set preFilter: '.$class);
 			$PhpTAL->setPreFilter(new $class);
 		}
 		if(!is_null($class = $this->postFilterClass)) {
-			$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'set postFilter: '.$class);
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'set postFilter: '.$class);
 			$PhpTAL->setPostFilter(new $class);
 		}
 		// assign Model values

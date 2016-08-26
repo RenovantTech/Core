@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
+use function metadigit\core\trace;
 use metadigit\core\Kernel;
 /**
  * Trait for DB operations, supporting trace
@@ -32,7 +33,7 @@ trait PdoTrait {
 	 */
 	protected function pdoBeginTransaction() {
 		$pdo = Kernel::pdo($this->pdo);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DB, debug_backtrace(0, 2)[1]['function'], 'beginTransaction()');
+		TRACE and trace(LOG_DEBUG, TRACE_DB, 'beginTransaction()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->beginTransaction();
 	}
 
@@ -43,7 +44,7 @@ trait PdoTrait {
 	 */
 	protected function pdoCommit() {
 		$pdo = Kernel::pdo($this->pdo);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DB, debug_backtrace(0, 2)[1]['function'], 'commit()');
+		TRACE and trace(LOG_DEBUG, TRACE_DB, 'commit()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->commit();
 	}
 
@@ -55,7 +56,7 @@ trait PdoTrait {
 	 */
 	protected function pdoExec($sql) {
 		$pdo = Kernel::pdo($this->pdo);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DB, debug_backtrace(0, 2)[1]['function'], $sql);
+		TRACE and trace(LOG_DEBUG, TRACE_DB, $sql, null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->exec($sql);
 	}
 
@@ -87,7 +88,7 @@ trait PdoTrait {
 	 */
 	protected function pdoQuery($sql) {
 		$pdo = Kernel::pdo($this->pdo);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DB, debug_backtrace(0, 2)[1]['function'], $sql);
+		TRACE and trace(LOG_DEBUG, TRACE_DB, $sql, null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->query($sql);
 	}
 
@@ -98,7 +99,7 @@ trait PdoTrait {
 	 */
 	protected function pdoRollBack() {
 		$pdo = Kernel::pdo($this->pdo);
-		TRACE and $this->trace(LOG_DEBUG, TRACE_DB, debug_backtrace(0, 2)[1]['function'], 'rollBack()');
+		TRACE and trace(LOG_DEBUG, TRACE_DB, 'rollBack()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->rollBack();
 	}
 
@@ -137,6 +138,6 @@ trait PdoTrait {
 			$sql = preg_replace($keys, $values, $sql, 1);
 		}
 		$msg = (strlen($sql)>100) ? substr($sql,0,100).'...' : $sql;
-		$this->trace(LOG_DEBUG, TRACE_DB, $func, $msg, $sql);
+		trace(LOG_DEBUG, TRACE_DB, $msg, $sql, $func);
 	}
 }

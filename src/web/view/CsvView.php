@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\view;
+use function metadigit\core\trace;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\util\csv\CsvWriter,
@@ -28,7 +29,7 @@ class CsvView implements \metadigit\core\web\ViewInterface {
 	function render(Request $Req, Response $Res, $resource) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['CSV Template', self::$template]);
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'template: '.self::$template);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'template: '.self::$template);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
 		$Res->setContentType(self::CONTENT_TYPE);
 		header('Content-Disposition: attachment; filename='.$saveName.'.csv');

@@ -14,7 +14,7 @@ namespace metadigit\core;
 class KernelHelper extends Kernel {
 
 	static function boot() {
-		self::trace(LOG_DEBUG, 1, __METHOD__);
+		self::trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
 		self::log('kernel bootstrap', LOG_INFO, 'kernel');
 		// directories
 		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(KernelError::ERR21);

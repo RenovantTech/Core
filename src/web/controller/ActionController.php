@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\controller;
+use function metadigit\core\trace;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\Exception;
@@ -37,7 +38,7 @@ abstract class ActionController implements \metadigit\core\web\ControllerInterfa
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
-			$this->trace(LOG_DEBUG, 1, 'preHandle', 'FALSE returned, skip Request handling');
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
@@ -58,7 +59,7 @@ abstract class ActionController implements \metadigit\core\web\ControllerInterfa
 				}
 			}
 		}
-		$this->trace(LOG_DEBUG, 1, $action.'Action');
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null, $this->_oid.'->'.$action.'Action');
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
 		return $View;

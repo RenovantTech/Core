@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\validator;
+use function metadigit\core\trace;
 use metadigit\core\Kernel;
 /**
  * Validator
@@ -32,7 +33,7 @@ class Validator {
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
 					$errors[$prop] = $func;
-					TRACE and Kernel::trace(LOG_DEBUG, 0, __METHOD__, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")');
+					TRACE and trace(LOG_DEBUG, TRACE_ERROR, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")', __METHOD__);
 				}
 			}
 		}

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
+use function metadigit\core\trace;
 use metadigit\core\Kernel;
 /**
  * Query
@@ -374,7 +375,7 @@ class Query {
 				$trace = preg_replace($keys, $values, $trace, 1);
 			}
 			$msg = (strlen($trace)>100) ? substr($trace,0,100).'...' : $trace;
-			Kernel::trace(LOG_DEBUG, TRACE_DB, $this->_tm, $msg, $trace);
+			trace(LOG_DEBUG, TRACE_DB, $msg, $trace, $this->_tm);
 		}
 		if(is_null($this->PDOStatement)) $this->PDOStatement = $PDO->prepare($sql);
 		$this->PDOStatement->execute($execParams);

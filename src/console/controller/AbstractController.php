@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console\controller;
+use function metadigit\core\trace;
 use metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
 	metadigit\core\console\Exception;
@@ -28,12 +29,12 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 
 	function handle(Request $Req, Response $Res) {
 		if(true!==$this->preHandle($Req, $Res)) {
-			$this->trace(LOG_DEBUG, 1, 'preHandle', 'FALSE returned, skip Request handling');
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
 		if(isset($this->_handle['params'])) {
-			$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'building action params');
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'building action params');
 			foreach($this->_handle['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
 					$paramClass = $param['class'];
@@ -49,7 +50,7 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 				}
 			}
 		}
-		$this->trace(LOG_DEBUG, 1, 'doHandle');
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null, $this->_oid.'->doHandle');
 		$View = call_user_func_array([$this,'doHandle'], $args);
 		$this->postHandle($Req, $Res, $View);
 		return $View;
