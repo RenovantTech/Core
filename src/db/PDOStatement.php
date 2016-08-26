@@ -12,7 +12,7 @@ namespace metadigit\core\db;
  */
 class PDOStatement extends \PDOStatement {
 
-	function execute(array $input_parameters = null) {
-		parent::execute($input_parameters);
+	function execute($params = null) {
+		parent::execute($params);
 	}
 }

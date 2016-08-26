@@ -13,6 +13,10 @@ use metadigit\core\TMP_DIR;
  */
 class PDO extends \PDO {
 
+	const DEFAULT_ATTRS = [
+		PDO::ATTR_STATEMENT_CLASS => ['metadigit\core\db\PDOStatement']
+	];
+
 	/**
 	 * Create new Query object
 	 * @param string $dsn      the Data Source Name, or DSN, contains the information required to connect to the database
@@ -21,9 +25,7 @@ class PDO extends \PDO {
 	 * @param array	 $options  a key=>value array of driver-specific connection options
 	 */
 	function __construct($dsn, $username=null, $password=null, array $options=null) {
-		$options = array_merge($options, [
-			PDO::ATTR_STATEMENT_CLASS => ['metadigit\core\db\PDOStatement']
-		]);
+		$options = ($options) ? array_merge($options, self::DEFAULT_ATTRS) : self::DEFAULT_ATTRS;
 		parent::__construct($dsn, $username, $password, $options);
 		$this->setAttribute(\PDO::ATTR_ERRMODE,\PDO::ERRMODE_EXCEPTION);
 		// SqLite specific settings
