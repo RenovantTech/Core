@@ -140,7 +140,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>index<\/title>/');
-		Kernel::getCache()->delete('mock.web.Dispatcher');
+		Kernel::cache('kernel')->delete('mock.web.Dispatcher');
 		$Dispatcher = Context::factory('mock.web',false)->get('mock.web.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;

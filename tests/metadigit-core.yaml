@@ -31,6 +31,11 @@ constants:
   UPLOAD_DIR:   /var/www/devel.com/data/files/
   SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
 
+caches:
+  system:
+    class:    metadigit\core\cache\SqliteCache
+    params:   ['system', 'sys-cache', false]
+
 databases:
   system:
     dns:      sqlite:/tmp/metadigit-core/system.sqlite

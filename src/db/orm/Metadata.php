@@ -97,9 +97,9 @@ class Metadata {
 		if(is_object($entity)) $entity = get_class($entity);
 		if(isset($cache[$entity])) return $cache[$entity];
 		$k = '#'.$entity.'#ORM-metadata';
-		if(!$cache[$entity] = Kernel::getCache()->get($k)) {
+		if(!$cache[$entity] = Kernel::cache('kernel')->get($k)) {
 			$cache[$entity] = new Metadata($entity);
-			Kernel::getCache()->set($k, $cache[$entity], null, 'ORM-metadata');
+			Kernel::cache('kernel')->set($k, $cache[$entity], null, 'ORM-metadata');
 		}
 		return $cache[$entity];
 	}

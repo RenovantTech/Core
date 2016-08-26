@@ -53,9 +53,6 @@ class Kernel {
 	/** HTTP/CLI apps routing
 	 * @var array */
 	static protected $apps;
-	/** Cache instance
-	 * @var \metadigit\core\cache\CacheInterface */
-	static protected $Cache;
 	/** System Context
 	 * @var \metadigit\core\context\Context */
 	static protected $SystemContext;
@@ -126,13 +123,16 @@ class Kernel {
 		self::$apps['CLI'] = $config['cli'];
 		// constants
 		foreach($config['constants'] as $k => $v) define($k, $v);
+		// caches
+		self::$cacheConf = array_merge($config['caches'], self::$cacheConf);
 		// databases
 		self::$dbConf = array_merge($config['databases'], self::$dbConf);
 		// logs
 		self::$logConf = $config['logs'];
 
+		// initialize
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
-		self::$Cache = new cache\SqliteCache('kernel-cache', 'cache', true);
+		self::cache('kernel');
 		set_exception_handler(function() {
 			call_user_func_array('metadigit\core\KernelDebugger::onException', func_get_args());
 		});
@@ -201,6 +201,36 @@ class Kernel {
 		self::logFlush();
 	}
 
+	// === CACHE ==================================================================================
+
+	/** Cache instances
+	 * @var array */
+	static protected $cache;
+	/** Cache configurations
+	 * @var array */
+	static protected $cacheConf = [
+		'kernel' => [
+			'class' => 'metadigit\core\cache\SqliteCache',
+			'params' => ['kernel-cache', 'cache', true]
+		]
+	];
+
+	/**
+	 * Return shared Cache instance
+	 * @param string $id Cache ID, default "system"
+	 * @return \metadigit\core\cache\CacheInterface
+	 */
+	static function cache($id='system') {
+		if(!isset(self::$cache[$id])) {
+			$cnf = self::$cacheConf[$id];
+			$ReflClass = new \ReflectionClass($cnf['class']);
+			$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
+			$Cache = $ReflClass->newInstanceArgs($params);
+			self::$cache[$id] = $Cache;
+		}
+		return self::$cache[$id];
+	}
+
 	// === DATABASES ==============================================================================
 
 	/** PDO instances
@@ -226,15 +256,6 @@ class Kernel {
 			self::$db[$id] = $pdo;
 		}
 		return self::$db[$id];
-	}
-
-	// === CACHE ==================================================================================
-
-	/**
-	 * @return \metadigit\core\cache\CacheInterface
-	 */
-	static function getCache() {
-		return self::$Cache;
 	}
 
 	// === LOG SYSTEM =============================================================================

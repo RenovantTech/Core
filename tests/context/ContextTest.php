@@ -48,7 +48,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testFactory() {
 		$Context = Context::factory('mock.context');
 		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-		$this->assertInstanceOf('metadigit\core\context\Context', Kernel::getCache()->get('mock.context.Context'));
+		$this->assertInstanceOf('metadigit\core\context\Context', Kernel::cache('kernel')->get('mock.context.Context'));
 		return $Context;
 	}
 
@@ -71,7 +71,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testFactory2() {
 		$GlobalContext = Context::factory('system');
 		$this->assertInstanceOf('metadigit\core\context\Context', $GlobalContext);
-		$this->assertTrue(Kernel::getCache()->has('system.Context'));
+		$this->assertTrue(Kernel::cache('kernel')->has('system.Context'));
 		return $GlobalContext;
 	}
 
@@ -90,7 +90,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\context\Context', 'getContainer');
 		$ReflMethod->setAccessible(true);
 		$this->assertInstanceOf('metadigit\core\depinjection\Container', $ReflMethod->invoke($Context));
-		$this->assertTrue(Kernel::getCache()->has('mock.context.Container'));
+		$this->assertTrue(Kernel::cache('kernel')->has('mock.context.Container'));
 	}
 
 	/**

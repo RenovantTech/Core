@@ -106,7 +106,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');
-		Kernel::getCache()->delete('mock.console.Dispatcher');
+		Kernel::cache('kernel')->delete('mock.console.Dispatcher');
 		$Dispatcher = Context::factory('mock.console',false)->get('mock.console.Dispatcher');
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;

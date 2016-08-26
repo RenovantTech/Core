@@ -8,8 +8,8 @@ class SqliteCacheTest extends \PHPUnit_Framework_TestCase {
 	static $SqliteCacheWithBuffer;
 
 	static function setUpBeforeClass() {
-		self::$SqliteCache = new SqliteCache('sqlite', 'cache');
-		self::$SqliteCacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
+		self::$SqliteCache = new SqliteCache('cache1', 'sqlite', 'cache');
+		self::$SqliteCacheWithBuffer = new SqliteCache('cache2', 'sqlite', 'cache-buffered', true);
 	}
 
 	function testConstructor() {
@@ -92,7 +92,7 @@ class SqliteCacheTest extends \PHPUnit_Framework_TestCase {
 		self::$SqliteCacheWithBuffer->set('test1', 'HelloWorld');
 		self::$SqliteCacheWithBuffer = null;
 		SqliteCache::shutdown();
-		self::$SqliteCacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
+		self::$SqliteCacheWithBuffer = new SqliteCache('cache1', 'sqlite', 'cache-buffered', true);
 		$this->assertEquals('HelloWorld', self::$SqliteCacheWithBuffer->get('test1'));
 	}
 }

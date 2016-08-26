@@ -9,6 +9,7 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	function testInit() {
+//		Kernel::init();
 		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'apps');
 		$ReflProp->setAccessible(true);
 		$apps = $ReflProp->getValue();
@@ -54,15 +55,11 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Dispatcher', $file);
 	}
 
-
 	/**
 	 * @depends testInit
 	 */
 	function testCache() {
-		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'Cache');
-		$ReflProp->setAccessible(true);
-		$Cache = $ReflProp->getValue();
-		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', $Cache);
+		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', Kernel::cache('kernel'));
 	}
 
 	/**

@@ -45,9 +45,9 @@ class Validator {
 		$class = get_class($Object);
 		if(isset($cache[$class])) return $cache[$class];
 		$k = '#'.$class.'#validator';
-		if(!$cache[$class] = Kernel::getCache()->get($k)) {
+		if(!$cache[$class] = Kernel::cache('kernel')->get($k)) {
 			$cache[$class] = (new ClassParser)->parse($class);
-			Kernel::getCache()->set($k, $cache[$class], null, 'validator');
+			Kernel::cache('kernel')->set($k, $cache[$class], null, 'validator');
 		}
 		return $cache[$class];
 	}

@@ -36,7 +36,7 @@ class Context implements EventDispatcherInterface {
 	static function factory($namespace, $useCache=true) {
 		if($useCache && isset(self::$_instances[$namespace]))
 			return self::$_instances[$namespace];
-		elseif($useCache && $Context = Kernel::getCache()->get($namespace.'.Context'))
+		elseif($useCache && $Context = Kernel::cache('kernel')->get($namespace.'.Context'))
 			return self::$_instances[$namespace] = $Context;
 		else {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $namespace, null, __METHOD__);
@@ -46,7 +46,7 @@ class Context implements EventDispatcherInterface {
 			else
 				$xmlPath = $dirName.DIRECTORY_SEPARATOR.'context.xml';
 			self::$_instances[$namespace] = $Context = new Context($namespace, $xmlPath);
-			Kernel::getCache()->set($namespace.'.Context', $Context);
+			Kernel::cache('kernel')->set($namespace.'.Context', $Context);
 			return $Context;
 		}
 	}
@@ -86,18 +86,18 @@ class Context implements EventDispatcherInterface {
 		if(!is_null($xmlPath)) {
 			if(!file_exists($xmlPath)) throw new ContextException(11, [$this->_oid, $xmlPath]);
 			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML');
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML', null, $this->_oid.'->'.__FUNCTION__);
 			$this->getXmlParser()->verify();
 			$this->includedNamespaces = $this->getXmlParser()->getIncludes();
 			$this->getXmlParser()->parseEventListeners($this);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready');
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready', null, $this->_oid.'->'.__FUNCTION__);
 			$XML = simplexml_load_file($xmlPath);
 		}
 		// create Container
 		$containerXmlPath = \metadigit\core\CACHE_DIR.$namespace.'.Container'.'.xml';
 		file_put_contents($containerXmlPath, $XML->xpath('/context/objects')[0]->asXML());
 		$Container = new Container($namespace, $containerXmlPath, $this->includedNamespaces, $this->_oid);
-		Kernel::getCache()->set($namespace.'.Container', $Container);
+		Kernel::cache('kernel')->set($namespace.'.Container', $Container);
 		$ReflProp = new \ReflectionProperty($Container, 'id2classMap');
 		$ReflProp->setAccessible(true);
 		$this->id2classMap = $ReflProp->getValue($Container);
@@ -134,13 +134,13 @@ class Context implements EventDispatcherInterface {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $id);
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $id, null, $this->_oid.'->'.__FUNCTION__);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
 			if($this->has($id, $class)) {
-				if(Kernel::getCache()->has($id)) $Obj = Kernel::getCache()->get($id);
-				else Kernel::getCache()->set($id, $Obj = $this->getContainer()->get($id, $class));
+				if(Kernel::cache('kernel')->has($id)) $Obj = Kernel::cache('kernel')->get($id);
+				else Kernel::cache('kernel')->set($id, $Obj = $this->getContainer()->get($id, $class));
 				if($Obj instanceof ContextAwareInterface) $Obj->setContext($this);
 			} else {
 				$ctxNamespace = null;
@@ -164,7 +164,7 @@ class Context implements EventDispatcherInterface {
 	 * @return \metadigit\core\depinjection\Container
 	 */
 	protected function getContainer() {
-		return Kernel::getCache()->get($this->namespace.'.Container');
+		return Kernel::cache('kernel')->get($this->namespace.'.Container');
 	}
 
 	/**
@@ -172,9 +172,9 @@ class Context implements EventDispatcherInterface {
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
 		if(TRACE) {
-			$trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
-			$func = ((isset($trace['object'])) ? $trace['object']->_oid().'->' : $trace['class'].'::').$trace['function'];
-			trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName), null, $func);
+//			$trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
+//			$func = ((isset($trace['object'])) ? $trace['object']->_oid().'->' : $trace['class'].'::').$trace['function'];
+			trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName));
 		}
 		$params['Context'] = $this;
 		if(is_null($Event)) $Event = new Event($target, $params);
