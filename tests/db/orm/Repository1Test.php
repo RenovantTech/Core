@@ -98,6 +98,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testCreate(Repository $UsersRepository) {
 		$User = $UsersRepository->create(['name'=>'Tom', 'surname'=>'Brown']);
@@ -109,6 +110,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testDelete(Repository $UsersRepository) {
 		// passing Entity
@@ -137,6 +139,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testDeleteAll(Repository $UsersRepository) {
 		$this->assertSame(2, $UsersRepository->deleteAll(null, null, 'age,EQ,21'));
@@ -149,8 +152,10 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($UsersRepository->fetch(8));
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->fetch(6));
 	}
+
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testFetch(Repository $UsersRepository) {
 		// FETCH_OBJ
@@ -195,6 +200,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testFetchOne(Repository $UsersRepository) {
 		// FETCH_OBJ
@@ -253,6 +259,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testFetchAll(Repository $UsersRepository) {
 		// FETCH_OBJ
@@ -312,6 +319,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testToArray(Repository $UsersRepository) {
 		// no subset
@@ -338,6 +346,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testDoValidate(Repository $UsersRepository) {
 
@@ -374,6 +383,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testInsert(Repository $UsersRepository) {
 		$lastTime = new DateTime();
@@ -436,6 +446,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testInsertException(Repository $UsersRepository) {
 		$lastTime = new DateTime();
@@ -457,6 +468,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testInsertWithEmptyNull(Repository $UsersRepository) {
 		$this->assertInstanceOf('mock\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'', 'lastTime'=>'', 'updatedAt'=>'2000-01-01 00:00:00']));
@@ -465,6 +477,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testUpdate(Repository $UsersRepository) {
 
@@ -511,6 +524,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $UsersRepository
 	 */
 	function testUpdateException(Repository $UsersRepository) {
 		try {

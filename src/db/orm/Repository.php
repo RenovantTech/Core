@@ -93,7 +93,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return integer
 	 */
 	function count($criteriaExp=null) {
-		return $this->execCount(__FUNCTION__, $criteriaExp);
+		return $this->execCount($criteriaExp);
 	}
 
 	/**
@@ -118,9 +118,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$Entity = $EntityOrKey;
 		} else {
 			$criteriaExp = Metadata::get($this->class)->pkCriteria($EntityOrKey);
-			$Entity = $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp);
+			$Entity = $this->execFetchOne(0, null, $criteriaExp);
 		}
-		return $this->execDeleteOne(__FUNCTION__, $Entity, $fetchMode, $fetchSubset);
+		return $this->execDeleteOne($Entity, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -132,7 +132,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	function deleteAll($limit, $orderExp=null, $criteriaExp=null) {
-		return $this->execDeleteAll(__FUNCTION__, $limit, $orderExp, $criteriaExp);
+		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
 	}
 
 	/**
@@ -145,7 +145,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	function fetch($id, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$criteriaExp = Metadata::get($this->class)->pkCriteria($id);
-		return $this->execFetchOne(__FUNCTION__, 0, null, $criteriaExp, $fetchMode, $fetchSubset);
+		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -160,7 +160,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	function fetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if($offset) $offset--;
-		return $this->execFetchOne(__FUNCTION__, $offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
+		return $this->execFetchOne($offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -176,7 +176,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 */
 	function fetchAll($page=null, $pageSize=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
-		return $this->execFetchAll(__FUNCTION__, $offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
+		return $this->execFetchAll($offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -190,7 +190,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	function insert($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		return $this->execInsertOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
+		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -204,7 +204,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @throws Exception
 	 */
 	function update($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		return $this->execUpdateOne(__FUNCTION__, $id, $data, $validate, $fetchMode, $fetchSubset);
+		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
 	/**
@@ -220,31 +220,29 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 
 	/**
 	 * Count entities using a Query.
-	 * @param string $method count method (used for trace)
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer
 	 * @throws Exception
 	 */
-	protected function execCount($method, $criteriaExp=null) {
+	protected function execCount($criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
 			return QueryRunner::count($this->pdo, $this->class, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
-			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(200, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Delete Entity using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param mixed $Entity object or its primary keys
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execDeleteOne($method, $Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execDeleteOne($Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
@@ -260,20 +258,19 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(400, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Delete entities using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param int $limit LIMIT
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer n° of deleted entities
 	 * @throws Exception
 	 */
-	protected function execDeleteAll($method, $limit, $orderExp=null, $criteriaExp=null) {
+	protected function execDeleteAll($limit, $orderExp=null, $criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE_ALL, null, null, $OrmEvent);
@@ -281,13 +278,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$this->Context->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
 		} catch(\PDOException $Ex) {
-			throw new Exception(400, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(400, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Fetch an Entity using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param int|null $offset OFFSET
 	 * @param string|null $orderExp ORDER BY expression
 	 * @param string|null $criteriaExp CRITERIA expression
@@ -296,7 +292,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return object Entity
 	 * @throws Exception
 	 */
-	protected function execFetchOne($method, $offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
@@ -305,13 +301,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $Entity;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(200, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Fetch entities using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param int|null $offset OFFSET
 	 * @param int|null $limit LIMIT
 	 * @param string|null $orderExp ORDER BY expression
@@ -321,7 +316,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return array entities
 	 * @throws Exception
 	 */
-	protected function execFetchAll($method, $offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchAll($offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
@@ -330,13 +325,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			}
 			return $entities;
 		} catch(\PDOException $Ex) {
-			throw new Exception(200, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(200, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Insert Entity using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate FALSE to skip validation
@@ -345,7 +339,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execInsertOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execInsertOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($this->class);
 		try {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
@@ -368,13 +362,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(100, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(100, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
 	/**
 	 * Update Entity using a Query.
-	 * @param string $method fetch method (used for trace)
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
 	 * @param bool $validate
@@ -383,7 +376,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	protected function execUpdateOne($method, $id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execUpdateOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($this->class);
 		$criteriaExp = $Metadata->pkCriteria($id);
 		if(is_object($data)) $data = DataMapper::object2array($data);
@@ -426,7 +419,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
-			throw new Exception(300, [$this->_oid, $method, $Ex->getCode(), $Ex->getMessage()]);
+			throw new Exception(300, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
 
