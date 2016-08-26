@@ -124,11 +124,11 @@ class Kernel {
 		// constants
 		foreach($config['constants'] as $k => $v) define($k, $v);
 		// caches
-		self::$cacheConf = array_merge($config['caches'], self::$cacheConf);
+		if(is_array($config['caches'])) self::$cacheConf = array_merge($config['caches'], self::$cacheConf);
 		// databases
-		self::$dbConf = array_merge($config['databases'], self::$dbConf);
+		if(is_array($config['databases'])) self::$dbConf = array_merge($config['databases'], self::$dbConf);
 		// logs
-		self::$logConf = $config['logs'];
+		if(is_array($config['logs'])) self::$logConf = $config['logs'];
 
 		// initialize
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();

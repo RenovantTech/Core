@@ -37,6 +37,12 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('timeZone', $settings);
 		$this->assertEquals('Europe/London', $settings['timeZone']);
 
+		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'cacheConf');
+		$ReflProp->setAccessible(true);
+		$cacheConf = $ReflProp->getValue();
+		$this->assertArrayHasKey('kernel', $cacheConf);
+		$this->assertEquals('metadigit\core\cache\SqliteCache', $cacheConf['kernel']['class']);
+
 		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'dbConf');
 		$ReflProp->setAccessible(true);
 		$dbConf = $ReflProp->getValue();
@@ -60,6 +66,7 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testCache() {
 		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', Kernel::cache('kernel'));
+		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', Kernel::cache('system'));
 	}
 
 	/**
