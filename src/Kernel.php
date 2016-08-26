@@ -56,12 +56,6 @@ class Kernel {
 	/** Cache instance
 	 * @var \metadigit\core\cache\CacheInterface */
 	static protected $Cache;
-	/** Database PDO configurations
-	 * @var array */
-	static protected $dbConf = [
-		'kernel-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'kernel-cache.sqlite' ],
-		'kernel-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'kernel-trace.sqlite' ]
-	];
 	/** System Context
 	 * @var \metadigit\core\context\Context */
 	static protected $SystemContext;
@@ -73,9 +67,6 @@ class Kernel {
 	static protected $namespaces = [
 		'metadigit\core' => DIR
 	];
-	/** PDO instances
-	 * @var array */
-	static protected $_pdo;
 	/** Current HTTP/CLI Request
 	 * @var object */
 	static protected $Req;
@@ -212,19 +203,29 @@ class Kernel {
 
 	// === DATABASES ==============================================================================
 
+	/** PDO instances
+	 * @var array */
+	static protected $db;
+	/** Database PDO configurations
+	 * @var array */
+	static protected $dbConf = [
+		'kernel-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'kernel-cache.sqlite' ],
+		'kernel-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'kernel-trace.sqlite' ]
+	];
+
 	/**
 	 * Return shared PDO instance
 	 * @param string $id database ID, default "master"
 	 * @return \PDO
 	 */
 	static function pdo($id='master') {
-		if(!isset(self::$_pdo[$id])) {
+		if(!isset(self::$db[$id])) {
 			$cnf = self::$dbConf[$id];
 			TRACE and self::trace(LOG_DEBUG, TRACE_DB, sprintf('open db "%s": %s', $id, $cnf['dns']), null, __METHOD__);
 			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[]);
-			self::$_pdo[$id] = $pdo;
+			self::$db[$id] = $pdo;
 		}
-		return self::$_pdo[$id];
+		return self::$db[$id];
 	}
 
 	// === CACHE ==================================================================================
