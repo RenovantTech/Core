@@ -58,25 +58,14 @@ class Query {
 	/** SQL WITH ROLLUP
 	 * @var boolean */
 	protected $withRollup = false;
-	/** Trace method
-	 * @var string */
-	protected $_tm;
 
 	/**
 	 * Create new Query object
 	 * @param string $pdo optional PDO instance ID, default to 'master'
-	 * @param integer $traceLevel backtrace levels to go up
 	 * @return \metadigit\core\db\Query
 	 */
-	function __construct($pdo='master', $traceLevel=0) {
+	function __construct($pdo='master') {
 		$this->pdo = $pdo;
-		if(TRACE) {
-			$dbt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, $traceLevel+2)[$traceLevel+1];
-			$_tm = (isset($dbt['object']) && method_exists($dbt['object'], '_oid')) ? $dbt['object']->_oid() : $dbt['class'];
-			$_tm .= (isset($dbt['object'])) ? '->' : '::';
-			$_tm .= $dbt['function'];
-			$this->_tm = $_tm;
-		}
 	}
 
 	/**
@@ -95,7 +84,7 @@ class Query {
 	/**
 	 * Execute CALL statement
 	 * @param array $params
-	 * @return array|null output params if any
+	 * @return array|true|null output params if any
 	 */
 	function execCall(array $params) {
 		$sql = '';
@@ -375,7 +364,7 @@ class Query {
 				$trace = preg_replace($keys, $values, $trace, 1);
 			}
 			$msg = (strlen($trace)>100) ? substr($trace,0,100).'...' : $trace;
-			trace(LOG_DEBUG, TRACE_DB, $msg, $trace, $this->_tm);
+			trace(LOG_DEBUG, TRACE_DB, $msg, $trace);
 		}
 		if(is_null($this->PDOStatement)) $this->PDOStatement = $PDO->prepare($sql);
 		$this->PDOStatement->execute($execParams);

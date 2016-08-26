@@ -25,7 +25,7 @@ class QueryRunner {
 	 */
 	static function count($pdo, $class, $criteriaExp=null) {
 		$Metadata = Metadata::get($class);
-		$Query = (new Query($pdo, 2))
+		$Query = (new Query($pdo))
 			->on($Metadata->sql('source'), '*')
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
@@ -46,7 +46,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$deleteFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo, 2))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -54,7 +54,7 @@ class QueryRunner {
 			$Query->execCall($execParams);
 			return true;
 		} else {
-			$Query = (new Query($pdo, 2))
+			$Query = (new Query($pdo))
 				->on($Metadata->sql('target'))
 				->criteriaExp($Metadata->pkCriteria($Entity))
 				->criteriaExp($criteriaExp);
@@ -72,7 +72,7 @@ class QueryRunner {
 	 */
 	static function deleteAll($pdo, $class, $limit, $orderExp, $criteriaExp) {
 		$Metadata = Metadata::get($class);
-		$Query = (new Query($pdo, 2))
+		$Query = (new Query($pdo))
 			->on($Metadata->sql('target'))
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
@@ -95,7 +95,7 @@ class QueryRunner {
 	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
-		$Query = (new Query($pdo, 2))
+		$Query = (new Query($pdo))
 			->on($Metadata->sql('source'), $subset)
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
@@ -132,7 +132,7 @@ class QueryRunner {
 	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
-		$Query = (new Query($pdo, 2))
+		$Query = (new Query($pdo))
 			->on($Metadata->sql('source'), $subset)
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
@@ -168,7 +168,7 @@ class QueryRunner {
 		if($insertFn = $Metadata->sql('insertFn')) {
 			$params = explode(',',str_replace(' ','',$insertFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo, 2))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -178,7 +178,7 @@ class QueryRunner {
 			return true;
 		} else {
 			$fields = implode(',', array_keys(array_filter($Metadata->properties(), function($p) { return !$p['readonly']; })));
-			$Query = (new Query($pdo, 2))->on($Metadata->sql('target'), $fields);
+			$Query = (new Query($pdo))->on($Metadata->sql('target'), $fields);
 			if($Query->execInsert($data)==1) {
 				// fetch AUTO ID
 				if(count($Metadata->pkeys())==1 && isset($Metadata->properties()[$Metadata->pkeys()[0]]['autoincrement'])) {
@@ -203,7 +203,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$updateFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo, 2))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -213,7 +213,7 @@ class QueryRunner {
 		} else {
 			$data = DataMapper::object2sql($Entity, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
-			$Query = (new Query($pdo, 2))
+			$Query = (new Query($pdo))
 				->on($Metadata->sql('target'), $fields)
 				->criteriaExp($Metadata->pkCriteria($Entity));
 			return ($Query->execUpdate($data)==1 && $Query->errorCode()=='000000') ? true:false;
