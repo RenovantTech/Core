@@ -17,12 +17,12 @@ class KernelHelper extends Kernel {
 		self::trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
 		self::log('kernel bootstrap', LOG_INFO, 'kernel');
 		// directories
-		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(KernelError::ERR21);
-		if(!defined('\metadigit\core\BASE_DIR')) die(KernelError::ERR22);
-		if(!defined('\metadigit\core\DATA_DIR')) die(KernelError::ERR23);
-		if(!is_writable(DATA_DIR)) die(KernelError::ERR24);
+		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(KernelException::ERR21);
+		if(!defined('\metadigit\core\BASE_DIR')) die(KernelException::ERR22);
+		if(!defined('\metadigit\core\DATA_DIR')) die(KernelException::ERR23);
+		if(!is_writable(DATA_DIR)) die(KernelException::ERR24);
 		// php.ini settings
-		if(get_magic_quotes_gpc()) die(KernelError::ERR29);
+		if(get_magic_quotes_gpc()) die(KernelException::ERR29);
 		// DATA_DIR
 		if(!file_exists(ASSETS_DIR)) mkdir(ASSETS_DIR, 0770, true);
 		if(!file_exists(BACKUP_DIR)) mkdir(BACKUP_DIR, 0770, true);
