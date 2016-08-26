@@ -28,6 +28,15 @@ define('metadigit\core\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'PROD');
 
 /**
+ * Cache helper
+ * @param string $id Cache ID, default "system"
+ * @return cache\CacheInterface
+ */
+function cache($id='system') {
+	return Kernel::cache($id);
+}
+
+/**
  * Trace helper
  * @param integer $level trace level, use a LOG_? constant value
  * @param integer $type trace type, use a TRACE_? constant value
