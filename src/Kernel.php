@@ -99,7 +99,8 @@ class Kernel {
 	 * @return void
 	 */
 	static function init($configFile=self::CONFIG_FILE) {
-		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
+		self::$traceFn = __METHOD__;
+		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT);
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
@@ -159,6 +160,7 @@ class Kernel {
 	 * @throws KernelException
 	 */
 	static function dispatch($api=PHP_SAPI) {
+		self::$traceFn = __METHOD__;
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
 		$app = null;
@@ -190,7 +192,7 @@ class Kernel {
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
 		self::$Req->setAttribute('APP_DIR', $parse[2].'/');
-		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, $dispatcherID, null, __METHOD__);
+		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, $dispatcherID);
 		Context::factory($namespace);
 		(new CoreProxy($dispatcherID, $namespace.'.Context'))->dispatch(self::$Req, self::$Res);
 	}
@@ -199,6 +201,7 @@ class Kernel {
 	 * Automatic shutdown handler
 	 */
 	static function shutdown() {
+		self::$traceFn = __METHOD__;
 		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 		cache\SqliteCache::shutdown();
 		$err = error_get_last();
