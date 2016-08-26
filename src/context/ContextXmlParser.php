@@ -83,7 +83,7 @@ class ContextXmlParser {
 		if(isset($this->XML->xpath('//events')[0])) {
 			foreach($this->XML->xpath('//events/event') as $eventXML) {
 				$eventName = (string)$eventXML['name'];
-				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing listeners for event "'.$eventName.'"');
+				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing listeners for event "'.$eventName.'"', null, $this->_oid);
 				foreach($eventXML->xpath('listeners/listener') as $listenerXML) {
 					$priority = (isset($listenerXML['priority'])) ? (int)$listenerXML['priority'] : 1;
 					$callback = (string)$listenerXML;

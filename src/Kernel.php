@@ -191,7 +191,8 @@ class Kernel {
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
 		self::$Req->setAttribute('APP_DIR', $parse[2].'/');
 		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, $dispatcherID, null, __METHOD__);
-		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		Context::factory($namespace);
+		(new CoreProxy($dispatcherID, $namespace.'.Context'))->dispatch(self::$Req, self::$Res);
 	}
 
 	/**

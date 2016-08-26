@@ -86,11 +86,11 @@ class Context implements EventDispatcherInterface {
 		if(!is_null($xmlPath)) {
 			if(!file_exists($xmlPath)) throw new ContextException(11, [$this->_oid, $xmlPath]);
 			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML', null, $this->_oid.'->'.__FUNCTION__);
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML', null, $this->_oid);
 			$this->getXmlParser()->verify();
 			$this->includedNamespaces = $this->getXmlParser()->getIncludes();
 			$this->getXmlParser()->parseEventListeners($this);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready', null, $this->_oid.'->'.__FUNCTION__);
+			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready', null, $this->_oid);
 			$XML = simplexml_load_file($xmlPath);
 		}
 		// create Container
@@ -134,7 +134,7 @@ class Context implements EventDispatcherInterface {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $id, null, $this->_oid.'->'.__FUNCTION__);
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'GET '.$id, null, $this->_oid);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
@@ -171,11 +171,7 @@ class Context implements EventDispatcherInterface {
 	 * @see metadigit\core\event\EventDispatcherInterface
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
-		if(TRACE) {
-//			$trace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1];
-//			$func = ((isset($trace['object'])) ? $trace['object']->_oid().'->' : $trace['class'].'::').$trace['function'];
-			trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName));
-		}
+		TRACE and trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName));
 		$params['Context'] = $this;
 		if(is_null($Event)) $Event = new Event($target, $params);
 		$Event->setName($eventName);

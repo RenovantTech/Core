@@ -92,7 +92,7 @@ class ContainerXmlParser {
 	 * @throws ContainerException
 	 */
 	function parseObjectConstructorArgs($id, $containerOID) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
 		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$args = [];
@@ -117,7 +117,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new CoreProxy((string)$xmlItem);
+								$value = new CoreProxy((string)$xmlItem, $this->proxyRef);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
@@ -154,7 +154,7 @@ class ContainerXmlParser {
 	 * @throws ContainerException
 	 */
 	function parseObjectProperties($id, $containerOID) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`');
+		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 		list($objXML) = $this->XML->xpath('/objects/object[@id=\''.$id.'\']');
 		if(!$objXML) throw new ContainerException(1, [$containerOID, $id]);
 		$properties = [];
@@ -179,7 +179,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new CoreProxy((string)$xmlItem);
+								$value = new CoreProxy((string)$xmlItem, $this->proxyRef);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
