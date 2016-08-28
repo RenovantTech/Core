@@ -33,9 +33,6 @@ class Container {
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** Container reference for CoreProxy
-	 * @var string */
-	protected $proxyRef;
 	/** XML Parser
 	 * @var ContainerXmlParser */
 	protected $XmlParser;
@@ -48,12 +45,10 @@ class Container {
 	 * @param string $namespace Container namespace
 	 * @param string $xmlPath   XML path
 	 * @param array  $includes  available namespaces
-	 * @param string|null $proxyRef Container ID for ObjectProxy
 	 * @throws ContainerException
 	 */
-	function __construct($namespace, $xmlPath, $includes=[], $proxyRef=null) {
+	function __construct($namespace, $xmlPath, $includes=[]) {
 		$this->_oid = $namespace.'.Container';
-		$this->proxyRef = (is_null($proxyRef)) ? $this->_oid : $proxyRef;
 		$this->namespace = $namespace;
 		$this->includes = $includes;
 		$this->xmlPath = $xmlPath;
@@ -65,7 +60,7 @@ class Container {
 	}
 
 	function __sleep() {
-		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace', 'proxyRef', 'xmlPath'];
+		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace', 'xmlPath'];
 	}
 
 	/**
@@ -148,7 +143,7 @@ class Container {
 	 * @return ContainerXmlParser
 	 */
 	protected function getXmlParser() {
-		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->XmlParser = new ContainerXmlParser($this->xmlPath, array_merge((array)$this->namespace, $this->includes), $this->proxyRef);
+		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->XmlParser = new ContainerXmlParser($this->xmlPath, array_merge((array)$this->namespace, $this->includes));
 	}
 
 	/**
