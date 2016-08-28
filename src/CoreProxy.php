@@ -35,11 +35,9 @@ class CoreProxy {
 	function __call($method, $args) {
 		$prevTraceFn = Kernel::traceFn();
 		try {
-			if(is_null($this->_Obj)) {
-				$namespace = substr($this->_oid, 0, strrpos($this->_oid, '.'));
-				$this->_Obj = Kernel::cache('kernel')->get($namespace.'.Container')->get($this->_oid, null, Container::FAILURE_SILENT);
-			}
-			if(is_object($this->_Obj)) {
+			$this->_Obj || $this->_Obj = Kernel::cache('kernel')->get($this->_oid);
+			$this->_Obj || $this->_Obj = Kernel::cache('kernel')->get(substr($this->_oid, 0, strrpos($this->_oid, '.')).'.Container')->get($this->_oid, null, Container::FAILURE_SILENT);
+			if($this->_Obj) {
 				Kernel::traceFn($this->_oid.'->'.$method);
 				TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT);
 				$r = call_user_func_array([$this->_Obj, $method], $args);

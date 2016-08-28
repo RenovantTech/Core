@@ -7,7 +7,8 @@
  */
 namespace metadigit\core\depinjection;
 use function metadigit\core\trace;
-use metadigit\core\util\xml\XMLValidator;
+use metadigit\core\Kernel,
+	metadigit\core\util\xml\XMLValidator;
 /**
  * Dependency Injection Container
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -88,6 +89,7 @@ class Container {
 				$this->setProperty($k, $v, $Obj, $ReflObject);
 			}
 			$this->objects[$id] = $Obj;
+			Kernel::cache('kernel')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
 			if($failureMode==self::FAILURE_SILENT) return null;
