@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use metadigit\core\depinjection\Container,
+use metadigit\core\context\Context,
+	metadigit\core\depinjection\Container,
 	metadigit\core\depinjection\ContainerException;
 /**
  * Proxy for injected objects.
@@ -36,7 +37,7 @@ class CoreProxy {
 		$prevTraceFn = Kernel::traceFn();
 		try {
 			$this->_Obj || $this->_Obj = Kernel::cache('kernel')->get($this->_oid);
-			$this->_Obj || $this->_Obj = Kernel::cache('kernel')->get(substr($this->_oid, 0, strrpos($this->_oid, '.')).'.Container')->get($this->_oid, null, Container::FAILURE_SILENT);
+			$this->_Obj || $this->_Obj = Context::factory(substr($this->_oid, 0, strrpos($this->_oid, '.')))->getContainer()->get($this->_oid, null, Container::FAILURE_SILENT);
 			if($this->_Obj) {
 				Kernel::traceFn($this->_oid.'->'.$method);
 				TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT);
