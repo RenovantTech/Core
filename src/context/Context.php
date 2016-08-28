@@ -127,7 +127,7 @@ class Context implements EventDispatcherInterface {
 	}
 
 	/**
-	 * Get an object.
+	 * Get an object Proxy
 	 * @param string $id object identifier
 	 * @param string $class required object class
 	 * @param integer $failureMode failure mode when the object does not exist
@@ -192,6 +192,7 @@ class Context implements EventDispatcherInterface {
 	 * @return ContextXmlParser
 	 */
 	protected function getXmlParser() {
-		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->Parser = new ContextXmlParser($this->namespace, $this->xmlPath);
+		$this->XmlParser || $this->XmlParser = new ContextXmlParser($this->namespace, $this->xmlPath);
+		return $this->XmlParser;
 	}
 }
