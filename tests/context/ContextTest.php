@@ -58,6 +58,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testFactory
+	 * @param Context $Context
 	 */
 	function testHas(Context $Context) {
 		$this->assertTrue($Context->has('mock.context.Mock1', 'mock\context\Mock1'));
@@ -77,6 +78,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testFactory2
+	 * @param Context $GlobalContext
 	 */
 	function testHas2(Context $GlobalContext) {
 		$this->assertTrue($GlobalContext->has('system.Mock', 'mock\GlobalMock'));
@@ -85,8 +87,9 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testFactory
+	 * @param Context $Context
 	 */
-	function _____testGetContainer(Context $Context) {
+	function testGetContainer(Context $Context) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\context\Context', 'getContainer');
 		$ReflMethod->setAccessible(true);
 		$this->assertInstanceOf('metadigit\core\depinjection\Container', $ReflMethod->invoke($Context));
@@ -96,22 +99,22 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * Test GET inside Context
 	 * @depends testFactory
+	 * @param Context $Context
+	 * @return Context
 	 */
 	function testGet(Context $Context) {
 		$Mock = $Context->get('mock.context.Mock1');
-		$this->assertInstanceOf('mock\context\Mock1', $Mock);
 		$this->assertEquals('foo', $Mock->getProp1());
 		$this->assertEquals('bar', $Mock->getProp2());
-		$ReflProp = new \ReflectionProperty('mock\context\Mock1', 'Child');
-		$ReflProp->setAccessible(true);
-		$Child = $ReflProp->getValue($Mock);
-		$this->assertInstanceOf('metadigit\core\CoreProxy', $Child);
+		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock->getChild());
+		$this->assertEquals('SystemMock', $Mock->getChild()->name());
 		return $Context;
 	}
 
 	/**
 	 * Test GET on included Contexts via ObjectProxy
 	 * @depends testGet
+	 * @param Context $Context
 	 */
 	function testGet2(Context $Context) {
 		$Mock = $Context->get('mock.context.Mock1');
@@ -120,9 +123,10 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * Test GET Exception inside Context
-	 * @depends testGet
-	 * @expectedException		metadigit\core\context\ContextException
-	 * @expectedExceptionCode	1
+	 * @depends                  testGet
+	 * @expectedException        \metadigit\core\context\ContextException
+	 * @expectedExceptionCode    1
+	 * @param Context $Context
 	 */
 	function testGetException1(Context $Context) {
 		$Context->get('mock.context.NotExists');
@@ -130,9 +134,10 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * Test GET Exception on included Contexts
-	 * @depends testGet
-	 * @expectedException		\metadigit\core\context\ContextException
-	 * @expectedExceptionCode	1
+	 * @depends                  testGet
+	 * @expectedException        \metadigit\core\context\ContextException
+	 * @expectedExceptionCode    1
+	 * @param Context $Context
 	 */
 	function testGetException2(Context $Context) {
 		$Context->get('system.NotExists');
@@ -140,6 +145,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Context $Context
 	 */
 	function testAddListener(Context $Context) {
 		$Context->listen('foo', 'callback1');
@@ -160,6 +166,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Context $Context
 	 */
 	function testTrigger(Context $Context) {
 		global $var;

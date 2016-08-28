@@ -14,9 +14,6 @@ use metadigit\core\depinjection\Container,
  */
 class CoreProxy {
 
-	/** parent Container/Context OID
-	 * @var string */
-	protected $_container;
 	/** Object OID
 	 * @var string */
 	protected $_oid;
@@ -26,21 +23,22 @@ class CoreProxy {
 
 	/**
 	 * @param string $id proxied object OID
-	 * @param string $container
 	 */
-	function __construct($id, $container=null) {
+	function __construct($id) {
 		$this->_oid = $id;
-		$this->_container = $container;
 	}
 
 	function __sleep() {
-		return ['_oid', '_container'];
+		return ['_oid'];
 	}
 
 	function __call($method, $args) {
 		$prevTraceFn = Kernel::traceFn();
 		try {
-			if(is_null($this->_Obj)) $this->_Obj = Kernel::cache('kernel')->get($this->_container)->get($this->_oid, null, Container::FAILURE_SILENT);
+			if(is_null($this->_Obj)) {
+				$namespace = substr($this->_oid, 0, strrpos($this->_oid, '.'));
+				$this->_Obj = Kernel::cache('kernel')->get($namespace.'.Container')->get($this->_oid, null, Container::FAILURE_SILENT);
+			}
 			if(is_object($this->_Obj)) {
 				Kernel::traceFn($this->_oid.'->'.$method);
 				TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT);
