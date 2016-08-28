@@ -4,10 +4,22 @@
 		<include namespace="system"/>
 	</includes>
 	<objects>
-		<object id="mock.db.orm.EntityRepository" class="metadigit\core\db\orm\Repository">
+		<object id="mock.db.orm.StatsRepository" class="metadigit\core\db\orm\Repository">
 			<constructor>
-				<arg name="class">mock\db\orm\Entity</arg>
-				<arg name="pdo">test</arg>
+				<arg name="class">mock\db\orm\Stats</arg>
+				<arg name="pdo">mysql</arg>
+			</constructor>
+		</object>
+		<object id="mock.db.orm.UserRepository" class="metadigit\core\db\orm\Repository">
+			<constructor>
+				<arg name="class">mock\db\orm\User</arg>
+				<arg name="pdo">mysql</arg>
+			</constructor>
+		</object>
+		<object id="mock.db.orm.User2Repository" class="metadigit\core\db\orm\Repository">
+			<constructor>
+				<arg name="class">mock\db\orm\User2</arg>
+				<arg name="pdo">mysql</arg>
 			</constructor>
 		</object>
 	</objects>

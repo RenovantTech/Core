@@ -12,14 +12,11 @@ use metadigit\core\context\Context;
  * HTTP Session Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class SessionManager implements \metadigit\core\context\ContextAwareInterface {
+class SessionManager {
 	use \metadigit\core\CoreTrait;
 
 	const EVENT_START = 'session.start';
 	const EVENT_END = 'session.end';
-	/** owner Context
-	 * @var \metadigit\core\context\Context */
-	protected $Context;
 	/** The session name references the name of the session, which is used in cookies and URLs (e.g. PHPSESSID)
 	 * @var string */
 	protected $name = 'SESSION';
@@ -55,7 +52,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 		session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure);
 		session_set_save_handler($this->Handler, true);
 		session_start();
-		$this->Context->trigger(self::EVENT_START, $this);
+		$this->context()->trigger(self::EVENT_START, $this);
 	}
 
 	/**
@@ -74,14 +71,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 	 * @return void
 	 */
 	function end($readonly=true) {
-		$this->Context->trigger(self::EVENT_END, $this);
+		$this->context()->trigger(self::EVENT_END, $this);
 		session_write_close();
-	}
-
-	/**
-	 * @see ContextAwareInterface
-	 */
-	function setContext(Context $Context) {
-		$this->Context = $Context;
 	}
 }

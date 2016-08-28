@@ -4,95 +4,137 @@ use metadigit\core\cache\SqliteCache;
 
 class SqliteCacheTest extends \PHPUnit_Framework_TestCase {
 
-	static $SqliteCache;
-	static $SqliteCacheWithBuffer;
-
-	static function setUpBeforeClass() {
-		self::$SqliteCache = new SqliteCache('cache1', 'sqlite', 'cache');
-		self::$SqliteCacheWithBuffer = new SqliteCache('cache2', 'sqlite', 'cache-buffered', true);
+	function testConstructor() {
+		$Cache = new SqliteCache('cache1', 'sqlite', 'cache');
+		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $Cache);
+		return $Cache;
 	}
 
-	function testConstructor() {
-		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', self::$SqliteCache);
-		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', self::$SqliteCacheWithBuffer);
+	function testConstructor2() {
+		$CacheWithBuffer = new SqliteCache('cache2', 'sqlite', 'cache-buffered', true);
+		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $CacheWithBuffer);
+		return $CacheWithBuffer;
 	}
 
 	/**
 	 * @depends testConstructor
+	 * @param SqliteCache $Cache
+	 * @return SqliteCache
 	 */
-	function testSet() {
-		$this->assertTrue(self::$SqliteCache->set('test1', 'HelloWorld'));
-		$this->assertTrue(self::$SqliteCacheWithBuffer->set('test1', 'HelloWorld'));
+	function testSet(SqliteCache $Cache) {
+		$this->assertTrue($Cache->set('test1', 'HelloWorld'));
+		return $Cache;
+	}
+
+	/**
+	 * @depends testConstructor2
+	 * @param SqliteCache $CacheWithBuffer
+	 * @return SqliteCache
+	 */
+	function testSet2(SqliteCache $CacheWithBuffer) {
+		$this->assertTrue($CacheWithBuffer->set('test1', 'HelloWorld'));
+		return $CacheWithBuffer;
 	}
 
 	/**
 	 * @depends testSet
+	 * @param SqliteCache $Cache
 	 */
-	function testGet() {
-		$this->assertEquals('HelloWorld', self::$SqliteCache->get('test1'));
-		$this->assertFalse(self::$SqliteCache->get('test2'));
-		$this->assertEquals('HelloWorld', self::$SqliteCacheWithBuffer->get('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->get('test2'));
+	function testGet(SqliteCache $Cache) {
+		$this->assertEquals('HelloWorld', $Cache->get('test1'));
+		$this->assertFalse($Cache->get('test2'));
+	}
+
+	/**
+	 * @depends testSet2
+	 * @param SqliteCache $CacheWithBuffer
+	 */
+	function testGet2(SqliteCache $CacheWithBuffer) {
+		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
+		$this->assertFalse($CacheWithBuffer->get('test2'));
 	}
 
 	/**
 	 * @depends testSet
+	 * @param SqliteCache $Cache
 	 */
-	function testHas() {
-		$this->assertTrue(self::$SqliteCache->has('test1'));
-		$this->assertFalse(self::$SqliteCache->has('test2'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test2'));
+	function testHas(SqliteCache $Cache) {
+		$this->assertTrue($Cache->has('test1'));
+		$this->assertFalse($Cache->has('test2'));
+	}
+
+	/**
+	 * @depends testSet2
+	 * @param SqliteCache $CacheWithBuffer
+	 */
+	function testHas2(SqliteCache $CacheWithBuffer) {
+		$this->assertTrue($CacheWithBuffer->has('test1'));
+		$this->assertFalse($CacheWithBuffer->has('test2'));
 	}
 
 	/**
 	 * @depends testSet
+	 * @param SqliteCache $Cache
 	 */
-	function testDelete() {
-		$this->assertTrue(self::$SqliteCache->delete('test1'));
-		$this->assertFalse(self::$SqliteCache->has('test1'));
-		$this->assertFalse(self::$SqliteCache->get('test1'));
+	function testDelete(SqliteCache $Cache) {
+		$this->assertTrue($Cache->delete('test1'));
+		$this->assertFalse($Cache->has('test1'));
+		$this->assertFalse($Cache->get('test1'));
+	}
 
-		$this->assertTrue(self::$SqliteCacheWithBuffer->delete('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->get('test1'));
+	/**
+	 * @depends testSet2
+	 * @param SqliteCache $CacheWithBuffer
+	 */
+	function testDelete2(SqliteCache $CacheWithBuffer) {
+		$this->assertTrue($CacheWithBuffer->delete('test1'));
+		$this->assertFalse($CacheWithBuffer->has('test1'));
+		$this->assertFalse($CacheWithBuffer->get('test1'));
 	}
 
 	/**
 	 * @depends testSet
+	 * @param SqliteCache $Cache
 	 */
-	function testClean() {
-		self::$SqliteCache->set('test1', 'HelloWorld1');
-		self::$SqliteCache->set('test2', 'HelloWorld2');
-		self::$SqliteCache->set('test3', 'HelloWorld3');
-		$this->assertTrue(self::$SqliteCache->clean());
-		$this->assertFalse(self::$SqliteCache->has('test1'));
-		$this->assertFalse(self::$SqliteCache->has('test2'));
-		$this->assertFalse(self::$SqliteCache->has('test3'));
-		$this->assertFalse(self::$SqliteCache->get('test1'));
-		$this->assertFalse(self::$SqliteCache->get('test2'));
-		$this->assertFalse(self::$SqliteCache->get('test3'));
-
-		self::$SqliteCacheWithBuffer->set('test1', 'HelloWorld1');
-		self::$SqliteCacheWithBuffer->set('test2', 'HelloWorld2');
-		self::$SqliteCacheWithBuffer->set('test3', 'HelloWorld3');
-		$this->assertTrue(self::$SqliteCacheWithBuffer->clean());
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test2'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->has('test3'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->get('test1'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->get('test2'));
-		$this->assertFalse(self::$SqliteCacheWithBuffer->get('test3'));
+	function testClean(SqliteCache $Cache) {
+		$Cache->set('test1', 'HelloWorld1');
+		$Cache->set('test2', 'HelloWorld2');
+		$Cache->set('test3', 'HelloWorld3');
+		$this->assertTrue($Cache->clean());
+		$this->assertFalse($Cache->has('test1'));
+		$this->assertFalse($Cache->has('test2'));
+		$this->assertFalse($Cache->has('test3'));
+		$this->assertFalse($Cache->get('test1'));
+		$this->assertFalse($Cache->get('test2'));
+		$this->assertFalse($Cache->get('test3'));
 	}
 
 	/**
-	 * @depends testSet
+	 * @depends testSet2
+	 * @param SqliteCache $CacheWithBuffer
 	 */
-	function testWriteBuffer() {
-		self::$SqliteCacheWithBuffer->set('test1', 'HelloWorld');
-		self::$SqliteCacheWithBuffer = null;
+	function testClean2(SqliteCache $CacheWithBuffer) {
+		$CacheWithBuffer->set('test1', 'HelloWorld1');
+		$CacheWithBuffer->set('test2', 'HelloWorld2');
+		$CacheWithBuffer->set('test3', 'HelloWorld3');
+		$this->assertTrue($CacheWithBuffer->clean());
+		$this->assertFalse($CacheWithBuffer->has('test1'));
+		$this->assertFalse($CacheWithBuffer->has('test2'));
+		$this->assertFalse($CacheWithBuffer->has('test3'));
+		$this->assertFalse($CacheWithBuffer->get('test1'));
+		$this->assertFalse($CacheWithBuffer->get('test2'));
+		$this->assertFalse($CacheWithBuffer->get('test3'));
+	}
+
+	/**
+	 * @depends testSet2
+	 * @param SqliteCache $CacheWithBuffer
+	 */
+	function testWriteBuffer(SqliteCache $CacheWithBuffer) {
+		$CacheWithBuffer->set('test1', 'HelloWorld');
+		$CacheWithBuffer = null;
 		SqliteCache::shutdown();
-		self::$SqliteCacheWithBuffer = new SqliteCache('cache1', 'sqlite', 'cache-buffered', true);
-		$this->assertEquals('HelloWorld', self::$SqliteCacheWithBuffer->get('test1'));
+		$CacheWithBuffer = new SqliteCache('cache1', 'sqlite', 'cache-buffered', true);
+		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }

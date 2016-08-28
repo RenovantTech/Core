@@ -7,7 +7,8 @@
  */
 namespace metadigit\core\context;
 use function metadigit\core\trace;
-use metadigit\core\Kernel,
+use metadigit\core\CoreProxy,
+	metadigit\core\Kernel,
 	metadigit\core\depinjection\Container,
 	metadigit\core\depinjection\ContainerException,
 	metadigit\core\event\Event,
@@ -108,7 +109,7 @@ class Context implements EventDispatcherInterface {
 	}
 
 	/**
-	 * @see metadigit\core\event\EventDispatcherInterface
+	 * @see \metadigit\core\event\EventDispatcherInterface
 	 */
 	function listen($eventName, $callback, $priority=1) {
 		$this->listeners[$eventName][(int)$priority][] = $callback;
@@ -126,7 +127,7 @@ class Context implements EventDispatcherInterface {
 	}
 
 	/**
-	 * Get an object.
+	 * Get an object Proxy
 	 * @param string $id object identifier
 	 * @param string $class required object class
 	 * @param integer $failureMode failure mode when the object does not exist
@@ -139,9 +140,7 @@ class Context implements EventDispatcherInterface {
 		try {
 			$Obj = null;
 			if($this->has($id, $class)) {
-				if(Kernel::cache('kernel')->has($id)) $Obj = Kernel::cache('kernel')->get($id);
-				else Kernel::cache('kernel')->set($id, $Obj = $this->getContainer()->get($id, $class));
-				if($Obj instanceof ContextAwareInterface) $Obj->setContext($this);
+				$Obj = new CoreProxy($id);
 			} else {
 				$ctxNamespace = null;
 				foreach($this->includedNamespaces as $namespace) {
@@ -163,7 +162,7 @@ class Context implements EventDispatcherInterface {
 	 * return Dependency Injector Container
 	 * @return \metadigit\core\depinjection\Container
 	 */
-	protected function getContainer() {
+	function getContainer() {
 		return Kernel::cache('kernel')->get($this->namespace.'.Container');
 	}
 
@@ -193,6 +192,7 @@ class Context implements EventDispatcherInterface {
 	 * @return ContextXmlParser
 	 */
 	protected function getXmlParser() {
-		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->Parser = new ContextXmlParser($this->namespace, $this->xmlPath);
+		$this->XmlParser || $this->XmlParser = new ContextXmlParser($this->namespace, $this->xmlPath);
+		return $this->XmlParser;
 	}
 }

@@ -1,7 +1,6 @@
 <?php
 namespace test\depinjection;
-use metadigit\core\depinjection\Container,
-	metadigit\core\depinjection\ContainerException;
+use metadigit\core\depinjection\Container;
 
 class ContainerTest extends \PHPUnit_Framework_TestCase {
 
@@ -22,6 +21,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Container $Container
 	 */
 	function testGet(Container $Container) {
 		// only ID
@@ -40,18 +40,18 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Mock1', $name);
 
 		// only ID
-		$Mock = $Container->get('mock.depinjection.Mock2');
-		$this->assertInstanceOf('mock\depinjection\Mock2', $Mock);
-		$ReflProp = new \ReflectionProperty('mock\depinjection\Mock2', 'name');
-		$ReflProp->setAccessible(true);
-		$name = $ReflProp->getValue($Mock);
-		$this->assertEquals('Mock2', $name);
+		$Mock2 = $Container->get('mock.depinjection.Mock2');
+		$this->assertInstanceOf('mock\depinjection\Mock2', $Mock2);
+		$this->assertEquals('Mock2', $Mock2->name());
+		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock2->getChild());
+		$this->assertEquals('SystemMock', $Mock2->getChild()->name());
 	}
 
 	/**
-	 * @depends testConstructor
-	 * @expectedException		\metadigit\core\depinjection\ContainerException
-	 * @expectedExceptionCode	1
+	 * @depends                  testConstructor
+	 * @expectedException        \metadigit\core\depinjection\ContainerException
+	 * @expectedExceptionCode    1
+	 * @param Container $Container
 	 */
 	function testGetException(Container $Container) {
 		$Container->get('mock.NotExists');
@@ -59,6 +59,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Container $Container
 	 */
 	function testHas(Container $Container) {
 		$this->assertTrue($Container->has('mock.depinjection.Mock1'));
@@ -69,6 +70,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Container $Container
 	 */
 	function testGetListByType(Container $Container) {
 		$ids = $Container->getListByType('mock\depinjection\Mock1');
@@ -79,6 +81,7 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Container $Container
 	 */
 	function testGetAllByType(Container $Container) {
 		$objs = $Container->getAllByType('mock\depinjection\Mock1');
@@ -89,15 +92,17 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Container $Container
 	 */
 	function testGetType(Container $Container) {
 		$this->assertEquals('mock\depinjection\Mock1', $Container->getType('mock.depinjection.Mock1'));
 	}
 
 	/**
-	 * @depends testConstructor
-	 * @expectedException		\metadigit\core\depinjection\ContainerException
-	 * @expectedExceptionCode	1
+	 * @depends                  testConstructor
+	 * @expectedException        \metadigit\core\depinjection\ContainerException
+	 * @expectedExceptionCode    1
+	 * @param Container $Container
 	 */
 	function testGetTypeException(Container $Container) {
 		$Container->getType('mock.depinjection.NotExists');

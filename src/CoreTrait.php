@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use metadigit\core\context\Context;
 /**
  * Basic trait used by almost all framework classes.
  * It implements:
@@ -25,5 +26,12 @@ trait CoreTrait {
 
 	protected function _namespace() {
 		return (is_null($this->_oid)) ? 'global' : substr($this->_oid, 0, strrpos($this->_oid,'.'));
+	}
+
+	/**
+	 * @return Context
+	 */
+	protected function context() {
+		return Context::factory(substr($this->_oid, 0, strrpos($this->_oid,'.')));
 	}
 }

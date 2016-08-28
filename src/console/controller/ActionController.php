@@ -7,7 +7,8 @@
  */
 namespace metadigit\core\console\controller;
 use function metadigit\core\trace;
-use metadigit\core\cli\Request,
+use metadigit\core\Kernel,
+	metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
 	metadigit\core\console\Exception;
 /**
@@ -58,7 +59,8 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 				}
 			}
 		}
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null, $this->_oid.'->'.$action.'Action');
+		Kernel::traceFn($this->_oid.'->'.$action.'Action');
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
 		return $View;

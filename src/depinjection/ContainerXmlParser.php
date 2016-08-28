@@ -19,9 +19,6 @@ class ContainerXmlParser {
 	/** Included Container namespaces
 	 * @var array */
 	protected $namespaces = [];
-	/** Container reference for ObjectProxy
-	 * @var string */
-	protected $proxyRef;
 	/** Container XML path
 	 * @var string */
 	protected $xmlPath;
@@ -32,11 +29,9 @@ class ContainerXmlParser {
 	/**
 	 * @param string $xmlPath XML path
 	 * @param array $namespaces Container namespaces
-	 * @param string $proxyRef Container ID for ObjectProxy
 	 */
-	function __construct($xmlPath, $namespaces, $proxyRef) {
+	function __construct($xmlPath, $namespaces) {
 		$this->_oid = $namespaces[0].'.ContainerParser';
-		$this->proxyRef = $proxyRef;
 		sort($namespaces);
 		$this->namespaces = $namespaces;
 		$this->xmlPath = $xmlPath;
@@ -117,7 +112,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new CoreProxy((string)$xmlItem, $this->proxyRef);
+								$value = new CoreProxy((string)$xmlItem);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
@@ -139,7 +134,7 @@ class ContainerXmlParser {
 					foreach($this->namespaces as $ns) {
 						if(strpos($id, $ns.'.') === 0) $namespace = $ns;
 					}
-					$args[(string)$xmlArg['name']] = new CoreProxy($id, $this->proxyRef);
+					$args[(string)$xmlArg['name']] = new CoreProxy($id);
 					break;
 			}
 		}
@@ -179,7 +174,7 @@ class ContainerXmlParser {
 								$value = (string)$xmlItem;
 								break;
 							case 'object':
-								$value = new CoreProxy((string)$xmlItem, $this->proxyRef);
+								$value = new CoreProxy((string)$xmlItem);
 								break;
 						}
 						$key = ($xmlItem['key']) ? (string)$xmlItem['key'] : null;
@@ -201,7 +196,7 @@ class ContainerXmlParser {
 					foreach($this->namespaces as $ns) {
 						if(strpos($id, $ns.'.') === 0) $namespace = $ns;
 					}
-					$properties[(string)$xmlProp['name']] = new CoreProxy($id, $this->proxyRef);
+					$properties[(string)$xmlProp['name']] = new CoreProxy($id);
 					break;
 			}
 		}

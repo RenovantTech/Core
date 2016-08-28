@@ -13,19 +13,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		define('metadigit\core\APP_URI', '/');
 		$Req = new Request;
 		$Res = new Response;
-		$Dispatcher = Context::factory('mock.console')->get('mock.console.Dispatcher');
-		$this->assertInstanceOf('metadigit\core\console\Dispatcher', $Dispatcher);
-
-		$ReflProp = new \ReflectionProperty('metadigit\core\console\Dispatcher', 'Context');
-		$ReflProp->setAccessible(true);
-		$Context = $ReflProp->getValue($Dispatcher);
-		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-
+		$Dispatcher = Context::factory('mock.console')->getContainer()->get('mock.console.Dispatcher');
 		return $Dispatcher;
 	}
 
 	/**
 	 * @depends testConstruct
+	 * @param Dispatcher $Dispatcher
+	 * @return Dispatcher
 	 */
 	function testResolveController(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveController');
@@ -35,25 +30,26 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'db optimize');
-		$this->assertInstanceOf('mock\console\controller\AbstractController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('mock.console.AbstractController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','mod1','foo'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo');
-		$this->assertInstanceOf('mock\console\controller\ActionController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('mock.console.ActionController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','cron','backup'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'cron backup');
-		$this->assertInstanceOf('mock\console\controller\SimpleController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('mock.console.SimpleController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		return $Dispatcher;
 	}
 
 	/**
 	 * @depends testConstruct
+	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveView');
@@ -85,9 +81,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @depends testConstruct
+	 * @depends               testConstruct
 	 * @expectedException \metadigit\core\console\Exception
 	 * @expectedExceptionCode 12
+	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveView');

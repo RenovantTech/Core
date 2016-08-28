@@ -42,15 +42,14 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 	}
 
 	function testConstructor() {
-		$Context = Context::factory('mock.db.orm');
-		$StatsRepository = new Repository('mock\db\orm\Stats', 'mysql');
-		$StatsRepository->setContext($Context);
+		$StatsRepository = Context::factory('mock.db.orm')->getContainer()->get('mock.db.orm.StatsRepository');
 		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $StatsRepository);
 		return $StatsRepository;
 	}
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testCreate(Repository $StatsRepository) {
 		$Stats = $StatsRepository->create(['code'=>'EE', 'year'=>2013, 'score'=>3.5]);
@@ -62,6 +61,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testDelete(Repository $StatsRepository) {
 		// passing Entity
@@ -76,6 +76,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testDeleteAll(Repository $StatsRepository) {
 		$this->assertSame(4, $StatsRepository->deleteAll(null, null, 'year,EQ,2013'));
@@ -88,8 +89,10 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 		$this->assertFalse($StatsRepository->fetch(['DD',2014]));
 		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->fetch(['AA',2014]));
 	}
+
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testFetch(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -110,6 +113,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testFetchOne(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -128,6 +132,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testFetchAll(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -135,7 +140,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 		$this->assertCount(3, $stats);
 		$this->assertInstanceOf('mock\db\orm\Stats', $stats[0]);
 		$this->assertSame('DD', $stats[0]->code);
-		$this->assertSame(CC, $stats[1]->code);
+		$this->assertSame('CC', $stats[1]->code);
 
 		// FETCH_ARRAY
 		$stats = $StatsRepository->fetchAll(1, 3, 'code.ASC', 'score,GTE,5', Repository::FETCH_ARRAY);
@@ -147,6 +152,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testToArray(Repository $StatsRepository) {
 		// no subset
@@ -167,6 +173,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testInsert(Repository $StatsRepository) {
 		// INSERT null key & object
@@ -198,6 +205,7 @@ class Repository2Test extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param Repository $StatsRepository
 	 */
 	function testUpdate(Repository $StatsRepository) {
 

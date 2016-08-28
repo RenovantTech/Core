@@ -7,7 +7,8 @@
  */
 namespace metadigit\core\depinjection;
 use function metadigit\core\trace;
-use metadigit\core\util\xml\XMLValidator;
+use metadigit\core\Kernel,
+	metadigit\core\util\xml\XMLValidator;
 /**
  * Dependency Injection Container
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -33,9 +34,6 @@ class Container {
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** Container reference for CoreProxy
-	 * @var string */
-	protected $proxyRef;
 	/** XML Parser
 	 * @var ContainerXmlParser */
 	protected $XmlParser;
@@ -48,12 +46,10 @@ class Container {
 	 * @param string $namespace Container namespace
 	 * @param string $xmlPath   XML path
 	 * @param array  $includes  available namespaces
-	 * @param string|null $proxyRef Container ID for ObjectProxy
 	 * @throws ContainerException
 	 */
-	function __construct($namespace, $xmlPath, $includes=[], $proxyRef=null) {
+	function __construct($namespace, $xmlPath, $includes=[]) {
 		$this->_oid = $namespace.'.Container';
-		$this->proxyRef = (is_null($proxyRef)) ? $this->_oid : $proxyRef;
 		$this->namespace = $namespace;
 		$this->includes = $includes;
 		$this->xmlPath = $xmlPath;
@@ -65,7 +61,7 @@ class Container {
 	}
 
 	function __sleep() {
-		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace', 'proxyRef', 'xmlPath'];
+		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace', 'xmlPath'];
 	}
 
 	/**
@@ -93,6 +89,7 @@ class Container {
 				$this->setProperty($k, $v, $Obj, $ReflObject);
 			}
 			$this->objects[$id] = $Obj;
+			Kernel::cache('kernel')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
 			if($failureMode==self::FAILURE_SILENT) return null;
@@ -148,7 +145,7 @@ class Container {
 	 * @return ContainerXmlParser
 	 */
 	protected function getXmlParser() {
-		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->XmlParser = new ContainerXmlParser($this->xmlPath, array_merge((array)$this->namespace, $this->includes), $this->proxyRef);
+		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->XmlParser = new ContainerXmlParser($this->xmlPath, array_merge((array)$this->namespace, $this->includes));
 	}
 
 	/**

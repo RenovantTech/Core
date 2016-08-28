@@ -8,7 +8,6 @@
 namespace metadigit\core\db\orm;
 use function metadigit\core\trace;
 use metadigit\core\Kernel,
-	metadigit\core\context\Context,
 	metadigit\core\db\orm\util\DataMapper,
 	metadigit\core\db\orm\util\QueryRunner,
 	metadigit\core\util\validator\Validator;
@@ -16,7 +15,7 @@ use metadigit\core\Kernel,
  * ORM Repository
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Repository implements \metadigit\core\context\ContextAwareInterface {
+class Repository {
 	use \metadigit\core\CoreTrait;
 
 	/** FETCH MODE as objects */
@@ -28,9 +27,6 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	/** Entity class
 	 * @var string */
 	protected $class;
-	/** owner Context
-	 * @var \metadigit\core\context\Context */
-	protected $Context;
 	/** PDO instance ID
 	 * @var string */
 	protected $pdo = 'master';
@@ -227,7 +223,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execCount($criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			$this->Context->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
 			return QueryRunner::count($this->pdo, $this->class, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
@@ -245,10 +241,10 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execDeleteOne($Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
-			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
 			if(QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp())) {
 				$this->_onDelete->invoke($Entity);
-				$this->Context->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
+				$this->context()->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
 				switch($fetchMode) {
 					case self::FETCH_OBJ: return $Entity; break;
 					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset); break;
@@ -273,9 +269,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execDeleteAll($limit, $orderExp=null, $criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			$this->Context->trigger(OrmEvent::EVENT_PRE_DELETE_ALL, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_DELETE_ALL, null, null, $OrmEvent);
 			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $OrmEvent->getCriteriaExp());
-			$this->Context->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
@@ -295,9 +291,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execFetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
 			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
-				$this->Context->trigger(OrmEvent::EVENT_POST_FETCH, null, null, $OrmEvent->setEntity($Entity));
+				$this->context()->trigger(OrmEvent::EVENT_POST_FETCH, null, null, $OrmEvent->setEntity($Entity));
 			}
 			return $Entity;
 		} catch(\PDOException $Ex) {
@@ -319,9 +315,9 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 	protected function execFetchAll($offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			$this->Context->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
 			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
-				$this->Context->trigger(OrmEvent::EVENT_POST_FETCH_ALL, null, null, $OrmEvent->setEntities($entities));
+				$this->context()->trigger(OrmEvent::EVENT_POST_FETCH_ALL, null, null, $OrmEvent->setEntities($entities));
 			}
 			return $entities;
 		} catch(\PDOException $Ex) {
@@ -348,7 +344,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				$Entity->__construct(array_combine($Metadata->pkeys(), (array)$id));
 			}
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			$this->Context->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
 			$this->_onSave->invoke($Entity);
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
@@ -358,7 +354,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 					$criteriaExp = $Metadata->pkCriteria($Entity);
 					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
-				$this->Context->trigger(OrmEvent::EVENT_POST_INSERT, null, null, $OrmEvent);
+				$this->context()->trigger(OrmEvent::EVENT_POST_INSERT, null, null, $OrmEvent);
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
@@ -385,7 +381,7 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->class);
 			$Entity = new $this->class($newData);
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			$this->Context->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
+			$this->context()->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
 			// detect changes
 			$newData = DataMapper::object2sql($Entity);
 			$changes = [];
@@ -415,20 +411,12 @@ class Repository implements \metadigit\core\context\ContextAwareInterface {
 				if($fetchMode) {
 					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 				} else $response = true;
-				$this->Context->trigger(OrmEvent::EVENT_POST_UPDATE, null, null, $OrmEvent);
+				$this->context()->trigger(OrmEvent::EVENT_POST_UPDATE, null, null, $OrmEvent);
 				return $response;
 			} else return false;
 		} catch(\PDOException $Ex) {
 			throw new Exception(300, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
 		}
-	}
-
-	/**
-	 * @see ContextAwareInterface
-	 * @param Context $Context
-	 */
-	function setContext(Context $Context) {
-		$this->Context = $Context;
 	}
 
 	/**
