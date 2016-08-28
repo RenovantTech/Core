@@ -40,12 +40,11 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Mock1', $name);
 
 		// only ID
-		$Mock = $Container->get('mock.depinjection.Mock2');
-		$this->assertInstanceOf('mock\depinjection\Mock2', $Mock);
-		$ReflProp = new \ReflectionProperty('mock\depinjection\Mock2', 'name');
-		$ReflProp->setAccessible(true);
-		$name = $ReflProp->getValue($Mock);
-		$this->assertEquals('Mock2', $name);
+		$Mock2 = $Container->get('mock.depinjection.Mock2');
+		$this->assertInstanceOf('mock\depinjection\Mock2', $Mock2);
+		$this->assertEquals('Mock2', $Mock2->name());
+		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock2->getChild());
+		$this->assertEquals('SystemMock', $Mock2->getChild()->name());
 	}
 
 	/**
