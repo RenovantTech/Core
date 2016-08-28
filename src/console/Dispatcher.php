@@ -15,12 +15,9 @@ use metadigit\core\KernelDebugger,
  * High speed implementation of CLI Dispatcher based on plain args.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
+class Dispatcher {
 	use \metadigit\core\CoreTrait;
 
-	/** owner Context
-	 * @var \metadigit\core\context\Context */
-	protected $Context;
 	/** default View engine
 	 * @var string */
 	protected $defaultViewEngine = 'php';
@@ -39,14 +36,15 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 	];
 
 	function dispatch(Request $Req, Response $Res) {
-		$resource = null;
+		$Controller = $resource = null;
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
-			if(!$this->Context->trigger(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
-				$DispatcherEvent->setController($this->resolveController($Req, $Res));
+			if(!$this->context()->trigger(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				$Controller = $this->context()->get($this->resolveController($Req, $Res), 'metadigit\core\console\ControllerInterface');
+				$DispatcherEvent->setController($Controller);
 			}
-			if($Controller = $DispatcherEvent->getController()) {
-				if(!$this->Context->trigger(DispatcherEvent::EVENT_CONTROLLER, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+			if($Controller) {
+				if(!$this->context()->trigger(DispatcherEvent::EVENT_CONTROLLER, $this, [], $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
@@ -54,14 +52,14 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 				if(is_string($View)) list($View, $resource) = $this->resolveView($View, $Req, $Res);
 				if(!$View instanceof ViewInterface) throw new Exception(13);
 				$DispatcherEvent->setView($View);
-				if(!$this->Context->trigger(DispatcherEvent::EVENT_VIEW, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				if(!$this->context()->trigger(DispatcherEvent::EVENT_VIEW, $this, [], $DispatcherEvent)->isPropagationStopped()) {
 					$View->render($Req, $Res, $resource);
 				}
 			}
-			$this->Context->trigger(DispatcherEvent::EVENT_RESPONSE, $this, [], $DispatcherEvent);
+			$this->context()->trigger(DispatcherEvent::EVENT_RESPONSE, $this, [], $DispatcherEvent);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
-			$this->Context->trigger(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
+			$this->context()->trigger(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
 			KernelDebugger::onException($Ex);
 		}
 		$Res->send();
@@ -71,7 +69,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 	 * Resolve configured Controller to handle current Request
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @return ControllerInterface Controller object
+	 * @return string Controller ID
 	 * @throws Exception
 	 */
 	protected function resolveController(Request $Req, Response $Res) {
@@ -79,7 +77,7 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
 				TRACE and trace(LOG_DEBUG, 1, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
-				return $this->Context->get($controllerID);
+				return $controllerID;
 			}
 		}
 		$Res->setExitStatus(404);
@@ -112,13 +110,5 @@ class Dispatcher implements \metadigit\core\context\ContextAwareInterface {
 			$Res->setExitStatus(500);
 			throw $Ex;
 		}
-	}
-
-	/**
-	 * @see ContextAwareInterface
-	 * @param Context $Context
-	 */
-	function setContext(Context $Context) {
-		$this->Context = $Context;
 	}
 }

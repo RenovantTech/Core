@@ -13,26 +13,22 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		define('metadigit\core\APP_URI', '/');
 		$Req = new Request;
 		$Res = new Response;
-		$Dispatcher = Context::factory('mock.web')->get('mock.web.Dispatcher');
-		$this->assertInstanceOf('metadigit\core\web\Dispatcher', $Dispatcher);
-
-		$ReflProp = new \ReflectionProperty('metadigit\core\web\Dispatcher', 'Context');
-		$ReflProp->setAccessible(true);
-		$Context = $ReflProp->getValue($Dispatcher);
-		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-
+		$Dispatcher = Context::factory('mock.web')->getContainer()->get('mock.web.Dispatcher');
+/*
 		$ReflProp = new \ReflectionProperty('metadigit\core\web\Dispatcher', 'routes');
 		$ReflProp->setAccessible(true);
 		$routes = $ReflProp->getValue($Dispatcher);
 		$this->assertCount(4, $routes);
 		$this->assertArrayHasKey('/catalog/*', $routes);
 		$this->assertEquals('mock.web.AbstractController', $routes['/catalog/*']);
-
+*/
 		return $Dispatcher;
 	}
 
 	/**
 	 * @depends testConstruct
+	 * @param Dispatcher $Dispatcher
+	 * @return Dispatcher
 	 */
 	function testResolveController(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\web\Dispatcher', 'resolveController');
@@ -41,23 +37,23 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$_SERVER['REQUEST_URI'] = '/home';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/home');
-		$this->assertInstanceOf('mock\web\controller\SimpleController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.web.SimpleController', $ReflMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/foo';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/mod1/foo');
-		$this->assertInstanceOf('mock\web\controller\ActionController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.web.ActionController', $ReflMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_SERVER['REQUEST_URI'] = '/rest/book/14';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/rest/book/14');
-		$this->assertInstanceOf('mock\web\controller\RestActionController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.web.RestActionController', $ReflMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/catalog/books/science/13';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/catalog/books/science/13');
-		$this->assertInstanceOf('mock\web\controller\AbstractController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.web.AbstractController', $ReflMethod->invoke($Dispatcher, $Req));
 
 		return $Dispatcher;
 	}

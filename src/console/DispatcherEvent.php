@@ -84,9 +84,9 @@ class DispatcherEvent extends \metadigit\core\event\Event {
 	}
 
 	/**
-	 * @param ControllerInterface $Controller
+	 * @param $Controller
 	 */
-	function setController(ControllerInterface $Controller) {
+	function setController($Controller) {
 		$this->Controller = $Controller;
 	}
 

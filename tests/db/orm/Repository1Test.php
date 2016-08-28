@@ -89,9 +89,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	}
 
 	function testConstructor() {
-		$Context = Context::factory('mock.db.orm');
-		$UsersRepository = new Repository('mock\db\orm\User', 'mysql');
-		$UsersRepository->setContext($Context);
+		$UsersRepository = Context::factory('mock.db.orm')->getContainer()->get('mock.db.orm.UserRepository');
 		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $UsersRepository);
 		return $UsersRepository;
 	}
