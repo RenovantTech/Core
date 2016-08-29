@@ -1,0 +1,9 @@
+objects:
+  mock.container.Mock1:
+    class: mock\container\Mock1
+    properties:
+      Child: !obj system.Mock
+      name: Mock1
+  mock.container.Mock2:
+    class: mock\container\Mock2
+    constructor: [ 'Mock2', '!obj system.Mock']
