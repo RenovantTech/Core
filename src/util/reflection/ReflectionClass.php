@@ -18,7 +18,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * that org\metadigit\util\reflection\ReflectionMethod objects are returned instead of the
 	 * original ReflectionMethod instances.
 	 * @param integer $filter A filter mask
-	 * @return array of org\metadigit\util\reflection\ReflectionMethod Method reflection objects of the methods in this class
+	 * @return ReflectionMethod[] Method reflection objects of the methods in this class
 	 */
 	function getMethods($filter = NULL) {
 		$extendedMethods = [];
@@ -31,14 +31,13 @@ class ReflectionClass extends \ReflectionClass {
 
 	/**
 	 * Replacement for the original getMethod() method which makes sure
-	 * that org\metadigit\util\reflection\ReflectionMethod objects are returned instead of the
+	 * that metadigit\core\util\reflection\ReflectionMethod objects are returned instead of the
 	 * original ReflectionMethod instances.
 	 * @param string $name
 	 * @return ReflectionMethod Method reflection object of the named method
 	 */
 	function getMethod($name) {
 		$parentMethod = parent::getMethod($name);
-		if (!is_object($parentMethod)) return $parentMethod;
 		return new ReflectionMethod($this->getName(), $parentMethod->getName());
 	}
 
@@ -47,7 +46,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * that org\metadigit\util\reflection\ReflectionProperty objects are returned instead of the
 	 * original ReflectionProperty instances.
 	 * @param integer $filter A filter mask
-	 * @return array of org\metadigit\util\reflection\ReflectionProperty Property reflection objects of the properties in this class
+	 * @return ReflectionProperty[] Property reflection objects of the properties in this class
 	 */
 	function getProperties($filter = NULL) {
 		$extendedProperties = [];

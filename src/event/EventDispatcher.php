@@ -18,6 +18,9 @@ class EventDispatcher implements EventDispatcherInterface {
 	/** registered listeners (callbacks)
 	 * @var array */
 	private $listeners = [];
+	/** Context namespace
+	 * @var string */
+	protected $namespace;
 	/** XML Parser
 	 * @var EventDispatcherXmlParser */
 	protected $XmlParser;
@@ -49,7 +52,7 @@ class EventDispatcher implements EventDispatcherInterface {
 	}
 
 	/**
-	 * @see metadigit\core\event\EventDispatcherInterface
+	 * @see EventDispatcherInterface
 	 */
 	function listen($eventName, $callback, $priority=1) {
 		$this->listeners[$eventName][(int)$priority][] = $callback;

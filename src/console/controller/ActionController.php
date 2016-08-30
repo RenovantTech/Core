@@ -81,7 +81,7 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param mixed $View the View or view name
+	 * @param \metadigit\core\web\ViewInterface|string $View the View or view name
 	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res, $View=null) {

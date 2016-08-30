@@ -62,7 +62,6 @@ class Query {
 	/**
 	 * Create new Query object
 	 * @param string $pdo optional PDO instance ID, default to 'master'
-	 * @return \metadigit\core\db\Query
 	 */
 	function __construct($pdo='master') {
 		$this->pdo = $pdo;

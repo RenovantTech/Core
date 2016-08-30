@@ -18,7 +18,6 @@ class DocComment {
 	 * Parses the given doc comment and saves the result (description and
 	 * tags) in the object properties.
 	 * @param string $docComment A doc comment as returned by the reflection getDocComment() method
-	 * @return DocComment
 	 */
 	function __construct($docComment) {
 		$lines = explode(chr(10), $docComment);

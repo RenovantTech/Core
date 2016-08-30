@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
-use metadigit\core\TMP_DIR;
+use const metadigit\core\TMP_DIR;
 /**
  * PDO
  * @author Daniele Sciacchitano <dan@metadigit.it>

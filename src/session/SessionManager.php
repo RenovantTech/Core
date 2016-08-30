@@ -7,7 +7,6 @@
  */
 namespace metadigit\core\session;
 use function metadigit\core\trace;
-use metadigit\core\context\Context;
 /**
  * HTTP Session Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -61,7 +60,7 @@ class SessionManager {
 	function destroy() {
 		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
 		session_destroy();
-		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* strtotime('1980-01-01')*/, $this->path, $this->domain, $this->secure);
+		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* 1980-01-01 */, $this->path, $this->domain, $this->secure);
 	}
 
 	/**

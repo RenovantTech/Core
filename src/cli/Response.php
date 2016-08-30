@@ -7,7 +7,6 @@
  */
 namespace metadigit\core\cli;
 use function metadigit\core\trace;
-use metadigit\core\Kernel;
 /**
  * CLI Response.
  * @author Daniele Sciacchitano <dan@metadigit.it>

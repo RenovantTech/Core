@@ -7,7 +7,6 @@
  */
 namespace metadigit\core\http;
 use function metadigit\core\trace;
-use metadigit\core\Kernel;
 /**
  * HTTP Response.
  * @author Daniele Sciacchitano <dan@metadigit.it>

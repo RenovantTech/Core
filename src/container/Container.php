@@ -7,8 +7,7 @@
  */
 namespace metadigit\core\container;
 use function metadigit\core\trace;
-use metadigit\core\Kernel,
-	metadigit\core\util\xml\XMLValidator;
+use metadigit\core\Kernel;
 /**
  * Dependency Injection Container
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -91,7 +90,7 @@ class Container {
 	/**
 	 * Get all objects of desired class/interface.
 	 * @param string $class desired class/interface
-	 * @return array[object] objects (can be empty)
+	 * @return object[] objects (can be empty)
 	 */
 	function getAllByType($class) {
 		$ids = $this->getListByType($class);

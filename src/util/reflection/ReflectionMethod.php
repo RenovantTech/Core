@@ -17,7 +17,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * Replacement for the original getParameters() method which makes sure
 	 * that org\metadigit\util\reflection\ReflectionParameter objects are returned instead of the
 	 * original ReflectionParameter instances.
-	 * @return array of org\metadigit\util\reflection\ReflectionParameter Parameter reflection objects of the parameters of this method
+	 * @return ReflectionParameter[] Parameter reflection objects of the parameters of this method
 	 */
 	function getParameters() {
 		$extendedParameters = [];

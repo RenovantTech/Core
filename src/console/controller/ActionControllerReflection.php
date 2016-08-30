@@ -10,7 +10,6 @@ use metadigit\core\console\Exception,
 	metadigit\core\util\reflection\ReflectionClass;
 /**
  * Utility class for ActionController
- * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class ActionControllerReflection {

@@ -21,7 +21,8 @@ class ReflectionParameter extends \ReflectionParameter {
 		if($tag = $this->getDocComment()->getTag('param', $this->getPosition())) {
 			$exploded = explode(' ', $tag);
 			if (count($exploded) >= 2) return ltrim($exploded[0], '\\');
-		} else return false;
+		}
+		return false;
 	}
 
 	/**
