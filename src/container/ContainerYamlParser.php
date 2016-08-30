@@ -47,7 +47,7 @@ class ContainerYamlParser {
 		// @TODO verify YAML content
 		if(
 			!is_array($this->YAML) ||
-			!is_array($this->YAML['objects'])
+			(isset($this->YAML['objects']) && !is_array($this->YAML['objects']))
 		) throw new ContainerException(12, [$this->yamlPath]);
 		sort($namespaces);
 		$this->namespaces = $namespaces;
@@ -59,7 +59,7 @@ class ContainerYamlParser {
 	 * @internal
 	 */
 	function parseMaps(array &$id2classMap, array &$class2idMap) {
-		if(is_array($this->YAML['objects'])) {
+		if(isset($this->YAML['objects'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
 			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
@@ -90,7 +90,7 @@ class ContainerYamlParser {
 	 */
 	function parseObjectConstructorArgs($id) {
 		$args = [];
-		if(is_array($this->YAML['objects'][$id]['constructor'])) {
+		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 			$i = 0;
 			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
@@ -141,7 +141,7 @@ class ContainerYamlParser {
 	 */
 	function parseObjectProperties($id) {
 		$properties = [];
-		if(is_array($this->YAML['objects'][$id]['properties'])) {
+		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
 				switch (self::parseType($yamlProp)) {
