@@ -45,7 +45,10 @@ class ContainerYamlParser {
 			}
 		]);
 		// @TODO verify YAML content
-		// if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, [$xmlPath]);
+		if(
+			!is_array($this->YAML) ||
+			!is_array($this->YAML['objects'])
+		) throw new ContainerException(12, [$this->yamlPath]);
 		sort($namespaces);
 		$this->namespaces = $namespaces;
 	}
