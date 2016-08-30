@@ -38,6 +38,11 @@ class ContainerYamlParser {
 			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yaml';
 		else
 			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yaml';
+		if(strpos($this->yamlPath, 'phar://')!==false) {
+			$yamlFile = file_get_contents($this->yamlPath);
+			$this->yamlPath = \metadigit\core\CACHE_DIR.$namespaces[0].'.context.yaml';
+			file_put_contents($this->yamlPath, $yamlFile);
+		}
 		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_oid, $this->yamlPath]);
 		$this->YAML = yaml_parse_file($this->yamlPath, 0, $n, [
 			'!obj' => function($value, $tag, $flags) {

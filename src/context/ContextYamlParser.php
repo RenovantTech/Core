@@ -31,6 +31,11 @@ class ContextYamlParser {
 			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yaml';
 		else
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yaml';
+		if(strpos($yamlPath, 'phar://')!==false) {
+			$yamlFile = file_get_contents($yamlPath);
+			$yamlPath = \metadigit\core\CACHE_DIR.$namespace.'.context.yaml';
+			file_put_contents($yamlPath, $yamlFile);
+		}
 		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context YAML', null, $oid);
 
 		if(!file_exists($yamlPath)) throw new ContextException(11, [$oid, $yamlPath]);
