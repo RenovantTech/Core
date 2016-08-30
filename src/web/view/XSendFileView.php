@@ -22,7 +22,7 @@ class XSendFileView implements \metadigit\core\web\ViewInterface {
 		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'file: '.$resource);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
 		$Res->reset();
-		$Res->setContentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
+		header('Content-Type: '.((new \finfo(FILEINFO_MIME_TYPE))->file($resource)));
 		header('Content-Disposition: attachment; filename='.$saveName.'.'.pathinfo($resource, PATHINFO_EXTENSION));
 		switch($_SERVER['SERVER_SOFTWARE']) {
 			case (strpos($_SERVER['SERVER_SOFTWARE'], 'nginx')!==false):

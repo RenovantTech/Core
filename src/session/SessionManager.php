@@ -49,7 +49,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 
 	function start() {
 		if(PHP_SAPI=='cli') return;
-		if(session_status() == 2) throw new SessionException(11);
+		if(session_status() == PHP_SESSION_ACTIVE) throw new SessionException(11);
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->name);
 		session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure);

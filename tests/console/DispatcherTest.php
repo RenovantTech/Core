@@ -64,10 +64,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 index');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req);
+		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/index', $Req);
+		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/index', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 
@@ -76,10 +76,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo1');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'foo1', $Req);
+		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/foo1', $Req);
+		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/foo1', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 	}

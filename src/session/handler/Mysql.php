@@ -87,7 +87,7 @@ class Mysql implements \SessionHandlerInterface {
 			$st = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
 			list($ip, $uid, $lock, $data) = $st->fetch(\PDO::FETCH_NUM);
-			if(empty($ip)) define('SESSION_UID', null);
+			if(empty($ip)) @define('SESSION_UID', null);
 			else {
 				self::$id = $id;
 				define('SESSION_UID', $uid);

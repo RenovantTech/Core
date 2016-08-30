@@ -93,10 +93,10 @@ class KernelDebugger extends \metadigit\core\Kernel {
 
 	/**
 	 * Send EXCEPTION to DebugConsole
-	 * @param \Exception $Ex
+	 * @param \Exception|\Error $Ex
 	 * @return void
 	 */
-	static function traceException(\Exception $Ex) {
+	static function traceException($Ex) {
 		$info = (is_callable([$Ex, 'getInfo'])) ? $Ex->getInfo() : null;
 		$textTraceArray = self::formatTraceAsText($Ex->getTrace());
 		$msg = '[CODE '.$Ex->getCode().'] '.$Ex->getMessage();
@@ -113,7 +113,7 @@ class KernelDebugger extends \metadigit\core\Kernel {
 		self::log(sprintf('%s - FILE: %s:%s', $errstr, $errfile, $errline), LOG_ERR, 'kernel');
 	}
 
-	static private function logException(\Exception $Ex) {
+	static private function logException($Ex) {
 		$info = (is_callable([$Ex, 'getInfo'])) ? $Ex->getInfo() : null;
 		self::log(sprintf('%s[%s]: %s - %s - FILE: %s:%s', get_class($Ex), $Ex->getCode(), $Ex->getMessage(), $info, $Ex->getFile(), $Ex->getLine()), LOG_ERR, 'kernel');
 	}

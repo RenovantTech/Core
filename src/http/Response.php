@@ -164,6 +164,7 @@ class Response {
 		}
 		Kernel::trace(LOG_DEBUG, 1, __METHOD__, 'REDIRECT to '.$location);
 		header('Location: '.$location, true, $statusCode);
+		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}
 
 	/**
