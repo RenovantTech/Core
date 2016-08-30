@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\depinjection;
+namespace metadigit\core\container;
 use function metadigit\core\trace;
 use metadigit\core\Kernel,
 	metadigit\core\util\xml\XMLValidator;
@@ -34,34 +34,25 @@ class Container {
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** XML Parser
-	 * @var ContainerXmlParser */
-	protected $XmlParser;
-	/** Container XML path
-	 * @var string */
-	protected $xmlPath;
+	/** YAML Parser
+	 * @var ContainerYamlParser */
+	protected $YamlParser;
 
 	/**
 	 * Constructor
 	 * @param string $namespace Container namespace
-	 * @param string $xmlPath   XML path
 	 * @param array  $includes  available namespaces
 	 * @throws ContainerException
 	 */
-	function __construct($namespace, $xmlPath, $includes=[]) {
+	function __construct($namespace, $includes=[]) {
 		$this->_oid = $namespace.'.Container';
 		$this->namespace = $namespace;
 		$this->includes = $includes;
-		$this->xmlPath = $xmlPath;
-		if(!file_exists($xmlPath)) throw new ContainerException(11, [$this->_oid, $xmlPath]);
-		if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, [$xmlPath]);
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Container XML', null, $this->_oid);
-		list($this->id2classMap, $this->class2idMap) = $this->getXmlParser()->parseMaps();
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Container ready', null, $this->_oid);
+		$this->getYamlParser()->parseMaps($this->id2classMap, $this->class2idMap);
 	}
 
 	function __sleep() {
-		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace', 'xmlPath'];
+		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace'];
 	}
 
 	/**
@@ -78,13 +69,13 @@ class Container {
 		try {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_oid, $id, $class]);
-			$objClass = $this->getXmlParser()->getClass($id);
-			$args = $this->getXmlParser()->parseObjectConstructorArgs($id, $this->_oid);
+			$objClass = $this->id2classMap[$id][0];
+			$args = $this->getYamlParser()->parseObjectConstructorArgs($id);
 			$ReflClass = new \ReflectionClass($objClass);
 			$Obj = (empty($args)) ? $ReflClass->newInstance() : $ReflClass->newInstanceArgs($args);
 			$ReflObject = new \ReflectionObject($Obj);
 			$this->setProperty('_oid', $id, $Obj, $ReflObject);
-			$properties = $this->getXmlParser()->parseObjectProperties($id, $this->_oid);
+			$properties = $this->getYamlParser()->parseObjectProperties($id);
 			foreach ($properties as $k=>$v) {
 				$this->setProperty($k, $v, $Obj, $ReflObject);
 			}
@@ -142,10 +133,10 @@ class Container {
 	}
 
 	/**
-	 * @return ContainerXmlParser
+	 * @return ContainerYamlParser
 	 */
-	protected function getXmlParser() {
-		return (!is_null($this->XmlParser)) ? $this->XmlParser : $this->XmlParser = new ContainerXmlParser($this->xmlPath, array_merge((array)$this->namespace, $this->includes));
+	protected function getYamlParser() {
+		return (!is_null($this->YamlParser)) ? $this->YamlParser : $this->YamlParser = new ContainerYamlParser(array_merge((array)$this->namespace, $this->includes));
 	}
 
 	/**

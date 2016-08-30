@@ -15,6 +15,14 @@ class Mock1 {
 		global $var;
 		$var++;
 	}
+	function onEvent2($Event) {
+		global $var;
+		$var--;
+	}
+	function onEvent2bis($Event) {
+		global $var;
+		$var--;
+	}
 
 	function getChild() {
 		return $this->Child;

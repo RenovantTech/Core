@@ -17,6 +17,13 @@ class SessionManager {
 
 	const EVENT_START = 'session.start';
 	const EVENT_END = 'session.end';
+
+	/** SessionHandler class
+	 * @var string */
+	protected $handlerClass = 'metadigit\core\session\handler\Sqlite';
+	/** SessionHandler constructor params
+	 * @var array */
+	protected $handlerConfig = ['system', 'sessions'];
 	/** The session name references the name of the session, which is used in cookies and URLs (e.g. PHPSESSID)
 	 * @var string */
 	protected $name = 'SESSION';
@@ -36,20 +43,13 @@ class SessionManager {
 	 * @var object */
 	protected $Handler;
 
-	/**
-	 * @param string $handlerClass handler class
-	 * @param array $handlerConfig handler config
-	 */
-	function __construct($handlerClass='metadigit\core\session\handler\Sqlite', array $handlerConfig=['system', 'sessions']) {
-		$this->Handler = (new \ReflectionClass($handlerClass))->newInstanceArgs($handlerConfig);
-	}
-
 	function start() {
 		if(PHP_SAPI=='cli') return;
 		if(session_status() == 2) throw new SessionException(11);
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->name);
 		session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure);
+		$this->Handler = (new \ReflectionClass($this->handlerClass))->newInstanceArgs($this->handlerConfig);
 		session_set_save_handler($this->Handler, true);
 		session_start();
 		$this->context()->trigger(self::EVENT_START, $this);

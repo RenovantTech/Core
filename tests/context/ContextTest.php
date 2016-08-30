@@ -6,7 +6,7 @@ use metadigit\core\Kernel,
 class ContextTest extends \PHPUnit_Framework_TestCase {
 
 	function testConstructor() {
-		$Context = new Context('mock.context', MOCK_DIR.'/context/context.xml');
+		$Context = new Context('mock.context');
 		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
 
 		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'namespace');
@@ -14,17 +14,17 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$namespace = $ReflProp->getValue($Context);
 		$this->assertEquals('mock.context', $namespace);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'id2classMap');
-		$ReflProp->setAccessible(true);
-		$id2classMap = $ReflProp->getValue($Context);
-		$this->assertArrayHasKey('mock.context.Mock1', $id2classMap);
-		$this->assertArrayNotHasKey('mock.context.NotExists', $id2classMap);
-
 		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'includedNamespaces');
 		$ReflProp->setAccessible(true);
 		$includedNamespaces = $ReflProp->getValue($Context);
 		$this->assertContains('system', $includedNamespaces);
 		$this->assertNotContains('foo', $includedNamespaces);
+
+		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'id2classMap');
+		$ReflProp->setAccessible(true);
+		$id2classMap = $ReflProp->getValue($Context);
+		$this->assertArrayHasKey('mock.context.Mock1', $id2classMap);
+		$this->assertArrayNotHasKey('mock.context.NotExists', $id2classMap);
 
 		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'listeners');
 		$ReflProp->setAccessible(true);
@@ -36,7 +36,9 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$this->assertCount(1, $listeners['event2']);
 		$this->assertEquals('mock.context.EventSubscriber->onEvent1', $listeners['event1'][1][0]);
 		$this->assertEquals('mock.context.Mock1->onEvent1', $listeners['event1'][2][0]);
-		$this->assertEquals('mock.context.EventSubscriber->onEvent2', $listeners['event2'][1][0]);
+		$this->assertEquals('mock.context.Mock1->onEvent2', $listeners['event2'][1][0]);
+		$this->assertEquals('mock.context.Mock1->onEvent2bis', $listeners['event2'][1][1]);
+		$this->assertEquals('mock.context.EventSubscriber->onEvent2', $listeners['event2'][1][2]);
 
 		return $Context;
 	}
@@ -92,7 +94,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testGetContainer(Context $Context) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\context\Context', 'getContainer');
 		$ReflMethod->setAccessible(true);
-		$this->assertInstanceOf('metadigit\core\depinjection\Container', $ReflMethod->invoke($Context));
+		$this->assertInstanceOf('metadigit\core\container\Container', $ReflMethod->invoke($Context));
 		$this->assertTrue(Kernel::cache('kernel')->has('mock.context.Container'));
 	}
 

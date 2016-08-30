@@ -9,11 +9,10 @@ namespace metadigit\core\context;
 use function metadigit\core\trace;
 use metadigit\core\CoreProxy,
 	metadigit\core\Kernel,
-	metadigit\core\depinjection\Container,
-	metadigit\core\depinjection\ContainerException,
+	metadigit\core\container\Container,
+	metadigit\core\container\ContainerException,
 	metadigit\core\event\Event,
-	metadigit\core\event\EventDispatcherInterface,
-	metadigit\core\util\xml\XMLValidator;
+	metadigit\core\event\EventDispatcherInterface;
 /**
  * Context
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -67,45 +66,24 @@ class Context implements EventDispatcherInterface {
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** XML Parser
-	 * @var ContextXmlParser */
-	protected $XmlParser;
-	/** Context XML path
-	 * @var string */
-	protected $xmlPath;
 
 	/**
 	 * Constructor
-	 * @param string		$namespace	Context namespace
-	 * @param string|null	$xmlPath	optional XML path
+	 * @param string $namespace Context namespace
 	 * @throws ContextException
 	 */
-	function __construct($namespace, $xmlPath=null) {
+	function __construct($namespace) {
 		$this->_oid = $namespace.'.Context';
 		$this->namespace = $namespace;
-		$this->xmlPath = $xmlPath;
-		if(!is_null($xmlPath)) {
-			if(!file_exists($xmlPath)) throw new ContextException(11, [$this->_oid, $xmlPath]);
-			if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context XML', null, $this->_oid);
-			$this->getXmlParser()->verify();
-			$this->includedNamespaces = $this->getXmlParser()->getIncludes();
-			$this->getXmlParser()->parseEventListeners($this);
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready', null, $this->_oid);
-			$XML = simplexml_load_file($xmlPath);
-		}
+		// parse YAML
+		ContextYamlParser::parse($this->namespace, $this->includedNamespaces, $this->id2classMap, $this->listeners);
 		// create Container
-		$containerXmlPath = \metadigit\core\CACHE_DIR.$namespace.'.Container'.'.xml';
-		file_put_contents($containerXmlPath, $XML->xpath('/context/objects')[0]->asXML());
-		$Container = new Container($namespace, $containerXmlPath, $this->includedNamespaces, $this->_oid);
+		$Container = new Container($namespace, $this->includedNamespaces);
 		Kernel::cache('kernel')->set($namespace.'.Container', $Container);
-		$ReflProp = new \ReflectionProperty($Container, 'id2classMap');
-		$ReflProp->setAccessible(true);
-		$this->id2classMap = $ReflProp->getValue($Container);
 	}
 
 	function __sleep() {
-		return ['_oid', 'id2classMap', 'includedNamespaces', 'listeners', 'namespace', 'xmlPath'];
+		return ['_oid', 'id2classMap', 'includedNamespaces', 'listeners', 'namespace'];
 	}
 
 	/**
@@ -160,14 +138,14 @@ class Context implements EventDispatcherInterface {
 
 	/**
 	 * return Dependency Injector Container
-	 * @return \metadigit\core\depinjection\Container
+	 * @return \metadigit\core\container\Container
 	 */
 	function getContainer() {
 		return Kernel::cache('kernel')->get($this->namespace.'.Container');
 	}
 
 	/**
-	 * @see metadigit\core\event\EventDispatcherInterface
+	 * @see \metadigit\core\event\EventDispatcherInterface
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
 		TRACE and trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName));
@@ -186,13 +164,5 @@ class Context implements EventDispatcherInterface {
 			}
 		}
 		return $Event;
-	}
-
-	/**
-	 * @return ContextXmlParser
-	 */
-	protected function getXmlParser() {
-		$this->XmlParser || $this->XmlParser = new ContextXmlParser($this->namespace, $this->xmlPath);
-		return $this->XmlParser;
 	}
 }

@@ -1,0 +1,7 @@
+includes:
+  - mock.context.cyclic1
+objects:
+  mock.context.cyclic2.Mock:
+    class: mock\context\Mock1
+    properties:
+      Child: !obj mock.context.cyclic1.Mock

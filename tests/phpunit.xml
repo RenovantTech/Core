@@ -9,8 +9,8 @@
 			<directory>log/writer</directory>
 			<directory>log</directory>
 		</testsuite>
-		<testsuite name="depinjection">
-			<directory>depinjection</directory>
+		<testsuite name="container">
+			<directory>container</directory>
 		</testsuite>
 		<testsuite name="context">
 			<directory>context</directory>

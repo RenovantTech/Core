@@ -22,7 +22,7 @@ class ContextHelper extends Kernel {
 		// scan global namespaces
 		$files = scandir(\metadigit\core\BASE_DIR);
 		foreach($files as $file) {
-			if(is_file(\metadigit\core\BASE_DIR.$file) && substr($file,-12)=='-context.xml') {
+			if(is_file(\metadigit\core\BASE_DIR.$file) && substr($file,-12)=='-context.yaml') {
 				$contexts[] = Context::factory(substr($file, 0, -12));
 			}
 		}
@@ -36,7 +36,7 @@ class ContextHelper extends Kernel {
 	static private function scanNamespaceDir($namespace, $dir, &$contexts) {
 		$files = scandir($dir);
 		foreach($files as $file) {
-			if(is_file($dir.'/'.$file) && $file=='context.xml') {
+			if(is_file($dir.'/'.$file) && $file=='context.yaml') {
 				$contexts[] = Context::factory(str_replace('\\', '.', $namespace));
 			} elseif(is_dir($dir.'/'.$file) && !in_array($file, ['.','..'])) {
 				self::scanNamespaceDir($namespace.'\\'.$file, $dir.'/'.$file, $contexts);

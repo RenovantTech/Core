@@ -1,11 +1,16 @@
 <?php
-namespace mock\depinjection;
+namespace mock\container;
 
-class Mock1  {
+class Mock2  {
 
 	protected $Child;
 
 	protected $name;
+
+	function __construct($name, $Child) {
+		$this->name = $name;
+		$this->Child = $Child;
+	}
 
 	function hello() {
 		return 'Hello';

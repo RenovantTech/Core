@@ -1,16 +1,15 @@
 <?php
-namespace mock\depinjection;
+namespace mock\container;
 
-class Mock2  {
+class Mock1  {
 
 	protected $Child;
 
 	protected $name;
 
-	function __construct($name, $Child) {
-		$this->name = $name;
-		$this->Child = $Child;
-	}
+	protected $numbers = [];
+
+	protected $preferences = [];
 
 	function hello() {
 		return 'Hello';
