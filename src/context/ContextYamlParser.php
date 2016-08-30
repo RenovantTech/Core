@@ -36,15 +36,20 @@ class ContextYamlParser {
 		if(!file_exists($yamlPath)) throw new ContextException(11, [$oid, $yamlPath]);
 		$YAML = yaml_parse_file($yamlPath);
 		// @TODO verify YAML content
-		// if(!XMLValidator::schema($xmlPath, __DIR__.'/Context.xsd')) throw new ContextException(12, [$xmlPath]);
+		if(
+			!is_array($YAML) ||
+			(isset($YAML['includes']) && !is_array($YAML['includes'])) ||
+			(isset($YAML['objects']) && !is_array($YAML['objects'])) ||
+			(isset($YAML['events']) && !is_array($YAML['events']))
+		) throw new ContextException(12, [$yamlPath]);
 
 		// includes
-		if(is_array($YAML['includes'])) {
+		if(isset($YAML['includes'])) {
 			$includes = (array)$YAML['includes'];
 		}
 
 		// verify Context namespaces
-		if(is_array($YAML['objects'])) {
+		if(isset($YAML['objects'])) {
 			$availableNamespaces = implode(', ', array_merge((array)$namespace, $includes));
 			foreach($YAML['objects'] as $id => $objYAML) {
 				if(strpos($id, $namespace) !== 0) throw new ContextException(14, [$oid, $id, $namespace]);
@@ -77,7 +82,7 @@ class ContextYamlParser {
 		}
 
 		// ID => class MAP
-		if(is_array($YAML['objects'])) {
+		if(isset($YAML['objects'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing objects', null, $oid);
 			$filter = function($v) {
 				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
@@ -95,7 +100,7 @@ class ContextYamlParser {
 		}
 
 		// events listeners
-		if(is_array($YAML['events'])) {
+		if(isset($YAML['events'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing events listeners', null, $oid);
 			// parse events in YAML
 			foreach($YAML['events'] as $eventName => $eventYAML) {
@@ -107,7 +112,7 @@ class ContextYamlParser {
 			}
 		}
 		// scan for EventListenerInterface objects
-		if(is_array($YAML['objects'])) {
+		if(isset($YAML['objects'])) {
 			foreach($YAML['objects'] as $id => $objYAML) {
 				if((new \ReflectionClass($objYAML['class']))->implementsInterface('metadigit\core\event\EventSubscriberInterface')) {
 					$events = call_user_func([$objYAML['class'], 'getSubscribedEvents']);
