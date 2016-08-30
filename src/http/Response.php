@@ -165,6 +165,7 @@ class Response {
 		}
 		trace(LOG_DEBUG, TRACE_DEFAULT, 'REDIRECT to '.$location, null, __METHOD__);
 		header('Location: '.$location, true, $statusCode);
+		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}
 
 	/**

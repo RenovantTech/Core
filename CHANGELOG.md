@@ -1,3 +1,14 @@
+<a name="2.0.8"></a>
+# 2.0.8 (2016-08-30)
+
+### Features
+- **KernelDebugger:** fix compatibility with PHP 7.0.x
+
+### Bug Fixes
+- **web\view:** XSendFileView: force missing HTTP header ''Content-Type"
+
+
+
 <a name="2.0.7"></a>
 # 2.0.7 (2016-03-11)
 

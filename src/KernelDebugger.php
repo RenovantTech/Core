@@ -93,7 +93,7 @@ class KernelDebugger extends \metadigit\core\Kernel {
 
 	/**
 	 * Send EXCEPTION to DebugConsole
-	 * @param \Exception $Ex
+	 * @param \Exception|\Error $Ex
 	 * @return void
 	 */
 	static function traceException($Ex) {

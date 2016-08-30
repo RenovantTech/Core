@@ -42,7 +42,7 @@ class Session {
 	 * @throws SessionException
 	 */
 	final function __construct($namespace=null, $isSingleton=false) {
-		if(session_status() != 2) throw new SessionException(51);
+		if(session_status() == PHP_SESSION_DISABLED) throw new SessionException(51);
 		if(static::FORCE_NAMESPACE) $this->_namespace = static::FORCE_NAMESPACE;
 		else $this->_namespace = (!is_null($namespace)) ? $namespace : static::DEFAULT_NAMESPACE;
 		if(!preg_match('/^[a-zA-Z]{1}[_a-zA-Z0-9]*[a-zA-Z0-9]{1}$/', $this->_namespace)) throw new SessionException(52, [$this->_namespace]);
