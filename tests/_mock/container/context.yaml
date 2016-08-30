@@ -1,3 +1,5 @@
+includes:
+  - system
 objects:
   mock.container.Mock1:
     class: mock\container\Mock1
@@ -6,4 +8,4 @@ objects:
       name: Mock1
   mock.container.Mock2:
     class: mock\container\Mock2
-    constructor: [ 'Mock2', '!obj system.Mock']
+    constructor: [ Mock2, !obj system.Mock ]

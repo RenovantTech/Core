@@ -39,7 +39,11 @@ class ContainerYamlParser {
 		else
 			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yaml';
 		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_oid, $this->yamlPath]);
-		$this->YAML = yaml_parse_file($this->yamlPath);
+		$this->YAML = yaml_parse_file($this->yamlPath, 0, $n, [
+			'!obj' => function($value, $tag, $flags) {
+				return '!obj '.$value;
+			}
+		]);
 		// @TODO verify YAML content
 		// if(!XMLValidator::schema($xmlPath, __DIR__.'/Container.xsd')) throw new ContainerException(12, [$xmlPath]);
 		sort($namespaces);
@@ -87,6 +91,7 @@ class ContainerYamlParser {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 			$i = 0;
 			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
+				$yamlArg = trim($yamlArg);
 				switch(self::parseType($yamlArg)) {
 					case 'boolean':
 						$args[$i] = (boolean) $yamlArg;
@@ -99,6 +104,7 @@ class ContainerYamlParser {
 						break;
 					case 'array':
 						foreach($yamlArg as $key => $yamlItem) {
+							$yamlItem = trim($yamlItem);
 							switch(self::parseType($yamlItem)) {
 								case 'boolean':
 									$value = (boolean) $yamlItem;
@@ -143,6 +149,7 @@ class ContainerYamlParser {
 		if(is_array($this->YAML['objects'][$id]['properties'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
+				$yamlProp = trim($yamlProp);
 				switch (self::parseType($yamlProp)) {
 					case 'boolean':
 						$properties[$propName] = (boolean) $yamlProp;
@@ -155,6 +162,7 @@ class ContainerYamlParser {
 						break;
 					case 'array':
 						foreach($yamlProp as $key => $yamlItem) {
+							$yamlItem = trim($yamlItem);
 							switch (self::parseType($yamlItem)) {
 								case 'boolean':
 									$value = (boolean) $yamlItem;
