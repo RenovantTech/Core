@@ -7,6 +7,10 @@ class Mock1  {
 
 	protected $name;
 
+	protected $numbers = [];
+
+	protected $preferences = [];
+
 	function hello() {
 		return 'Hello';
 	}

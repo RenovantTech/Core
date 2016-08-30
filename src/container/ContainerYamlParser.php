@@ -99,9 +99,6 @@ class ContainerYamlParser {
 					case 'integer':
 						$args[$i] = (integer) $yamlArg;
 						break;
-					case 'string':
-						$args[$i] = (string) $yamlArg;
-						break;
 					case 'array':
 						foreach($yamlArg as $key => $yamlItem) {
 							$yamlItem = trim($yamlItem);
@@ -109,28 +106,23 @@ class ContainerYamlParser {
 								case 'boolean':
 									$value = (boolean) $yamlItem;
 									break;
-								case 'string':
-									$value = (string) $yamlItem;
+								case 'integer':
+									$value = (integer) $yamlItem;
 									break;
 								case 'object':
 									$value = new CoreProxy(substr($yamlItem, 5));
 									break;
+								default: // string
+									$value = (string) $yamlItem;
 							}
 							$args[$i][$key] = $value;
 						}
 						break;
-					case 'map':
-						$map = [];
-						foreach($yamlArg->children() as $xmlMap) {
-							foreach($xmlMap->children() as $yamlItem) {
-								$map[(string)$xmlMap['key']][(string)$yamlItem['key']] = (string)$yamlItem;
-							}
-						}
-						$args[(string)$yamlArg['name']] = $map;
-						break;
 					case 'object':
 						$args[$i] = new CoreProxy(substr($yamlArg, 5));
 						break;
+					default: // string
+						$args[$i] = (string) $yamlArg;
 				}
 				$i++;
 			}
@@ -149,7 +141,6 @@ class ContainerYamlParser {
 		if(is_array($this->YAML['objects'][$id]['properties'])) {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
-				$yamlProp = trim($yamlProp);
 				switch (self::parseType($yamlProp)) {
 					case 'boolean':
 						$properties[$propName] = (boolean) $yamlProp;
@@ -157,52 +148,33 @@ class ContainerYamlParser {
 					case 'integer':
 						$properties[$propName] = (integer) $yamlProp;
 						break;
-					case 'string':
-						$properties[$propName] = (string) $yamlProp;
-						break;
 					case 'array':
 						foreach($yamlProp as $key => $yamlItem) {
-							$yamlItem = trim($yamlItem);
 							switch (self::parseType($yamlItem)) {
 								case 'boolean':
 									$value = (boolean) $yamlItem;
 									break;
-								case 'string':
-									$value = (string) $yamlItem;
+								case 'integer':
+									$value = (integer) $yamlItem;
 									break;
 								case 'object':
 									$value = new CoreProxy(substr($yamlItem, 5));
 									break;
+								default: // string
+									$value = (string) $yamlItem;
 							}
 							$properties[$propName][$key] = $value;
 						}
 						break;
-					case 'map':
-						$map = [];
-						foreach($yamlProp->children() as $xmlMap) {
-							foreach($xmlMap->children() as $yamlItem) {
-								$map[(string)$xmlMap['key']][(string)$yamlItem['key']] = (string)$yamlItem;
-							}
-						}
-						$properties[$propName] = $map;
-						break;
 					case 'object':
 						$properties[$propName] = new CoreProxy(substr($yamlProp, 5));
 						break;
+					default: // string
+						$properties[$propName] = (string) $yamlProp;
 				}
 			}
 		}
 		return $properties;
-	}
-
-	static function parseConstants($string, $Obj=null) {
-		$_consts = [
-			'${BASE_DIR}'=> \metadigit\core\BASE_DIR
-		];
-		if(is_object($Obj))						$_consts['${ID}']			= $Obj->oid();
-		if(defined('metadigit\core\APP'))		$_consts['${APP}']			= \metadigit\core\APP;
-		if(defined('metadigit\core\PUBLIC_DIR'))$_consts['${PUBLIC_DIR}']	= \metadigit\core\PUBLIC_DIR;
-		return strtr($string,$_consts);
 	}
 
 	static function parseType($yamlNode) {

@@ -6,6 +6,10 @@ objects:
     properties:
       Child: !obj system.Mock
       name: Mock1
+      numbers: [ 2, 5, 8 ]
+      preferences:
+        p1: hello
+        p2: bye
   mock.container.Mock2:
     class: mock\container\Mock2
     constructor: [ Mock2, !obj system.Mock ]

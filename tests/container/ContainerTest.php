@@ -27,10 +27,25 @@ class ContainerTest extends \PHPUnit_Framework_TestCase {
 		// only ID
 		$Mock = $Container->get('mock.container.Mock1');
 		$this->assertInstanceOf('mock\container\Mock1', $Mock);
+		// string property
 		$ReflProp = new \ReflectionProperty('mock\container\Mock1', 'name');
 		$ReflProp->setAccessible(true);
 		$name = $ReflProp->getValue($Mock);
 		$this->assertEquals('Mock1', $name);
+		// array property
+		$ReflProp = new \ReflectionProperty('mock\container\Mock1', 'numbers');
+		$ReflProp->setAccessible(true);
+		$numbers = $ReflProp->getValue($Mock);
+		$this->assertCount(3, $numbers);
+		$this->assertContains(5, $numbers);
+		// map property
+		$ReflProp = new \ReflectionProperty('mock\container\Mock1', 'preferences');
+		$ReflProp->setAccessible(true);
+		$preferences = $ReflProp->getValue($Mock);
+		$this->assertCount(2, $preferences);
+		$this->assertArrayHasKey('p1', $preferences);
+		$this->assertEquals('hello', $preferences['p1']);
+
 		// ID & class
 		$Mock = $Container->get('mock.container.Mock1','mock\container\Mock1');
 		$this->assertInstanceOf('mock\container\Mock1', $Mock);
