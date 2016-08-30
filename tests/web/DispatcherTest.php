@@ -14,14 +14,14 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Dispatcher = Context::factory('mock.web')->getContainer()->get('mock.web.Dispatcher');
-/*
+
 		$ReflProp = new \ReflectionProperty('metadigit\core\web\Dispatcher', 'routes');
 		$ReflProp->setAccessible(true);
 		$routes = $ReflProp->getValue($Dispatcher);
 		$this->assertCount(4, $routes);
 		$this->assertArrayHasKey('/catalog/*', $routes);
 		$this->assertEquals('mock.web.AbstractController', $routes['/catalog/*']);
-*/
+
 		return $Dispatcher;
 	}
 
