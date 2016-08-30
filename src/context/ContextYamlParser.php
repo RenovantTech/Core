@@ -109,9 +109,12 @@ class ContextYamlParser {
 			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing events listeners', null, $oid);
 			// parse events in YAML
 			foreach($YAML['events'] as $eventName => $eventYAML) {
-				foreach($eventYAML as $listener => $listenerYAML) {
-					$priority = (isset($listenerYAML['priority'])) ? (int)$listenerYAML['priority'] : 1;
-					$listeners[$eventName][$priority][] = $listener;
+				foreach ($eventYAML as $listenerYAML) {
+					if(is_string($listenerYAML)) {
+						$listeners[$eventName][1][] = $listenerYAML;
+					} elseif (is_array($listenerYAML)) {
+						$listeners[$eventName][$listenerYAML['priority']][] = $listenerYAML['listener'];
+					}
 				}
 				krsort($listeners[$eventName], SORT_NUMERIC);
 			}

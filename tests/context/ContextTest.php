@@ -36,7 +36,9 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$this->assertCount(1, $listeners['event2']);
 		$this->assertEquals('mock.context.EventSubscriber->onEvent1', $listeners['event1'][1][0]);
 		$this->assertEquals('mock.context.Mock1->onEvent1', $listeners['event1'][2][0]);
-		$this->assertEquals('mock.context.EventSubscriber->onEvent2', $listeners['event2'][1][0]);
+		$this->assertEquals('mock.context.Mock1->onEvent2', $listeners['event2'][1][0]);
+		$this->assertEquals('mock.context.Mock1->onEvent2bis', $listeners['event2'][1][1]);
+		$this->assertEquals('mock.context.EventSubscriber->onEvent2', $listeners['event2'][1][2]);
 
 		return $Context;
 	}

@@ -13,5 +13,8 @@ objects:
       class: mock\context\EventSubscriber
 events:
   event1:
-    mock.context.Mock1->onEvent1:
+    - listener: mock.context.Mock1->onEvent1
       priority: 2
+  event2:
+    - mock.context.Mock1->onEvent2
+    - mock.context.Mock1->onEvent2bis
