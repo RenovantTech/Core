@@ -1,0 +1,20 @@
+objects:
+  # Dispatcher
+  mock.web.Dispatcher:
+    class: metadigit\core\web\Dispatcher
+    properties:
+      routes:
+        /catalog/*: mock.web.AbstractController
+        /mod1/*:    mock.web.ActionController
+        /rest/*:    mock.web.RestActionController
+        /home:      mock.web.SimpleController
+      resourcesDir: templates/
+  # controllers
+  mock.web.SimpleController:
+    class: mock\web\controller\SimpleController
+  mock.web.ActionController:
+    class: mock\web\controller\ActionController
+  mock.web.AbstractController:
+    class: mock\web\controller\AbstractController
+  mock.web.RestActionController:
+    class: mock\web\controller\RestActionController
