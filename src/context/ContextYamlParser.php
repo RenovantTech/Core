@@ -60,7 +60,7 @@ class ContextYamlParser {
 				if(strpos($id, $namespace) !== 0) throw new ContextException(14, [$oid, $id, $namespace]);
 				if(isset($objYAML['constructor'])) {
 					foreach($objYAML['constructor'] as $arg) {
-						if(substr($arg, 0, 4) == '!obj') {
+						if(is_string($arg) && substr($arg, 0, 4) == '!obj') {
 							$id = substr($arg, 5);
 							if(strpos($id, $namespace.'.') === 0) continue;
 							foreach($includes as $ns) {
@@ -68,12 +68,11 @@ class ContextYamlParser {
 							}
 							throw new ContextException(15, [$oid, '', $id, $availableNamespaces]);
 						}
-
 					}
 				}
 				if(isset($objYAML['properties'])) {
 					foreach($objYAML['properties'] as $prop => $propYAML) {
-						if(substr($propYAML, 0, 4) == '!obj') {
+						if(is_string($propYAML) && substr($propYAML, 0, 4) == '!obj') {
 							$id = substr($propYAML, 5);
 							if(strpos($id, $namespace.'.') === 0) continue;
 							foreach($includes as $ns) {

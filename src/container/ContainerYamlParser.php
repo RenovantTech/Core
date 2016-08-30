@@ -99,7 +99,6 @@ class ContainerYamlParser {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 			$i = 0;
 			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
-				$yamlArg = trim($yamlArg);
 				switch(self::parseType($yamlArg)) {
 					case 'boolean':
 						$args[$i] = (boolean) $yamlArg;
@@ -109,7 +108,6 @@ class ContainerYamlParser {
 						break;
 					case 'array':
 						foreach($yamlArg as $key => $yamlItem) {
-							$yamlItem = trim($yamlItem);
 							switch(self::parseType($yamlItem)) {
 								case 'boolean':
 									$value = (boolean) $yamlItem;
