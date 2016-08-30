@@ -1,0 +1,5 @@
+objects:
+  system.Mock:
+    class: mock\GlobalMock
+    properties:
+      name: SystemMock
