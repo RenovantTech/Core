@@ -7,8 +7,8 @@
  */
 namespace metadigit\core;
 use metadigit\core\context\Context,
-	metadigit\core\depinjection\Container,
-	metadigit\core\depinjection\ContainerException;
+	metadigit\core\container\Container,
+	metadigit\core\container\ContainerException;
 /**
  * Proxy for injected objects.
  * @author Daniele Sciacchitano <dan@metadigit.it>
