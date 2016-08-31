@@ -89,11 +89,15 @@ class PDO extends \PDO {
 	 * @param string $statement the SQL statement to prepare and execute.
 	 * @return \PDOStatement
 	 */
-/* @TODO
  	function query($statement) {
 		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
-		return call_user_func_array('parent::query', func_get_args());
-	}*/
+		$st = parent::query($statement);
+		if(func_num_args()>1) {
+			$args = array_shift(func_get_args());
+			call_user_func_array([$st,'setFetchMode'], $args);
+		}
+		return $st;
+	}
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.rollback.php
