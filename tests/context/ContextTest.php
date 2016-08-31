@@ -1,7 +1,7 @@
 <?php
 namespace test\context;
-use metadigit\core\Kernel,
-	metadigit\core\context\Context;
+use function metadigit\core\cache;
+use metadigit\core\context\Context;
 
 class ContextTest extends \PHPUnit_Framework_TestCase {
 
@@ -50,7 +50,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testFactory() {
 		$Context = Context::factory('mock.context');
 		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-		$this->assertInstanceOf('metadigit\core\context\Context', Kernel::cache('kernel')->get('mock.context.Context'));
+		$this->assertInstanceOf('metadigit\core\context\Context', cache('kernel')->get('mock.context.Context'));
 		return $Context;
 	}
 
@@ -74,7 +74,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testFactory2() {
 		$GlobalContext = Context::factory('system');
 		$this->assertInstanceOf('metadigit\core\context\Context', $GlobalContext);
-		$this->assertTrue(Kernel::cache('kernel')->has('system.Context'));
+		$this->assertTrue(cache('kernel')->has('system.Context'));
 		return $GlobalContext;
 	}
 
@@ -95,7 +95,7 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\context\Context', 'getContainer');
 		$ReflMethod->setAccessible(true);
 		$this->assertInstanceOf('metadigit\core\container\Container', $ReflMethod->invoke($Context));
-		$this->assertTrue(Kernel::cache('kernel')->has('mock.context.Container'));
+		$this->assertTrue(cache('kernel')->has('mock.context.Container'));
 	}
 
 	/**
@@ -173,8 +173,8 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 	function testTrigger(Context $Context) {
 		global $var;
 		$var = 1;
-		$Context->listen('trigger1', function($Ev) use (&$var) { $var++; });
-		$Context->listen('trigger1', function($Ev) use (&$var) { $var = $var + 2; }, 2);
+		$Context->listen('trigger1', function() use (&$var) { $var++; });
+		$Context->listen('trigger1', function() use (&$var) { $var = $var + 2; }, 2);
 		$this->assertEquals(1, $var);
 		$Context->trigger('trigger1', $Context);
 		$this->assertEquals(4, $var);
@@ -184,7 +184,10 @@ class ContextTest extends \PHPUnit_Framework_TestCase {
 		$Context->trigger('trigger2', $Context);
 		$this->assertEquals(3, $var);
 
-		$Context->listen('trigger3', function($Ev) { $Ev->stopPropagation(); });
+		$Context->listen('trigger3', function($Ev) {
+			/** @var \metadigit\core\event\Event $Ev */
+			$Ev->stopPropagation();
+		});
 		$Event = $Context->trigger('trigger3', $Context);
 		$this->assertInstanceOf('metadigit\core\event\Event', $Event);
 		$this->assertTrue($Event->isPropagationStopped());

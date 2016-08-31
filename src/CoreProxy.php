@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use function metadigit\core\cache;
 use metadigit\core\context\Context,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException;
@@ -36,7 +37,7 @@ class CoreProxy {
 	function __call($method, $args) {
 		$prevTraceFn = Kernel::traceFn();
 		try {
-			$this->_Obj || $this->_Obj = Kernel::cache('kernel')->get($this->_oid);
+			$this->_Obj || $this->_Obj = cache('kernel')->get($this->_oid);
 			$this->_Obj || $this->_Obj = Context::factory(substr($this->_oid, 0, strrpos($this->_oid, '.')))->getContainer()->get($this->_oid, null, Container::FAILURE_SILENT);
 			if($this->_Obj) {
 				Kernel::traceFn($this->_oid.'->'.$method);

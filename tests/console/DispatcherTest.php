@@ -1,7 +1,7 @@
 <?php
 namespace test\console;
-use metadigit\core\Kernel,
-	metadigit\core\console\Dispatcher,
+use function metadigit\core\cache;
+use metadigit\core\console\Dispatcher,
 	metadigit\core\context\Context,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response;
@@ -11,8 +11,8 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
 		define('metadigit\core\APP_URI', '/');
-		$Req = new Request;
-		$Res = new Response;
+		new Request;
+		new Response;
 		$Dispatcher = Context::factory('mock.console')->getContainer()->get('mock.console.Dispatcher');
 		return $Dispatcher;
 	}
@@ -103,7 +103,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');
-		Kernel::cache('kernel')->delete('mock.console.Dispatcher');
+		cache('kernel')->delete('mock.console.Dispatcher');
 		$Dispatcher = Context::factory('mock.console',false)->get('mock.console.Dispatcher');
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;

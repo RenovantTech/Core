@@ -6,8 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\container;
-use function metadigit\core\trace;
-use metadigit\core\Kernel;
+use function metadigit\core\{cache, trace};
 /**
  * Dependency Injection Container
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -79,7 +78,7 @@ class Container {
 				$this->setProperty($k, $v, $Obj, $ReflObject);
 			}
 			$this->objects[$id] = $Obj;
-			Kernel::cache('kernel')->set($id, $Obj);
+			cache('kernel')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
 			if($failureMode==self::FAILURE_SILENT) return null;

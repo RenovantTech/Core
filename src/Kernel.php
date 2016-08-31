@@ -33,7 +33,15 @@ defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'P
  * @return cache\CacheInterface
  */
 function cache($id='system') {
-	return Kernel::cache($id);
+	static $_ = [];
+	if(!isset($_[$id])) {
+		$cnf = Kernel::conf(Kernel::CONFIG_CACHE)[$id];
+		$ReflClass = new \ReflectionClass($cnf['class']);
+		$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
+		$Cache = $ReflClass->newInstanceArgs($params);
+		$_[$id] = $Cache;
+	}
+	return $_[$id];
 }
 
 /**
@@ -83,6 +91,14 @@ class Kernel {
 	/** HTTP/CLI apps routing
 	 * @var array */
 	static protected $apps;
+	/** Cache configurations
+	 * @var array */
+	static protected $cacheConf = [
+		'kernel' => [
+			'class' => 'metadigit\core\cache\SqliteCache',
+			'params' => ['kernel-cache', 'cache', true]
+		]
+	];
 	/** LogWriters configurations
 	 * @var array */
 	static protected $logConf;
@@ -185,7 +201,7 @@ class Kernel {
 
 		// initialize
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
-		self::cache('kernel');
+		cache('kernel');
 		set_exception_handler(function() {
 			call_user_func_array('metadigit\core\KernelDebugger::onException', func_get_args());
 		});
@@ -254,36 +270,6 @@ class Kernel {
 		}
 		if(PHP_SAPI != 'cli') session_write_close();
 		self::logFlush();
-	}
-
-	// === CACHE ==================================================================================
-
-	/** Cache instances
-	 * @var array */
-	static protected $cache;
-	/** Cache configurations
-	 * @var array */
-	static protected $cacheConf = [
-		'kernel' => [
-			'class' => 'metadigit\core\cache\SqliteCache',
-			'params' => ['kernel-cache', 'cache', true]
-		]
-	];
-
-	/**
-	 * Return shared Cache instance
-	 * @param string $id Cache ID, default "system"
-	 * @return \metadigit\core\cache\CacheInterface
-	 */
-	static function cache($id='system') {
-		if(!isset(self::$cache[$id])) {
-			$cnf = self::$cacheConf[$id];
-			$ReflClass = new \ReflectionClass($cnf['class']);
-			$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
-			$Cache = $ReflClass->newInstanceArgs($params);
-			self::$cache[$id] = $Cache;
-		}
-		return self::$cache[$id];
 	}
 
 	// === LOG SYSTEM =============================================================================

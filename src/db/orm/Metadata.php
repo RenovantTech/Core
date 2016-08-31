@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
-use metadigit\core\Kernel;
+use function metadigit\core\cache;
 /**
  * ORM Metadata
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -97,9 +97,9 @@ class Metadata {
 		if(is_object($entity)) $entity = get_class($entity);
 		if(isset($cache[$entity])) return $cache[$entity];
 		$k = '#'.$entity.'#ORM-metadata';
-		if(!$cache[$entity] = Kernel::cache('kernel')->get($k)) {
+		if(!$cache[$entity] = cache('kernel')->get($k)) {
 			$cache[$entity] = new Metadata($entity);
-			Kernel::cache('kernel')->set($k, $cache[$entity], null, 'ORM-metadata');
+			cache('kernel')->set($k, $cache[$entity], null, 'ORM-metadata');
 		}
 		return $cache[$entity];
 	}

@@ -1,7 +1,7 @@
 <?php
 namespace test\web;
-use metadigit\core\Kernel,
-	metadigit\core\context\Context,
+use function metadigit\core\cache;
+use metadigit\core\context\Context,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\Dispatcher;
@@ -11,8 +11,8 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
 		define('metadigit\core\APP_URI', '/');
-		$Req = new Request;
-		$Res = new Response;
+		new Request;
+		new Response;
 		$Dispatcher = Context::factory('mock.web')->getContainer()->get('mock.web.Dispatcher');
 
 		$ReflProp = new \ReflectionProperty('metadigit\core\web\Dispatcher', 'routes');
@@ -59,9 +59,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @depends testConstruct
+	 * @depends               testConstruct
 	 * @expectedException \metadigit\core\web\Exception
 	 * @expectedExceptionCode 11
+	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveControllerException11(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\web\Dispatcher', 'resolveController');
@@ -75,6 +76,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstruct
+	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\web\Dispatcher', 'resolveView');
@@ -116,9 +118,10 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * @depends testConstruct
+	 * @depends               testConstruct
 	 * @expectedException \metadigit\core\web\Exception
 	 * @expectedExceptionCode 12
+	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\web\Dispatcher', 'resolveView');
@@ -136,7 +139,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>index<\/title>/');
-		Kernel::cache('kernel')->delete('mock.web.Dispatcher');
+		cache('kernel')->delete('mock.web.Dispatcher');
 		$Dispatcher = Context::factory('mock.web',false)->get('mock.web.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;

@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
-use function metadigit\core\trace;
+use function metadigit\core\{cache, trace};
 use metadigit\core\CoreProxy,
 	metadigit\core\Kernel,
 	metadigit\core\container\Container,
@@ -36,7 +36,7 @@ class Context implements EventDispatcherInterface {
 	static function factory($namespace, $useCache=true) {
 		if($useCache && isset(self::$_instances[$namespace]))
 			return self::$_instances[$namespace];
-		elseif($useCache && $Context = Kernel::cache('kernel')->get($namespace.'.Context'))
+		elseif($useCache && $Context = cache('kernel')->get($namespace.'.Context'))
 			return self::$_instances[$namespace] = $Context;
 		else {
 			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $namespace, null, __METHOD__);
@@ -46,7 +46,7 @@ class Context implements EventDispatcherInterface {
 			else
 				$xmlPath = $dirName.DIRECTORY_SEPARATOR.'context.xml';
 			self::$_instances[$namespace] = $Context = new Context($namespace, $xmlPath);
-			Kernel::cache('kernel')->set($namespace.'.Context', $Context);
+			cache('kernel')->set($namespace.'.Context', $Context);
 			return $Context;
 		}
 	}
@@ -79,7 +79,7 @@ class Context implements EventDispatcherInterface {
 		ContextYamlParser::parse($this->namespace, $this->includedNamespaces, $this->id2classMap, $this->listeners);
 		// create Container
 		$Container = new Container($namespace, $this->includedNamespaces);
-		Kernel::cache('kernel')->set($namespace.'.Container', $Container);
+		cache('kernel')->set($namespace.'.Container', $Container);
 	}
 
 	function __sleep() {
@@ -141,7 +141,7 @@ class Context implements EventDispatcherInterface {
 	 * @return \metadigit\core\container\Container
 	 */
 	function getContainer() {
-		return Kernel::cache('kernel')->get($this->namespace.'.Container');
+		return cache('kernel')->get($this->namespace.'.Container');
 	}
 
 	/**
