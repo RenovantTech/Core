@@ -6,8 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
-use function metadigit\core\trace;
-use metadigit\core\Kernel;
+use function metadigit\core\{pdo, trace};
 /**
  * Trait for DB operations, supporting trace
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -23,7 +22,7 @@ trait PdoTrait {
 	 * @return \PDO
 	 */
 	protected function pdo() {
-		return Kernel::pdo($this->pdo);
+		return pdo($this->pdo);
 	}
 
 	/**
@@ -32,7 +31,7 @@ trait PdoTrait {
 	 * @return bool
 	 */
 	protected function pdoBeginTransaction() {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and trace(LOG_DEBUG, TRACE_DB, 'beginTransaction()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->beginTransaction();
 	}
@@ -43,7 +42,7 @@ trait PdoTrait {
 	 * @return bool
 	 */
 	protected function pdoCommit() {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and trace(LOG_DEBUG, TRACE_DB, 'commit()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->commit();
 	}
@@ -55,7 +54,7 @@ trait PdoTrait {
 	 * @return int
 	 */
 	protected function pdoExec($sql) {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and trace(LOG_DEBUG, TRACE_DB, $sql, null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->exec($sql);
 	}
@@ -66,7 +65,7 @@ trait PdoTrait {
 	 * @return mixed
 	 */
 	protected function pdoLastInsertId() {
-		return Kernel::pdo($this->pdo)->lastInsertId();
+		return pdo($this->pdo)->lastInsertId();
 	}
 
 	/**
@@ -76,7 +75,7 @@ trait PdoTrait {
 	 * @return \PDOStatement
 	 */
 	protected function pdoPrepare($sql) {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		return $pdo->prepare($sql);
 	}
 
@@ -87,7 +86,7 @@ trait PdoTrait {
 	 * @return \PDOStatement
 	 */
 	protected function pdoQuery($sql) {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and trace(LOG_DEBUG, TRACE_DB, $sql, null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->query($sql);
 	}
@@ -98,7 +97,7 @@ trait PdoTrait {
 	 * @return bool
 	 */
 	protected function pdoRollBack() {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and trace(LOG_DEBUG, TRACE_DB, 'rollBack()', null, debug_backtrace(0, 2)[1]['function']);
 		return $pdo->rollBack();
 	}
@@ -113,7 +112,7 @@ trait PdoTrait {
 	 * @return \PDOStatement
 	 */
 	protected function pdoStExecute($sql, $params=null) {
-		$pdo = Kernel::pdo($this->pdo);
+		$pdo = pdo($this->pdo);
 		TRACE and $this->_pdo_trace(debug_backtrace(0, 2)[1]['function'], $sql, $params);
 		$st = $pdo->prepare($sql);
 		$st->execute($params);

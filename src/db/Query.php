@@ -6,8 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
-use function metadigit\core\trace;
-use metadigit\core\Kernel;
 /**
  * Query
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -106,7 +104,7 @@ class Query {
 			$keys = [];
 			$sql = sprintf('SELECT %s', implode(', ', $outputParams));
 			foreach($outputParams as $p) $keys[] = substr($p,1);
-			return array_combine($keys, Kernel::pdo('mysql')->query($sql)->fetch(\PDO::FETCH_NUM));
+			return array_combine($keys, \metadigit\core\pdo($this->pdo)->query($sql)->fetch(\PDO::FETCH_NUM));
 		}
 	}
 
@@ -342,7 +340,6 @@ class Query {
 	 * @return \PDOStatement
 	 */
 	protected function doExec($sql, array $params=[]) {
-		$PDO = Kernel::pdo($this->pdo);
 		$execParams = $this->params;
 		foreach($params as $k=>$v) {
 			if($keys = array_keys($execParams, ':'.$k, true)) {
@@ -351,7 +348,7 @@ class Query {
 				}
 			} else $execParams[$k] = $v;
 		}
-		if(is_null($this->PDOStatement)) $this->PDOStatement = $PDO->prepare($sql);
+		if(is_null($this->PDOStatement)) $this->PDOStatement = \metadigit\core\pdo($this->pdo)->prepare($sql);
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
 	}

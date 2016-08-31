@@ -1,7 +1,7 @@
 <?php
 namespace test\db\orm;
-use metadigit\core\Kernel,
-	metadigit\core\context\Context,
+use function metadigit\core\pdo;
+use metadigit\core\context\Context,
 	metadigit\core\db\orm\Exception,
 	metadigit\core\db\orm\Repository,
 	metadigit\core\util\DateTime;
@@ -9,13 +9,13 @@ use metadigit\core\Kernel,
 class Repository1Test extends \PHPUnit_Framework_TestCase {
 
 	static function setUpBeforeClass() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `users`;
 			DROP PROCEDURE IF EXISTS sp_users_insert;
 			DROP PROCEDURE IF EXISTS sp_users_update;
 			DROP PROCEDURE IF EXISTS sp_users_delete;
 		');
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `users` (
 				id			smallint UNSIGNED NOT NULL AUTO_INCREMENT,
 				active		tinyint(1) UNSIGNED NOT NULL,
@@ -30,7 +30,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 				PRIMARY KEY(id)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		');
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			CREATE PROCEDURE sp_users_insert (
 				IN p_name		varchar(20),
 				IN p_surname	varchar(20),
@@ -43,7 +43,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 				SET p_id = LAST_INSERT_ID();
 			END;
 		');
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			CREATE PROCEDURE sp_users_update (
 				IN p_id			integer,
 				IN p_name		varchar(20),
@@ -55,7 +55,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 				UPDATE users SET name = p_name, surname = p_surname, age = p_age, score = p_score WHERE id = p_id;
 			END;
 		');
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			CREATE PROCEDURE sp_users_delete (
 				IN p_id		integer
 			)
@@ -66,7 +66,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	}
 
 	static function tearDownAfterClass() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `users`;
 			DROP PROCEDURE IF EXISTS sp_users_insert;
 			DROP PROCEDURE IF EXISTS sp_users_update;
@@ -75,7 +75,7 @@ class Repository1Test extends \PHPUnit_Framework_TestCase {
 	}
 
 	protected function setUp() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			TRUNCATE TABLE `users`;
 			INSERT INTO `users` (id, active, name, surname, age, score, lastTime) VALUES (1, 1, "Albert", "Brown", 21, 6.5, "2012-01-01 12:35:16");
 			INSERT INTO `users` (id, active, name, surname, age, score, lastTime) VALUES (2, 1, "Barbara", "Yellow", 25, 7.1, "2012-02-15 18:40:00");
