@@ -263,7 +263,7 @@ class Kernel {
 	static function pdo($id='master') {
 		if(!isset(self::$db[$id])) {
 			$cnf = self::$dbConf[$id];
-			TRACE and self::trace(LOG_DEBUG, TRACE_DB, sprintf('open db "%s": %s', $id, $cnf['dns']), null, __METHOD__);
+			TRACE and self::trace(LOG_INFO, TRACE_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
 			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[], $id);
 			self::$db[$id] = $pdo;
 		}

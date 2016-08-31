@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
-use function metadigit\core\trace;
 /**
  * PDOStatement wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -28,22 +27,11 @@ class PDOStatement extends \PDOStatement {
 	/**
 	 * @see http://www.php.net/manual/en/pdostatement.execute.php
 	 * @param array|null $params
+	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return boolean TRUE on success
 	 */
-	function execute($params = null) {
-		if(TRACE) {
-			$sql = $this->queryString;
-			if(!empty($params)) {
-				$keys = $values = [];
-				foreach($params as $k=>$v) {
-					$keys[] = (is_string($k)) ? '/:'.$k.'/' : '/[?]/';
-					$values[] = (is_null($v)) ? 'NULL' : ((is_numeric($v)) ? $v : '"'.htmlentities($v).'"');
-				}
-				$sql = preg_replace($keys, $values, $sql, 1);
-			}
-			$msg = (strlen($sql)>100) ? substr($sql,0,100).'...' : $sql;
-			trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $msg), $sql);
-		}
+	function execute($params = null, $traceLevel=LOG_INFO) {
+		TRACE and PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
 		return parent::execute($params);
 	}
 }

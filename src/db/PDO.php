@@ -14,6 +14,26 @@ use function metadigit\core\trace;
  */
 class PDO extends \PDO {
 
+	/**
+	 * @param string $id database ID
+	 * @param integer|false $level trace level, use a LOG_? constant value, default LOG_INFO
+	 * @param string $statement the SQL statement
+	 * @param array|null $params
+	 */
+	static function trace($id, $level=LOG_INFO, $statement, array $params = null) {
+		if($level===false) return;
+		if(!empty($params)) {
+			$keys = $values = [];
+			foreach($params as $k=>$v) {
+				$keys[] = (is_string($k)) ? '/:'.$k.'/' : '/[?]/';
+				$values[] = (is_null($v)) ? 'NULL' : ((is_numeric($v)) ? $v : '"'.htmlentities($v).'"');
+			}
+			$statement = preg_replace($keys, $values, $statement, 1);
+		}
+		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
+		trace($level, TRACE_DB, sprintf('[%s] %s', $id, $msg), $statement);
+	}
+
 	/** database ID
 	 * @var string */
 	protected $_id;
@@ -47,7 +67,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function beginTransaction() {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] beginTransaction()', $this->_id));
+		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] beginTransaction()', $this->_id));
 		return parent::beginTransaction();
 	}
 
@@ -56,19 +76,20 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function commit() {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] commit()', $this->_id));
+		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] commit()', $this->_id));
 		return parent::commit();
 	}
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
 	 * @param string $statement the SQL statement to prepare and execute
+	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return int the number of rows that were modified or deleted by the SQL statement
 	 */
-	function exec($statement) {
+	function exec($statement, $traceLevel=LOG_INFO) {
 		if(TRACE) {
 			$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-			trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
+			trace($traceLevel, TRACE_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		}
 		return parent::exec($statement);
 	}
@@ -87,9 +108,10 @@ class PDO extends \PDO {
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
 	 * @param string $statement the SQL statement to prepare and execute.
+	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return \PDOStatement
 	 */
- 	function query($statement) {
+ 	function query($statement, $traceLevel=LOG_INFO) {
 		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
 		$st = parent::query($statement);
 		if(func_num_args()>1) {
@@ -104,7 +126,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function rollBack() {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] rollBack()', $this->_id));
+		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] rollBack()', $this->_id));
 		return parent::rollBack();
 	}
 }
