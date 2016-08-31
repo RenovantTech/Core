@@ -98,26 +98,29 @@ class PDO extends \PDO {
 	 * @see http://www.php.net/manual/en/pdo.prepare.php
 	 * @param string $statement a valid SQL statement template
 	 * @param array $options holds one or more key=>value pairs to set attribute values for the PDOStatement object
-	 * @return \PDOStatement
+	 * @return PDOStatement
 	 * @throws \PDOException
 	 */
 	function prepare($statement, $options = null) {
-		return parent::prepare($statement, (array)$options);
+		$st = parent::prepare($statement, (array)$options);
+		/** @var PDOStatement $st */
+		return $st;
 	}
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
 	 * @param string $statement the SQL statement to prepare and execute.
 	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
-	 * @return \PDOStatement
+	 * @return PDOStatement
 	 */
- 	function query($statement, $traceLevel=LOG_INFO) {
+	function query($statement, $traceLevel=LOG_INFO) {
 		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
 		$st = parent::query($statement);
 		if(func_num_args()>1) {
 			$args = array_shift(func_get_args());
 			call_user_func_array([$st,'setFetchMode'], $args);
 		}
+		/** @var PDOStatement $st */
 		return $st;
 	}
 

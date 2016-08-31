@@ -25,13 +25,15 @@ class PDOStatement extends \PDOStatement {
 	}
 
 	/**
+	 * Override with fluent interface
 	 * @see http://www.php.net/manual/en/pdostatement.execute.php
 	 * @param array|null $params
 	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
-	 * @return boolean TRUE on success
+	 * @return PDOStatement
 	 */
 	function execute($params = null, $traceLevel=LOG_INFO) {
 		TRACE and PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
-		return parent::execute($params);
+		parent::execute($params);
+		return $this;
 	}
 }
