@@ -6,9 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\session\handler;
-use function metadigit\core\trace;
-use metadigit\core\Kernel,
-	metadigit\core\session\SessionException;
+use function metadigit\core\{pdo, trace};
+use metadigit\core\session\SessionException;
 /**
  * HTTP Session Handler implementation with a Mysql database.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -54,7 +53,7 @@ class Mysql implements \SessionHandlerInterface {
 		$this->pdo = $pdo;
 		$this->table = $table;
 		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize session storage', null, __METHOD__);
-		Kernel::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
+		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
 	/**
@@ -66,7 +65,7 @@ class Mysql implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function open($p, $n) {
-		if(!Kernel::pdo($this->pdo)) throw new SessionException(13);
+		if(!pdo($this->pdo)) throw new SessionException(13);
 		return true;
 	}
 
@@ -85,7 +84,7 @@ class Mysql implements \SessionHandlerInterface {
 	 */
 	function read($id) {
 		try {
-			$st = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
+			$st = pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
 			list($ip, $uid, $lock, $data) = $st->fetch(\PDO::FETCH_NUM);
 			if(empty($ip)) @define('SESSION_UID', null);
@@ -122,8 +121,8 @@ class Mysql implements \SessionHandlerInterface {
 			];
 			if(self::$id != $id) { // can be a new session OR a regenerated session
 				$params['startTime'] = time();
-				$st = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
-			} else $st = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table));
+				$st = pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
+			} else $st = pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table));
 			$st->execute($params);
 			return true;
 		} catch(\Exception $Ex) {
@@ -139,7 +138,7 @@ class Mysql implements \SessionHandlerInterface {
 	 */
 	function destroy($id) {
 		try {
-			$st = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
+			$st = pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
 			$st->execute(['id'=>$id]);
 			return (boolean) $st->rowCount();
 		} catch(\Exception $Ex) {
@@ -154,7 +153,7 @@ class Mysql implements \SessionHandlerInterface {
 	 */
 	function gc($maxlifetime) {
 		try {
-			return Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
+			return pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
 		} catch(\Exception $Ex) {
 			return false;
 		}

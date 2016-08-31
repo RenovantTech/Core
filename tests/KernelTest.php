@@ -1,5 +1,6 @@
 <?php
 namespace test;
+use function metadigit\core\pdo;
 use metadigit\core\Kernel;
 
 class KernelTest extends \PHPUnit_Framework_TestCase {
@@ -43,11 +44,11 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertArrayHasKey('kernel', $cacheConf);
 		$this->assertEquals('metadigit\core\cache\SqliteCache', $cacheConf['kernel']['class']);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'dbConf');
+		$ReflProp = new \ReflectionProperty('metadigit\core\Kernel', 'pdoConf');
 		$ReflProp->setAccessible(true);
-		$dbConf = $ReflProp->getValue();
-		$this->assertArrayHasKey('kernel-cache', $dbConf);
-		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/kernel-cache.sqlite', $dbConf['kernel-cache']['dns']);
+		$pdoConf = $ReflProp->getValue();
+		$this->assertArrayHasKey('kernel-cache', $pdoConf);
+		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/kernel-cache.sqlite', $pdoConf['kernel-cache']['dns']);
 	}
 
 	/**
@@ -73,8 +74,8 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testInit
 	 */
 	function testPdo() {
-		$this->assertInstanceOf('metadigit\core\db\PDO', Kernel::pdo('kernel-cache'));
-		$this->assertInstanceOf('metadigit\core\db\PDO', Kernel::pdo('mysql'));
+		$this->assertInstanceOf('metadigit\core\db\PDO', pdo('kernel-cache'));
+		$this->assertInstanceOf('metadigit\core\db\PDO', pdo('mysql'));
 	}
 
 	/**

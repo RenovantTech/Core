@@ -37,6 +37,22 @@ function cache($id='system') {
 }
 
 /**
+ * PDO helper
+ * @param string $id database ID, default "master"
+ * @return db\PDO shared PDO instance
+ */
+function pdo($id='master') {
+	static $_ = [];
+	if(!isset($_[$id])) {
+		$cnf = Kernel::conf(Kernel::CONFIG_PDO)[$id];
+		TRACE and Kernel::trace(LOG_INFO, TRACE_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
+		$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[], $id);
+		$_[$id] = $pdo;
+	}
+	return $_[$id];
+}
+
+/**
  * Trace helper
  * @param integer $level trace level, use a LOG_? constant value
  * @param integer $type trace type, use a TRACE_? constant value
@@ -55,16 +71,18 @@ function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $fu
  */
 class Kernel {
 
-	const CONFIG_FILE		= 'metadigit-core.yaml';
+	const CONFIG_APP		= 0;
+	const CONFIG_CACHE		= 1;
+	const CONFIG_LOG		= 2;
+	const CONFIG_NAMESPACE	= 3;
+	const CONFIG_PDO		= 4;
+	const DEFAULT_YAML		= 'metadigit-core.yaml';
 	const EVENT_INIT		= 'kernel:init';
 	const EVENT_SHUTDOWN	= 'kernel:shutdown';
 
 	/** HTTP/CLI apps routing
 	 * @var array */
 	static protected $apps;
-	/** System Context
-	 * @var \metadigit\core\context\Context */
-	static protected $SystemContext;
 	/** LogWriters configurations
 	 * @var array */
 	static protected $logConf;
@@ -72,6 +90,12 @@ class Kernel {
 	 * @var array */
 	static protected $namespaces = [
 		'metadigit\core' => DIR
+	];
+	/** Database PDO configurations
+	 * @var array */
+	static protected $pdoConf = [
+		'kernel-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'kernel-cache.sqlite' ],
+		'kernel-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'kernel-trace.sqlite' ]
 	];
 	/** Current HTTP/CLI Request
 	 * @var object */
@@ -87,6 +111,25 @@ class Kernel {
 		'locale'		=> 'en_US.UTF-8',
 		'timeZone'		=> 'UTC'
 	];
+	/** System Context
+	 * @var \metadigit\core\context\Context */
+	static protected $SystemContext;
+
+	/**
+	 * Kernel config reader
+	 * @param string $conf config name
+	 * @return array|bool
+	 */
+	static function conf($conf) {
+		switch ($conf) {
+			case self::CONFIG_APP: return self::$apps; break;
+			case self::CONFIG_CACHE: return self::$cacheConf; break;
+			case self::CONFIG_LOG: return self::$logConf; break;
+			case self::CONFIG_NAMESPACE: return self::$namespaces; break;
+			case self::CONFIG_PDO: return self::$pdoConf; break;
+			default: return false;
+		}
+	}
 
 	/**
 	 * Kernel bootstrap.
@@ -98,7 +141,7 @@ class Kernel {
 	 * @param string $configFile configuration .ini path, relative to BASE_DIR
 	 * @return void
 	 */
-	static function init($configFile=self::CONFIG_FILE) {
+	static function init($configFile=self::DEFAULT_YAML) {
 		self::$traceFn = __METHOD__;
 		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT);
 		// ENVIRONMENT FIX
@@ -136,7 +179,7 @@ class Kernel {
 		// caches
 		if(is_array($config['caches'])) self::$cacheConf = array_merge($config['caches'], self::$cacheConf);
 		// databases
-		if(is_array($config['databases'])) self::$dbConf = array_merge($config['databases'], self::$dbConf);
+		if(is_array($config['databases'])) self::$pdoConf = array_merge($config['databases'], self::$pdoConf);
 		// logs
 		if(is_array($config['logs'])) self::$logConf = $config['logs'];
 
@@ -241,33 +284,6 @@ class Kernel {
 			self::$cache[$id] = $Cache;
 		}
 		return self::$cache[$id];
-	}
-
-	// === DATABASES ==============================================================================
-
-	/** PDO instances
-	 * @var array */
-	static protected $db;
-	/** Database PDO configurations
-	 * @var array */
-	static protected $dbConf = [
-		'kernel-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'kernel-cache.sqlite' ],
-		'kernel-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'kernel-trace.sqlite' ]
-	];
-
-	/**
-	 * Return shared PDO instance
-	 * @param string $id database ID, default "master"
-	 * @return \PDO
-	 */
-	static function pdo($id='master') {
-		if(!isset(self::$db[$id])) {
-			$cnf = self::$dbConf[$id];
-			TRACE and self::trace(LOG_DEBUG, TRACE_DB, sprintf('open db "%s": %s', $id, $cnf['dns']), null, __METHOD__);
-			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[]);
-			self::$db[$id] = $pdo;
-		}
-		return self::$db[$id];
 	}
 
 	// === LOG SYSTEM =============================================================================

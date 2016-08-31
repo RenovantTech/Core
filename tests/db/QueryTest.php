@@ -1,12 +1,12 @@
 <?php
 namespace test\db;
-use metadigit\core\Kernel,
-	metadigit\core\db\Query;
+use function metadigit\core\pdo;
+use metadigit\core\db\Query;
 
 class QueryTest extends \PHPUnit_Framework_TestCase {
 
 	static function setUpBeforeClass() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `people` (
 				id			SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				name		VARCHAR(20),
@@ -64,14 +64,14 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 	}
 
 	static function tearDownAfterClass() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `people`;
 			DROP PROCEDURE IF EXISTS sp_people;
 		');
 	}
 
 	protected function setUp() {
-		Kernel::pdo('mysql')->exec('
+		pdo('mysql')->exec('
 			TRUNCATE `people`;
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (1, "Albert",	"Brown", 21, 32.5);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (2, "Barbara",	"Yellow",25, 8.6);
@@ -85,7 +85,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		');
 	}
 
-	function __testExecCount() {
+	function testExecCount() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people')->criteria('name LIKE "%ra%"')->execCount();
 		$this->assertEquals(2, $count);
@@ -113,7 +113,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $Query->execCount(['score'=>30]));
 	}
 
-	function __testExecDelete() {
+	function testExecDelete() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people')->criteria('surname = "Brown"')->execDelete();
 		$this->assertEquals(1, $count);
@@ -141,7 +141,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, $Query->execDelete(['score'=>11]));
 	}
 
-	function __testExecInsert() {
+	function testExecInsert() {
 		$Query = (new Query('mysql'))->on('people','name,surname');
 		$this->assertEquals(1, $Query->execInsert(['name'=>'John', 'surname'=>'Foo']));
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
@@ -153,7 +153,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, (new Query('mysql'))->on('sales')->criteria('year = 2014 AND product_id = 1')->execCount());
 	}
 
-	function __testExecInsertException() {
+	function testExecInsertException() {
 		try {
 			$Query = (new Query('mysql'))->on('sales', 'year, product_id, sales1, sales2, sales3, sales4, sales5, sales6, sales7, sales8, sales9, sales10, sales11, sales12');
 			$Query->execInsert(['year'=>2014, 'product_id'=>1, 'sales1'=>null, 'sales2'=>0, 'sales3'=>32000, 'sales4'=>28450.50, 'sales5'=>0, 'sales6'=>0, 'sales7'=>0, 'sales8'=>0, 'sales9'=>0, 'sales10'=>0, 'sales11'=>0, 'sales12'=>0]);
@@ -173,7 +173,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
 	}
 
-	function __testExecSelect() {
+	function testExecSelect() {
 		// criteria() values
 		$items = (new Query('mysql'))->on('people')->criteria('surname = "Green"')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertCount(4, $items);
@@ -217,7 +217,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 
 	}
 
-	function __testExecUpdate() {
+	function testExecUpdate() {
 		// criteria() values
 		$count = (new Query('mysql'))->on('people','name,surname')->criteria('age = 25')->execUpdate(['name'=>'Zack', 'surname'=>'Black']);
 		$this->assertEquals(2, $count);
@@ -241,13 +241,13 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('surname = "Ping" AND age >= 21 AND score >= 20')->execCount());
 	}
 
-	function __testExecCall() {
+	function testExecCall() {
 		$Query = (new Query('mysql'))->on('sp_people','name, surname, age, score, @id, @time');
 		$data = $Query->execCall(['name'=>'Xiao', 'surname'=>'Ming', 'score'=>30, 'age'=>25]);
 		$this->assertEquals(9, $data['id']);
 	}
 
-	function __testCriteriaExp() {
+	function testCriteriaExp() {
 		// EQ
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('surname,EQ,Red')->execCount());
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('surname,EQ,:name')->execCount(['name'=>'Red']));
@@ -271,7 +271,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(3, (new Query('mysql'))->on('people')->criteriaExp('age,IN,21,22,23')->execCount());
 	}
 
-	function __testSetCriteriaDictionary() {
+	function testSetCriteriaDictionary() {
 		$dictionary = [
 			'ageGTE' => 'age >= ?1',
 			'scoreXY' => 'score,BTW,?1,?2',
@@ -292,7 +292,7 @@ class QueryTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals(2, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('ageGTE,20|scoreXYbis,:min,:max')->execCount(['min'=>20, 'max'=>40]));
 	}
 
-	function __testSetOrderByDictionary() {
+	function testSetOrderByDictionary() {
 		$dictionary = [
 			'surnameASC' => 'surname ASC, name ASC',
 			'surnameDESC' => 'surname DESC, name DESC'
