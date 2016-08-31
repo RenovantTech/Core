@@ -264,7 +264,7 @@ class Kernel {
 		if(!isset(self::$db[$id])) {
 			$cnf = self::$dbConf[$id];
 			TRACE and self::trace(LOG_DEBUG, TRACE_DB, sprintf('open db "%s": %s', $id, $cnf['dns']), null, __METHOD__);
-			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[]);
+			$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[], $id);
 			self::$db[$id] = $pdo;
 		}
 		return self::$db[$id];
