@@ -222,7 +222,7 @@ class Kernel {
 		self::$traceFn = __METHOD__;
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
-		$app = null;
+		$app = $dispatcherID = $namespace = null;
 		switch($api) {
 			case 'cli':
 				foreach(self::$apps['CLI'] as $id => $namespace) {
@@ -265,7 +265,7 @@ class Kernel {
 		$err = error_get_last();
 		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
 			self::$traceError = KernelDebugger::E_ERROR;
-			KernelDebugger::onError($err['type'], $err['message'], $err['file'], $err['line'], null, debug_backtrace(false));
+			KernelDebugger::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 			http_response_code(500);
 		}
 		if(PHP_SAPI != 'cli') session_write_close();
@@ -373,7 +373,7 @@ class Kernel {
 	 * - directory
 	 * - file
 	 * @param string $class
-	 * @return array
+	 * @return array|false
 	 */
 	static function parseClassName($class) {
 		if(false === $i = strrpos($class, '\\')) {
@@ -388,5 +388,6 @@ class Kernel {
 				break;
 			}
 		}
+		return false;
 	}
 }
