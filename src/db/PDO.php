@@ -9,7 +9,7 @@ namespace metadigit\core\db;
 // @TODO use const metadigit\core\TMP_DIR;
 use function metadigit\core\trace;
 /**
- * PDO
+ * PDO wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class PDO extends \PDO {
@@ -66,7 +66,10 @@ class PDO extends \PDO {
 	 * @return int the number of rows that were modified or deleted by the SQL statement
 	 */
 	function exec($statement) {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
+		if(TRACE) {
+			$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
+			trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
+		}
 		return parent::exec($statement);
 	}
 
@@ -78,7 +81,6 @@ class PDO extends \PDO {
 	 * @throws \PDOException
 	 */
 	function prepare($statement, $options = null) {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
 		return parent::prepare($statement, (array)$options);
 	}
 
@@ -87,10 +89,11 @@ class PDO extends \PDO {
 	 * @param string $statement the SQL statement to prepare and execute.
 	 * @return \PDOStatement
 	 */
-	function query($statement) {
+/* @TODO
+ 	function query($statement) {
 		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
 		return call_user_func_array('parent::query', func_get_args());
-	}
+	}*/
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.rollback.php
