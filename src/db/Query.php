@@ -351,20 +351,6 @@ class Query {
 				}
 			} else $execParams[$k] = $v;
 		}
-		if(TRACE) {
-			$trace = $sql;
-			if(!empty($execParams)) {
-				$keys = [];
-				$values = [];
-				foreach($execParams as $k=>$v) {
-					$keys[] = (is_string($k)) ? '/:'.$k.'/' : '/[?]/';
-					$values[] = (is_null($v)) ? 'NULL' : ((is_numeric($v)) ? $v : '"'.htmlentities($v).'"');
-				}
-				$trace = preg_replace($keys, $values, $trace, 1);
-			}
-			$msg = (strlen($trace)>100) ? substr($trace,0,100).'...' : $trace;
-			trace(LOG_DEBUG, TRACE_DB, $msg, $trace);
-		}
 		if(is_null($this->PDOStatement)) $this->PDOStatement = $PDO->prepare($sql);
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
