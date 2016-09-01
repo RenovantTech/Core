@@ -1,4 +1,7 @@
 objects:
+  system.ACL:
+    class: metadigit\core\acl\ACL
+    constructor: [ sys_acl, sys_users, sys_groups, sys_users_2_groups, mysql ]
   system.Mock:
     class: mock\GlobalMock
     properties:
