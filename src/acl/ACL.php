@@ -128,7 +128,7 @@ class ACL {
 	}
 
 	protected function checkFilter(array $acl) {
-		$filterCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl']))->execute($acl['filter'])->fetchColumn();
+		$filterCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
 		$values1 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
 			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
 

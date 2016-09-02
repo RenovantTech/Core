@@ -2,7 +2,6 @@
 namespace test\acl;
 use function metadigit\core\pdo;
 use metadigit\core\acl\ACL,
-	metadigit\core\context\Context,
 	metadigit\core\http\Request;
 
 class ACLTest extends \PHPUnit_Framework_TestCase {
@@ -105,7 +104,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 	function testOnOrmException(ACL $ACL) {
 		$this->expectException('metadigit\core\acl\Exception');
 		$this->expectExceptionCode(200);
-		$this->expectExceptionMessage('[FILTER] "data.UserRepository.FETCH" value MISSING');
+		$this->expectExceptionMessage('[FILTER] "data.UserRepository" value MISSING');
 		$_SESSION['UID'] = 2;
 		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
 	}
