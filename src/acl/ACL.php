@@ -64,9 +64,14 @@ class ACL {
 		));
 	}
 
-	function onRoute(Request $Req) {
+	/**
+	 * @param Request $Req
+	 * @param integer $userId User ID
+	 * @return bool
+	 */
+	function onRoute(Request $Req, $userId) {
 		$target = $Req->URI();
-		$method =$Req->getMethod();
+		$method = $Req->getMethod();
 		$matches = [];
 		$aclArray = pdo($this->pdo)
 			->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
@@ -79,45 +84,57 @@ class ACL {
 			}
 		}
 		foreach($matches as $acl) {
-//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+//echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 		}
 		return true;
 	}
 
-	function onObject($target, $method) {
+	/**
+	 * @param string $target object ID
+	 * @param string $method object method
+	 * @param integer $userId User ID
+	 * @return bool
+	 */
+	function onObject($target, $method, $userId) {
 		$matches = pdo($this->pdo)
 			->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
 			->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 		foreach($matches as $acl) {
-//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+//echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 		}
 		return true;
 	}
 
-	function onOrm($target, $method) {
+	/**
+	 * @param string $target Repository ID
+	 * @param string $method Repository action (CREATE, FETCH .. )
+	 * @param integer $userId User ID
+	 * @return bool
+	 */
+	function onOrm($target, $method, $userId) {
 		$matches = pdo($this->pdo)
 			->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
 			->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 		foreach($matches as $acl) {
-//echo "\n UID: $_SESSION[UID] - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl);
+//echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
+			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 		}
 		return true;
 	}
 
-	protected function checkAction(array $acl) {
+	protected function checkAction(array $acl, $userId) {
 		$actionCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_ACTION_CODE, $this->tables['acl'], $acl['action']))->fetchColumn();
 		if(
 			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_USER, $this->tables['acl']))
-				->execute(['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
+				->execute(['action_id'=>$acl['action'], 'user_id'=>$userId])->fetchColumn()
 			&&
 			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2r']))
-				->execute(['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
+				->execute(['action_id'=>$acl['action'], 'user_id'=>$userId])->fetchColumn()
 		) {
 //echo "\t ACTION [$acl[action]] $actionCode => EXCEPTION 100 \n";
 			throw new Exception(100, [$actionCode]);
@@ -127,13 +144,13 @@ class ACL {
 		}
 	}
 
-	protected function checkFilter(array $acl) {
+	protected function checkFilter(array $acl, $userId) {
 		$filterCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
 		$values1 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
-			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
+			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$userId])->fetchAll(\PDO::FETCH_COLUMN);
 
 		$values2 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_GROUP, $this->tables['acl'], $this->tables['u2r']))
-			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
+			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$userId])->fetchAll(\PDO::FETCH_COLUMN);
 
 		$values = array_merge($values1, $values2);
 		if(empty($values)) {

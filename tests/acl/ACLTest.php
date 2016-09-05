@@ -43,12 +43,10 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testOnRoute(ACL $ACL) {
 		$Req = new Request('/api/users/', 'GET', ['type'=>'all']);
-		$_SESSION['UID'] = 1;
-		$this->assertTrue($ACL->onRoute($Req));
+		$this->assertTrue($ACL->onRoute($Req, 1));
 
 		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
-		$_SESSION['UID'] = 1;
-		$this->assertTrue($ACL->onRoute($Req));
+		$this->assertTrue($ACL->onRoute($Req, 1));
 	}
 
 	/**
@@ -60,8 +58,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "api.users.insert" DENIED');
 		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
-		$_SESSION['UID'] = 2;
-		$this->assertTrue($ACL->onRoute($Req));
+		$this->assertTrue($ACL->onRoute($Req, 2));
 	}
 
 	/**
@@ -69,8 +66,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 	 * @param ACL $ACL
 	 */
 	function testOnObject(ACL $ACL) {
-		$_SESSION['UID'] = 1;
-		$this->assertTrue($ACL->onObject('service.Foo', 'index'));
+		$this->assertTrue($ACL->onObject('service.Foo', 'index', 1));
 	}
 
 	/**
@@ -81,8 +77,7 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 		$this->expectException('metadigit\core\acl\Exception');
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "service.Foo" DENIED');
-		$_SESSION['UID'] = 2;
-		$this->assertTrue($ACL->onObject('service.Foo', 'index'));
+		$this->assertTrue($ACL->onObject('service.Foo', 'index', 2));
 	}
 
 	/**
@@ -90,11 +85,8 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 	 * @param ACL $ACL
 	 */
 	function testOnOrm(ACL $ACL) {
-		$_SESSION['UID'] = 1;
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
-
-		$_SESSION['UID'] = 4;
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 1));
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 4));
 	}
 
 	/**
@@ -105,7 +97,6 @@ class ACLTest extends \PHPUnit_Framework_TestCase {
 		$this->expectException('metadigit\core\acl\Exception');
 		$this->expectExceptionCode(200);
 		$this->expectExceptionMessage('[FILTER] "data.UserRepository" value MISSING');
-		$_SESSION['UID'] = 2;
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH'));
+		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 2));
 	}
 }
