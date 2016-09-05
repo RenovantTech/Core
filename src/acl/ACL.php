@@ -10,7 +10,6 @@ use function metadigit\core\{pdo, trace};
 use metadigit\core\http\Request;
 
 class ACL {
-	use \metadigit\core\CoreTrait;
 
 	const SQL_CHECK_ROUTE	= 'SELECT * FROM %s WHERE type = "URL" AND ( method IS NULL OR method = :method ) ORDER BY CHAR_LENGTH(target) DESC';
 	const SQL_CHECK_OBJECT	= 'SELECT * FROM %s WHERE type = "OBJECT" AND target = :target AND ( method IS NULL OR method = :method )';
@@ -39,22 +38,13 @@ class ACL {
 	];
 
 	/**
-	 * ACL constructor.
-	 * @param string $tabAcl
-	 * @param string $tabUsers
-	 * @param string $tabRoles
-	 * @param string $tabU2R
 	 * @param string $pdo PDO instance ID, default to "master"
+	 * @param array|null $tables
 	 */
-	function __construct($tabAcl='sys_acl', $tabUsers='sys_users', $tabRoles='sys_roles', $tabU2R='sys_users_2_roles', $pdo='master') {
-		$this->tables = [
-			'acl'	=> $tabAcl,
-			'users'	=> $tabUsers,
-			'roles'=> $tabRoles,
-			'u2r'	=> $tabU2R
-		];
-		$this->pdo = $pdo;
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage');
+	function __construct($pdo='master', array $tables=null) {
+		if($pdo) $this->pdo = $pdo;
+		if($tables) $this->tables = array_merge($this->tables, $tables);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage', null, 'ACL');
 		$PDO = pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
