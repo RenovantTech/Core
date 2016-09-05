@@ -7,7 +7,8 @@
  */
 namespace metadigit\core\acl;
 use function metadigit\core\{pdo, trace};
-use metadigit\core\http\Request;
+use metadigit\core\Kernel,
+	metadigit\core\http\Request;
 
 class ACL {
 
@@ -42,9 +43,11 @@ class ACL {
 	 * @param array|null $tables
 	 */
 	function __construct($pdo='master', array $tables=null) {
+		$prevTraceFn = Kernel::traceFn();
+		Kernel::traceFn('ACL');
 		if($pdo) $this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage', null, 'ACL');
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage');
 		$PDO = pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
@@ -52,51 +55,70 @@ class ACL {
 			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
+		Kernel::traceFn($prevTraceFn);
 	}
 
 	/**
 	 * @param Request $Req
 	 * @param integer $userId User ID
 	 * @return bool
+	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
+		$prevTraceFn = Kernel::traceFn();
+		Kernel::traceFn('ACL->'.__FUNCTION__);
 		$target = $Req->URI();
 		$method = $Req->getMethod();
 		$matches = [];
-		$aclArray = pdo($this->pdo)
-			->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
-			->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
-		foreach($aclArray as $item) {
-			$item['target'] = str_replace('/', '\\/', $item['target']);
-			if(preg_match('/'.$item['target'].'/', $target)) {
-				$matches[] = $item;
-				break;
+		try {
+			$aclArray = pdo($this->pdo)
+				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
+				->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($aclArray as $item) {
+				$item['target'] = str_replace('/', '\\/', $item['target']);
+				if(preg_match('/'.$item['target'].'/', $target)) {
+					$matches[] = $item;
+					break;
+				}
 			}
-		}
-		foreach($matches as $acl) {
+			foreach($matches as $acl) {
 //echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+			}
+			Kernel::traceFn($prevTraceFn);
+			return true;
+		} catch (\Exception $Ex) {
+			Kernel::traceFn($prevTraceFn);
+			throw $Ex;
 		}
-		return true;
 	}
 
 	/**
-	 * @param string $target object ID
-	 * @param string $method object method
+	 * @param string $target  object ID
+	 * @param string $method  object method
 	 * @param integer $userId User ID
 	 * @return bool
+	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$matches = pdo($this->pdo)
-			->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
-			->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
-		foreach($matches as $acl) {
+		$prevTraceFn = Kernel::traceFn();
+		Kernel::traceFn('ACL->'.__FUNCTION__);
+		try {
+			$matches = pdo($this->pdo)
+				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
+				->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($matches as $acl) {
 //echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+			}
+			Kernel::traceFn($prevTraceFn);
+			return true;
+		} catch (\Exception $Ex) {
+			Kernel::traceFn($prevTraceFn);
+			throw $Ex;
 		}
-		return true;
 	}
 
 	/**
@@ -104,17 +126,26 @@ class ACL {
 	 * @param string $method Repository action (CREATE, FETCH .. )
 	 * @param integer $userId User ID
 	 * @return bool
+	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$matches = pdo($this->pdo)
-			->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
-			->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
-		foreach($matches as $acl) {
+		$prevTraceFn = Kernel::traceFn();
+		Kernel::traceFn('ACL->'.__FUNCTION__);
+		try {
+			$matches = pdo($this->pdo)
+				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
+				->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($matches as $acl) {
 //echo "\n UID: $userId - ACL: $acl[type] $acl[target] $acl[method] \n";
-			if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
-			if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
+				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
+			}
+			Kernel::traceFn($prevTraceFn);
+			return true;
+		} catch (\Exception $Ex) {
+			Kernel::traceFn($prevTraceFn);
+			throw $Ex;
 		}
-		return true;
 	}
 
 	protected function checkAction(array $acl, $userId) {
