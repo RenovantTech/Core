@@ -6,13 +6,13 @@ INSERT INTO sys_users (id, name) VALUES
 	(4, 'Brian Special User')
 ;
 /* GROUPS */
-INSERT INTO sys_groups (id, name) VALUES
+INSERT INTO sys_roles (id, name) VALUES
 	(1, 'ADMIN'),
 	(2, 'STAFF'),
 	(3, 'USER')
 ;
 /* USERS 2 GROUPS */
-INSERT INTO sys_users_2_groups (user_id, group_id) VALUES
+INSERT INTO sys_users_2_roles (user_id, role_id) VALUES
 	(1, 1),
 	(2, 2),
 	(3, 3),
@@ -53,7 +53,7 @@ INSERT INTO sys_acl_actions_2_users (action_id, user_id) VALUES
 	(6, 2),
 	(6, 4)
 ;
-INSERT INTO sys_acl_actions_2_groups (action_id, group_id) VALUES
+INSERT INTO sys_acl_actions_2_roles (action_id, role_id) VALUES
 	(1, 1),
 	(2, 1),
 	(3, 1),
@@ -68,7 +68,7 @@ INSERT INTO sys_acl_filters_2_users (filter_id, user_id, data) VALUES
 	(5, 4, 123),
 	(6, 4, 123)
 ;
-INSERT INTO sys_acl_filters_2_groups (filter_id, group_id, data) VALUES
+INSERT INTO sys_acl_filters_2_roles (filter_id, role_id, data) VALUES
 --	(5, 1, 123 ),
 	(5, 1, '*' ),
 	(6, 1, '*')

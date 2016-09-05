@@ -17,9 +17,9 @@ class ACL {
 	const SQL_CHECK_ORM		= 'SELECT * FROM %s WHERE type = "ORM" AND target = :target AND ( method IS NULL OR method = :method )';
 
 	const SQL_MATCH_ACTION_USER		= 'SELECT COUNT(*) FROM %s_actions_2_users WHERE action_id = :action_id AND user_id = :user_id';
-	const SQL_MATCH_ACTION_GROUP	= 'SELECT COUNT(*) FROM %s_actions_2_groups WHERE action_id = :action_id AND group_id IN ( SELECT group_id FROM %s WHERE user_id = :user_id )';
+	const SQL_MATCH_ACTION_GROUP	= 'SELECT COUNT(*) FROM %s_actions_2_roles WHERE action_id = :action_id AND role_id IN ( SELECT role_id FROM %s WHERE user_id = :user_id )';
 	const SQL_MATCH_FILTER_USER		= 'SELECT data FROM %s_filters_2_users WHERE filter_id = :filter_id AND user_id = :user_id';
-	const SQL_MATCH_FILTER_GROUP	= 'SELECT data FROM %s_filters_2_groups WHERE filter_id = :filter_id AND group_id IN ( SELECT group_id FROM %s WHERE user_id = :user_id )';
+	const SQL_MATCH_FILTER_GROUP	= 'SELECT data FROM %s_filters_2_roles WHERE filter_id = :filter_id AND role_id IN ( SELECT role_id FROM %s WHERE user_id = :user_id )';
 
 	const SQL_FETCH_ACTION_CODE = 'SELECT code FROM %s_actions WHERE id = %u';
 	const SQL_FETCH_FILTER_CODE = 'SELECT code FROM %s_filters WHERE id = %u';
@@ -34,32 +34,32 @@ class ACL {
 	protected $tables = [
 		'acl'	=> 'sys_acl',
 		'users'	=> 'sys_users',
-		'groups'=> 'sys_groups',
-		'u2g'	=> 'sys_users_2_groups'
+		'roles'	=> 'sys_roles',
+		'u2r'	=> 'sys_users_2_roles'
 	];
 
 	/**
 	 * ACL constructor.
 	 * @param string $tabAcl
 	 * @param string $tabUsers
-	 * @param string $tabGroups
-	 * @param string $tabU2G
+	 * @param string $tabRoles
+	 * @param string $tabU2R
 	 * @param string $pdo PDO instance ID, default to "master"
 	 */
-	function __construct($tabAcl='sys_acl', $tabUsers='sys_users', $tabGroups='sys_groups', $tabU2G='sys_users_2_groups', $pdo='master') {
+	function __construct($tabAcl='sys_acl', $tabUsers='sys_users', $tabRoles='sys_roles', $tabU2R='sys_users_2_roles', $pdo='master') {
 		$this->tables = [
 			'acl'	=> $tabAcl,
 			'users'	=> $tabUsers,
-			'groups'=> $tabGroups,
-			'u2g'	=> $tabU2G
+			'roles'=> $tabRoles,
+			'u2r'	=> $tabU2R
 		];
 		$this->pdo = $pdo;
 		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage');
 		$PDO = pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
-			['acl', 't_u2g', 't_users', 't_groups'],
-			[$this->tables['acl'], $this->tables['u2g'], $this->tables['users'], $this->tables['groups']],
+			['acl', 't_u2r', 't_users', 't_roles'],
+			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
 	}
@@ -116,7 +116,7 @@ class ACL {
 			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_USER, $this->tables['acl']))
 				->execute(['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
 			&&
-			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2g']))
+			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2r']))
 				->execute(['action_id'=>$acl['action'], 'user_id'=>$_SESSION['UID']])->fetchColumn()
 		) {
 //echo "\t ACTION [$acl[action]] $actionCode => EXCEPTION 100 \n";
@@ -132,7 +132,7 @@ class ACL {
 		$values1 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
 			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
 
-		$values2 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_GROUP, $this->tables['acl'], $this->tables['u2g']))
+		$values2 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_GROUP, $this->tables['acl'], $this->tables['u2r']))
 			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$_SESSION['UID']])->fetchAll(\PDO::FETCH_COLUMN);
 
 		$values = array_merge($values1, $values2);
