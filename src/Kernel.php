@@ -36,6 +36,7 @@ function acl() {
 	if(!isset($ACL) && !$ACL = cache('kernel')->get('ACL')) {
 		$cnf = Kernel::conf(Kernel::CONFIG_ACL);
 		$ACL = new acl\ACL($cnf['config']['database'], $cnf['config']['tables']);
+		cache('kernel')->set('ACL', $ACL);
 	}
 	return $ACL;
 }
@@ -240,6 +241,7 @@ class Kernel {
 			if(error_reporting()===0) return;
 			call_user_func_array('metadigit\core\KernelDebugger::onError', func_get_args());
 		});
+		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) acl();
 		self::$SystemContext = Context::factory('system');
 		self::$SystemContext->trigger(self::EVENT_INIT);
 	}
