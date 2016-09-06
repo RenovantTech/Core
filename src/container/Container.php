@@ -13,6 +13,7 @@ use function metadigit\core\{cache, trace};
  */
 class Container {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;

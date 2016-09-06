@@ -22,6 +22,7 @@ use metadigit\core\Kernel,
  */
 abstract class ActionController implements \metadigit\core\console\ControllerInterface {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** Default action method to invoke. */
 	const DEFAULT_ACTION = 'index';

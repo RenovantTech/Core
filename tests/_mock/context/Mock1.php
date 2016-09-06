@@ -2,6 +2,7 @@
 namespace mock\context;
 
 class Mock1 {
+	const ACL_SKIP = true;
 
 	protected $prop1;
 	protected $prop2;

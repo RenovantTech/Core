@@ -17,6 +17,7 @@ use metadigit\core\KernelDebugger,
  */
 class Dispatcher {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** default View engine
 	 * @var string */

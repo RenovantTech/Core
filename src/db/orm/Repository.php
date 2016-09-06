@@ -17,6 +17,7 @@ use metadigit\core\Kernel,
  */
 class Repository {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** FETCH MODE as objects */
 	const FETCH_OBJ		= 1;

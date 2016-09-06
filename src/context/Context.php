@@ -19,6 +19,7 @@ use metadigit\core\CoreProxy,
  */
 class Context implements EventDispatcherInterface {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;
