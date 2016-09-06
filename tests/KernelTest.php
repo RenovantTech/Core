@@ -1,6 +1,6 @@
 <?php
 namespace test;
-use function metadigit\core\{cache, pdo};
+use function metadigit\core\{acl, cache, pdo};
 use metadigit\core\Kernel;
 
 class KernelTest extends \PHPUnit_Framework_TestCase {
@@ -60,6 +60,21 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals('Dispatcher', $className);
 		$this->assertEquals(realpath(__DIR__.'/../src/web'), $dir);
 		$this->assertEquals('Dispatcher', $file);
+	}
+
+	/**
+	 * @depends testInit
+	 */
+	function testAcl() {
+		$ACL = acl();
+		$this->assertInstanceOf('metadigit\core\acl\ACL', $ACL);
+		$this->assertTrue(\metadigit\core\ACL_ROUTES);
+		$this->assertTrue(\metadigit\core\ACL_OBJECTS);
+		$this->assertTrue(\metadigit\core\ACL_ORM);
+		$ReflProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
+		$ReflProp->setAccessible(true);
+		$pdo = $ReflProp->getValue($ACL);
+		$this->assertEquals('mysql', $pdo);
 	}
 
 	/**

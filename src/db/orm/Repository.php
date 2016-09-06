@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
-use function metadigit\core\trace;
+use const metadigit\core\ACL_ORM;
+use function metadigit\core\{acl, trace};
 use metadigit\core\Kernel,
 	metadigit\core\db\orm\util\DataMapper,
 	metadigit\core\db\orm\util\QueryRunner,
@@ -17,6 +18,7 @@ use metadigit\core\Kernel,
  */
 class Repository {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** FETCH MODE as objects */
 	const FETCH_OBJ		= 1;
@@ -224,6 +226,7 @@ class Repository {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->context()->trigger(OrmEvent::EVENT_PRE_COUNT, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'COUNT', SESSION_UID);
 			return QueryRunner::count($this->pdo, $this->class, $OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_oid, $Ex->getCode(), $Ex->getMessage()]);
@@ -242,6 +245,7 @@ class Repository {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			$this->context()->trigger(OrmEvent::EVENT_PRE_DELETE, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'DELETE', SESSION_UID);
 			if(QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp())) {
 				$this->_onDelete->invoke($Entity);
 				$this->context()->trigger(OrmEvent::EVENT_POST_DELETE, null, null, $OrmEvent);
@@ -270,6 +274,7 @@ class Repository {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->context()->trigger(OrmEvent::EVENT_PRE_DELETE_ALL, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'DELETE', SESSION_UID);
 			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $OrmEvent->getCriteriaExp());
 			$this->context()->trigger(OrmEvent::EVENT_POST_DELETE_ALL, null, null, $OrmEvent);
 			return $n;
@@ -292,6 +297,7 @@ class Repository {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->context()->trigger(OrmEvent::EVENT_PRE_FETCH, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'FETCH', SESSION_UID);
 			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->context()->trigger(OrmEvent::EVENT_POST_FETCH, null, null, $OrmEvent->setEntity($Entity));
 			}
@@ -316,6 +322,7 @@ class Repository {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->context()->trigger(OrmEvent::EVENT_PRE_FETCH_ALL, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'FETCH', SESSION_UID);
 			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->context()->trigger(OrmEvent::EVENT_POST_FETCH_ALL, null, null, $OrmEvent->setEntities($entities));
 			}
@@ -345,6 +352,7 @@ class Repository {
 			}
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->context()->trigger(OrmEvent::EVENT_PRE_INSERT, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'INSERT', SESSION_UID);
 			$this->_onSave->invoke($Entity);
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
@@ -382,6 +390,7 @@ class Repository {
 			$Entity = new $this->class($newData);
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->context()->trigger(OrmEvent::EVENT_PRE_UPDATE, null, null, $OrmEvent);
+			ACL_ORM and acl()->onOrm($this->_oid, 'UPDATE', SESSION_UID);
 			// detect changes
 			$newData = DataMapper::object2sql($Entity);
 			$changes = [];

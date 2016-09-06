@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\web;
-use function metadigit\core\trace;
+use const metadigit\core\ACL_ROUTES;
+use function metadigit\core\{acl, trace};
 use metadigit\core\KernelDebugger,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response;
@@ -16,6 +17,7 @@ use metadigit\core\KernelDebugger,
  */
 class Dispatcher {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** default View engine
 	 * @var string */
@@ -45,6 +47,7 @@ class Dispatcher {
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
 			if(!$this->context()->trigger(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				ACL_ROUTES and acl()->onRoute($Req, SESSION_UID);
 				$Controller = $this->context()->get($this->resolveController($Req), 'metadigit\core\web\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}

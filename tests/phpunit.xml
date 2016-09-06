@@ -9,6 +9,9 @@
 			<directory>log/writer</directory>
 			<directory>log</directory>
 		</testsuite>
+		<testsuite name="acl">
+			<directory>acl</directory>
+		</testsuite>
 		<testsuite name="container">
 			<directory>container</directory>
 		</testsuite>

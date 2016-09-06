@@ -142,6 +142,7 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		cache('kernel')->delete('mock.web.Dispatcher');
 		$Dispatcher = Context::factory('mock.web',false)->get('mock.web.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
+		define('SESSION_UID', 1);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', '/home');

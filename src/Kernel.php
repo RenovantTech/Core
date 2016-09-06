@@ -28,6 +28,20 @@ define('metadigit\core\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'PROD');
 
 /**
+ * ACL helper
+ * @return acl\ACL
+ */
+function acl() {
+	static $ACL;
+	if(!isset($ACL) && !$ACL = cache('kernel')->get('ACL')) {
+		$cnf = Kernel::conf(Kernel::CONFIG_ACL);
+		$ACL = new acl\ACL($cnf['config']['database'], $cnf['config']['tables']);
+		cache('kernel')->set('ACL', $ACL);
+	}
+	return $ACL;
+}
+
+/**
  * Cache helper
  * @param string $id Cache ID, default "system"
  * @return cache\CacheInterface
@@ -79,15 +93,27 @@ function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $fu
  */
 class Kernel {
 
-	const CONFIG_APP		= 0;
-	const CONFIG_CACHE		= 1;
-	const CONFIG_LOG		= 2;
-	const CONFIG_NAMESPACE	= 3;
-	const CONFIG_PDO		= 4;
+	const CONFIG_ACL		= 0;
+	const CONFIG_APP		= 1;
+	const CONFIG_CACHE		= 2;
+	const CONFIG_LOG		= 3;
+	const CONFIG_NAMESPACE	= 4;
+	const CONFIG_PDO		= 5;
 	const DEFAULT_YAML		= 'metadigit-core.yaml';
 	const EVENT_INIT		= 'kernel:init';
 	const EVENT_SHUTDOWN	= 'kernel:shutdown';
 
+	/** ACL configurations
+	 * @var array */
+	static protected $aclConf = [
+		'routes' => false,
+		'objects' => false,
+		'orm' => false,
+		'config' => [
+			'database' => 'master',
+			'tables' => null
+		]
+	];
 	/** HTTP/CLI apps routing
 	 * @var array */
 	static protected $apps;
@@ -138,6 +164,7 @@ class Kernel {
 	 */
 	static function conf($conf) {
 		switch ($conf) {
+			case self::CONFIG_ACL: return self::$aclConf; break;
 			case self::CONFIG_APP: return self::$apps; break;
 			case self::CONFIG_CACHE: return self::$cacheConf; break;
 			case self::CONFIG_LOG: return self::$logConf; break;
@@ -192,6 +219,11 @@ class Kernel {
 		self::$apps['CLI'] = $config['cli'];
 		// constants
 		foreach($config['constants'] as $k => $v) define($k, $v);
+		// ACL
+		if(is_array($config['acl'])) self::$aclConf = array_merge(self::$aclConf, $config['acl']);
+		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) self::$aclConf['routes']);
+		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) self::$aclConf['objects']);
+		define(__NAMESPACE__.'\ACL_ORM', (boolean) self::$aclConf['orm']);
 		// caches
 		if(is_array($config['caches'])) self::$cacheConf = array_merge($config['caches'], self::$cacheConf);
 		// databases
@@ -209,6 +241,7 @@ class Kernel {
 			if(error_reporting()===0) return;
 			call_user_func_array('metadigit\core\KernelDebugger::onError', func_get_args());
 		});
+		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) acl();
 		self::$SystemContext = Context::factory('system');
 		self::$SystemContext->trigger(self::EVENT_INIT);
 	}

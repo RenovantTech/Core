@@ -19,6 +19,7 @@ use metadigit\core\Kernel,
  */
 abstract class AbstractController implements \metadigit\core\console\ControllerInterface {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	/** Controller handle method configuration
 	 * @var array */

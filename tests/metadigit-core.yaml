@@ -31,6 +31,23 @@ constants:
   UPLOAD_DIR:   /var/www/devel.com/data/files/
   SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
 
+# =========================================================
+# Core services
+# =========================================================
+
+# ACL service
+acl:
+  routes:   true  # enable ACL checks on routing
+  objects:  true  # enable ACL checks on objects methods calls
+  orm:      true  # enable ACL checks on ORM operations
+  config:
+    database: mysql
+    tables:
+      acl:    sys_acl
+      users:  sys_users
+      roles:  sys_roles
+      u2r:    sys_users_2_roles
+
 caches:
   system:
     class:    metadigit\core\cache\SqliteCache

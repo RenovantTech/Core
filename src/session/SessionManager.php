@@ -13,6 +13,7 @@ use function metadigit\core\trace;
  */
 class SessionManager {
 	use \metadigit\core\CoreTrait;
+	const ACL_SKIP = true;
 
 	const EVENT_START = 'session.start';
 	const EVENT_END = 'session.end';
