@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
+use const metadigit\core\{TRACE, TRACE_DEFAULT, TRACE_DEPINJ};
 use function metadigit\core\trace;
 use metadigit\core\Kernel;
 /**

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\session\handler;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\{pdo, trace};
 use metadigit\core\session\SessionException;
 /**

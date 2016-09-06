@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\validator;
+use const metadigit\core\{TRACE, TRACE_ERROR};
 use function metadigit\core\{cache, trace};
 /**
  * Validator

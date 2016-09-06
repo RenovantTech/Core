@@ -7,6 +7,7 @@
  */
 namespace metadigit\core\db;
 // @TODO use const metadigit\core\TMP_DIR;
+use const metadigit\core\{TRACE, TRACE_DB};
 use function metadigit\core\trace;
 /**
  * PDO wrapper

@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
-use const metadigit\core\ACL_ORM;
+use const metadigit\core\{ACL_ORM, TRACE, TRACE_DEFAULT};
 use function metadigit\core\{acl, trace};
 use metadigit\core\Kernel,
 	metadigit\core\db\orm\util\DataMapper,

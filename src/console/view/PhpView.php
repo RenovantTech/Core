@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console\view;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\trace;
 use metadigit\core\cli\Request,
 	metadigit\core\cli\Response,

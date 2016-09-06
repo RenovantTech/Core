@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web;
-use const metadigit\core\ACL_ROUTES;
+use const metadigit\core\{ACL_ROUTES, TRACE, TRACE_DEFAULT};
 use function metadigit\core\{acl, trace};
 use metadigit\core\KernelDebugger,
 	metadigit\core\http\Request,

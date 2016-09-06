@@ -6,11 +6,11 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\trace;
 use metadigit\core\KernelDebugger,
 	metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
-	metadigit\core\context\Context;
+	metadigit\core\cli\Response;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -76,7 +76,7 @@ class Dispatcher {
 	protected function resolveController(Request $Req, Response $Res) {
 		foreach($this->mappings as $cmd => $controllerID) {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
-				TRACE and trace(LOG_DEBUG, 1, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
+				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
@@ -103,7 +103,7 @@ class Dispatcher {
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
-			TRACE and trace(LOG_DEBUG, 1, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
+			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
 			$class = $this->viewEngines[$engine];
 			$View = new $class;
 			return [$View, $resource];

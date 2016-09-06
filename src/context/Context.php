@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
+use const metadigit\core\{TRACE, TRACE_DEPINJ, TRACE_EVENT};
 use function metadigit\core\{cache, trace};
 use metadigit\core\CoreProxy,
 	metadigit\core\Kernel,

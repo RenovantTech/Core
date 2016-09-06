@@ -6,6 +6,7 @@ use metadigit\core\Kernel;
 class KernelTest extends \PHPUnit_Framework_TestCase {
 
 	function testConstants() {
+		$this->assertEquals('3.0.0', \metadigit\core\VERSION);
 		$this->assertEquals(realpath(__DIR__.'/../src/'), \metadigit\core\DIR);
 	}
 

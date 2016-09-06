@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\cache;
+use const metadigit\core\{TRACE, TRACE_CACHE};
 use function metadigit\core\trace;
 /**
  * Array implementation of CacheInterface, useful for testing.

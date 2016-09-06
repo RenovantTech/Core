@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\container;
+use const metadigit\core\{TRACE, TRACE_DEPINJ};
 use function metadigit\core\{cache, trace};
 /**
  * Dependency Injection Container

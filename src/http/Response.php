@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\http;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\trace;
 /**
  * HTTP Response.
@@ -162,7 +163,7 @@ class Response {
 			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
 			$location = $url.$location;
 		}
-		trace(LOG_DEBUG, TRACE_DEFAULT, 'REDIRECT to '.$location, null, __METHOD__);
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'REDIRECT to '.$location, null, __METHOD__);
 		header('Location: '.$location, true, $statusCode);
 		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}

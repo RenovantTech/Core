@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\cache;
+use const metadigit\core\{TRACE, TRACE_CACHE, TRACE_ERROR};
 use function metadigit\core\{pdo, trace};
 /**
  * Sqlite implementation of CacheInterface
@@ -105,7 +106,7 @@ class SqliteCache implements CacheInterface {
 	}
 
 	function mget(array $ids) {
-		// @TODO mget()
+		// @TODO
 	}
 
 	function set($id, $value, $expire=null, $tags=null) {

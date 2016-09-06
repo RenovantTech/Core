@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\controller;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\trace;
 use metadigit\core\Kernel,
 	metadigit\core\http\Request,

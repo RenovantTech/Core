@@ -8,24 +8,20 @@
 namespace metadigit\core;
 use metadigit\core\context\Context;
 
-// trace & Profiler
-defined('TRACE')						or define('TRACE', false);
-define('TRACE_ERROR',		0);
-define('TRACE_DEFAULT',		1);
-define('TRACE_AUTOLOADING',	2);
-define('TRACE_DB',			3);
-define('TRACE_DEPINJ',		4);
-define('TRACE_CACHE',		5);
-define('TRACE_EVENT',		6);
-defined('PROFILER')						or define('PROFILER', false);
+// trace
+const TRACE_ERROR		= 0;
+const TRACE_DEFAULT		= 1;
+const TRACE_AUTOLOADING	= 2;
+const TRACE_DB			= 3;
+const TRACE_DEPINJ		= 4;
+const TRACE_CACHE		= 5;
+const TRACE_EVENT		= 6;
 // system
 define('EOL', "\r\n");
-define('metadigit\core\VERSION',		'3.0.0');
-defined('metadigit\core\BOOTSTRAP')		or die('BOOTSTRAP not defined!');
-defined('metadigit\core\BASE_DIR')		or die('BASE_DIR not defined!');
-define('metadigit\core\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
+const VERSION = '3.0.0';
+define(__NAMESPACE__.'\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 // environment
-defined('metadigit\core\ENVIRONMENT')	or define('metadigit\core\ENVIRONMENT', 'PROD');
+defined(__NAMESPACE__.'\ENVIRONMENT') or define(__NAMESPACE__.'\ENVIRONMENT', 'PROD');
 
 /**
  * ACL helper
@@ -50,9 +46,9 @@ function cache($id='system') {
 	static $_ = [];
 	if(!isset($_[$id])) {
 		$cnf = Kernel::conf(Kernel::CONFIG_CACHE)[$id];
-		$ReflClass = new \ReflectionClass($cnf['class']);
+		$RefClass = new \ReflectionClass($cnf['class']);
 		$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
-		$Cache = $ReflClass->newInstanceArgs($params);
+		$Cache = $RefClass->newInstanceArgs($params);
 		$_[$id] = $Cache;
 	}
 	return $_[$id];

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\log\writer;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\{pdo, trace};
 use metadigit\core\log\Logger;
 /**
@@ -43,7 +44,7 @@ class SqliteWriter implements \metadigit\core\log\LogWriterInterface {
 	function __construct($pdo, $table='log') {
 		$this->pdo = $pdo;
 		$this->table = $table;
-		TRACE and trace(LOG_DEBUG, 1, 'initialize log storage [Sqlite]');
+		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize log storage [Sqlite]');
 		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 

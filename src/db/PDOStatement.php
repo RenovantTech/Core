@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
+use const metadigit\core\TRACE;
 /**
  * PDOStatement wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>

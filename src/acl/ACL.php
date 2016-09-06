@@ -6,9 +6,11 @@
  * @license New BSD License
  */
 namespace metadigit\core\acl;
-use function metadigit\core\{pdo, trace};
 use metadigit\core\Kernel,
 	metadigit\core\http\Request;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use function metadigit\core\{pdo, trace};
+
 
 class ACL {
 

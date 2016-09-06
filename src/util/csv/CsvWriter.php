@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\csv;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
 use function metadigit\core\trace;
 /**
  * CSV Writer

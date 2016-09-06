@@ -6,11 +6,13 @@
  * @license New BSD License
  */
 namespace metadigit\core\console\controller;
-use function metadigit\core\trace;
 use metadigit\core\Kernel,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
 	metadigit\core\console\Exception;
+use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use function metadigit\core\trace;
+
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
