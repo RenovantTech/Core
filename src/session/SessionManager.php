@@ -34,7 +34,7 @@ class SessionManager {
 	/** Path on the domain where the cookie will work. Use a single slash ('/') for all paths on the domain.
 	 * @var string */
 	protected $path = '/';
-	/** Cookie domain, for example 'www.php.net'. To make cookies visible on all subdomains then the domain must be prefixed with a dot like '.php.net'.
+	/** Cookie domain, for example 'www.php.net'. To make cookies visible on all sub-domains then the domain must be prefixed with a dot like '.php.net'.
 	 * @var string */
 	protected $domain = '';
 	/** If TRUE cookie will only be sent over secure connections.
@@ -68,10 +68,9 @@ class SessionManager {
 	/**
 	 * Shutdown the session, close writing and detach $_SESSION from the back-end storage mechanism.
 	 * This will complete the internal data transformation on this request.
-	 * @param bool $readonly - OPTIONAL remove write access (i.e. throw error if Zend_Session's attempt writes)
 	 * @return void
 	 */
-	function end($readonly=true) {
+	function end() {
 		$this->context()->trigger(self::EVENT_END, $this);
 		session_write_close();
 	}

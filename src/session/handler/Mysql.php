@@ -154,7 +154,8 @@ class Mysql implements \SessionHandlerInterface {
 	 */
 	function gc($maxlifetime) {
 		try {
-			return pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
+			pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
+			return true;
 		} catch(\Exception $Ex) {
 			return false;
 		}
