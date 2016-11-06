@@ -110,7 +110,6 @@ class Kernel {
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
 		ini_set('upload_tmp_dir', TMP_DIR);
-		spl_autoload_register(__CLASS__.'::autoload');
 		register_shutdown_function(__CLASS__.'::shutdown');
 
 		$config = yaml(CORE_YAML);
@@ -251,30 +250,6 @@ class Kernel {
 			foreach(self::$log as $log)
 				call_user_func_array([$Logger,'log'], $log);
 		}
-	}
-
-	// === AUTO-LOADING SYSTEM ====================================================================
-
-	/**
-	 * __autoload() implementation
-	 * @param string $class class name
-	 * @return void
-	 */
-	static function autoload($class) {
-		list($namespace, $className, $dir, $file) = self::parseClassName($class);
-		if(@file_exists($path = $dir.'/all.cache.inc')) {
-			TRACE and trace(LOG_DEBUG, T_AUTOLOAD, $namespace.'\*', null, __METHOD__);
-			require_once($path);
-			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
-		}
-		if(@file_exists($file = $dir.'/'.$file.'.php')) {
-			TRACE and trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
-			require($file);
-			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
-		}
-		TRACE and trace(LOG_ERR, T_ERROR, 'FAILED loading '.$class, null, __METHOD__);
-		Tracer::$traceError = 3;
-		self::log(sprintf('ERROR loading class %s',$class ), LOG_ERR, 'kernel');
 	}
 
 	/**

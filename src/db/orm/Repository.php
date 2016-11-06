@@ -444,5 +444,5 @@ class Repository {
 		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 	}
 }
-Kernel::autoload('metadigit\core\db\orm\util\DataMapper');
-Kernel::autoload('metadigit\core\db\orm\util\QueryRunner');
+class_exists('metadigit\core\db\orm\util\DataMapper');
+class_exists('metadigit\core\db\orm\util\QueryRunner');
