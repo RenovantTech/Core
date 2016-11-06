@@ -108,7 +108,6 @@ class Kernel {
 	const CONFIG_LOG		= 3;
 	const CONFIG_NAMESPACE	= 4;
 	const CONFIG_PDO		= 5;
-	const DEFAULT_YAML		= 'metadigit-core.yaml';
 	const EVENT_INIT		= 'kernel:init';
 	const EVENT_SHUTDOWN	= 'kernel:shutdown';
 
@@ -190,10 +189,9 @@ class Kernel {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
-	 * @param string $configFile configuration .ini path, relative to BASE_DIR
 	 * @return void
 	 */
-	static function init($configFile=self::DEFAULT_YAML) {
+	static function init() {
 		self::$traceFn = __METHOD__;
 		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT);
 		// ENVIRONMENT FIX
@@ -203,7 +201,7 @@ class Kernel {
 		spl_autoload_register(__CLASS__.'::autoload');
 		register_shutdown_function(__CLASS__.'::shutdown');
 
-		if(!$config = yaml_parse_file(BASE_DIR.$configFile)) die('Invalid Core configuration file: '.$configFile);
+		$config = yaml(CORE_YAML);
 
 		// settings
 		self::$settings = array_replace(self::$settings, $config['settings']);

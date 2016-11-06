@@ -14,6 +14,7 @@ const LOG_DIR		= '/tmp/metadigit-core/log/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
 // environment
+const CORE_YAML		= BASE_DIR.'core.yml';
 const ENVIRONMENT	= 'PHPUNIT';
 
 define('MOCK_DIR', __DIR__.'/_mock');
