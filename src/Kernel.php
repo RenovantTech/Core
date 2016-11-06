@@ -69,7 +69,6 @@ class Kernel {
 	/** system settings
 	 * @var array */
 	static private $settings = [
-		'traceLevel'	=> LOG_DEBUG,
 		'charset'		=> 'UTF-8',
 		'locale'		=> 'en_US.UTF-8',
 		'timeZone'		=> 'UTC'
