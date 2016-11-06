@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\csv;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 /**
  * CSV Writer
@@ -90,7 +90,7 @@ class CsvWriter {
 	 * @param string $file output file
 	 */
 	function write($file) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'output file: '.$file);
+		trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
 		$fh = fopen($file, 'w');
 		// labels
 		$output = '';

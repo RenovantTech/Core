@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\view;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response,
@@ -22,7 +22,7 @@ class JsonView implements \metadigit\core\web\ViewInterface {
 	const CONTENT_TYPE = 'application/json';
 
 	function render(Request $Req, Response $Res, $resource) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
+		trace(LOG_DEBUG, T_INFO);
 		$Res->setContentType(self::CONTENT_TYPE);
 		echo json_encode($Res->getData());
 		switch(json_last_error()) {

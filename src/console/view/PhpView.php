@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console\view;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 use metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
@@ -30,7 +30,7 @@ class PhpView implements \metadigit\core\console\ViewInterface {
 	function render(Request $Req, Response $Res, $resource) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'render PHP template '.self::$template);
+		trace(LOG_DEBUG, T_INFO, 'render PHP template '.self::$template);
 		self::$model = $Res->getData();
 		self::execTemplate();
 	}

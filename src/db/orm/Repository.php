@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm;
-use const metadigit\core\{ACL_ORM, TRACE, TRACE_DEFAULT};
+use const metadigit\core\ACL_ORM;
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\{acl, trace};
 use metadigit\core\Kernel,
 	metadigit\core\db\orm\util\DataMapper,
@@ -400,7 +401,7 @@ class Repository {
 					$changes[$k] = $newData[$k];
 			}
 			if(!count($changes)) {
-				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'SKIP update, Entity not modified');
+				trace(LOG_DEBUG, T_INFO, 'SKIP update, Entity not modified');
 				return true;
 			}
 			// onSave callback
@@ -434,7 +435,7 @@ class Repository {
 	 * @throws Exception
 	 */
 	protected function doValidate($Entity, $validateMode) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'subset: '.$validateMode);
+		trace(LOG_DEBUG, T_INFO, 'subset: '.$validateMode);
 		$validateSubset = (is_string($validateMode)) ? Metadata::get($this->class)->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);

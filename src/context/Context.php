@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
-use const metadigit\core\{TRACE, TRACE_DEPINJ, TRACE_EVENT};
+use const metadigit\core\trace\{T_DEPINJ, T_EVENT};
 use function metadigit\core\{cache, trace};
 use metadigit\core\CoreProxy,
 	metadigit\core\Kernel,
@@ -41,7 +41,7 @@ class Context implements EventDispatcherInterface {
 		elseif($useCache && $Context = cache('kernel')->get($namespace.'.Context'))
 			return self::$_instances[$namespace] = $Context;
 		else {
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, $namespace, null, __METHOD__);
+			trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 			list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.','\\', $namespace.'.Context'));
 			if(empty($dirName))
 				$xmlPath = \metadigit\core\BASE_DIR.$namespace.'-context.xml';
@@ -115,7 +115,7 @@ class Context implements EventDispatcherInterface {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'GET '.$id, null, $this->_oid);
+		trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
@@ -150,7 +150,7 @@ class Context implements EventDispatcherInterface {
 	 * @see \metadigit\core\event\EventDispatcherInterface
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
-		TRACE and trace(LOG_DEBUG, TRACE_EVENT, strtoupper($eventName));
+		trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
 		$params['Context'] = $this;
 		if(is_null($Event)) $Event = new Event($target, $params);
 		$Event->setName($eventName);

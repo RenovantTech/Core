@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\trace\T_INFO;
 /**
  * Base Exception class
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -32,7 +33,7 @@ class Exception extends \Exception {
 			}
 		}
 		parent::__construct((string)$message, (int)$code);
-		TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT, '[CODE '.$this->getCode().'] '.$this->getMessage(), null, get_class($this));
+		trace(LOG_DEBUG, T_INFO, '[CODE '.$this->getCode().'] '.$this->getMessage(), null, get_class($this));
 	}
 
 	/**

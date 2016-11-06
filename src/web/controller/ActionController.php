@@ -6,11 +6,11 @@
  * @license New BSD License
  */
 namespace metadigit\core\web\controller;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
-use metadigit\core\Kernel,
-	metadigit\core\http\Request,
+use metadigit\core\http\Request,
 	metadigit\core\http\Response,
+	metadigit\core\trace\Tracer,
 	metadigit\core\web\Exception;
 /**
  * MVC action Controller implementation.
@@ -41,7 +41,7 @@ abstract class ActionController implements \metadigit\core\web\ControllerInterfa
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
@@ -62,8 +62,8 @@ abstract class ActionController implements \metadigit\core\web\ControllerInterfa
 				}
 			}
 		}
-		Kernel::traceFn($this->_oid.'->'.$action.'Action');
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
+		Tracer::traceFn($this->_oid.'->'.$action.'Action');
+		trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
 		return $View;

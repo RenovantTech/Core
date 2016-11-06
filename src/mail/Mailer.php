@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\mail;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 use Swift_Message;
 /**
@@ -64,7 +64,7 @@ class Mailer {
 
 	function __call($method, $args) {
 		if(is_null($this->Mailer)) $this->initMailer();
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null, $this->_oid.'->'.$method);
+		trace(LOG_DEBUG, T_INFO, null, null, $this->_oid.'->'.$method);
 		return call_user_func_array([$this->Mailer, $method], $args);
 	}
 
@@ -79,7 +79,7 @@ class Mailer {
 	 * - Swift_Mailer instance
 	 */
 	protected function initMailer() {
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
+		trace(LOG_DEBUG, T_INFO);
 		require $this->swiftDirectory.'dependency_maps/cache_deps.php';
 		require $this->swiftDirectory.'dependency_maps/message_deps.php';
 		require $this->swiftDirectory.'dependency_maps/mime_deps.php';
@@ -114,7 +114,7 @@ class Mailer {
 	 */
 	function newMessage() {
 		if(is_null($this->Mailer)) $this->initMailer();
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
+		trace(LOG_DEBUG, T_INFO);
 		return Swift_Message::newInstance();
 	}
 
@@ -127,9 +127,9 @@ class Mailer {
 	 */
 	function batchSend(Swift_Message $Message) {
 		if(is_null($this->Mailer)) $this->initMailer();
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'START');
+		trace(LOG_DEBUG, T_INFO, 'START');
 		$n = $this->Mailer->batchSend($Message, $this->failedRecipients);
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
+		trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
 		return $n;
 	}
 
@@ -142,9 +142,9 @@ class Mailer {
 	 */
 	function send(Swift_Message $Message) {
 		if(is_null($this->Mailer)) $this->initMailer();
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT);
+		trace(LOG_DEBUG, T_INFO);
 		$n = $this->Mailer->send($Message, $this->failedRecipients);
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
+		trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
 		return $n;
 	}
 }

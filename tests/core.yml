@@ -1,5 +1,4 @@
 settings:
-  traceLevel:   7
   charset:      UTF-8
   locale:       en_GB.UTF-8
   timeZone:     Europe/London
@@ -80,3 +79,7 @@ logs:
     class:    metadigit\core\log\writer\FileWriter
     param1:   system.log
     param2:   null
+
+# TRACE service
+trace:
+  level:      LOG_DEBUG

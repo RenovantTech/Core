@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\excel;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 /**
  * Excel Writer
@@ -64,7 +64,7 @@ class ExcelWriter {
 	 * @param string $file output file
 	 */
 	function write($file) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'output file: '.$file);
+		trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
 		$fh = fopen($file, 'w');
 		// header
 		$output = '<table>'.chr(10);

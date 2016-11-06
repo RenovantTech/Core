@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\http;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 /**
  * HTTP Response.
@@ -140,7 +140,7 @@ class Response {
 	function send() {
 		$this->size = ob_get_length();
 		if($this->size) header('Content-Type: '.(($this->contentType)?:self::DEFAULT_MIME));
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
+		trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
 		define('TRACE_END_TIME', microtime(1));
@@ -163,7 +163,7 @@ class Response {
 			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
 			$location = $url.$location;
 		}
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'REDIRECT to '.$location, null, __METHOD__);
+		trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
 		header('Location: '.$location, true, $statusCode);
 		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}

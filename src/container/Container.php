@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\container;
-use const metadigit\core\{TRACE, TRACE_DEPINJ};
+use const metadigit\core\trace\T_DEPINJ;
 use function metadigit\core\{cache, trace};
 /**
  * Dependency Injection Container
@@ -64,7 +64,7 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'GET '.$id, null, $this->_oid);
+		trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);

@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
-use const metadigit\core\{TRACE, TRACE_DEFAULT, TRACE_DEPINJ};
+use const metadigit\core\trace\{T_INFO, T_DEPINJ};
 use function metadigit\core\trace;
 use metadigit\core\Kernel;
 /**
@@ -37,7 +37,7 @@ class ContextYamlParser {
 			$yamlPath = \metadigit\core\CACHE_DIR.$namespace.'.context.yaml';
 			file_put_contents($yamlPath, $yamlFile);
 		}
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Context YAML', null, $oid);
+		trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Context YAML', null, $oid);
 
 		if(!file_exists($yamlPath)) throw new ContextException(11, [$oid, $yamlPath]);
 		$YAML = yaml_parse_file($yamlPath);
@@ -88,7 +88,7 @@ class ContextYamlParser {
 
 		// ID => class MAP
 		if(isset($YAML['objects'])) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing objects', null, $oid);
+			trace(LOG_DEBUG, T_INFO, 'parsing objects', null, $oid);
 			$filter = function($v) {
 				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
 				if((boolean)strpos($v,'Abstract')) return false;
@@ -106,7 +106,7 @@ class ContextYamlParser {
 
 		// events listeners
 		if(isset($YAML['events'])) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing events listeners', null, $oid);
+			trace(LOG_DEBUG, T_INFO, 'parsing events listeners', null, $oid);
 			// parse events in YAML
 			foreach($YAML['events'] as $eventName => $eventYAML) {
 				foreach ($eventYAML as $listenerYAML) {
@@ -134,6 +134,6 @@ class ContextYamlParser {
 				}
 			}
 		}
-		TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Context ready', null, $oid);
+		trace(LOG_DEBUG, T_DEPINJ, '[END] Context ready', null, $oid);
 	}
 }

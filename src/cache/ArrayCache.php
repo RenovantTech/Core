@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\cache;
-use const metadigit\core\{TRACE, TRACE_CACHE};
+use const metadigit\core\trace\T_CACHE;
 use function metadigit\core\trace;
 /**
  * Array implementation of CacheInterface, useful for testing.
@@ -22,7 +22,7 @@ class ArrayCache implements CacheInterface {
 
 	function get($id) {
 		if(isset($this->store[$id])) return $this->store[$id];
-		TRACE and trace(LOG_DEBUG, TRACE_CACHE, '[MISSED] '.$id);
+		trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id);
 		return false;
 	}
 
@@ -39,13 +39,13 @@ class ArrayCache implements CacheInterface {
 	}
 
 	function set($id, $value, $expire=0, $tag=null) {
-		TRACE and trace(LOG_DEBUG, TRACE_CACHE, '[STORE] '.$id);
+		trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id);
 		$this->store[$id] = $value;
 		return true;
 	}
 
 	function delete($id) {
-		TRACE and trace(LOG_DEBUG, TRACE_CACHE, '[DELETE] '.$id);
+		trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id);
 		if(isset($this->store[$id])) {
 			unset($this->store[$id]);
 			return true;

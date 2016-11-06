@@ -6,9 +6,11 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\trace\T_INFO;
 use metadigit\core\context\Context,
 	metadigit\core\container\Container,
-	metadigit\core\container\ContainerException;
+	metadigit\core\container\ContainerException,
+	metadigit\core\trace\Tracer;
 /**
  * Proxy for injected objects.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -34,21 +36,21 @@ class CoreProxy {
 	}
 
 	function __call($method, $args) {
-		$prevTraceFn = Kernel::traceFn();
+		$prevTraceFn = Tracer::traceFn();
 		try {
 			$this->_Obj || $this->_Obj = cache('kernel')->get($this->_oid);
 			$this->_Obj || $this->_Obj = Context::factory(substr($this->_oid, 0, strrpos($this->_oid, '.')))->getContainer()->get($this->_oid, null, Container::FAILURE_SILENT);
 			if($this->_Obj) {
-				Kernel::traceFn($this->_oid.'->'.$method);
+				Tracer::traceFn($this->_oid.'->'.$method);
 				ACL_OBJECTS and @constant(get_class($this->_Obj).'::ACL_SKIP')==null and acl()->onObject($this->_oid, $method, SESSION_UID);
-				TRACE and Kernel::trace(LOG_DEBUG, TRACE_DEFAULT);
+				trace(LOG_DEBUG, T_INFO);
 				$r = call_user_func_array([$this->_Obj, $method], $args);
-				Kernel::traceFn($prevTraceFn);
+				Tracer::traceFn($prevTraceFn);
 				return $r;
 			}
 			throw new ContainerException(4, [$this->_oid]);
 		} catch (\Exception $Ex) {
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
