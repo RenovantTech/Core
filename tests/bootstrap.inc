@@ -2,7 +2,7 @@
 namespace metadigit\core;
 // core services
 const TRACE = false;
-// path
+// directories
 const BOOTSTRAP = __FILE__;
 const PUBLIC_DIR	= '/tmp/metadigit-core/httpdocs/';
 const BASE_DIR		= __DIR__.'/';
@@ -13,6 +13,8 @@ const CACHE_DIR		= '/tmp/metadigit-core/cache/';
 const LOG_DIR		= '/tmp/metadigit-core/log/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
+// environment
+const ENVIRONMENT	= 'PHPUNIT';
 
 define('MOCK_DIR', __DIR__.'/_mock');
 

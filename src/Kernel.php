@@ -20,8 +20,6 @@ const TRACE_EVENT		= 6;
 define('EOL', "\r\n");
 const VERSION = '3.0.0';
 define(__NAMESPACE__.'\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
-// environment
-defined(__NAMESPACE__.'\ENVIRONMENT') or define(__NAMESPACE__.'\ENVIRONMENT', 'PROD');
 
 /**
  * ACL helper
@@ -81,6 +79,21 @@ function pdo($id='master') {
  */
 function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $function=null) {
 	Kernel::trace($level, $type, $msg, $data, $function);
+}
+
+/**
+ * YAML parser utility, supporting ENVIRONMENT switch
+ * @param string $file         YAML file path
+ * @param string|null $section YAML section to be parsed
+ * @return array
+ * @throws Exception
+ */
+function yaml($file, $section=null) {
+	$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
+	if(file_exists($fileEnv)) $YAML = yaml_parse_file($fileEnv);
+	elseif(file_exists($file)) $YAML = yaml_parse_file($file);
+	else throw new Exception('YAML not found: '.$file);
+	return ($section) ? $YAML[$section] : $YAML;
 }
 
 /**
