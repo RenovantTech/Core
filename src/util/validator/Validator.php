@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\validator;
-use const metadigit\core\{TRACE, TRACE_ERROR};
+use const metadigit\core\trace\T_ERROR;
 use function metadigit\core\{cache, trace};
 /**
  * Validator
@@ -33,7 +33,7 @@ class Validator {
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
 					$errors[$prop] = $func;
-					TRACE and trace(LOG_DEBUG, TRACE_ERROR, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")', __METHOD__);
+					trace(LOG_DEBUG, T_ERROR, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")', __METHOD__);
 				}
 			}
 		}

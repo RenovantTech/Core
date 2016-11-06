@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\container;
-use const metadigit\core\{TRACE, TRACE_DEPINJ};
+use const metadigit\core\trace\T_DEPINJ;
 use function metadigit\core\trace;
 use metadigit\core\CoreProxy,
 	metadigit\core\Kernel;
@@ -66,7 +66,7 @@ class ContainerYamlParser {
 	 */
 	function parseMaps(array &$id2classMap, array &$class2idMap) {
 		if(isset($this->YAML['objects'])) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
+			trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
 			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
 				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
@@ -84,7 +84,7 @@ class ContainerYamlParser {
 					$class2idMap[$class][] = $id;
 				}
 			}
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, '[END] Container ready', null, $this->_oid);
+			trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_oid);
 		}
 	}
 
@@ -97,7 +97,7 @@ class ContainerYamlParser {
 	function parseObjectConstructorArgs($id) {
 		$args = [];
 		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
+			trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 			$i = 0;
 			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
 				switch(self::parseType($yamlArg)) {
@@ -146,7 +146,7 @@ class ContainerYamlParser {
 	function parseObjectProperties($id) {
 		$properties = [];
 		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
+			trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
 				switch (self::parseType($yamlProp)) {
 					case 'boolean':

@@ -16,8 +16,8 @@ define(__NAMESPACE__.'\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 namespace metadigit\core\trace;
 
 const T_ERROR		= 0;
-const T_DEFAULT		= 1;
-const T_AUTOLOADING	= 2;
+const T_INFO		= 1;
+const T_AUTOLOAD	= 2;
 const T_DB			= 3;
 const T_DEPINJ		= 4;
 const T_CACHE		= 5;

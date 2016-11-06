@@ -21,6 +21,7 @@ define('MOCK_DIR', __DIR__.'/_mock');
 
 require __DIR__.'/../src/constants.inc';
 require __DIR__.'/../src/helpers.inc';
+require __DIR__.'/../src/trace/Tracer.php';
 require __DIR__.'/../src/CoreProxy.php';
 require __DIR__.'/../src/CoreTrait.php';
 require __DIR__.'/../src/Kernel.php';

@@ -6,6 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\trace\{T_INFO, T_DB};
+use metadigit\core\trace\Tracer;
 
 /**
  * ACL helper
@@ -47,7 +49,7 @@ function pdo($id='master') {
 	static $_ = [];
 	if(!isset($_[$id])) {
 		$cnf = Kernel::conf(Kernel::CONFIG_PDO)[$id];
-		TRACE and Kernel::trace(LOG_INFO, TRACE_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
+		trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
 		$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[], $id);
 		$_[$id] = $pdo;
 	}
@@ -56,15 +58,15 @@ function pdo($id='master') {
 
 /**
  * Trace helper
- * @param integer $level trace level, use a LOG_? constant value
- * @param integer $type trace type, use a TRACE_? constant value
+ * @param integer $level trace level, use a LOG_* constant value
+ * @param integer $type trace type, use a T_* constant value
  * @param string $msg the trace message
  * @param mixed $data the trace data
  * @param string $function the calling object method
  * @return void
  */
-function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $function=null) {
-	Kernel::trace($level, $type, $msg, $data, $function);
+function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
+	Tracer::trace($level, $type, $msg, $data, $function);
 }
 
 /**

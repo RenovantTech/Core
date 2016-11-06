@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
-use const metadigit\core\TRACE;
 /**
  * PDOStatement wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -33,7 +32,7 @@ class PDOStatement extends \PDOStatement {
 	 * @return PDOStatement
 	 */
 	function execute($params = null, $traceLevel=LOG_INFO) {
-		TRACE and PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
+		PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
 		parent::execute($params);
 		return $this;
 	}

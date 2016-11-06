@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\cli;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 /**
  * CLI Response.
@@ -125,7 +125,7 @@ class Response {
 	 */
 	function send() {
 		$this->size = ob_get_length();
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, null, null. __METHOD__);
+		trace(LOG_DEBUG, T_INFO, null, null. __METHOD__);
 		ob_flush();
 		define('TRACE_END_TIME', microtime(1));
 	}

@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\event;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 /**
  * EventDispatcherXmlParser
@@ -44,7 +44,7 @@ class EventDispatcherXmlParser {
 	function parseListeners(EventDispatcher $EventDispatcher) {
 		foreach($this->XML->xpath('/events/event') as $eventXML) {
 			$eventName = (string)$eventXML['name'];
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'parsing listeners for event "'.$eventName.'"');
+			trace(LOG_DEBUG, T_INFO, 'parsing listeners for event "'.$eventName.'"');
 			foreach($eventXML->xpath('listeners/listener') as $listenerXML) {
 				$priority = (isset($listenerXML['priority'])) ? (int)$listenerXML['priority'] : 1;
 				$callback = (string)$listenerXML;

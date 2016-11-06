@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\trace\T_INFO;
 /**
  * KernelHelper
  * @internal
@@ -14,7 +15,7 @@ namespace metadigit\core;
 class KernelHelper extends Kernel {
 
 	static function boot() {
-		self::trace(LOG_DEBUG, TRACE_DEFAULT, null, null, __METHOD__);
+		trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::log('kernel bootstrap', LOG_INFO, 'kernel');
 		// directories
 		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(KernelException::ERR21);

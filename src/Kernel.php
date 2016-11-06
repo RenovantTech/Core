@@ -6,7 +6,9 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use metadigit\core\context\Context;
+use const metadigit\core\trace\{T_AUTOLOAD, T_ERROR, T_INFO};
+use metadigit\core\context\Context,
+	metadigit\core\trace\Tracer;
 /**
  * Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -103,8 +105,8 @@ class Kernel {
 	 * @return void
 	 */
 	static function init() {
-		self::$traceFn = __METHOD__;
-		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT);
+		Tracer::traceFn(__METHOD__);
+		TRACE and trace(LOG_DEBUG, T_INFO);
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
@@ -119,7 +121,6 @@ class Kernel {
 		date_default_timezone_set(self::$settings['timeZone']);
 		setlocale(LC_ALL,self::$settings['locale']);
 		ini_set('default_charset',self::$settings['charset']);
-		self::$traceLevel = self::$settings['traceLevel'];
 		// namespaces
 		foreach($config['namespaces'] as $k => $dir) {
 			$dir = rtrim($dir,DIRECTORY_SEPARATOR);
@@ -170,7 +171,7 @@ class Kernel {
 	 * @throws KernelException
 	 */
 	static function dispatch($api=PHP_SAPI) {
-		self::$traceFn = __METHOD__;
+		Tracer::traceFn(__METHOD__);
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
 		$app = $dispatcherID = $namespace = null;
@@ -202,7 +203,7 @@ class Kernel {
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
 		self::$Req->setAttribute('APP_DIR', $parse[2].'/');
-		TRACE and self::trace(LOG_DEBUG, TRACE_DEFAULT, $dispatcherID);
+		TRACE and trace(LOG_DEBUG, T_INFO, $dispatcherID);
 		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
@@ -210,12 +211,12 @@ class Kernel {
 	 * Automatic shutdown handler
 	 */
 	static function shutdown() {
-		self::$traceFn = __METHOD__;
+		Tracer::traceFn(__METHOD__);
 		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 		cache\SqliteCache::shutdown();
 		$err = error_get_last();
 		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
-			self::$traceError = KernelDebugger::E_ERROR;
+			Tracer::$traceError = KernelDebugger::E_ERROR;
 			KernelDebugger::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 			http_response_code(500);
 		}
@@ -236,7 +237,7 @@ class Kernel {
 	 * @param string $facility log facility
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		TRACE and self::trace(LOG_DEBUG, 1, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
+		TRACE and trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}
 
@@ -253,45 +254,6 @@ class Kernel {
 		}
 	}
 
-	// === TRACE SYSTEM ===========================================================================
-
-	/** backtrace store
-	 * @var array */
-	static protected $trace = [];
-	/** backtrace Error level, incremented by errors & exceptions
-	 * @var integer */
-	static protected $traceError = 0;
-	/** backtrace level
-	 * @var integer */
-	static protected $traceLevel = LOG_DEBUG;
-	/** backtrace current scope
-	 * @var string */
-	static protected $traceFn;
-
-	/**
-	 * Kernel trace function.
-	 * @param integer $level trace level, use a LOG_? constant value
-	 * @param integer $type trace type, use a TRACE_? constant value
-	 * @param string $msg the trace message
-	 * @param mixed $data the trace data
-	 * @param string $function the tracing object method / function
-	 */
-	static function trace($level=LOG_DEBUG, $type=TRACE_DEFAULT, $msg=null, $data=null, $function=null) {
-		if($level > self::$traceLevel) return;
-		$fn = str_replace('metadigit', '\\', $function?:self::$traceFn);
-		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, print_r($data,true)];
-	}
-
-	/**
-	 * Setter/getter backtrace current scope
-	 * @param string|null $fn
-	 * @return string
-	 */
-	static function traceFn($fn=null) {
-		if($fn) self::$traceFn = $fn;
-		return self::$traceFn;
-	}
-
 	// === AUTO-LOADING SYSTEM ====================================================================
 
 	/**
@@ -302,17 +264,17 @@ class Kernel {
 	static function autoload($class) {
 		list($namespace, $className, $dir, $file) = self::parseClassName($class);
 		if(@file_exists($path = $dir.'/all.cache.inc')) {
-			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, $namespace.'\*', null, __METHOD__);
+			TRACE and trace(LOG_DEBUG, T_AUTOLOAD, $namespace.'\*', null, __METHOD__);
 			require_once($path);
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
 		if(@file_exists($file = $dir.'/'.$file.'.php')) {
-			TRACE and self::trace(LOG_DEBUG, TRACE_AUTOLOADING, $class, null, __METHOD__);
+			TRACE and trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
 			require($file);
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
-		TRACE and self::trace(LOG_ERR, TRACE_ERROR, 'FAILED loading '.$class, null, __METHOD__);
-		self::$traceError = 3;
+		TRACE and trace(LOG_ERR, T_ERROR, 'FAILED loading '.$class, null, __METHOD__);
+		Tracer::$traceError = 3;
 		self::log(sprintf('ERROR loading class %s',$class ), LOG_ERR, 'kernel');
 	}
 

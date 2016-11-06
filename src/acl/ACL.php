@@ -6,11 +6,10 @@
  * @license New BSD License
  */
 namespace metadigit\core\acl;
-use metadigit\core\Kernel,
-	metadigit\core\http\Request;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\{pdo, trace};
-
+use metadigit\core\http\Request,
+	metadigit\core\trace\Tracer;
 
 class ACL {
 
@@ -45,11 +44,11 @@ class ACL {
 	 * @param array|null $tables
 	 */
 	function __construct($pdo='master', array $tables=null) {
-		$prevTraceFn = Kernel::traceFn();
-		Kernel::traceFn('ACL');
+		$prevTraceFn = Tracer::traceFn();
+		Tracer::traceFn('ACL');
 		if($pdo) $this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize ACL storage');
+		trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
 		$PDO = pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
@@ -57,7 +56,7 @@ class ACL {
 			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
-		Kernel::traceFn($prevTraceFn);
+		Tracer::traceFn($prevTraceFn);
 	}
 
 	/**
@@ -67,8 +66,8 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
-		$prevTraceFn = Kernel::traceFn();
-		Kernel::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = Tracer::traceFn();
+		Tracer::traceFn('ACL->'.__FUNCTION__);
 		$target = $Req->URI();
 		$method = $Req->getMethod();
 		$matches = [];
@@ -88,10 +87,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -104,8 +103,8 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = Kernel::traceFn();
-		Kernel::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = Tracer::traceFn();
+		Tracer::traceFn('ACL->'.__FUNCTION__);
 		try {
 			$matches = pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
@@ -115,10 +114,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -131,8 +130,8 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = Kernel::traceFn();
-		Kernel::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = Tracer::traceFn();
+		Tracer::traceFn('ACL->'.__FUNCTION__);
 		try {
 			$matches = pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
@@ -142,10 +141,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Kernel::traceFn($prevTraceFn);
+			Tracer::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -162,7 +161,7 @@ class ACL {
 //echo "\t ACTION [$acl[action]] $actionCode => EXCEPTION 100 \n";
 			throw new Exception(100, [$actionCode]);
 		} else {
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, "$acl[type] $acl[target] $acl[method] - ACTION: $actionCode => OK ");
+			trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - ACTION: $actionCode => OK ");
 //echo "\t ACTION [$acl[action]] $actionCode => OK \n";
 		}
 	}
@@ -180,7 +179,7 @@ class ACL {
 //echo "\t FILTER [$acl[filter]] $filterCode => EXCEPTION 200 \n";
 			throw new Exception(200, [$filterCode]);
 		} elseif(array_search('*', $values) !== false) {
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, "$acl[type] $acl[target] $acl[method] - FILTER: $filterCode VALUE: * => OK ");
+			trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - FILTER: $filterCode VALUE: * => OK ");
 //echo "\t FILTER [$acl[filter]] $filterCode * => OK \n";
 			return true;
 		} else {

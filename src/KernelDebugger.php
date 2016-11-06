@@ -6,6 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\trace\T_ERROR;
+use metadigit\core\trace\Tracer;
 /**
  * Kernel extension for errors & exceptions handling
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -44,9 +46,9 @@ class KernelDebugger extends \metadigit\core\Kernel {
 	 * @return void
 	 */
 	static function onError($errno, $errstr, $errfile, $errline, $errcontext) {
-		if(parent::$traceError < self::E_NOTICE && in_array($errno, [E_NOTICE,E_USER_NOTICE,E_STRICT])) parent::$traceError = self::E_NOTICE;
-		elseif(parent::$traceError < self::E_WARNING && in_array($errno, [E_WARNING,E_USER_WARNING])) parent::$traceError = self::E_WARNING;
-		else parent::$traceError = self::E_ERROR;
+		if(Tracer::$traceError < self::E_NOTICE && in_array($errno, [E_NOTICE,E_USER_NOTICE,E_STRICT])) Tracer::$traceError = self::E_NOTICE;
+		elseif(Tracer::$traceError < self::E_WARNING && in_array($errno, [E_WARNING,E_USER_WARNING])) Tracer::$traceError = self::E_WARNING;
+		else Tracer::$traceError = self::E_ERROR;
 		// get trace array, w/o first 3 elements (this function call)
 		$trace = debug_backtrace(false);
 		array_shift($trace);array_shift($trace);array_shift($trace);
@@ -62,9 +64,9 @@ class KernelDebugger extends \metadigit\core\Kernel {
 	static function onException($Ex) {
 		$level = ($Ex instanceof \metadigit\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
 		switch($level) {
-			case E_USER_NOTICE: if(parent::$traceError < self::E_NOTICE) parent::$traceError = self::E_NOTICE; break;
-			case E_USER_WARNING: if(parent::$traceError < self::E_WARNING) parent::$traceError = self::E_WARNING; break;
-			default: parent::$traceError = self::E_ERROR;
+			case E_USER_NOTICE: if(Tracer::$traceError < self::E_NOTICE) Tracer::$traceError = self::E_NOTICE; break;
+			case E_USER_WARNING: if(Tracer::$traceError < self::E_WARNING) Tracer::$traceError = self::E_WARNING; break;
+			default: Tracer::$traceError = self::E_ERROR;
 		}
 		TRACE and self::traceException($Ex);
 		self::logException($Ex);
@@ -88,7 +90,7 @@ class KernelDebugger extends \metadigit\core\Kernel {
 					'------------------------------------------------------------------------------------------------'."\n".
 					implode('<br/>',$textTraceArray)."\n".
 					'------------------------------------------------------------------------------------------------';
-		self::trace(LOG_ERR, TRACE_ERROR, $errstr, $data, self::LABELS[$errno]);
+		trace(LOG_ERR, T_ERROR, $errstr, $data, self::LABELS[$errno]);
 	}
 
 	/**
@@ -106,7 +108,7 @@ class KernelDebugger extends \metadigit\core\Kernel {
 					'------------------------------------------------------------------------------------------------'."\n".
 					implode("\n",$textTraceArray)."\n".
 					'------------------------------------------------------------------------------------------------';
-		self::trace(LOG_ERR, TRACE_ERROR, $msg, $data, get_class($Ex));
+		trace(LOG_ERR, T_ERROR, $msg, $data, get_class($Ex));
 	}
 
 	static private function logError($errno, $errstr, $errfile, $errline, $errcontext, $trace) {

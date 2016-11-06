@@ -6,7 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\web;
-use const metadigit\core\{ACL_ROUTES, TRACE, TRACE_DEFAULT};
+use const metadigit\core\ACL_ROUTES;
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\{acl, trace};
 use metadigit\core\KernelDebugger,
 	metadigit\core\http\Request,
@@ -83,7 +84,7 @@ class Dispatcher {
 	protected function resolveController(Request $Req) {
 		foreach($this->routes as $url => $controllerID) {
 			if(fnmatch($url, $Req->getAttribute('APP_URI'))) {
-				TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, $url.' => '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
+				trace(LOG_DEBUG, T_INFO, $url.' => '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
@@ -109,7 +110,7 @@ class Dispatcher {
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
-			TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
+			trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
 			$class = $this->viewEngines[$engine];
 			$View = new $class;
 			return [$View, $resource];

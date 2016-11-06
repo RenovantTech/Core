@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\db;
 // @TODO use const metadigit\core\TMP_DIR;
-use const metadigit\core\{TRACE, TRACE_DB};
+use const metadigit\core\trace\T_DB;
 use function metadigit\core\trace;
 /**
  * PDO wrapper
@@ -32,7 +32,7 @@ class PDO extends \PDO {
 			$statement = preg_replace($keys, $values, $statement, 1);
 		}
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		trace($level, TRACE_DB, sprintf('[%s] %s', $id, $msg), $statement);
+		trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
 	}
 
 	/** database ID
@@ -68,7 +68,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function beginTransaction() {
-		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] beginTransaction()', $this->_id));
+		trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
 		return parent::beginTransaction();
 	}
 
@@ -77,7 +77,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function commit() {
-		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] commit()', $this->_id));
+		trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
 		return parent::commit();
 	}
 
@@ -88,10 +88,8 @@ class PDO extends \PDO {
 	 * @return int the number of rows that were modified or deleted by the SQL statement
 	 */
 	function exec($statement, $traceLevel=LOG_INFO) {
-		if(TRACE) {
-			$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-			trace($traceLevel, TRACE_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
-		}
+		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
+		trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
 	}
 
@@ -115,7 +113,7 @@ class PDO extends \PDO {
 	 * @return PDOStatement
 	 */
 	function query($statement, $traceLevel=LOG_INFO) {
-		TRACE and trace(LOG_DEBUG, TRACE_DB, sprintf('[%s] %s', $this->_id, $statement));
+		trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
 		$st = parent::query($statement);
 		if(func_num_args()>1) {
 			$args = array_shift(func_get_args());
@@ -130,7 +128,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function rollBack() {
-		TRACE and trace(LOG_INFO, TRACE_DB, sprintf('[%s] rollBack()', $this->_id));
+		trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
 		return parent::rollBack();
 	}
 }

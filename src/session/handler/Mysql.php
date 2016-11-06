@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\session\handler;
-use const metadigit\core\{TRACE, TRACE_DEFAULT};
+use const metadigit\core\trace\T_INFO;
 use function metadigit\core\{pdo, trace};
 use metadigit\core\session\SessionException;
 /**
@@ -53,7 +53,7 @@ class Mysql implements \SessionHandlerInterface {
 	function __construct($pdo, $table='sessions') {
 		$this->pdo = $pdo;
 		$this->table = $table;
-		TRACE and trace(LOG_DEBUG, TRACE_DEFAULT, 'initialize session storage', null, __METHOD__);
+		trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, __METHOD__);
 		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
