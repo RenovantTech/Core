@@ -151,13 +151,6 @@ class Kernel {
 		// initialize
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
 		cache('kernel');
-		set_exception_handler(function() {
-			call_user_func_array('metadigit\core\KernelDebugger::onException', func_get_args());
-		});
-		set_error_handler(function() {
-			if(error_reporting()===0) return;
-			call_user_func_array('metadigit\core\KernelDebugger::onError', func_get_args());
-		});
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) acl();
 		self::$SystemContext = Context::factory('system');
 		self::$SystemContext->trigger(self::EVENT_INIT);
@@ -214,8 +207,7 @@ class Kernel {
 		cache\SqliteCache::shutdown();
 		$err = error_get_last();
 		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
-			Tracer::$traceError = KernelDebugger::E_ERROR;
-			KernelDebugger::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
+			Tracer::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 			http_response_code(500);
 		}
 		if(PHP_SAPI != 'cli') session_write_close();

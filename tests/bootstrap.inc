@@ -31,4 +31,5 @@ exec('rm -fr '.DATA_DIR);
 register_shutdown_function(function() {
 	exec('rm -fr '.DATA_DIR);
 });
+trace\Tracer::init();
 Kernel::init();

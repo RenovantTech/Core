@@ -8,27 +8,72 @@
 namespace metadigit\core\trace;
 use const metadigit\core\CORE_YAML;
 use function metadigit\core\yaml;
+use metadigit\core\Kernel;
 /**
  * Tracer
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class Tracer {
 
+	const E_NOTICE = 1;
+	const E_WARNING = 2;
+	const E_ERROR = 3;
+
 	static protected $conf = [
 		'level' => LOG_DEBUG
 	];
+	/** current Error level, incremented by errors & exceptions
+	 * @var integer */
+	static protected $errorLevel = 0;
 	/** backtrace store
 	 * @var array */
 	static protected $trace = [];
-	/** backtrace Error level, incremented by errors & exceptions
-	 * @var integer */
-	static public $traceError = 0;
 	/** backtrace current scope
 	 * @var string */
 	static protected $traceFn;
 
 	static function init() {
-		self::$conf = array_merge(self::$conf,yaml(CORE_YAML, 'trace'));
+		self::$conf = array_merge(self::$conf, yaml(CORE_YAML, 'trace'));
+		if(is_string(self::$conf['level'])) self::$conf['level'] = constant(self::$conf['level']);
+		set_exception_handler(__CLASS__.'::onException');
+		set_error_handler(__CLASS__.'::onError');
+	}
+
+	/**
+	 * Error handler
+	 * @param integer $n       contains the level of the error raised
+	 * @param string  $str     contains the error message
+	 * @param string  $file    contains the filename that the error was raised in
+	 * @param integer $line    contains the file line that the error was raised in
+	 * @param array   $context contain an array of every variable that existed in the scope the error was triggered in
+	 * @return void
+	 */
+	static function onError($n, $str, $file, $line, $context) {
+//		if(error_reporting()===0) return;
+		if(self::$errorLevel < self::E_NOTICE && in_array($n, [E_NOTICE,E_USER_NOTICE,E_STRICT])) self::$errorLevel = self::E_NOTICE;
+		elseif(self::$errorLevel < self::E_WARNING && in_array($n, [E_WARNING,E_USER_WARNING])) self::$errorLevel = self::E_WARNING;
+		else self::$errorLevel = self::E_ERROR;
+		// get trace array, w/o first 2 elements (this function call)
+		require_once __DIR__.'/functions.inc';
+		traceError($n, $str, $file, $line);
+		// @TODO call toDB() toLog() toEmail()
+	}
+
+	/**
+	 * Exception handler
+	 * @param \Throwable $Ex the Error/Exception raised
+	 */
+	static function onException(\Throwable $Ex) {
+		$level = ($Ex instanceof \metadigit\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
+		switch($level) {
+			case E_USER_NOTICE: if(self::$errorLevel < self::E_NOTICE) self::$errorLevel = self::E_NOTICE; break;
+			case E_USER_WARNING: if(self::$errorLevel < self::E_WARNING) self::$errorLevel = self::E_WARNING; break;
+			default: self::$errorLevel = self::E_ERROR;
+		}
+		require_once __DIR__.'/functions.inc';
+		traceException($Ex);
+		// @TODO call toDB() toLog() toEmail()
+
 	}
 
 	/**
@@ -57,4 +102,3 @@ class Tracer {
 		return self::$trace;
 	}
 }
-Tracer::init();

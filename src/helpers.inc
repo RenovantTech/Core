@@ -21,8 +21,7 @@ spl_autoload_register(function($class) {
 		require($file);
 		if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 	}
-	trace(LOG_ERR, T_ERROR, 'FAILED loading '.$class, null, __METHOD__);
-	Tracer::$traceError = 3;
+	trigger_error('FAILED loading '.$class, E_USER_ERROR);
 });
 
 /**
