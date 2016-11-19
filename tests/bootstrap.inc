@@ -1,7 +1,5 @@
 <?php
 namespace metadigit\core;
-// core services
-const TRACE = false;
 // directories
 const BOOTSTRAP = __FILE__;
 const PUBLIC_DIR	= '/tmp/metadigit-core/httpdocs/';
