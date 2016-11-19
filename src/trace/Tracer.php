@@ -14,7 +14,7 @@ use function metadigit\core\yaml;
  */
 class Tracer {
 
-	const CONF = [
+	static protected $conf = [
 		'level' => LOG_DEBUG
 	];
 	/** backtrace store
@@ -26,14 +26,9 @@ class Tracer {
 	/** backtrace current scope
 	 * @var string */
 	static protected $traceFn;
-	/** backtrace level
-	 * @var integer */
-	static protected $level = LOG_DEBUG;
 
-	function __construct() {
-		$conf = array_merge(yaml(CORE_YAML, 'trace'), self::CONF);
-		var_dump($conf);
-		//foreach ($conf as $k=>$v) $this->$k = $v;
+	static function init() {
+		self::$conf = array_merge(self::$conf,yaml(CORE_YAML, 'trace'));
 	}
 
 	/**
@@ -44,7 +39,7 @@ class Tracer {
 	 * @param string $function the tracing object method / function
 	 */
 	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
-		if($level > self::$level) return;
+		if($level > self::$conf['level']) return;
 		$fn = str_replace('metadigit', '\\', $function?:self::$traceFn);
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, print_r($data,true)];
 	}
@@ -62,3 +57,4 @@ class Tracer {
 		return self::$trace;
 	}
 }
+Tracer::init();
