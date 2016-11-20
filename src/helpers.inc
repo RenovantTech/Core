@@ -6,23 +6,23 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_ERROR, T_INFO};
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\trace\Tracer;
 
 /**
  * __autoload() implementation
  * @param string $class class name
- * @return void
  */
-spl_autoload_register(function($class) {
+function autoload($class) {
 	list($namespace, $className, $dir, $file) = Kernel::parseClassName($class);
 	if(@file_exists($file = $dir.'/'.$file.'.php')) {
-		trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
+		trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __FUNCTION__);
 		require($file);
 		if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 	}
 	trigger_error('FAILED loading '.$class, E_USER_ERROR);
-});
+}
+spl_autoload_register(__NAMESPACE__.'\autoload');
 
 /**
  * ACL helper
