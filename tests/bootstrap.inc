@@ -1,7 +1,5 @@
 <?php
 namespace metadigit\core;
-// core services
-const TRACE = false;
 // directories
 const BOOTSTRAP = __FILE__;
 const PUBLIC_DIR	= '/tmp/metadigit-core/httpdocs/';
@@ -33,4 +31,5 @@ exec('rm -fr '.DATA_DIR);
 register_shutdown_function(function() {
 	exec('rm -fr '.DATA_DIR);
 });
+trace\Tracer::init();
 Kernel::init();

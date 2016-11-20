@@ -105,7 +105,7 @@ class Kernel {
 	 */
 	static function init() {
 		Tracer::traceFn(__METHOD__);
-		TRACE and trace(LOG_DEBUG, T_INFO);
+		trace(LOG_DEBUG, T_INFO);
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 		ignore_user_abort(1);
@@ -151,13 +151,6 @@ class Kernel {
 		// initialize
 		if(!file_exists(DATA_DIR.'.metadigit-core')) KernelHelper::boot();
 		cache('kernel');
-		set_exception_handler(function() {
-			call_user_func_array('metadigit\core\KernelDebugger::onException', func_get_args());
-		});
-		set_error_handler(function() {
-			if(error_reporting()===0) return;
-			call_user_func_array('metadigit\core\KernelDebugger::onError', func_get_args());
-		});
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) acl();
 		self::$SystemContext = Context::factory('system');
 		self::$SystemContext->trigger(self::EVENT_INIT);
@@ -201,7 +194,7 @@ class Kernel {
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		$parse = self::parseClassName(str_replace('.','\\', $namespace.'.class'));
 		self::$Req->setAttribute('APP_DIR', $parse[2].'/');
-		TRACE and trace(LOG_DEBUG, T_INFO, $dispatcherID);
+		trace(LOG_DEBUG, T_INFO, $dispatcherID);
 		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
@@ -212,12 +205,6 @@ class Kernel {
 		Tracer::traceFn(__METHOD__);
 		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 		cache\SqliteCache::shutdown();
-		$err = error_get_last();
-		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
-			Tracer::$traceError = KernelDebugger::E_ERROR;
-			KernelDebugger::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
-			http_response_code(500);
-		}
 		if(PHP_SAPI != 'cli') session_write_close();
 		self::logFlush();
 	}
@@ -235,7 +222,7 @@ class Kernel {
 	 * @param string $facility log facility
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		TRACE and trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
+		trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}
 

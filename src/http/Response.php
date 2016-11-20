@@ -143,7 +143,9 @@ class Response {
 		trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
-		define('TRACE_END_TIME', microtime(1));
+		ini_set('precision', 16);
+		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));
+		ini_restore('precision');
 	}
 
 	/**

@@ -127,7 +127,9 @@ class Response {
 		$this->size = ob_get_length();
 		trace(LOG_DEBUG, T_INFO, null, null. __METHOD__);
 		ob_flush();
-		define('TRACE_END_TIME', microtime(1));
+		ini_set('precision', 16);
+		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));
+		ini_restore('precision');
 	}
 
 	/**

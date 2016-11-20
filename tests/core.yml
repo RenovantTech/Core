@@ -83,3 +83,4 @@ logs:
 # TRACE service
 trace:
   level:      LOG_DEBUG
+  storeFn:    null
