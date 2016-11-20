@@ -205,11 +205,6 @@ class Kernel {
 		Tracer::traceFn(__METHOD__);
 		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 		cache\SqliteCache::shutdown();
-		$err = error_get_last();
-		if(in_array($err['type'], [E_ERROR,E_CORE_ERROR,E_COMPILE_ERROR,])) {
-			Tracer::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
-			http_response_code(500);
-		}
 		if(PHP_SAPI != 'cli') session_write_close();
 		self::logFlush();
 	}

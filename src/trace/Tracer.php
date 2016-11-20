@@ -8,7 +8,6 @@
 namespace metadigit\core\trace;
 use const metadigit\core\CORE_YAML;
 use function metadigit\core\yaml;
-use metadigit\core\Kernel;
 /**
  * Tracer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -20,7 +19,8 @@ class Tracer {
 	const E_ERROR = 3;
 
 	static protected $conf = [
-		'level' => LOG_DEBUG
+		'level'		=> LOG_DEBUG,
+		'storeFn'	=> null
 	];
 	/** current Error level, incremented by errors & exceptions
 	 * @var integer */
@@ -37,6 +37,9 @@ class Tracer {
 		if(is_string(self::$conf['level'])) self::$conf['level'] = constant(self::$conf['level']);
 		set_exception_handler(__CLASS__.'::onException');
 		set_error_handler(__CLASS__.'::onError');
+		register_shutdown_function(function() {
+			register_shutdown_function(__CLASS__.'::shutdown');
+		});
 	}
 
 	/**
@@ -74,6 +77,19 @@ class Tracer {
 		traceException($Ex);
 		// @TODO call toDB() toLog() toEmail()
 
+	}
+
+	/**
+	 * Shutdown handler
+	 */
+	static function shutdown() {
+		$err = error_get_last();
+		if(in_array($err['type'], [E_ERROR,E_PARSE,E_CORE_ERROR,E_CORE_WARNING,E_COMPILE_ERROR,E_COMPILE_WARNING])) {
+			self::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
+		}
+		if(self::$conf['storeFn']) {
+			call_user_func(self::$conf['storeFn'], self::$trace, self::$errorLevel);
+		}
 	}
 
 	/**
