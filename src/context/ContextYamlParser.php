@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\context;
 use const metadigit\core\trace\{T_INFO, T_DEPINJ};
-use function metadigit\core\trace;
+use function metadigit\core\{trace, yaml};
 use metadigit\core\Kernel;
 /**
  * ContextParser
@@ -32,15 +32,9 @@ class ContextYamlParser {
 			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
 		else
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		if(strpos($yamlPath, 'phar://')!==false) {
-			$yamlFile = file_get_contents($yamlPath);
-			$yamlPath = \metadigit\core\CACHE_DIR.$namespace.'.context.yml';
-			file_put_contents($yamlPath, $yamlFile);
-		}
 		trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Context YAML', null, $oid);
-
 		if(!file_exists($yamlPath)) throw new ContextException(11, [$oid, $yamlPath]);
-		$YAML = yaml_parse_file($yamlPath);
+		$YAML = yaml($yamlPath);
 		// @TODO verify YAML content
 		if(
 			!is_array($YAML) ||
