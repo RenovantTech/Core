@@ -36,12 +36,12 @@ class ContainerYamlParser {
 		$this->_oid = $namespaces[0].'.ContainerParser';
 		list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.', '\\', $this->_oid));
 		if (empty($dirName))
-			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yaml';
+			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yml';
 		else
-			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yaml';
+			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		if(strpos($this->yamlPath, 'phar://')!==false) {
 			$yamlFile = file_get_contents($this->yamlPath);
-			$this->yamlPath = \metadigit\core\CACHE_DIR.$namespaces[0].'.context.yaml';
+			$this->yamlPath = \metadigit\core\CACHE_DIR.$namespaces[0].'.context.yml';
 			file_put_contents($this->yamlPath, $yamlFile);
 		}
 		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_oid, $this->yamlPath]);

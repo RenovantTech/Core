@@ -29,12 +29,12 @@ class ContextYamlParser {
 		$oid = $namespace . '.ContextYamlParser';
 		list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.', '\\', $namespace . '.Context'));
 		if (empty($dirName))
-			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yaml';
+			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
 		else
-			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yaml';
+			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		if(strpos($yamlPath, 'phar://')!==false) {
 			$yamlFile = file_get_contents($yamlPath);
-			$yamlPath = \metadigit\core\CACHE_DIR.$namespace.'.context.yaml';
+			$yamlPath = \metadigit\core\CACHE_DIR.$namespace.'.context.yml';
 			file_put_contents($yamlPath, $yamlFile);
 		}
 		trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Context YAML', null, $oid);
