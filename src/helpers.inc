@@ -87,20 +87,21 @@ function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=
 
 /**
  * YAML parser utility, supporting PHAR & ENVIRONMENT switch
- * @param string $file YAML file path
+ * @param string $file         YAML file path
  * @param string|null $section optional YAML section to be parsed
+ * @param array|null $callbacks content handlers for YAML nodes
  * @return array
  * @throws Exception
  */
-function yaml($file, $section=null) {
+function yaml($file, $section=null, array $callbacks=null) {
 	$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
 	if(file_exists($fileEnv)) $file = $fileEnv;
 	elseif(!file_exists($file)) throw new Exception(__FUNCTION__.' YAML not found: '.$file);
 	if(strpos($file, 'phar://')!==false) {
 		$tmp = tempnam(TMP_DIR, 'yaml-');
 		file_put_contents($tmp, file_get_contents($file));
-		$YAML = yaml_parse_file($tmp);
+		$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
 		unlink($tmp);
-	} else $YAML = yaml_parse_file($file);
+	} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
 	return ($section) ? $YAML[$section] : $YAML;
 }
