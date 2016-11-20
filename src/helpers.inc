@@ -63,9 +63,9 @@ function cache($id='system') {
 function pdo($id='master') {
 	static $_ = [];
 	if(!isset($_[$id])) {
-		$cnf = Kernel::conf(Kernel::CONFIG_PDO)[$id];
+		$cnf = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], Kernel::conf(Kernel::CONFIG_PDO)[$id]);
 		trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
-		$pdo = new db\PDO($cnf['dns'], @$cnf['user'], @$cnf['pwd'], @$cnf['options']?:[], $id);
+		$pdo = @new db\PDO($cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
 		$_[$id] = $pdo;
 	}
 	return $_[$id];
