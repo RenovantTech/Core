@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
+use const metadigit\core\TMP_DIR;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\trace\Tracer;
 
@@ -85,16 +86,21 @@ function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=
 }
 
 /**
- * YAML parser utility, supporting ENVIRONMENT switch
- * @param string $file         YAML file path
- * @param string|null $section YAML section to be parsed
+ * YAML parser utility, supporting PHAR & ENVIRONMENT switch
+ * @param string $file YAML file path
+ * @param string|null $section optional YAML section to be parsed
  * @return array
  * @throws Exception
  */
 function yaml($file, $section=null) {
 	$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
-	if(file_exists($fileEnv)) $YAML = yaml_parse_file($fileEnv);
-	elseif(file_exists($file)) $YAML = yaml_parse_file($file);
-	else throw new Exception('YAML not found: '.$file);
+	if(file_exists($fileEnv)) $file = $fileEnv;
+	elseif(!file_exists($file)) throw new Exception(__FUNCTION__.' YAML not found: '.$file);
+	if(strpos($file, 'phar://')!==false) {
+		$tmp = tempnam(TMP_DIR, 'yaml-');
+		file_put_contents($tmp, file_get_contents($file));
+		$YAML = yaml_parse_file($tmp);
+		unlink($tmp);
+	} else $YAML = yaml_parse_file($file);
 	return ($section) ? $YAML[$section] : $YAML;
 }
