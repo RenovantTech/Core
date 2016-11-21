@@ -104,7 +104,7 @@ class Tracer {
 	 */
 	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
 		if($level > self::$conf['level']) return;
-		$fn = str_replace('metadigit', '\\', $function?:self::$traceFn);
+		$fn = str_replace('metadigit\core', '\\', $function?:self::$traceFn);
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
 	}
 
