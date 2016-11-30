@@ -65,9 +65,9 @@ class SqliteCache implements CacheInterface {
 	protected $writeBuffer = false;
 
 	/**
-	 * @param string $id		cache ID
-	 * @param string $pdo       PDO instance ID
-	 * @param string $table     table name
+	 * @param string $id cache ID
+	 * @param string $pdo PDO instance ID
+	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
@@ -113,7 +113,7 @@ class SqliteCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->id);
-				self::$buffer[$this->id][] = [$id, $value, $expire, $tags];
+				self::$buffer[$this->id][] = [$id, serialize($value), $expire, $tags];
 			} else {
 				trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->id);
 				if(is_null($this->_pdo_set)) $this->_pdo_set = pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
@@ -169,7 +169,7 @@ class SqliteCache implements CacheInterface {
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
-				@self::$bufferPDO[$k]->execute(['id'=>$id, 'data'=>serialize($value), 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
+				@self::$bufferPDO[$k]->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
 			}
 		}
 	}
