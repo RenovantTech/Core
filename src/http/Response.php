@@ -26,7 +26,7 @@ class Response {
 	 * @var int */
 	private $size = 0;
 	/** Current View/viewName
-	 * @var \metadigit\core\web\ViewInterface|string|null */
+	 * @var \metadigit\core\http\ViewInterface|string|null */
 	private $View = null;
 
 	function __construct() {
@@ -82,7 +82,7 @@ class Response {
 
 	/**
 	 * Get current View / viewName
-	 * @return \metadigit\core\web\ViewInterface|null|string
+	 * @return \metadigit\core\http\ViewInterface|null|string
 	 */
 	function getView() {
 		return $this->View;
@@ -124,7 +124,7 @@ class Response {
 
 	/**
 	 * Set the View / viewName to be rendered with Response data
-	 * @param \metadigit\core\web\ViewInterface|string $view
+	 * @param \metadigit\core\http\ViewInterface|string $view
 	 */
 	function setView($view) {
 		$this->View = $view;
