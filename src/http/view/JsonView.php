@@ -24,7 +24,7 @@ class JsonView implements \metadigit\core\http\ViewInterface {
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		trace(LOG_DEBUG, T_INFO);
 		$Res->contentType(self::CONTENT_TYPE);
-		echo json_encode($Res->getData());
+		echo json_encode($Res->getData(), $options);
 		switch(json_last_error()) {
 			case JSON_ERROR_NONE: break;
 			case JSON_ERROR_DEPTH: throw new Exception(251); break;
