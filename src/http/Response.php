@@ -144,11 +144,11 @@ class Response {
 	 * @param string $path
 	 * @param string $domain
 	 * @param bool $secure
-	 * @param bool $httponly
+	 * @param bool $httpOnly
 	 * @return Response (fluent interface)
 	 */
-	function cookie(string $name, string $value='', int $expire=0, string $path='', string $domain='', bool $secure=false, bool $httponly=false): Response {
-		setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+	function cookie(string $name, string $value='', int $expire=0, string $path='', string $domain='', bool $secure=false, bool $httpOnly=false): Response {
+		setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
 		return $this;
 	}
 
@@ -170,8 +170,8 @@ class Response {
 	 */
 	function redirect($location, $statusCode=302) {
 		ob_clean();
+		$this->view = null;
 		$this->viewEngine = null;
-		$this->viewTemplate = null;
 		// @TODO check that Dispatcher stop normal flow and exit .. maybe use an Exception ... MVCRedirectException ...
 		if(substr($location,0,4)!='http'){
 			$url = (isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']==true) ? 'https://' : 'http://';
