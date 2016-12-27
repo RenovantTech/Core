@@ -12,7 +12,6 @@ class AbstractController extends \metadigit\core\http\controller\AbstractControl
 	 * @param string $categ
 	 * @param string $tags
 	 * @param integer $id
-	 * @return string
 	 */
 	function doHandle(Request $Req, Response $Res, $categ, $tags, $id=1) {
 		$Res->set([

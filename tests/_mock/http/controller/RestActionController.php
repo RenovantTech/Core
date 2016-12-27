@@ -10,7 +10,6 @@ class RestActionController extends \metadigit\core\http\controller\ActionControl
 	 * @param Request $Req
 	 * @param Response $Res
 	 * @param string $class
-	 * @return string
 	 */
 	function createAction(Request $Req, Response $Res, $class) {
 		$Res->set([
@@ -25,7 +24,6 @@ class RestActionController extends \metadigit\core\http\controller\ActionControl
 	 * @param Response $Res
 	 * @param string $class
 	 * @param integer $id
-	 * @return string
 	 */
 	function readAction(Request $Req, Response $Res, $class, $id) {
 		$Res->set([

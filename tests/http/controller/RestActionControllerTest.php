@@ -10,9 +10,9 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
-		$ReflProp->setAccessible(true);
-		$_actions = $ReflProp->getValue($ActionController);
+		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
+		$RefProp->setAccessible(true);
+		$_actions = $RefProp->getValue($ActionController);
 		$this->assertCount(5, $_actions);
 
 		$this->assertArrayHasKey('destroy', $_actions);
@@ -31,33 +31,33 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 	 * @return \mock\http\controller\RestActionController
 	 */
 	function testResolveActionMethod(\mock\http\controller\RestActionController $ActionController) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/book';
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$Req = new Request;
-		$this->assertEquals('create', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('create', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
-		$this->assertEquals('read', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('read', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
-		$this->assertEquals('readAll', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('readAll', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'PUT';
 		$Req = new Request;
-		$this->assertEquals('update', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('update', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'DELETE';
 		$Req = new Request;
-		$this->assertEquals('destroy', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('destroy', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
 	}
@@ -69,12 +69,12 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testResolveActionException() {
 		$ActionController2 = new \mock\http\controller\RestActionController;
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_METHOD'] = 'INVALID';
 		$Req = new Request;
-		$ReflMethod->invoke($ActionController2, $Req);
+		$RefMethod->invoke($ActionController2, $Req);
 	}
 
 	/**

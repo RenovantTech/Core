@@ -10,9 +10,9 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $AbstractController);
 		$this->assertInstanceOf('metadigit\core\http\controller\AbstractController', $AbstractController);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\http\controller\AbstractController', '_config');
-		$ReflProp->setAccessible(true);
-		$_config = $ReflProp->getValue($AbstractController);
+		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\AbstractController', '_config');
+		$RefProp->setAccessible(true);
+		$_config = $RefProp->getValue($AbstractController);
 
 		$this->assertEquals('categ', $_config['params'][2]['name']);
 		$this->assertNull($_config['params'][2]['class']);

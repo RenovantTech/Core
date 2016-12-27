@@ -66,9 +66,8 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 		}
 		Tracer::traceFn($this->_oid.'->doHandle');
 		trace(LOG_DEBUG, T_INFO);
-		$View = call_user_func_array([$this,'doHandle'], $args);
-		$this->postHandle($Req, $Res, $View);
-		return $View;
+		call_user_func_array([$this,'doHandle'], $args);
+		$this->postHandle($Req, $Res);
 	}
 	/**
 	 * Pre-handle hook, can be overridden by subclasses.
@@ -84,9 +83,8 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param \metadigit\core\http\ViewInterface|string $View the View or view name
 	 * @throws Exception in case of errors
 	 */
-	protected function postHandle(Request $Req, Response $Res, $View=null) {
+	protected function postHandle(Request $Req, Response $Res) {
 	}
 }

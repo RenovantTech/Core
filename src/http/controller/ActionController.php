@@ -69,9 +69,8 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 		}
 		Tracer::traceFn($this->_oid.'->'.$action.'Action');
 		trace(LOG_DEBUG, T_INFO);
-		$View = call_user_func_array([$this,$action.'Action'], $args);
-		$this->postHandle($Req, $Res, $View);
-		return $View;
+		call_user_func_array([$this, $action.'Action'], $args);
+		$this->postHandle($Req, $Res);
 	}
 
 	/**
@@ -89,10 +88,9 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param mixed $View the View or view name
 	 * @throws Exception in case of errors
 	 */
-	protected function postHandle(Request $Req, Response $Res, $View=null) {
+	protected function postHandle(Request $Req, Response $Res) {
 	}
 
 	/**

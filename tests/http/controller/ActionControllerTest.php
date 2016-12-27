@@ -10,9 +10,9 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
-		$ReflProp->setAccessible(true);
-		$_actions = $ReflProp->getValue($ActionController);
+		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
+		$RefProp->setAccessible(true);
+		$_actions = $RefProp->getValue($ActionController);
 		$this->assertCount(7, $_actions);
 
 		$this->assertArrayHasKey('bar', $_actions);
@@ -41,20 +41,20 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 	 * @return \mock\http\controller\ActionController
 	 */
 	function testResolveActionMethod(\mock\http\controller\ActionController $ActionController) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/mod1/';
 		$Req = new Request;
-		$this->assertEquals('index', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('index', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/foo';
 		$Req = new Request;
-		$this->assertEquals('foo', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('foo', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '31/02/2013/details-xml';
 		$Req = new Request;
-		$this->assertEquals('details', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('details', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
 	}
@@ -66,12 +66,12 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 	 */
 	function testResolveActionException() {
 		$ActionController2 = new \mock\http\controller\ActionController;
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/mod1/not-exists';
 		$Req = new Request;
-		$ReflMethod->invoke($ActionController2, $Req);
+		$RefMethod->invoke($ActionController2, $Req);
 	}
 
 	/**

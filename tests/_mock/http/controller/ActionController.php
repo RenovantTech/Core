@@ -31,7 +31,6 @@ class ActionController extends \metadigit\core\http\controller\ActionController 
 	 * @param \metadigit\core\http\Request $Req
 	 * @param \metadigit\core\http\Response $Res
 	 * @param string $name
-	 * @return string
 	 */
 	function action3Action(Request $Req, Response $Res, $name='Tom') {
 		$Res->set('name', $name)
@@ -46,7 +45,6 @@ class ActionController extends \metadigit\core\http\controller\ActionController 
 	 * @param integer $month
 	 * @param integer $day
 	 * @param string $format
-	 * @return string
 	 */
 	function detailsAction(Request $Req, Response $Res, $year, $month, $day, $format) {
 		$Res->set([
