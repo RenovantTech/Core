@@ -14,6 +14,7 @@ class ExcelViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param ExcelView $ExcelView
 	 */
 	function testRender(ExcelView $ExcelView) {
 		$Req = new Request;
@@ -34,6 +35,7 @@ class ExcelViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 201
+	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException1(ExcelView $ExcelView) {
 		$Req = new Request;
@@ -46,6 +48,7 @@ class ExcelViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 202
+	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException2(ExcelView $ExcelView) {
 		$Req = new Request;
@@ -58,6 +61,7 @@ class ExcelViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 203
+	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException3(ExcelView $ExcelView) {
 		$Req = new Request;

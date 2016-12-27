@@ -14,13 +14,14 @@ class XSendFileViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param XSendFileView $XSendFileView
 	 */
 	function testRender(XSendFileView $XSendFileView) {
 		header_remove();
 		$Req = new Request;
 		$Res = new Response;
 		$XSendFileView->render($Req, $Res, MOCK_DIR.'/http/templates/test.txt');
-		$headers = headers_list();
+//		$headers = headers_list();
 //		$this->assertContains('X-Accel-Redirect: '.MOCK_DIR.'/http/templates/test.txt', $headers);
 //		$this->assertContains('X-Sendfile: '.MOCK_DIR.'/http/templates/test.txt', $headers);
 		header_remove();
@@ -30,6 +31,7 @@ class XSendFileViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 201
+	 * @param XSendFileView $XSendFileView
 	 */
 	function testRenderException(XSendFileView $XSendFileView) {
 		$Req = new Request;

@@ -1,8 +1,7 @@
 <?php
 namespace test\http\controller;
 use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\controller\AbstractController;
+	metadigit\core\http\Response;
 
 class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
@@ -31,6 +30,7 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param \mock\http\controller\AbstractController $AbstractController
 	 */
 	function testHandle(\mock\http\controller\AbstractController $AbstractController) {
 		$_SERVER['REQUEST_URI'] = '/books/history+math/32';

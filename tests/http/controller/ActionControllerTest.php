@@ -1,7 +1,6 @@
 <?php
 namespace test\http\controller;
-use metadigit\core\http\controller\ActionController,
-	metadigit\core\http\Request,
+use metadigit\core\http\Request,
 	metadigit\core\http\Response;
 
 class ActionControllerTest extends \PHPUnit_Framework_TestCase {
@@ -38,6 +37,8 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param \mock\http\controller\ActionController $ActionController
+	 * @return \mock\http\controller\ActionController
 	 */
 	function testResolveActionMethod(\mock\http\controller\ActionController $ActionController) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
@@ -75,6 +76,7 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @param \mock\http\controller\ActionController $ActionController
 	 */
 	function testHandle(\mock\http\controller\ActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/mod1/action2';

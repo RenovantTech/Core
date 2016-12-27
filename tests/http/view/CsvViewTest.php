@@ -14,6 +14,7 @@ class CsvViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param CsvView $CsvView
 	 */
 	function testRender(CsvView $CsvView) {
 		$Req = new Request;
@@ -34,6 +35,7 @@ class CsvViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 201
+	 * @param CsvView $CsvView
 	 */
 	function testRenderException1(CsvView $CsvView) {
 		$Req = new Request;
@@ -46,6 +48,7 @@ class CsvViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 202
+	 * @param CsvView $CsvView
 	 */
 	function testRenderException2(CsvView $CsvView) {
 		$Req = new Request;
@@ -58,6 +61,7 @@ class CsvViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 203
+	 * @param CsvView $CsvView
 	 */
 	function testRenderException3(CsvView $CsvView) {
 		$Req = new Request;

@@ -14,6 +14,7 @@ class PhpTALViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param PhpTALView $PhpTALView
 	 */
 	function testRender(PhpTALView $PhpTALView) {
 		$this->expectOutputRegex('/<title>index<\/title>/');

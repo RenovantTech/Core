@@ -1,7 +1,6 @@
 <?php
 namespace test\http\controller;
-use metadigit\core\http\controller\ActionController,
-	metadigit\core\http\Request,
+use metadigit\core\http\Request,
 	metadigit\core\http\Response;
 
 class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
@@ -28,6 +27,8 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param \mock\http\controller\RestActionController $ActionController
+	 * @return \mock\http\controller\RestActionController
 	 */
 	function testResolveActionMethod(\mock\http\controller\RestActionController $ActionController) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
@@ -78,6 +79,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @param \mock\http\controller\RestActionController $ActionController
 	 */
 	function testHandle(\mock\http\controller\RestActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/book';

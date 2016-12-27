@@ -14,6 +14,7 @@ class FileViewTest extends \PHPUnit_Framework_TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param FileView $FileView
 	 */
 	function testRender(FileView $FileView) {
 		$this->expectOutputRegex('/Hello America/');
@@ -27,6 +28,7 @@ class FileViewTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 201
+	 * @param FileView $FileView
 	 */
 	function testRenderException(FileView $FileView) {
 		$Req = new Request;
