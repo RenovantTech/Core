@@ -20,7 +20,7 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	/** template suffixes */
-	const TEMPLATE_SUFFIXS = '.html|.xml';
+	const TEMPLATE_SUFFIXES = '.html|.xml';
 	/** customizable PhpTAL pre-filter class, must implements PHPTAL_Filter
 	 * @var string */
 	protected $preFilterClass = null;
@@ -30,15 +30,15 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		$template = null;
-		$suffixs = explode('|', static::TEMPLATE_SUFFIXS);
-		foreach($suffixs as $suffix) {
+		$suffixes = explode('|', static::TEMPLATE_SUFFIXES);
+		foreach($suffixes as $suffix) {
 			if(file_exists($template = $Req->getAttribute('RESOURCES_DIR').$resource.$suffix)) {
 				trace(LOG_DEBUG, T_INFO, 'template: '.$template);
 				$this->execTemplate($template, $Res);
 				return;
 			}
 		}
-		throw new Exception(201, ['PHPTal Template', $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIXS]);
+		throw new Exception(201, ['PHPTal Template', $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIXES]);
 	}
 
 	function setPreFilter($class) {
@@ -55,11 +55,10 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 		$PhpTAL->setEncoding('UTF-8');
 		$PhpTAL->setOutputMode(\PHPTAL::HTML5);
 		if(!file_exists(\metadigit\core\CACHE_DIR.'phptal')) mkdir(\metadigit\core\CACHE_DIR.'phptal', 0750);
-		//chown(CACHE_DIR.'phptal','apache');
 		$PhpTAL->setPhpCodeDestination(\metadigit\core\CACHE_DIR.'phptal');
 		if(!is_null($class = $this->preFilterClass)) {
 			trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class);
-			$PhpTAL->setPreFilter(new $class);
+			$PhpTAL->addPreFilter(new $class);
 		}
 		if(!is_null($class = $this->postFilterClass)) {
 			trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class);
