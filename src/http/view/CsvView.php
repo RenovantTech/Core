@@ -31,9 +31,9 @@ class CsvView implements \metadigit\core\http\ViewInterface {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['CSV Template', self::$template]);
 		trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);
-		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
+		$fileName = $options['fileName'] ?? pathinfo($resource, PATHINFO_FILENAME);
 		$Res->contentType(self::CONTENT_TYPE);
-		header('Content-Disposition: attachment; filename='.$saveName.'.csv');
+		header('Content-Disposition: attachment; filename='.$fileName.'.csv');
 		$CsvWriter = new CsvWriter();
 		// prepare data
 		if(is_null($Res->get('data'))) throw new Exception(202, ['data']);
