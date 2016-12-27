@@ -1,10 +1,12 @@
 <?php
 namespace test\http;
+use const metadigit\core\http\ENGINE_PHP;
 use function metadigit\core\cache;
 use metadigit\core\context\Context,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Dispatcher;
+	metadigit\core\http\Dispatcher,
+	metadigit\core\http\DispatcherEvent;
 
 class DispatcherTest extends \PHPUnit_Framework_TestCase {
 
@@ -15,9 +17,9 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		new Response;
 		$Dispatcher = Context::factory('mock.http')->getContainer()->get('mock.http.Dispatcher');
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\http\Dispatcher', 'routes');
-		$ReflProp->setAccessible(true);
-		$routes = $ReflProp->getValue($Dispatcher);
+		$RefProp = new \ReflectionProperty('metadigit\core\http\Dispatcher', 'routes');
+		$RefProp->setAccessible(true);
+		$routes = $RefProp->getValue($Dispatcher);
 		$this->assertCount(4, $routes);
 		$this->assertArrayHasKey('/catalog/*', $routes);
 		$this->assertEquals('mock.http.AbstractController', $routes['/catalog/*']);
@@ -31,29 +33,29 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 * @return Dispatcher
 	 */
 	function testResolveController(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/home';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/home');
-		$this->assertSame('mock.http.SimpleController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.http.SimpleController', $RefMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/foo';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/mod1/foo');
-		$this->assertSame('mock.http.ActionController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.http.ActionController', $RefMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_SERVER['REQUEST_URI'] = '/rest/book/14';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/rest/book/14');
-		$this->assertSame('mock.http.RestActionController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.http.RestActionController', $RefMethod->invoke($Dispatcher, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/catalog/books/science/13';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/catalog/books/science/13');
-		$this->assertSame('mock.http.AbstractController', $ReflMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('mock.http.AbstractController', $RefMethod->invoke($Dispatcher, $Req));
 
 		return $Dispatcher;
 	}
@@ -65,13 +67,13 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveControllerException11(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/not-exists/foo';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/not-exists/foo');
-		$ReflMethod->invoke($Dispatcher, $Req);
+		$RefMethod->invoke($Dispatcher, $Req);
 	}
 
 	/**
@@ -79,17 +81,19 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveView');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveView');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/http/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req);
+		$Res = (new Response)->setView('index', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/index', $Req);
+		$Res = (new Response)->setView('/index', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 
@@ -97,10 +101,12 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/mod1/');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/http/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req);
+		$Res = (new Response)->setView('index', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/index', $Req);
+		$Res = (new Response)->setView('/mod1/index', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 
@@ -109,10 +115,12 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/mod1/foo1');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/http/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'foo1', $Req);
+		$Res = (new Response)->setView('foo1', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/foo1', $Req);
+		$Res = (new Response)->setView('/mod1/foo1', null, ENGINE_PHP);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 	}
@@ -124,14 +132,16 @@ class DispatcherTest extends \PHPUnit_Framework_TestCase {
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveView');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveView');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;
 		$Req->setAttribute('APP_URI', '/');
 		$Req->setAttribute('APP_DIR', MOCK_DIR.'/http/');
-		$ReflMethod->invoke($Dispatcher, 'xxx:index', $Req);
+		$Res = new Response;
+		$Res->setView('index', null, 'xxx');
+		$RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
 	}
 
 	/**

@@ -27,12 +27,12 @@ class CsvView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	static private $template;
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['CSV Template', self::$template]);
 		trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
-		$Res->setContentType(self::CONTENT_TYPE);
+		$Res->contentType(self::CONTENT_TYPE);
 		header('Content-Disposition: attachment; filename='.$saveName.'.csv');
 		$CsvWriter = new CsvWriter();
 		// prepare data

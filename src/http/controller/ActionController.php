@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\http\controller;
+use const metadigit\core\http\ENGINE_PHP;
 use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 use metadigit\core\http\Request,
@@ -33,12 +34,16 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	/** Controller actions routing configuration
 	 * @var array */
 	protected $_routes = [];
+	/** default View engine
+	 * @var string */
+	protected $viewEngine = ENGINE_PHP;
 
 	function __construct() {
 		list($this->_actions, $this->_routes) = ActionControllerReflection::analyzeActions($this);
 	}
 
 	function handle(Request $Req, Response $Res) {
+		$Res->setView(null, null, $this->viewEngine);
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
 			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');

@@ -25,9 +25,15 @@ class Response {
 	/** Response size (bytes)
 	 * @var int */
 	private $size = 0;
-	/** Current View/viewName
+	/** Current View name
+	 * @var string|null */
+	private $view = null;
+	/** Current View Engine
 	 * @var \metadigit\core\http\ViewInterface|string|null */
-	private $View = null;
+	private $viewEngine = null;
+	/** Current View options
+	 * @var array|null */
+	private $viewOptions = null;
 
 	function __construct() {
 		ob_start();
@@ -44,7 +50,7 @@ class Response {
 	 * @param string $key
 	 * @return mixed|null
 	 */
-	function get($key) {
+	function get(string $key) {
 		return (isset($this->data[$key])) ? $this->data[$key] : null;
 	}
 
@@ -52,15 +58,23 @@ class Response {
 	 * Get all Response data (array)
 	 * @return array
 	 */
-	function getData() {
+	function getData(): array {
 		return $this->data;
+	}
+
+	/**
+	 * Get HTTP Status Code
+	 * @return integer
+	 */
+	function getCode(): int {
+		return http_response_code();
 	}
 
 	/**
 	 * Get current Response output
 	 * @return string
 	 */
-	function getContent() {
+	function getContent(): string {
 		return ob_get_contents();
 	}
 
@@ -68,7 +82,7 @@ class Response {
 	 * Get HTTP header "Content-Type"
 	 * @return string
 	 */
-	function getContentType() {
+	function getContentType(): string {
 		return $this->contentType;
 	}
 
@@ -76,28 +90,27 @@ class Response {
 	 * Returns the actual buffer size used for this Response. If no buffering is used, this method returns 0.
 	 * @return int
 	 */
-	function getSize() {
+	function getSize(): int {
 		return ($this->size) ?: ob_get_length();
 	}
 
 	/**
-	 * Get current View / viewName
+	 * Get View, options and engine
 	 * @return \metadigit\core\http\ViewInterface|null|string
 	 */
 	function getView() {
-		return $this->View;
+		return [$this->view, $this->viewOptions, $this->viewEngine];
 	}
 
+	// === methods ================================================================================
+
 	/**
-	 * Store Response data
-	 * @param string|array $k data key or array
-	 * @param mixed|null $v data value
+	 * Set HTTP Status Code
+	 * @param int $code HTTP Status Code
 	 * @return Response (fluent interface)
 	 */
-	function set($k, $v=null) {
-		if(is_array($k)) $this->data = array_merge($this->data, $k);
-		elseif(is_string($k) && preg_match('/^[a-zA-Z]+/',$k)) $this->data[$k] = $v;
-		else trigger_error(__METHOD__.': invalid key');
+	function code(int $code): Response {
+		http_response_code($code);
 		return $this;
 	}
 
@@ -106,7 +119,7 @@ class Response {
 	 * @param $output
 	 * @return Response (fluent interface)
 	 */
-	function setContent($output) {
+	function content($output): Response {
 		ob_clean();
 		echo $output;
 		return $this;
@@ -117,20 +130,70 @@ class Response {
 	 * @param string $contentType
 	 * @return Response (fluent interface)
 	 */
-	function setContentType($contentType) {
+	function contentType($contentType): Response {
 		if(!$this->contentType) $this->contentType = $contentType;
 		return $this;
 	}
 
 	/**
-	 * Set the View / viewName to be rendered with Response data
-	 * @param \metadigit\core\http\ViewInterface|string $view
+	 * Set HTTP Cookie
+	 * wrapper for native setcookie() function, @see http://php.net/manual/en/function.setcookie.php
+	 * @param string $name
+	 * @param string $value
+	 * @param int $expire
+	 * @param string $path
+	 * @param string $domain
+	 * @param bool $secure
+	 * @param bool $httponly
+	 * @return Response (fluent interface)
 	 */
-	function setView($view) {
-		$this->View = $view;
+	function cookie(string $name, string $value='', int $expire=0, string $path='', string $domain='', bool $secure=false, bool $httponly=false): Response {
+		setcookie($name, $value, $expire, $path, $domain, $secure, $httponly);
+		return $this;
 	}
 
-	// === methods ================================================================================
+	/**
+	 * Set HTTP header
+	 * @param string $value
+	 * @return Response (fluent interface)
+	 */
+	function header(string $value): Response {
+		header($value);
+		return $this;
+	}
+
+	/**
+	 * Sends a temporary redirect response to the client using the specified redirect location URL.
+	 * After using this method, the response should be considered to be committed and should not be written to.
+	 * @param string $location URL to be redirect to
+	 * @param int $statusCode the HTTP status code, defaults to 302.
+	 */
+	function redirect($location, $statusCode=302) {
+		ob_clean();
+		$this->viewEngine = null;
+		$this->viewTemplate = null;
+		// @TODO check that Dispatcher stop normal flow and exit .. maybe use an Exception ... MVCRedirectException ...
+		if(substr($location,0,4)!='http'){
+			$url = (isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']==true) ? 'https://' : 'http://';
+			$url .= $_SERVER['SERVER_NAME'];
+			if($_SERVER['SERVER_PORT']!=80) $url .= ':'.$_SERVER['SERVER_PORT'];
+			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
+			$location = $url.$location;
+		}
+		trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
+		header('Location: '.$location, true, $statusCode);
+		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
+	}
+
+	/**
+	 * Clears any data that exists in the buffer as well as the status code and headers.
+	 * @return Response (fluent interface)
+	 */
+	function reset(): Response {
+		$this->size = 0;
+		ob_clean();
+		return $this;
+	}
 
 	/**
 	 * Forces any content in the buffer to be written to the client.
@@ -149,32 +212,29 @@ class Response {
 	}
 
 	/**
-	 * Sends a temporary redirect response to the client using the specified redirect location URL.
-	 * After using this method, the response should be considered to be committed and should not be written to.
-	 * @param string $location URL to be redirect to
-	 * @param int $statusCode the HTTP status code, defaults to 302.
+	 * Store Response data
+	 * @param string|array $k data key or array
+	 * @param mixed|null $v data value
+	 * @return Response (fluent interface)
 	 */
-	function redirect($location, $statusCode=302) {
-		ob_clean();
-		$this->View = null;
-		// @TODO check that Dispatcher stop normal flow and exit .. maybe use an Exception ... MVCRedirectException ...
-		if(substr($location,0,4)!='http'){
-			$url = (isset($_SERVER['HTTPS'])&&$_SERVER['HTTPS']==true) ? 'https://' : 'http://';
-			$url .= $_SERVER['SERVER_NAME'];
-			if($_SERVER['SERVER_PORT']!=80) $url .= ':'.$_SERVER['SERVER_PORT'];
-			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
-			$location = $url.$location;
-		}
-		trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
-		header('Location: '.$location, true, $statusCode);
-		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
+	function set($k, $v=null) {
+		if(is_array($k)) $this->data = array_merge($this->data, $k);
+		elseif(is_string($k) && preg_match('/^[a-zA-Z]+/',$k)) $this->data[$k] = $v;
+		else trigger_error(__METHOD__.': invalid key');
+		return $this;
 	}
 
 	/**
-	 * Clears any data that exists in the buffer as well as the status code and headers.
+	 * Set the View name to be rendered with Response data
+	 * @param string $view View name
+	 * @param array|null $options View options
+	 * @param \metadigit\core\http\ViewInterface|string|integer|null $viewEngine View Engine to be used
+	 * @return Response
 	 */
-	function reset() {
-		$this->size = 0;
-		ob_clean();
+	function setView($view, array $options=null, $viewEngine=null): Response {
+		$this->view = $view;
+		$this->viewOptions = $options;
+		$this->viewEngine = $viewEngine;
+		return $this;
 	}
 }

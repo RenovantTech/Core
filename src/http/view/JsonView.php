@@ -21,9 +21,9 @@ class JsonView implements \metadigit\core\http\ViewInterface {
 
 	const CONTENT_TYPE = 'application/json';
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		trace(LOG_DEBUG, T_INFO);
-		$Res->setContentType(self::CONTENT_TYPE);
+		$Res->contentType(self::CONTENT_TYPE);
 		echo json_encode($Res->getData());
 		switch(json_last_error()) {
 			case JSON_ERROR_NONE: break;

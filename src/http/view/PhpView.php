@@ -28,7 +28,7 @@ class PhpView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	static private $template;
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);
 		trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);

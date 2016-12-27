@@ -86,7 +86,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('create', $Res->getView());
+		$this->assertEquals(['create', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
 		$this->assertSame(53, $Res->get('id'));
 		$_POST = [];
@@ -96,7 +96,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('read', $Res->getView());
+		$this->assertEquals(['read', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
 		$this->assertSame(32, $Res->get('id'));
 
@@ -105,7 +105,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('readAll', $Res->getView());
+		$this->assertEquals(['readAll', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
 
 		$_SERVER['REQUEST_URI'] = '/book/78';
@@ -113,7 +113,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('update', $Res->getView());
+		$this->assertEquals(['update', null, null], $Res->getView());
 		$this->assertSame('book', $Res->get('class'));
 		$this->assertSame(78, $Res->get('id'));
 
@@ -122,7 +122,7 @@ class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('destroy', $Res->getView());
+		$this->assertEquals(['destroy', null, null], $Res->getView());
 		$this->assertSame('book', $Res->get('class'));
 		$this->assertSame(41, $Res->get('id'));
 	}

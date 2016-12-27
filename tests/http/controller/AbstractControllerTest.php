@@ -38,7 +38,7 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$AbstractController->handle($Req, $Res);
-		$this->assertEquals('view', $Res->getView());
+		$this->assertEquals(['view',null,null], $Res->getView());
 		$this->assertEquals('books', $Res->get('categ'));
 		$this->assertEquals('history+math', $Res->get('tags'));
 		$this->assertSame(32, $Res->get('id'));

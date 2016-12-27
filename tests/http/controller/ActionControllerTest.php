@@ -82,14 +82,14 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('id-7', $Res->getView());
+		$this->assertEquals(['id-7', null, null], $Res->getView());
 		$this->assertEquals(7, $Res->get('id'));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/action3';
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('view3', $Res->getView());
+		$this->assertEquals(['view3', null, null], $Res->getView());
 		$this->assertEquals('Tom', $Res->get('name'));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/action3';
@@ -97,14 +97,14 @@ class ActionControllerTest extends \PHPUnit_Framework_TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('view3', $Res->getView());
+		$this->assertEquals(['view3', null, null], $Res->getView());
 		$this->assertEquals('Jack', $Res->get('name'));
 
 		$_SERVER['REQUEST_URI'] = '31/02/2013/details-xml';
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
-		$this->assertEquals('details', $Res->getView());
+		$this->assertEquals(['details', null, null], $Res->getView());
 		$this->assertSame(2013, $Res->get('year'));
 		$this->assertSame(2, $Res->get('month'));
 		$this->assertSame(31, $Res->get('day'));

@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\http\controller;
+use const metadigit\core\http\ENGINE_PHP;
 use const metadigit\core\trace\T_INFO;
 use function metadigit\core\trace;
 use metadigit\core\http\Request,
@@ -25,12 +26,16 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	/** Controller handle method configuration
 	 * @var array */
 	protected $_config = [];
+	/** default View engine
+	 * @var string */
+	protected $viewEngine = ENGINE_PHP;
 
 	function __construct() {
 		$this->_config = AbstractControllerReflection::analyzeHandle($this);
 	}
 
 	function handle(Request $Req, Response $Res) {
+		$Res->setView(null, null, $this->viewEngine);
 		if(true!==$this->preHandle($Req, $Res)) {
 			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;

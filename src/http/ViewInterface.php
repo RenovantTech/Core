@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\http;
 /**
- * MVC View for a CLI Request.
+ * MVC View for an HTTP Request.
  * Implementations are responsible for rendering content, and exposing the model. A single view exposes multiple model attributes.
  *
  * View implementations may differ widely. An obvious implementation would be
@@ -20,9 +20,9 @@ interface ViewInterface {
 	 * Render the View given the specified resource.
 	 * @param Request $Req current request
 	 * @param Response $Res current response we are building
-	 * @param string $resource
+	 * @param string|null $resource template or similar resource needed by view implementation
+	 * @param array|null $options rendering options
 	 * @throws \Exception if rendering failed
-	 * @return void
 	 */
-	function render(Request $Req, Response $Res, $resource);
+	function render(Request $Req, Response $Res, $resource=null, array $options=null);
 }

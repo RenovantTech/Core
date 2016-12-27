@@ -19,7 +19,7 @@ use metadigit\core\http\Request,
 class XSendFileView implements \metadigit\core\http\ViewInterface {
 	use \metadigit\core\CoreTrait;
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!file_exists($resource)) throw new Exception(201, ['X-SendFile', $resource]);
 		trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);

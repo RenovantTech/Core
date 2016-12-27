@@ -6,6 +6,6 @@ use metadigit\core\http\Request,
 class SimpleController implements \metadigit\core\http\ControllerInterface {
 
 	function handle(Request $Req, Response $Res) {
-		$Res->setView('index');
+		$Res->setView('index', null, 'PHP');
 	}
 }

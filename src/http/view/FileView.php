@@ -19,11 +19,11 @@ use metadigit\core\http\Request,
 class FileView implements \metadigit\core\http\ViewInterface {
 	use \metadigit\core\CoreTrait;
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!file_exists($resource)) throw new Exception(201, ['File', $resource]);
 		trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
 		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
-		$Res->setContentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
+		$Res->contentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
 		header('Content-Disposition: attachment; filename='.$saveName.'.'.pathinfo($resource, PATHINFO_EXTENSION));
 		header('Content-Length: '.filesize($resource));
 		readfile($resource);

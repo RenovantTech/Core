@@ -28,7 +28,7 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	protected $postFilterClass = null;
 
-	function render(Request $Req, Response $Res, $resource) {
+	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		$template = null;
 		$suffixs = explode('|', static::TEMPLATE_SUFFIXS);
 		foreach($suffixs as $suffix) {
