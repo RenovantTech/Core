@@ -56,10 +56,10 @@ class KernelTest extends \PHPUnit_Framework_TestCase {
 	 * @depends testInit
 	 */
 	function testParseClassName() {
-		list($namespace, $className, $dir, $file) = Kernel::parseClassName('metadigit\core\web\Dispatcher');
-		$this->assertEquals('metadigit\core\web', $namespace);
+		list($namespace, $className, $dir, $file) = Kernel::parseClassName('metadigit\core\http\Dispatcher');
+		$this->assertEquals('metadigit\core\http', $namespace);
 		$this->assertEquals('Dispatcher', $className);
-		$this->assertEquals(realpath(__DIR__.'/../src/web'), $dir);
+		$this->assertEquals(realpath(__DIR__.'/../src/http'), $dir);
 		$this->assertEquals('Dispatcher', $file);
 	}
 

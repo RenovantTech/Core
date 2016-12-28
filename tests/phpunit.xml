@@ -26,10 +26,10 @@
 			<directory>console/controller</directory>
 			<file>console/DispatcherTest.php</file>
 		</testsuite>
-		<testsuite name="web">
-			<directory>web/view</directory>
-			<directory>web/controller</directory>
-			<file>web/DispatcherTest.php</file>
+		<testsuite name="http">
+			<directory>http/view</directory>
+			<directory>http/controller</directory>
+			<file>http/DispatcherTest.php</file>
 		</testsuite>
 		<testsuite name="kernel">
 			<file>ExceptionTest.php</file>
