@@ -228,13 +228,13 @@ class Response {
 	 * Set the View name to be rendered with Response data
 	 * @param string $view View name
 	 * @param array|null $options View options
-	 * @param \metadigit\core\http\ViewInterface|string|integer|null $viewEngine View Engine to be used
+	 * @param \metadigit\core\http\ViewInterface|string|integer|null $engine View Engine to be used
 	 * @return Response
 	 */
-	function setView($view, array $options=null, $viewEngine=null): Response {
-		$this->view = $view;
-		$this->viewOptions = $options;
-		$this->viewEngine = $viewEngine;
+	function setView($view, array $options=null, $engine=null): Response {
+		if($view) $this->view = $view;
+		if($options) $this->viewOptions = $options;
+		if($engine) $this->viewEngine = $engine;
 		return $this;
 	}
 }
