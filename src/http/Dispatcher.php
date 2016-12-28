@@ -26,7 +26,7 @@ class Dispatcher {
 	protected $resourcesDir = \metadigit\core\PUBLIC_DIR;
 	/** default View engine
 	 * @var string */
-	protected $viewEngine = ENGINE_PHP;
+	protected $viewEngine = null;
 	/** View engines mapping
 	 * @var array */
 	protected $viewEngines = [
