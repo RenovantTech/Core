@@ -9,7 +9,6 @@ namespace metadigit\core\context;
 use const metadigit\core\trace\{T_DEPINJ, T_EVENT};
 use function metadigit\core\{cache, trace};
 use metadigit\core\CoreProxy,
-	metadigit\core\Kernel,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException,
 	metadigit\core\event\Event,
@@ -42,12 +41,7 @@ class Context implements EventDispatcherInterface {
 			return self::$_instances[$namespace] = $Context;
 		else {
 			trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
-			list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.','\\', $namespace.'.Context'));
-			if(empty($dirName))
-				$xmlPath = \metadigit\core\BASE_DIR.$namespace.'-context.xml';
-			else
-				$xmlPath = $dirName.DIRECTORY_SEPARATOR.'context.xml';
-			self::$_instances[$namespace] = $Context = new Context($namespace, $xmlPath);
+			self::$_instances[$namespace] = $Context = new Context($namespace);
 			cache('kernel')->set($namespace.'.Context', $Context);
 			return $Context;
 		}
@@ -89,7 +83,12 @@ class Context implements EventDispatcherInterface {
 	}
 
 	/**
+	 * Add an Event listener on the specified event
 	 * @see \metadigit\core\event\EventDispatcherInterface
+	 * @param string   $eventName the name of the event to listen for
+	 * @param callable $callback  the callback function to be invoked
+	 * @param int      $priority  trigger precedence on the listeners chain (higher values execute earliest)
+	 * @throws \Exception
 	 */
 	function listen($eventName, $callback, $priority=1) {
 		$this->listeners[$eventName][(int)$priority][] = $callback;
@@ -147,7 +146,13 @@ class Context implements EventDispatcherInterface {
 	}
 
 	/**
+	 * Trigger an Event, calling attached listeners
 	 * @see \metadigit\core\event\EventDispatcherInterface
+	 * @param string		$eventName	the name of the event
+	 * @param mixed			$target		Event's target
+	 * @param array			$params		Event's parameters
+	 * @param Event|null	$Event		optional custom Event object
+	 * @return Event the Event object
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
 		trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
