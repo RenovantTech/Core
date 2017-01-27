@@ -20,7 +20,7 @@ define('TRACE_EVENT',		6);
 defined('PROFILER')						or define('PROFILER', false);
 // system
 define('EOL', "\r\n");
-define('metadigit\core\VERSION',		'2.0.8');
+define('metadigit\core\VERSION',		'2.0.9');
 defined('metadigit\core\BOOTSTRAP')		or die('BOOTSTRAP not defined!');
 defined('metadigit\core\BASE_DIR')		or die('BASE_DIR not defined!');
 define('metadigit\core\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);

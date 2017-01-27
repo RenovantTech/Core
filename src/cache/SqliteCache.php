@@ -107,7 +107,7 @@ class SqliteCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				$this->trace(LOG_DEBUG, TRACE_CACHE, __FUNCTION__, '[STORE] '.$id.' (buffered)');
-				self::$_buffer[$this->pdo.'#'.$this->table]['store'][] = [$id, $value, $expire, $tags];
+				self::$_buffer[$this->pdo.'#'.$this->table]['store'][] = [$id, serialize($value), $expire, $tags];
 			} else {
 				$this->trace(LOG_DEBUG, TRACE_CACHE, __FUNCTION__, '[STORE] '.$id);
 				if(is_null($this->_pdo_set)) $this->_pdo_set = Kernel::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
@@ -163,7 +163,7 @@ class SqliteCache implements CacheInterface {
 			foreach($buffer['store'] as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
-				@$buffer['pdoSt']->execute(['id'=>$id, 'data'=>serialize($value), 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
+				@$buffer['pdoSt']->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
 			}
 		}
 	}

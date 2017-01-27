@@ -1,3 +1,14 @@
+<a name="2.0.9"></a>
+# 2.0.9 (2017-01-27)
+
+### Features
+- **util\HtmlWriter:** new utility class to generate HTML files
+
+### Bug Fixes
+- **cache\SqliteCache:** immediately serialize write buffered objects to avoid run time changes
+
+
+
 <a name="2.0.8"></a>
 # 2.0.8 (2016-08-30)
 
