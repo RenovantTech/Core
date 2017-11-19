@@ -3,7 +3,7 @@ namespace test\db;
 use function metadigit\core\pdo;
 use metadigit\core\db\Query;
 
-class QueryTest extends \PHPUnit_Framework_TestCase {
+class QueryTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
 		pdo('mysql')->exec('

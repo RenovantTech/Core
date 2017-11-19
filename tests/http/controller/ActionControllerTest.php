@@ -3,7 +3,7 @@ namespace test\http\controller;
 use metadigit\core\http\Request,
 	metadigit\core\http\Response;
 
-class ActionControllerTest extends \PHPUnit_Framework_TestCase {
+class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ActionController = new \mock\http\controller\ActionController;

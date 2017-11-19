@@ -2,7 +2,7 @@
 namespace test\mail;
 use metadigit\core\mail\Mailer;
 
-class MailerTest extends \PHPUnit_Framework_TestCase {
+class MailerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Mailer = new Mailer(SWIFT_DIR, 'smtp', [

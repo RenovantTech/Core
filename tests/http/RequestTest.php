@@ -2,7 +2,7 @@
 namespace test\http;
 use metadigit\core\http\Request;
 
-class RequestTest extends \PHPUnit_Framework_TestCase {
+class RequestTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$_SERVER['REQUEST_URI'] = '/mod1/action2';

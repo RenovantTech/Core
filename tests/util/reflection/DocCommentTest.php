@@ -2,7 +2,7 @@
 namespace test\util\reflection;
 use metadigit\core\util\reflection;
 
-class DocCommentTest extends \PHPUnit_Framework_TestCase {
+class DocCommentTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$DocComment = (new reflection\ReflectionClass('mock\util\reflection\Mock'))->getDocComment();

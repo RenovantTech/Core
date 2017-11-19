@@ -2,7 +2,7 @@
 namespace test\session;
 use metadigit\core\session\SessionManager;
 
-class SessionManagerTest extends \PHPUnit_Framework_TestCase {
+class SessionManagerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$SessionManager = new SessionManager;

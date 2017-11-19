@@ -2,7 +2,7 @@
 namespace test\container;
 use metadigit\core\container\Container;
 
-class ContainerTest extends \PHPUnit_Framework_TestCase {
+class ContainerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Container = new Container('mock.container');

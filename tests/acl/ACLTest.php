@@ -4,7 +4,7 @@ use function metadigit\core\pdo;
 use metadigit\core\acl\ACL,
 	metadigit\core\http\Request;
 
-class ACLTest extends \PHPUnit_Framework_TestCase {
+class ACLTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
 		pdo('mysql')->exec('

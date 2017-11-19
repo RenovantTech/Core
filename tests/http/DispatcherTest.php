@@ -8,7 +8,7 @@ use metadigit\core\context\Context,
 	metadigit\core\http\Dispatcher,
 	metadigit\core\http\DispatcherEvent;
 
-class DispatcherTest extends \PHPUnit_Framework_TestCase {
+class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';

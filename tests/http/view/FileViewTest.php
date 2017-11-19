@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\view\FileView;
 
-class FileViewTest extends \PHPUnit_Framework_TestCase {
+class FileViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$FileView = new FileView;

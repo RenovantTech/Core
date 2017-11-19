@@ -2,7 +2,7 @@
 namespace test\cache;
 use metadigit\core\cache\SqliteCache;
 
-class SqliteCacheTest extends \PHPUnit_Framework_TestCase {
+class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Cache = new SqliteCache('cache1', 'sqlite', 'cache');

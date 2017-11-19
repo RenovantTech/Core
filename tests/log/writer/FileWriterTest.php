@@ -2,7 +2,7 @@
 namespace test\log\writer;
 use metadigit\core\log\writer\FileWriter;
 
-class FileWriterTest extends \PHPUnit_Framework_TestCase {
+class FileWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		// 1) full path

@@ -3,7 +3,7 @@ namespace test;
 use function metadigit\core\{acl, cache, pdo};
 use metadigit\core\Kernel;
 
-class KernelTest extends \PHPUnit_Framework_TestCase {
+class KernelTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstants() {
 		$this->assertEquals('3.0.0', \metadigit\core\VERSION);

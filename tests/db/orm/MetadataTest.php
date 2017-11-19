@@ -2,7 +2,7 @@
 namespace test\db\orm;
 use metadigit\core\db\orm\Metadata;
 
-class MetadataTest extends \PHPUnit_Framework_TestCase {
+class MetadataTest extends \PHPUnit\Framework\TestCase {
 
 	function testParse1() {
 		$Metadata = new Metadata('mock\db\orm\User');

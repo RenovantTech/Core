@@ -3,7 +3,7 @@ namespace test\log\writer;
 use function metadigit\core\pdo;
 use metadigit\core\log\writer\SqliteWriter;
 
-class SqliteWriterTest extends \PHPUnit_Framework_TestCase {
+class SqliteWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Writer = new SqliteWriter('sqlite','log');

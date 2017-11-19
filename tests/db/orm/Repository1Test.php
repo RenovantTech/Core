@@ -6,7 +6,7 @@ use metadigit\core\context\Context,
 	metadigit\core\db\orm\Repository,
 	metadigit\core\util\DateTime;
 
-class Repository1Test extends \PHPUnit_Framework_TestCase {
+class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
 		pdo('mysql')->exec('

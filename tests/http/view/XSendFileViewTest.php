@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\view\XSendFileView;
 
-class XSendFileViewTest extends \PHPUnit_Framework_TestCase {
+class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$XSendFileView = new XSendFileView;

@@ -4,7 +4,7 @@ use const metadigit\core\trace\{T_ERROR, T_INFO};
 use function metadigit\core\trace;
 use metadigit\core\trace\Tracer;
 
-class TracerTest extends \PHPUnit_Framework_TestCase {
+class TracerTest extends \PHPUnit\Framework\TestCase {
 
 	function testInit() {
 		Tracer::init();

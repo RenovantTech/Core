@@ -4,7 +4,7 @@ use function metadigit\core\pdo;
 use metadigit\core\context\Context,
 	metadigit\core\db\orm\Repository;
 
-class Repository2Test extends \PHPUnit_Framework_TestCase {
+class Repository2Test extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
 		pdo('mysql')->exec('

@@ -2,7 +2,7 @@
 namespace test\session;
 use metadigit\core\session\Session;
 
-class SessionTest extends \PHPUnit_Framework_TestCase {
+class SessionTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		session_start();
