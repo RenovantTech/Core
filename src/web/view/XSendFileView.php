@@ -18,18 +18,19 @@ class XSendFileView implements \metadigit\core\web\ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	function render(Request $Req, Response $Res, $resource) {
-		if(!file_exists($resource)) throw new Exception(201, ['X-SendFile', $resource]);
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'file: '.$resource);
-		$saveName = $Res->get('saveName') ?: pathinfo($resource, PATHINFO_FILENAME);
+		if(!defined('XSENDFILE_PATH')) throw new Exception(261);
+		if(!defined('XSENDFILE_URL')) throw new Exception(262);
+		if(!file_exists(XSENDFILE_PATH.$resource)) throw new Exception(201, ['X-SendFile', XSENDFILE_PATH.$resource]);
+		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'file: '.XSENDFILE_PATH.$resource);
+		$saveName = $Res->get('saveName') ?: pathinfo(XSENDFILE_PATH.$resource, PATHINFO_FILENAME);
 		$Res->reset();
-		header('Content-Type: '.((new \finfo(FILEINFO_MIME_TYPE))->file($resource)));
-		header('Content-Disposition: attachment; filename='.$saveName.'.'.pathinfo($resource, PATHINFO_EXTENSION));
-		switch($_SERVER['SERVER_SOFTWARE']) {
-			case (strpos($_SERVER['SERVER_SOFTWARE'], 'nginx')!==false):
-				$resource = str_replace(\metadigit\core\PUBLIC_DIR, '/', $resource);
-				$resource = str_replace(\metadigit\core\DATA_DIR, '/', $resource);
-				break;
-		}
+		header('Content-Type: '.((new \finfo(FILEINFO_MIME_TYPE))->file(XSENDFILE_PATH.$resource)));
+		header('Content-Disposition: attachment; filename='.$saveName.'.'.pathinfo(XSENDFILE_PATH.$resource, PATHINFO_EXTENSION));
+		// Apache / Nginx switch
+		if(function_exists('apache_get_version'))
+			$resource = XSENDFILE_PATH.$resource;
+		else
+			$resource = XSENDFILE_URL.$resource;
 		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'X-Sendfile: '.$resource);
 		header('X-Accel-Redirect: '.$resource);
 		header('X-Sendfile: '.$resource);

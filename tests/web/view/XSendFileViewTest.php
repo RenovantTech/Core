@@ -14,15 +14,17 @@ class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param XSendFileView $XSendFileView
 	 */
 	function testRender(XSendFileView $XSendFileView) {
 		header_remove();
 		$Req = new Request;
 		$Res = new Response;
-		$XSendFileView->render($Req, $Res, MOCK_DIR.'/web/templates/test.txt');
+		$XSendFileView->render($Req, $Res, 'xsendfile.txt');
 		$headers = headers_list();
 //		$this->assertContains('X-Accel-Redirect: '.MOCK_DIR.'/web/templates/test.txt', $headers);
 //		$this->assertContains('X-Sendfile: '.MOCK_DIR.'/web/templates/test.txt', $headers);
+		$this->assertEquals(0, $Res->getSize());
 		header_remove();
 	}
 
@@ -30,10 +32,11 @@ class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @expectedException \metadigit\core\web\Exception
 	 * @expectedExceptionCode 201
+	 * @param XSendFileView $XSendFileView
 	 */
 	function testRenderException(XSendFileView $XSendFileView) {
 		$Req = new Request;
 		$Res = new Response;
-		$XSendFileView->render($Req, $Res, MOCK_DIR.'/web/templates/not-exists.txt');
+		$XSendFileView->render($Req, $Res, 'not-exists.txt');
 	}
 }

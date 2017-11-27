@@ -1,0 +1,3 @@
+Hello Europe!
+Hello America!
+Hello World!
