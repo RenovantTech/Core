@@ -2,7 +2,7 @@
 namespace test\log\writer;
 use metadigit\core\log\writer\FileTreeWriter;
 
-class FileTreeWriterTest extends \PHPUnit_Framework_TestCase {
+class FileTreeWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Writer = new FileTreeWriter('test.log');

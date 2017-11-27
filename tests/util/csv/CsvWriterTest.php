@@ -2,7 +2,7 @@
 namespace test\util\csv;
 use metadigit\core\util\csv\CsvWriter;
 
-class CsvWriterTest extends \PHPUnit_Framework_TestCase {
+class CsvWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$CsvWriter = new CsvWriter();

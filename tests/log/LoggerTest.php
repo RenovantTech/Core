@@ -3,7 +3,7 @@ namespace test\log;
 use metadigit\core\log\Logger,
 	metadigit\core\log\writer\FileWriter;
 
-class LoggerTest extends \PHPUnit_Framework_TestCase {
+class LoggerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Logger = new Logger;

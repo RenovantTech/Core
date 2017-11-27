@@ -2,7 +2,7 @@
 namespace test\util\excel;
 use metadigit\core\util\excel\ExcelWriter;
 
-class ExcelWriterTest extends \PHPUnit_Framework_TestCase {
+class ExcelWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ExcelWriter = new ExcelWriter();

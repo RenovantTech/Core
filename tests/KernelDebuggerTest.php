@@ -3,7 +3,7 @@ namespace test\debug;
 use metadigit\core\Kernel,
 	metadigit\core\KernelDebugger;
 
-class KernelDebuggerTest extends \PHPUnit_Framework_TestCase {
+class KernelDebuggerTest extends \PHPUnit\Framework\TestCase {
 
 	function testError() {
 		file_put_contents(\metadigit\core\LOG_DIR.'system.log', '');

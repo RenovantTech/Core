@@ -5,7 +5,7 @@ use metadigit\core\Kernel,
 	metadigit\core\db\orm\Repository,
 	metadigit\core\util\DateTime;
 
-class Repository2Test extends \PHPUnit_Framework_TestCase {
+class Repository2Test extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
 		Kernel::pdo('mysql')->exec('

@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\view\ExcelView;
 
-class ExcelViewTest extends \PHPUnit_Framework_TestCase {
+class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ExcelView = new ExcelView;

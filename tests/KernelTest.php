@@ -2,7 +2,7 @@
 namespace test;
 use metadigit\core\Kernel;
 
-class KernelTest extends \PHPUnit_Framework_TestCase {
+class KernelTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstants() {
 		$this->assertEquals(realpath(__DIR__.'/../src/'), \metadigit\core\DIR);

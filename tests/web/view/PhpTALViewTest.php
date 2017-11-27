@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\view\PhpTALView;
 
-class PhpTALViewTest extends \PHPUnit_Framework_TestCase {
+class PhpTALViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$PhpTALView = new PhpTALView;

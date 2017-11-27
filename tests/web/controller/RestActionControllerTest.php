@@ -4,7 +4,7 @@ use metadigit\core\web\controller\ActionController,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response;
 
-class RestActionControllerTest extends \PHPUnit_Framework_TestCase {
+class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ActionController = new \mock\web\controller\RestActionController;

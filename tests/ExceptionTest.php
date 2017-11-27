@@ -2,7 +2,7 @@
 namespace test;
 use metadigit\core\Exception;
 
-class ExceptionTest extends \PHPUnit_Framework_TestCase {
+class ExceptionTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		$Ex = new Exception(100, 'Custom message');

@@ -36,7 +36,7 @@ class EventTester {
 }
 
 
-class EventDispatcherTest extends \PHPUnit_Framework_TestCase {
+class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ReflProp = new \ReflectionProperty('metadigit\core\event\EventDispatcher', 'listeners');

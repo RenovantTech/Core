@@ -3,7 +3,7 @@ namespace test\depinjection;
 use metadigit\core\depinjection\Container,
 	metadigit\core\depinjection\ContainerException;
 
-class ContainerTest extends \PHPUnit_Framework_TestCase {
+class ContainerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Container = new Container('project.web', MOCK_DIR.'/depinjection/container.xml');

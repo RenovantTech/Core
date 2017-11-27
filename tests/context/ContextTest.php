@@ -3,7 +3,7 @@ namespace test\context;
 use metadigit\core\Kernel,
 	metadigit\core\context\Context;
 
-class ContextTest extends \PHPUnit_Framework_TestCase {
+class ContextTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Context = new Context('mock.context', MOCK_DIR.'/context/context.xml');

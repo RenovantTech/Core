@@ -2,7 +2,7 @@
 namespace test\util\validator;
 use metadigit\core\util\validator\ClassParser;
 
-class ClassParserTest extends \PHPUnit_Framework_TestCase {
+class ClassParserTest extends \PHPUnit\Framework\TestCase {
 
 	function testParse() {
 		$metadata = (new ClassParser)->parse('mock\util\validator\Class1');

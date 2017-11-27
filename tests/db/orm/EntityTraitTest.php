@@ -4,7 +4,7 @@ use metadigit\core\util\DateTime,
 	mock\db\orm\User,
 	mock\db\orm\Stats;
 
-class EntityTraitTest extends \PHPUnit_Framework_TestCase {
+class EntityTraitTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$User = new User(['id'=>1, 'name'=>'Jack', 'surname'=>'Brown', 'age'=>21, 'scores'=>6.5, 'date'=>(new DateTime('2012-01-01 12:35:16'))]);
