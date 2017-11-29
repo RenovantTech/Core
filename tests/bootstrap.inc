@@ -16,6 +16,8 @@ const CORE_YAML		= BASE_DIR.'core.yml';
 const ENVIRONMENT	= 'PHPUNIT';
 
 define('MOCK_DIR', __DIR__.'/_mock');
+define('XSENDFILE_PATH', __DIR__.'/_mock/web/templates/');
+define('XSENDFILE_URL', '/web/templates/');
 
 require __DIR__.'/../src/constants.inc';
 require __DIR__.'/../src/helpers.inc';
