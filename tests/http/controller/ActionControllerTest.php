@@ -88,6 +88,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(7, $Res->get('id'));
 
 		$_SERVER['REQUEST_URI'] = '/mod1/action3';
+		unset($_GET['name']);
 		$Req = new Request;
 		$Res = new Response;
 		$ActionController->handle($Req, $Res);
