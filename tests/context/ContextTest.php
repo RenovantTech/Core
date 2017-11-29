@@ -55,7 +55,8 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testFactoryWithCycledGraphs() {
-		Context::factory('mock.context.cyclic1');
+		$Context = Context::factory('mock.context.cyclic1');
+		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
 	}
 
 	/**
