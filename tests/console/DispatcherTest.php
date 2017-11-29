@@ -14,6 +14,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		new Request;
 		new Response;
 		$Dispatcher = Context::factory('mock.console')->getContainer()->get('mock.console.Dispatcher');
+		$this->assertInstanceOf('metadigit\core\console\Dispatcher', $Dispatcher);
 		return $Dispatcher;
 	}
 
