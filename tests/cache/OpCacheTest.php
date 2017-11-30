@@ -24,7 +24,11 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSet(OpCache $Cache) {
 		$this->assertTrue($Cache->set('test1', 'HelloWorld'));
-		$this->assertEquals('<?php $data=\'HelloWorld\';', file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$this->assertEquals('<?php $expire=0; $data=\'HelloWorld\';', file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$time = time()-60;
+		$this->assertTrue($Cache->set('test2', 'HelloWorld2', $time));
+		$raw = '<?php $expire='.$time.'; $data=\'HelloWorld2\';';
+		$this->assertEquals($raw, file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test2'),8,'/'),0,-1)));
 		return $Cache;
 	}
 
@@ -45,7 +49,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testGet(OpCache $Cache) {
 		$this->assertEquals('HelloWorld', $Cache->get('test1'));
-		$this->assertFalse($Cache->get('test2'));
+		$this->assertFalse($Cache->get('testX'));
 	}
 
 	/**
@@ -61,9 +65,18 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testSet
 	 * @param OpCache $Cache
 	 */
+	function testGetExpired(OpCache $Cache) {
+		$Cache = new OpCache('cache1');
+		$this->assertFalse($Cache->get('test2'));
+	}
+
+	/**
+	 * @depends testSet
+	 * @param OpCache $Cache
+	 */
 	function testHas(OpCache $Cache) {
 		$this->assertTrue($Cache->has('test1'));
-		$this->assertFalse($Cache->has('test2'));
+		$this->assertFalse($Cache->has('testX'));
 	}
 
 	/**

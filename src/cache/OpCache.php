@@ -47,7 +47,7 @@ class OpCache implements CacheInterface {
 			return $this->cache[$id];
 		} else {
 			@include($this->_file($this->id, $id));
-			$value = isset($data) ? $data: false;
+			$value = (isset($data) && isset($expire) && ($expire==0 || $expire>time())) ? $data: false;
 			if($value===false) {
 				trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->id);
 				return false;
@@ -72,7 +72,7 @@ class OpCache implements CacheInterface {
 			self::$buffer[$this->id][] = [$id, $value, $expire, $tags];
 		} else {
 			trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->id);
-			$this->_write($this->id, $id, $value);
+			$this->_write($this->id, $id, $value, $expire);
 		}
 		$this->cache[$id] = $value;
 		return true;
@@ -113,7 +113,7 @@ class OpCache implements CacheInterface {
 		return CACHE_DIR.'opc-'.$cache.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
 	}
 
-	static protected function _write($cache, $id, $value) {
+	static protected function _write($cache, $id, $value, $expire) {
 		$data = var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
 		$file = substr(chunk_split(md5($id),8,'/'),0,-1);
@@ -121,7 +121,7 @@ class OpCache implements CacheInterface {
 		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0]);
 		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1]);
 		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1].'/'.$f[2]);
-		file_put_contents($tmp, '<?php $data='.$data.';', LOCK_EX);
+		file_put_contents($tmp, '<?php $expire='.(int)$expire.'; $data='.$data.';', LOCK_EX);
 		rename($tmp, CACHE_DIR.'opc-'.$cache.'/'.$file);
 	}
 
@@ -144,7 +144,7 @@ class OpCache implements CacheInterface {
 			trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
-				self::_write($k, $id, $value);
+				self::_write($k, $id, $value, $expire);
 			}
 		}
 	}
