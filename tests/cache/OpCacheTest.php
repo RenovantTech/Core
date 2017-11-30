@@ -24,7 +24,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSet(OpCache $Cache) {
 		$this->assertTrue($Cache->set('test1', 'HelloWorld'));
-		$this->assertEquals('<?php $data=\'HelloWorld\';', file_get_contents(CACHE_DIR.'opc-cache1/'.md5('test1')));
+		$this->assertEquals('<?php $data=\'HelloWorld\';', file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
 		return $Cache;
 	}
 
@@ -35,7 +35,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSet2(OpCache $CacheWithBuffer) {
 		$this->assertTrue($CacheWithBuffer->set('test1', 'HelloWorld'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.md5('test1')));
+		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
 		return $CacheWithBuffer;
 	}
 
@@ -83,7 +83,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($Cache->delete('test1'));
 		$this->assertFalse($Cache->has('test1'));
 		$this->assertFalse($Cache->get('test1'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache1/'.md5('test1')));
+		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
 	}
 
 	/**
@@ -94,7 +94,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($CacheWithBuffer->delete('test1'));
 		$this->assertFalse($CacheWithBuffer->has('test1'));
 		$this->assertFalse($CacheWithBuffer->get('test1'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.md5('test1')));
+		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
 	}
 
 	/**

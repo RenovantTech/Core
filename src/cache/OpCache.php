@@ -25,9 +25,6 @@ class OpCache implements CacheInterface {
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
-	/** Cache directory
-	 * @var string */
-	protected $DIR;
 	/** Write buffer
 	 * @var boolean */
 	protected $writeBuffer = false;
@@ -38,10 +35,10 @@ class OpCache implements CacheInterface {
 	 */
 	function __construct($id, $writeBuffer=false) {
 		$this->id = $id;
-		$this->DIR = CACHE_DIR.'opc-'.$id.'/';
+		$DIR = CACHE_DIR.'opc-'.$id.'/';
 		$this->writeBuffer = (boolean) $writeBuffer;
-		trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$this->DIR, null, $this->id);
-		mkdir($this->DIR, 0755, true);
+		trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$DIR, null, $this->id);
+		mkdir($DIR, 0755, true);
 	}
 
 	function get($id) {
@@ -49,7 +46,7 @@ class OpCache implements CacheInterface {
 			trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->id);
 			return $this->cache[$id];
 		} else {
-			@include($this->DIR.md5($id));
+			@include($this->_file($this->id, $id));
 			$value = isset($data) ? $data: false;
 			if($value===false) {
 				trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->id);
@@ -62,7 +59,7 @@ class OpCache implements CacheInterface {
 
 	function has($id) {
 		if(isset($this->cache[$id])) return true;
-		return file_exists($this->DIR.md5($id));
+		return file_exists($this->_file($this->id, $id));
 	}
 
 	function mget(array $ids) {
@@ -75,12 +72,7 @@ class OpCache implements CacheInterface {
 			self::$buffer[$this->id][] = [$id, $value, $expire, $tags];
 		} else {
 			trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->id);
-			$md5 = md5($id);
-			$data = var_export($value, true);
-			if(is_array($tags)) $tags = implode('|', $tags);
-			$tmp = TMP_DIR.'/opc-'.$md5;
-			file_put_contents($tmp, '<?php $data='.$data.';', LOCK_EX);
-			rename($tmp, $this->DIR.$md5);
+			$this->_write($this->id, $id, $value);
 		}
 		$this->cache[$id] = $value;
 		return true;
@@ -90,7 +82,8 @@ class OpCache implements CacheInterface {
 	function delete($id) {
 		trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->id);
 		if(isset($this->cache[$id])) unset($this->cache[$id]);
-		return file_exists($this->DIR.md5($id)) ? unlink($this->DIR.md5($id)) : true;
+		$file = $this->_file($this->id, $id);
+		return file_exists($file) ? unlink($file) : true;
 	}
 
 	function clean($mode=self::CLEAN_ALL, $tags=null) {
@@ -98,9 +91,7 @@ class OpCache implements CacheInterface {
 		unset(self::$buffer[$this->id]);
 		switch($mode) {
 			case self::CLEAN_ALL:
-				self::_rmdir($this->DIR);
-
-
+				self::_clean(CACHE_DIR.'opc-'.$this->id);
 				break;
 			case self::CLEAN_OLD:
 				//@TODO
@@ -118,14 +109,30 @@ class OpCache implements CacheInterface {
 		return true;
 	}
 
+	static protected function _file($cache, $id) {
+		return CACHE_DIR.'opc-'.$cache.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
+	}
+
+	static protected function _write($cache, $id, $value) {
+		$data = var_export($value, true);
+		$tmp = TMP_DIR.'/opc-'. md5($id);
+		$file = substr(chunk_split(md5($id),8,'/'),0,-1);
+		$f = explode('/', $file);
+		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0]);
+		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1]);
+		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1].'/'.$f[2]);
+		file_put_contents($tmp, '<?php $data='.$data.';', LOCK_EX);
+		rename($tmp, CACHE_DIR.'opc-'.$cache.'/'.$file);
+	}
+
 	/**
 	 * Recursive directory remove (like UNIX rm -fR /path)
 	 * @param string $dir directory
 	 */
-	protected function _rmdir($dir) {
+	static protected function _clean($dir) {
 		$files = glob($dir .'/*');
 		foreach ($files as $file) {
-			is_dir($file) ? self::_rmdir($file) : unlink($file);
+			is_dir($file) ? self::_clean($file) : unlink($file);
 		}
 	}
 
@@ -137,13 +144,7 @@ class OpCache implements CacheInterface {
 			trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
-				if(is_array($tags)) $tags = implode('|', $tags);
-				$md5 = md5($id);
-				$data = var_export($value, true);
-				if(is_array($tags)) $tags = implode('|', $tags);
-				$tmp = TMP_DIR.'/opc-'.$md5;
-				file_put_contents($tmp, '<?php $data='.$data.';', LOCK_EX);
-				rename($tmp, CACHE_DIR.'opc-'.$k.'/'.$md5);
+				self::_write($k, $id, $value);
 			}
 		}
 	}
