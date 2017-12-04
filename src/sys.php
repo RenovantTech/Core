@@ -93,6 +93,13 @@ class sys {
 	static function init() {
 		Tracer::traceFn(__METHOD__);
 		self::trace(LOG_DEBUG, T_INFO);
+		register_shutdown_function(function () {
+			Tracer::traceFn(__METHOD__);
+			//self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
+			//cache\SqliteCache::shutdown();
+			if(PHP_SAPI != 'cli') session_write_close();
+		});
+
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
 
@@ -164,16 +171,6 @@ class sys {
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
 		self::trace(LOG_DEBUG, T_INFO, $dispatcherID);
 		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
-	}
-
-	/**
-	 * Automatic shutdown handler
-	 */
-	static function shutdown() {
-		Tracer::traceFn(__METHOD__);
-//		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
-		cache\SqliteCache::shutdown();
-		if(PHP_SAPI != 'cli') session_write_close();
 	}
 
 	/**
