@@ -12,7 +12,7 @@ use const metadigit\core\trace\T_INFO;
  * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class sysboot extends sys {
+class sysBoot extends sys {
 
 	/**
 	 * Framework bootstrap on first launch (or cache missing)
@@ -33,7 +33,6 @@ class sysboot extends sys {
 		if(!file_exists(LOG_DIR)) mkdir(LOG_DIR, 0770, true);
 		if(!file_exists(TMP_DIR)) mkdir(TMP_DIR, 0770, true);
 		if(!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0770, true);
-		file_put_contents(DATA_DIR.'.metadigit-core', date('Y-m-d H:i:s'));
 
 		$Sys = new sys();
 

@@ -110,7 +110,7 @@ class sys {
 
 		$Sys = $namespaces = null;
 		@include self::CACHE_FILE;
-		if(!isset($Sys)) list($Sys, $namespaces) = sysboot::boot();
+		if(!isset($Sys)) list($Sys, $namespaces) = sysBoot::boot();
 		self::$namespaces = $namespaces;
 		self::$Sys = $Sys;
 
