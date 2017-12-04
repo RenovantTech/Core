@@ -46,10 +46,8 @@ settings:
   timeZone:     Europe/London
 
 # =========================================================
-# System services
-# =========================================================
-
 # ACL service
+# =========================================================
 acl:
   routes:   true  # enable ACL checks on routing
   objects:  true  # enable ACL checks on objects methods calls
@@ -62,28 +60,36 @@ acl:
       roles:  sys_roles
       u2r:    sys_users_2_roles
 
+# =========================================================
 # CACHE service
+# =========================================================
 cache:
-  system:
+  #sys:         ### System cache, override with CAUTION
+  #  class:    metadigit\core\cache\SqliteCache
+  #  params:   ['sys-cache', 'cache', true]
+  main:
     class:    metadigit\core\cache\SqliteCache
-    params:   ['system', 'sys-cache', false]
+    params:   ['sqlite', 'cache', false]
 
+
+# =========================================================
 # DB service
+# =========================================================
 database:
-  system:
-    dns:      sqlite:/tmp/metadigit-core/system.sqlite
-    user:     null
-    pwd:      null
+  #sys-cache:  ### System cache DB, override with CAUTION
+  #  dns:      sqlite:{{CACHE_DIR}}sys-cache.sqlite
+  #sys-trace:  ### System trace DB, override with CAUTION
+  #  dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
   sqlite:
-    dns:      sqlite:/tmp/metadigit-core/test.sqlite
-    user:     null
-    pwd:      null
+    dns:      sqlite:/tmp/metadigit-core/db.sqlite
   mysql:
     dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
     user:     phpunit
     pwd:      phpunit
 
+# =========================================================
 # LOG service
+# =========================================================
 log:
   kernel:
     level:    LOG_INFO
@@ -98,7 +104,9 @@ log:
     param1:   system.log
     param2:   null
 
+# =========================================================
 # TRACE service
+# =========================================================
 trace:
   level:      LOG_DEBUG
   storeFn:    null

@@ -15,7 +15,7 @@ use metadigit\core\context\Context,
  */
 class sys {
 
-	const CACHE_FILE = CACHE_DIR.'core-sys';
+	const CACHE_FILE = CACHE_DIR.'sys';
 	const EVENT_INIT		= 'sys:init';
 	const EVENT_SHUTDOWN	= 'sys:shutdown';
 	const INFO_NAMESPACE = 1;
@@ -207,7 +207,7 @@ class sys {
 	 * @param string $id Cache ID, default "system"
 	 * @return cache\CacheInterface
 	 */
-	static function cache($id='system') {
+	static function cache($id='main') {
 		static $_ = [];
 		if(!isset($_[$id])) {
 			$cnf = self::$Sys->cache[$id];
