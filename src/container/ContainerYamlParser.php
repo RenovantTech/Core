@@ -7,9 +7,8 @@
  */
 namespace metadigit\core\container;
 use const metadigit\core\trace\T_DEPINJ;
-use function metadigit\core\{trace, yaml};
-use metadigit\core\CoreProxy,
-	metadigit\core\Kernel;
+use metadigit\core\sys,
+	metadigit\core\CoreProxy;
 /**
  * Dependency Injection ContainerParser
  * @internal
@@ -34,13 +33,13 @@ class ContainerYamlParser {
 	 */
 	function __construct(array $namespaces) {
 		$this->_oid = $namespaces[0].'.ContainerParser';
-		list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.', '\\', $this->_oid));
+		$dirName = sys::info($this->_oid, sys::INFO_PATH_DIR);
 		if (empty($dirName))
 			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yml';
 		else
 			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_oid, $this->yamlPath]);
-		$this->YAML = yaml($this->yamlPath, null, [
+		$this->YAML = sys::yaml($this->yamlPath, null, [
 			'!obj' => function($value, $tag, $flags) {
 				return '!obj '.$value;
 			}
@@ -61,7 +60,7 @@ class ContainerYamlParser {
 	 */
 	function parseMaps(array &$id2classMap, array &$class2idMap) {
 		if(isset($this->YAML['objects'])) {
-			trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
 			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
 				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
@@ -79,7 +78,7 @@ class ContainerYamlParser {
 					$class2idMap[$class][] = $id;
 				}
 			}
-			trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_oid);
 		}
 	}
 
@@ -92,7 +91,7 @@ class ContainerYamlParser {
 	function parseObjectConstructorArgs($id) {
 		$args = [];
 		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
-			trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
 			$i = 0;
 			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
 				switch(self::parseType($yamlArg)) {
@@ -141,7 +140,7 @@ class ContainerYamlParser {
 	function parseObjectProperties($id) {
 		$properties = [];
 		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
-			trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
 			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
 				switch (self::parseType($yamlProp)) {
 					case 'boolean':

@@ -6,8 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\db\orm\util;
-use function metadigit\core\pdo;
-use metadigit\core\db\Query,
+use metadigit\core\sys,
+	metadigit\core\db\Query,
 	metadigit\core\db\orm\Metadata,
 	metadigit\core\db\orm\Repository;
 /**
@@ -183,7 +183,7 @@ class QueryRunner {
 				// fetch AUTO ID
 				if(count($Metadata->pkeys())==1 && isset($Metadata->properties()[$Metadata->pkeys()[0]]['autoincrement'])) {
 					$k = $Metadata->pkeys()[0];
-					$v = (int)pdo($pdo)->lastInsertId();
+					$v = (int)sys::pdo($pdo)->lastInsertId();
 					$Entity->$k =$v;
 				}
 				return true;

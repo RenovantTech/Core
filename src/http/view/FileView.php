@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\view;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
 /**
@@ -21,7 +21,7 @@ class FileView implements \metadigit\core\http\ViewInterface {
 
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!file_exists($resource)) throw new Exception(201, ['File', $resource]);
-		trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
 		$fileName = $options['fileName'] ?? pathinfo($resource, PATHINFO_FILENAME);
 		$Res->contentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
 		header('Content-Disposition: attachment; filename='.$fileName.'.'.pathinfo($resource, PATHINFO_EXTENSION));

@@ -6,8 +6,8 @@
  * @license New BSD License
  */
 namespace metadigit\core\trace;
-use const metadigit\core\CORE_YAML;
-use function metadigit\core\yaml;
+use const metadigit\core\SYS_YAML;
+use metadigit\core\sys;
 /**
  * Tracer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -33,7 +33,7 @@ class Tracer {
 	static protected $traceFn;
 
 	static function init() {
-		self::$conf = array_merge(self::$conf, yaml(CORE_YAML, 'trace'));
+		self::$conf = array_merge(self::$conf, sys::yaml(SYS_YAML, 'trace'));
 		if(is_string(self::$conf['level'])) self::$conf['level'] = constant(self::$conf['level']);
 		set_exception_handler(__CLASS__.'::onException');
 		set_error_handler(__CLASS__.'::onError');

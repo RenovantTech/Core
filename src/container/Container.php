@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\container;
 use const metadigit\core\trace\T_DEPINJ;
-use function metadigit\core\{cache, trace};
+use metadigit\core\sys;
 /**
  * Dependency Injection Container
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -64,7 +64,7 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);
@@ -80,7 +80,7 @@ class Container {
 				$this->setProperty($k, $v, $Obj, $ReflObject);
 			}
 			$this->objects[$id] = $Obj;
-			cache('kernel')->set($id, $Obj);
+			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
 			if($failureMode==self::FAILURE_SILENT) return null;

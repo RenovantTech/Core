@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\controller;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\trace\Tracer,
 	metadigit\core\http\Exception;
@@ -36,7 +36,7 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
 		if(true!==$this->preHandle($Req, $Res)) {
-			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
@@ -64,7 +64,7 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 			}
 		}
 		Tracer::traceFn($this->_oid.'->doHandle');
-		trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO);
 		call_user_func_array([$this,'doHandle'], $args);
 		$this->postHandle($Req, $Res);
 	}

@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\log\writer;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\{pdo, trace};
-use metadigit\core\log\Logger;
+use metadigit\core\sys,
+	metadigit\core\log\Logger;
 /**
  * Writes logs to sqlite database
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -44,15 +44,15 @@ class SqliteWriter implements \metadigit\core\log\LogWriterInterface {
 	function __construct($pdo, $table='log') {
 		$this->pdo = $pdo;
 		$this->table = $table;
-		trace(LOG_DEBUG, T_INFO, 'initialize log storage [Sqlite]');
-		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize log storage [Sqlite]');
+		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
 	function write($time, $message, $level=LOG_INFO, $facility=null) {
-		if(is_null($this->_pdo_insert)) $this->_pdo_insert = pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
+		if(is_null($this->_pdo_insert)) $this->_pdo_insert = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
 		$this->_pdo_insert->execute(['date'=>$time, 'level'=>Logger::LABELS[$level], 'facility'=>$facility, 'message'=>$message]);
 	}
 }

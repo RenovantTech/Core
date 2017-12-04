@@ -1,7 +1,7 @@
 <?php
 namespace test\log\writer;
-use function metadigit\core\pdo;
-use metadigit\core\log\writer\SqliteWriter;
+use metadigit\core\sys,
+	metadigit\core\log\writer\SqliteWriter;
 
 class SqliteWriterTest extends \PHPUnit\Framework\TestCase {
 
@@ -13,6 +13,7 @@ class SqliteWriterTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param SqliteWriter $Writer
 	 */
 	function testWrite(SqliteWriter $Writer) {
 		$time = time();
@@ -20,7 +21,7 @@ class SqliteWriterTest extends \PHPUnit\Framework\TestCase {
 		$Writer->write($time, 'test message WARNING', LOG_WARNING);
 		$Writer->write($time, 'test message EMERG', LOG_EMERG, 'kernel');
 		unset($Writer);
-		$pdostm = pdo('sqlite')->query('SELECT * FROM `log`', \PDO::FETCH_ASSOC);
+		$pdostm = sys::pdo('sqlite')->query('SELECT * FROM `log`', \PDO::FETCH_ASSOC);
 
 		$row = $pdostm->fetch();
 		$this->assertEquals('INFO', $row['level']);

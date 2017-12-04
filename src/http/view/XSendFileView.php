@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\view;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
 /**
@@ -23,7 +23,7 @@ class XSendFileView implements \metadigit\core\http\ViewInterface {
 		if(!defined('XSENDFILE_PATH')) throw new Exception(261);
 		if(!defined('XSENDFILE_URL')) throw new Exception(262);
 		if(!file_exists(XSENDFILE_PATH.$resource)) throw new Exception(201, ['X-SendFile', XSENDFILE_PATH.$resource]);
-		trace(LOG_DEBUG, T_INFO, 'file: '.XSENDFILE_PATH.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'file: '.XSENDFILE_PATH.$resource);
 		$fileName = $options['fileName'] ?? pathinfo(XSENDFILE_PATH.$resource, PATHINFO_FILENAME);
 		$Res->reset();
 		header('Content-Type: '.((new \finfo(FILEINFO_MIME_TYPE))->file(XSENDFILE_PATH.$resource)));
@@ -33,7 +33,7 @@ class XSendFileView implements \metadigit\core\http\ViewInterface {
 			$resource = XSENDFILE_PATH.$resource;
 		else
 			$resource = XSENDFILE_URL.$resource;
-		trace(LOG_DEBUG, T_INFO, 'X-Sendfile: '.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'X-Sendfile: '.$resource);
 		header('X-Accel-Redirect: '.$resource);
 		header('X-Sendfile: '.$resource);
 	}

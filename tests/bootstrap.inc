@@ -12,7 +12,7 @@ const LOG_DIR		= '/tmp/metadigit-core/log/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
 // environment
-const CORE_YAML		= BASE_DIR.'core.yml';
+const SYS_YAML		= BASE_DIR.'sys.yml';
 const ENVIRONMENT	= 'PHPUNIT';
 
 define('MOCK_DIR', __DIR__.'/_mock');
@@ -20,11 +20,10 @@ define('XSENDFILE_PATH', __DIR__.'/_mock/http/templates/');
 define('XSENDFILE_URL', '/web/templates/');
 
 require __DIR__.'/../src/constants.inc';
-require __DIR__.'/../src/helpers.inc';
 require __DIR__.'/../src/trace/Tracer.php';
 require __DIR__.'/../src/CoreProxy.php';
 require __DIR__.'/../src/CoreTrait.php';
-require __DIR__.'/../src/Kernel.php';
+require __DIR__.'/../src/sys.php';
 require __DIR__.'/../vendor/autoload.php';
 
 // clean DATA_DIR
@@ -34,4 +33,4 @@ register_shutdown_function(function() {
 	exec('rm -fr '.DATA_DIR);
 });
 trace\Tracer::init();
-Kernel::init();
+sys::init();

@@ -1,7 +1,7 @@
 <?php
 namespace test\console;
-use function metadigit\core\cache;
-use metadigit\core\console\Dispatcher,
+use metadigit\core\sys,
+	metadigit\core\console\Dispatcher,
 	metadigit\core\context\Context,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response;
@@ -13,7 +13,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
-		$Dispatcher = Context::factory('mock.console')->getContainer()->get('mock.console.Dispatcher');
+		$Dispatcher = Context::factory('mock.console')
+			->getContainer()->get('mock.console.Dispatcher');
 		$this->assertInstanceOf('metadigit\core\console\Dispatcher', $Dispatcher);
 		return $Dispatcher;
 	}
@@ -104,7 +105,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');
-		cache('kernel')->delete('mock.console.Dispatcher');
+		sys::cache('sys')->delete('mock.console.Dispatcher');
 		$Dispatcher = Context::factory('mock.console',false)->get('mock.console.Dispatcher');
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;

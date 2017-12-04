@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\controller;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\trace\Tracer,
 	metadigit\core\http\Exception;
@@ -45,7 +45,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
-			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
@@ -67,7 +67,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 			}
 		}
 		Tracer::traceFn($this->_oid.'->'.$action.'Action');
-		trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO);
 		call_user_func_array([$this, $action.'Action'], $args);
 		$this->postHandle($Req, $Res);
 	}

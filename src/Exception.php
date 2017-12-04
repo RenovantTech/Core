@@ -33,7 +33,7 @@ class Exception extends \Exception {
 			}
 		}
 		parent::__construct((string)$message, (int)$code);
-		trace(LOG_DEBUG, T_INFO, '[CODE '.$this->getCode().'] '.$this->getMessage(), null, get_class($this));
+		sys::trace(LOG_DEBUG, T_INFO, '[CODE '.$this->getCode().'] '.$this->getMessage(), null, get_class($this));
 	}
 
 	/**

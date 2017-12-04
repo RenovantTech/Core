@@ -1,16 +1,16 @@
 <?php
 namespace test\db\orm;
-use function metadigit\core\pdo;
-use metadigit\core\context\Context,
+use metadigit\core\sys,
+	metadigit\core\context\Context,
 	metadigit\core\db\orm\Repository;
 
 class Repository2Test extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `stats` (
 				code		varchar(5) not NULL,
 				year		year not NULL,
@@ -21,13 +21,13 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	}
 
 	static function tearDownAfterClass() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
 	}
 
 	protected function setUp() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			TRUNCATE TABLE `stats`;
 			INSERT INTO `stats` (code, year, score) VALUES ("AA", 2013, 6.5);
 			INSERT INTO `stats` (code, year, score) VALUES ("BB", 2013, 8.3);

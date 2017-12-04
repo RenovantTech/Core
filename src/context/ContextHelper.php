@@ -6,13 +6,13 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
-use metadigit\core\Kernel;
+use metadigit\core\sys;
 /**
  * ContextHelper
  * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class ContextHelper extends Kernel {
+class ContextHelper extends sys {
 
 	/**
 	 * @return array[Context]

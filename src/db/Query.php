@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\db;
+use metadigit\core\sys;
 /**
  * Query
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -104,7 +105,7 @@ class Query {
 			$keys = [];
 			$sql = sprintf('SELECT %s', implode(', ', $outputParams));
 			foreach($outputParams as $p) $keys[] = substr($p,1);
-			return array_combine($keys, \metadigit\core\pdo($this->pdo)->query($sql)->fetch(\PDO::FETCH_NUM));
+			return array_combine($keys, sys::pdo($this->pdo)->query($sql)->fetch(\PDO::FETCH_NUM));
 		}
 	}
 
@@ -348,7 +349,7 @@ class Query {
 				}
 			} else $execParams[$k] = $v;
 		}
-		if(is_null($this->PDOStatement)) $this->PDOStatement = \metadigit\core\pdo($this->pdo)->prepare($sql);
+		if(is_null($this->PDOStatement)) $this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
 	}

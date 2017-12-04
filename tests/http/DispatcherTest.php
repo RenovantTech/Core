@@ -1,8 +1,8 @@
 <?php
 namespace test\http;
 use const metadigit\core\http\ENGINE_PHP;
-use function metadigit\core\cache;
-use metadigit\core\context\Context,
+use metadigit\core\sys,
+	metadigit\core\context\Context,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Dispatcher,
@@ -149,7 +149,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>index<\/title>/');
-		cache('kernel')->delete('mock.http.Dispatcher');
+		sys::cache('sys')->delete('mock.http.Dispatcher');
 		$Dispatcher = Context::factory('mock.http',false)->get('mock.http.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
 		define('SESSION_UID', 1);

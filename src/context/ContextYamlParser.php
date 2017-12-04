@@ -7,8 +7,7 @@
  */
 namespace metadigit\core\context;
 use const metadigit\core\trace\{T_INFO, T_DEPINJ};
-use function metadigit\core\{trace, yaml};
-use metadigit\core\Kernel;
+use metadigit\core\sys;
 /**
  * ContextParser
  * @internal
@@ -27,14 +26,14 @@ class ContextYamlParser {
 	 */
 	static function parse($namespace, array &$includes, array &$id2classMap, array &$listeners) {
 		$oid = $namespace . '.ContextYamlParser';
-		list($namespace2, $className, $dirName, $fileName) = Kernel::parseClassName(str_replace('.', '\\', $namespace . '.Context'));
+		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
 		if (empty($dirName))
 			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
 		else
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Context YAML', null, $oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Context YAML', null, $oid);
 		if(!file_exists($yamlPath)) throw new ContextException(11, [$oid, $yamlPath]);
-		$YAML = yaml($yamlPath);
+		$YAML = sys::yaml($yamlPath);
 		// @TODO verify YAML content
 		if(
 			!is_array($YAML) ||
@@ -82,7 +81,7 @@ class ContextYamlParser {
 
 		// ID => class MAP
 		if(isset($YAML['objects'])) {
-			trace(LOG_DEBUG, T_INFO, 'parsing objects', null, $oid);
+			sys::trace(LOG_DEBUG, T_INFO, 'parsing objects', null, $oid);
 			$filter = function($v) {
 				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
 				if((boolean)strpos($v,'Abstract')) return false;
@@ -100,7 +99,7 @@ class ContextYamlParser {
 
 		// events listeners
 		if(isset($YAML['events'])) {
-			trace(LOG_DEBUG, T_INFO, 'parsing events listeners', null, $oid);
+			sys::trace(LOG_DEBUG, T_INFO, 'parsing events listeners', null, $oid);
 			// parse events in YAML
 			foreach($YAML['events'] as $eventName => $eventYAML) {
 				foreach ($eventYAML as $listenerYAML) {
@@ -128,6 +127,6 @@ class ContextYamlParser {
 				}
 			}
 		}
-		trace(LOG_DEBUG, T_DEPINJ, '[END] Context ready', null, $oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Context ready', null, $oid);
 	}
 }

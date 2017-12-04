@@ -1,13 +1,13 @@
 <?php
 namespace test\acl;
-use function metadigit\core\pdo;
-use metadigit\core\acl\ACL,
+use metadigit\core\sys,
+	metadigit\core\acl\ACL,
 	metadigit\core\http\Request;
 
 class ACLTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_acl_filters_2_users;
 			DROP TABLE IF EXISTS sys_acl_filters_2_roles;
 			DROP TABLE IF EXISTS sys_acl_actions_2_users;
@@ -25,7 +25,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	function testConstruct() {
 		$ACL = new ACL( 'mysql');
 		$this->assertInstanceOf('metadigit\core\acl\ACL', $ACL);
-		pdo('mysql')->exec(file_get_contents(__DIR__.'/init.sql'));
+		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/init.sql'));
 		return $ACL;
 	}
 

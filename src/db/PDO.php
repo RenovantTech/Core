@@ -8,7 +8,7 @@
 namespace metadigit\core\db;
 // @TODO use const metadigit\core\TMP_DIR;
 use const metadigit\core\trace\T_DB;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * PDO wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -32,7 +32,7 @@ class PDO extends \PDO {
 			$statement = preg_replace($keys, $values, $statement, 1);
 		}
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
+		sys::trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
 	}
 
 	/** database ID
@@ -68,7 +68,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function beginTransaction() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
 		return parent::beginTransaction();
 	}
 
@@ -77,7 +77,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function commit() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
 		return parent::commit();
 	}
 
@@ -89,7 +89,7 @@ class PDO extends \PDO {
 	 */
 	function exec($statement, $traceLevel=LOG_INFO) {
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
+		sys::trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
 	}
 
@@ -113,7 +113,7 @@ class PDO extends \PDO {
 	 * @return PDOStatement
 	 */
 	function query($statement, $traceLevel=LOG_INFO) {
-		trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
+		sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
 		$st = parent::query($statement);
 		if(func_num_args()>1) {
 			$args = array_shift(func_get_args());
@@ -128,7 +128,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function rollBack() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
 		return parent::rollBack();
 	}
 }

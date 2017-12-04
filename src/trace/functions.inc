@@ -6,8 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\trace;
-use function metadigit\core\trace;
-use metadigit\core\Kernel;
+use metadigit\core\sys;
 
 const LABELS = [
 		E_ERROR=>'E_ERROR',
@@ -44,8 +43,8 @@ function traceError($n, $str, $file, $line) {
 		'------------------------------------------------------------------------------------------------'."\n".
 		implode('<br/>',$textTraceArray)."\n".
 		'------------------------------------------------------------------------------------------------';
-	trace(LOG_ERR, T_ERROR, $str, $data, LABELS[$n]);
-//	Kernel::log(sprintf('%s - FILE: %s:%s', $str, $file, $line), LOG_ERR, 'kernel');
+	sys::trace(LOG_ERR, T_ERROR, $str, $data, LABELS[$n]);
+//	sys::log(sprintf('%s - FILE: %s:%s', $str, $file, $line), LOG_ERR, 'kernel');
 }
 
 
@@ -63,8 +62,8 @@ function traceException(\Throwable $Ex) {
 		'------------------------------------------------------------------------------------------------'."\n".
 		implode("\n",$textTraceArray)."\n".
 		'------------------------------------------------------------------------------------------------';
-	trace(LOG_ERR, T_ERROR, $msg, $data, get_class($Ex));
-//	Kernel::log(sprintf('%s[%s]: %s - %s - FILE: %s:%s', get_class($Ex), $Ex->getCode(), $Ex->getMessage(), $info, $Ex->getFile(), $Ex->getLine()), LOG_ERR, 'kernel');
+	sys::trace(LOG_ERR, T_ERROR, $msg, $data, get_class($Ex));
+//	sys::log(sprintf('%s[%s]: %s - %s - FILE: %s:%s', get_class($Ex), $Ex->getCode(), $Ex->getMessage(), $info, $Ex->getFile(), $Ex->getLine()), LOG_ERR, 'kernel');
 }
 
 function formatTraceAsText(array $traceArray) {

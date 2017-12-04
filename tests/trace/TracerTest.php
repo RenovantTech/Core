@@ -1,15 +1,15 @@
 <?php
 namespace test\tracer;
 use const metadigit\core\trace\{T_ERROR, T_INFO};
-use function metadigit\core\trace;
-use metadigit\core\trace\Tracer;
+use metadigit\core\sys,
+	metadigit\core\trace\Tracer;
 
 class TracerTest extends \PHPUnit\Framework\TestCase {
 
 	function testInit() {
 		Tracer::init();
-		trace(LOG_DEBUG, T_INFO, 'msg1');
-		trace(LOG_ERR, T_INFO, 'err1');
+		sys::trace(LOG_DEBUG, T_INFO, 'msg1');
+		sys::trace(LOG_ERR, T_INFO, 'err1');
 
 		$trace = Tracer::export();
 		$t = array_pop($trace);

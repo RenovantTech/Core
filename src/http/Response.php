@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\http;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * HTTP Response.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -180,7 +180,7 @@ class Response {
 			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
 			$location = $url.$location;
 		}
-		trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
 		header('Location: '.$location, true, $statusCode);
 		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}
@@ -203,7 +203,7 @@ class Response {
 	function send() {
 		$this->size = ob_get_length();
 		if($this->size) header('Content-Type: '.(($this->contentType)?:self::DEFAULT_MIME));
-		trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
 		ini_set('precision', 16);

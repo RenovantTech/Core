@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\cli;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * CLI Response.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -125,7 +125,7 @@ class Response {
 	 */
 	function send() {
 		$this->size = ob_get_length();
-		trace(LOG_DEBUG, T_INFO, null, null. __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, null, null. __METHOD__);
 		ob_flush();
 		ini_set('precision', 16);
 		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));

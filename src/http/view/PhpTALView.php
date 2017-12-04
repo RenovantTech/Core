@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\view;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
 /**
@@ -33,7 +33,7 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 		$suffixes = explode('|', static::TEMPLATE_SUFFIXES);
 		foreach($suffixes as $suffix) {
 			if(file_exists($template = $Req->getAttribute('RESOURCES_DIR').$resource.$suffix)) {
-				trace(LOG_DEBUG, T_INFO, 'template: '.$template);
+				sys::trace(LOG_DEBUG, T_INFO, 'template: '.$template);
 				$this->execTemplate($template, $Res);
 				return;
 			}
@@ -57,11 +57,11 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 		if(!file_exists(\metadigit\core\CACHE_DIR.'phptal')) mkdir(\metadigit\core\CACHE_DIR.'phptal', 0750);
 		$PhpTAL->setPhpCodeDestination(\metadigit\core\CACHE_DIR.'phptal');
 		if(!is_null($class = $this->preFilterClass)) {
-			trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class);
+			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class);
 			$PhpTAL->addPreFilter(new $class);
 		}
 		if(!is_null($class = $this->postFilterClass)) {
-			trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class);
+			sys::trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class);
 			$PhpTAL->setPostFilter(new $class);
 		}
 		// assign Model values

@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\event;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\util\xml\XMLValidator;
+use metadigit\core\sys,
+	metadigit\core\util\xml\XMLValidator;
 /**
  * The EventDispatcher is the core of the framework event system.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -42,9 +42,9 @@ class EventDispatcher implements EventDispatcherInterface {
 		if(!is_null($xmlPath)) {
 			if(!file_exists($xmlPath)) throw new EventDispatcherException(11, [$this->_oid, $xmlPath]);
 			if(!XMLValidator::schema($xmlPath, __DIR__.'/EventDispatcher.xsd')) throw new EventDispatcherException(12, [$xmlPath]);
-			trace(LOG_DEBUG, T_INFO, '[START] parsing EventDispatcher XML');
+			sys::trace(LOG_DEBUG, T_INFO, '[START] parsing EventDispatcher XML');
 			$this->getXmlParser()->parseListeners($this);
-			trace(LOG_DEBUG, T_INFO, '[END] EventDispatcher ready');
+			sys::trace(LOG_DEBUG, T_INFO, '[END] EventDispatcher ready');
 		}
 	}
 
