@@ -2,7 +2,6 @@
 namespace test;
 use metadigit\core\sys,
 	metadigit\core\sysboot;
-use const metadigit\core\TMP_DIR;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
@@ -131,17 +130,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 */
-	function testLog() {
-		file_put_contents(\metadigit\core\LOG_DIR.'kernel.log', '');
-		sys::log('kernel message', LOG_INFO, 'kernel');
-		sys::shutdown();
-		$lines = file(\metadigit\core\LOG_DIR.'kernel.log', FILE_IGNORE_NEW_LINES);
-		$this->assertStringEndsWith('[INFO] kernel: sys bootstrap', $lines[0]);
-	}
-
-	/**
-	 * @depends testLogger
-	 */
 	function _testDispatchCLI() {
 		$_SERVER['argv'] = [
 			0 => \metadigit\core\BOOTSTRAP,
@@ -159,7 +147,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testLogger
+	 * @depends testInit
 	 */
 	function _testDispatchHTTP() {
 		$_SERVER['REQUEST_URI'] = '/';

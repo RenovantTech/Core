@@ -6,8 +6,10 @@
  * @license New BSD License
  */
 namespace metadigit\core\log;
+use const metadigit\core\trace\T_INFO;
+use metadigit\core\sys;
 /**
- * Versatile Logger who supports different LogWriters backends.
+ * Versatile Logger who supports different LogWriters back-ends.
  * The following writers are ready to be used:
  * * LogWriterFile
  * * LogWriterFileTree
@@ -26,18 +28,29 @@ class Logger {
 		LOG_ALERT => 'ALERT',
 		LOG_EMERG => 'EMERG'
 	];
-
+	/** Log buffer
+	 * @var array */
+	protected $buffer = [];
 	/** attached LogWriters instances
 	 * @var array */
 	protected $writers = [];
-
 	/** LogWriters filtering levels
 	 * @var array */
 	protected $levels = [];
-
 	/** LogWriters filtering facilities
 	 * @var array */
 	protected $facilities = [];
+
+	function __construct($config=[]) {
+		foreach($config as $k => $cnf) {
+			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
+			$this->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
+		}
+	}
+
+	function __destruct() {
+		$this->flush();
+	}
 
 	/**
 	 * Add a LogWriter
@@ -52,17 +65,27 @@ class Logger {
 	}
 
 	/**
-	 * Write a log entry
-	 * @param string $message log message
-	 * @param integer $level log level, default: LOG_INFO
-	 * @param string $facility optional log facility, default NULL
-	 * @param int $time override log timestamp, default NULL
+	 * Flush log buffer
 	 */
-	function log($message, $level=LOG_INFO, $facility=null, $time=null) {
-		if(is_null($time)) $time = time();
-		foreach($this->levels as $k => $_level) {
-			if($level <= $_level && ( is_null($this->facilities[$k]) || $this->facilities[$k] == $facility ))
-				$this->writers[$k]->write($time, $message, $level, $facility);
+	function flush() {
+		foreach($this->buffer as $log) {
+			list($message, $level, $facility, $time) = $log;
+			if(is_null($time)) $time = time();
+			foreach($this->levels as $k => $_level) {
+				if($level <= $_level && ( is_null($this->facilities[$k]) || $this->facilities[$k] == $facility ))
+					$this->writers[$k]->write($time, $message, $level, $facility);
+			}
 		}
+	}
+
+	/**
+	 * Log entry
+	 * @param string $message log message
+	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
+	 * @param string $facility optional log facility, default NULL
+	 */
+	function log($message, $level=LOG_INFO, $facility=null) {
+		sys::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', self::LABELS[$level], $facility, $message), null, __METHOD__);
+		$this->buffer[] = [$message, $level, $facility, time()];
 	}
 }

@@ -23,9 +23,6 @@ class sys {
 	const INFO_PATH = 3;
 	const INFO_PATH_DIR = 4;
 	const INFO_PATH_FILE = 5;
-	/** log buffer
-	 * @var array */
-	static protected $_log = [];
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
 	static protected $namespaces = [
@@ -177,19 +174,7 @@ class sys {
 //		self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 		cache\SqliteCache::shutdown();
 		if(PHP_SAPI != 'cli') session_write_close();
-		// flush logs
-		static $Logger;
-		if(!$Logger) {
-			$Logger = new log\Logger();
-			foreach(self::$Sys->log as $k => $cnf)
-				$Logger->addWriter(new $cnf['class']($cnf['param1'], $cnf['param2']), constant($cnf['level']), $cnf['facility']);
-		}
-		if(!empty(self::$_log)) {
-			foreach(self::$_log as $log)
-				call_user_func_array([$Logger,'log'], $log);
-		}
 	}
-
 
 	/**
 	 * __autoload() implementation
@@ -273,8 +258,9 @@ class sys {
 	 * @param string $facility log facility
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
-		self::$_log[] = [$message, $level, $facility, time()];
+		static $Logger;
+		if(!isset($Logger)) $Logger = new log\Logger(self::$Sys->log);
+		$Logger->log($message, $level, $facility);
 	}
 
 	/**
