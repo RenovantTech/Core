@@ -38,8 +38,10 @@ class sysBoot extends sys {
 
 		$config = self::yaml(SYS_YAML);
 
-		// settings
-		$Sys->settings = array_replace($Sys->settings, $config['settings']);
+		// APPS HTTP/CLI
+		$Sys->apps['HTTP'] = $config['apps'];
+		$Sys->apps['CLI'] = $config['cli'];
+
 		// namespaces
 		$namespaces = self::$namespaces;
 		foreach($config['namespaces'] as $k => $dir) {
@@ -53,18 +55,25 @@ class sysBoot extends sys {
 			}
 			$namespaces[$k] = $dir;
 		}
-		// APPS HTTP/CLI
-		$Sys->apps['HTTP'] = $config['apps'];
-		$Sys->apps['CLI'] = $config['cli'];
+
+		// constants
+		if(is_array($config['constants'])) $Sys->constants = $config['constants'];
+
+		// settings
+		$Sys->settings = array_replace($Sys->settings, $config['settings']);
+
 		// ACL service
 		if(is_array($config['acl'])) $Sys->acl = array_merge($Sys->acl, $config['acl']);
+
 		// Cache service
 		if(is_array($config['cache'])) $Sys->cache = array_merge($config['cache'], $Sys->cache);
-		// databases
+
+		// DB service
 		if(is_array($config['database'])) $Sys->pdo = array_merge($config['database'], $Sys->pdo);
 		foreach ($Sys->pdo as $id => $conf) {
 			$Sys->pdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
 		}
+
 		// Log service
 		if(is_array($config['log'])) $Sys->log = $config['log'];
 

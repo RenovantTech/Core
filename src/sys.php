@@ -53,7 +53,7 @@ class sys {
 	];
 	/** HTTP/CLI apps routing
 	 * @var array */
-	protected $apps;
+	protected $apps = [];
 	/** Cache configurations
 	 * @var array */
 	protected $cache = [
@@ -64,10 +64,10 @@ class sys {
 	];
 	/** Constants
 	 * @var array */
-	protected $constants;
+	protected $constants = [];
 	/** LogWriters configurations
 	 * @var array */
-	protected $log;
+	protected $log = [];
 	/** Database PDO configurations
 	 * @var array */
 	protected $pdo = [
