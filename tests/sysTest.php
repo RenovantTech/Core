@@ -38,7 +38,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertArrayHasKey('timeZone', $settings);
 		$this->assertEquals('Europe/London', $settings['timeZone']);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'caches');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cache');
 		$ReflProp->setAccessible(true);
 		$caches = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('sys', $caches);

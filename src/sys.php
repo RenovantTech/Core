@@ -25,7 +25,7 @@ class sys {
 	const INFO_PATH_FILE = 5;
 	/** log buffer
 	 * @var array */
-	static protected $log = [];
+	static protected $_log = [];
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
 	static protected $namespaces = [
@@ -59,7 +59,7 @@ class sys {
 	protected $apps;
 	/** Cache configurations
 	 * @var array */
-	protected $caches = [
+	protected $cache = [
 		'sys' => [
 			'class' => 'metadigit\core\cache\SqliteCache',
 			'params' => ['sys-cache', 'cache', true]
@@ -70,8 +70,7 @@ class sys {
 	protected $constants;
 	/** LogWriters configurations
 	 * @var array */
-	protected $logs;
-
+	protected $log;
 	/** Database PDO configurations
 	 * @var array */
 	protected $pdo = [
@@ -182,11 +181,11 @@ class sys {
 		static $Logger;
 		if(!$Logger) {
 			$Logger = new log\Logger();
-			foreach(self::$Sys->logs as $k => $cnf)
+			foreach(self::$Sys->log as $k => $cnf)
 				$Logger->addWriter(new $cnf['class']($cnf['param1'], $cnf['param2']), constant($cnf['level']), $cnf['facility']);
 		}
-		if(!empty(self::$log)) {
-			foreach(self::$log as $log)
+		if(!empty(self::$_log)) {
+			foreach(self::$_log as $log)
 				call_user_func_array([$Logger,'log'], $log);
 		}
 	}
@@ -226,7 +225,7 @@ class sys {
 	static function cache($id='system') {
 		static $_ = [];
 		if(!isset($_[$id])) {
-			$cnf = self::$Sys->caches[$id];
+			$cnf = self::$Sys->cache[$id];
 			$RefClass = new \ReflectionClass($cnf['class']);
 			$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
 			$Cache = $RefClass->newInstanceArgs($params);
@@ -275,7 +274,7 @@ class sys {
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
 		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', log\Logger::LABELS[$level], $facility, $message), null, __METHOD__);
-		self::$log[] = [$message, $level, $facility, time()];
+		self::$_log[] = [$message, $level, $facility, time()];
 	}
 
 	/**

@@ -1,12 +1,6 @@
-settings:
-  charset:      UTF-8
-  locale:       en_GB.UTF-8
-  timeZone:     Europe/London
-
-namespaces:
-  mock:           _mock
-  metadigit\lib:  /opt/metadigit-lib/src
-
+# =========================================================
+# APPs definitions
+# =========================================================
 apps:
   webconsole:
     httpPort:   8080
@@ -21,9 +15,22 @@ apps:
     baseUrl:    /
     namespace:  web
 
+# =========================================================
+# CLI definitions
+# =========================================================
 cli:
   console:      mock.console
 
+# =========================================================
+# __autoload map namespace/directory
+# =========================================================
+namespaces:
+  mock:           _mock
+  metadigit\lib:  /opt/metadigit-lib/src
+
+# =========================================================
+# Environment constants
+# =========================================================
 constants:
   ASSETS_DIR:   /var/www/devel.com/data/assets/
   ASSETS_URL:   /assets/
@@ -31,7 +38,15 @@ constants:
   SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
 
 # =========================================================
-# Core services
+# Php settings
+# =========================================================
+settings:
+  charset:      UTF-8
+  locale:       en_GB.UTF-8
+  timeZone:     Europe/London
+
+# =========================================================
+# System services
 # =========================================================
 
 # ACL service
@@ -47,12 +62,14 @@ acl:
       roles:  sys_roles
       u2r:    sys_users_2_roles
 
-caches:
+# CACHE service
+cache:
   system:
     class:    metadigit\core\cache\SqliteCache
     params:   ['system', 'sys-cache', false]
 
-databases:
+# DB service
+database:
   system:
     dns:      sqlite:/tmp/metadigit-core/system.sqlite
     user:     null
@@ -66,7 +83,8 @@ databases:
     user:     phpunit
     pwd:      phpunit
 
-logs:
+# LOG service
+log:
   kernel:
     level:    LOG_INFO
     facility: kernel

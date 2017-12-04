@@ -57,17 +57,17 @@ class sysboot extends sys {
 		// APPS HTTP/CLI
 		$Sys->apps['HTTP'] = $config['apps'];
 		$Sys->apps['CLI'] = $config['cli'];
-		// ACL
+		// ACL service
 		if(is_array($config['acl'])) $Sys->acl = array_merge($Sys->acl, $config['acl']);
-		// caches
-		if(is_array($config['caches'])) $Sys->caches = array_merge($config['caches'], $Sys->caches);
+		// Cache service
+		if(is_array($config['cache'])) $Sys->cache = array_merge($config['cache'], $Sys->cache);
 		// databases
-		if(is_array($config['databases'])) $Sys->pdo = array_merge($config['databases'], $Sys->pdo);
+		if(is_array($config['database'])) $Sys->pdo = array_merge($config['database'], $Sys->pdo);
 		foreach ($Sys->pdo as $id => $conf) {
 			$Sys->pdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
 		}
-		// logs
-		if(is_array($config['logs'])) $Sys->logs = $config['logs'];
+		// Log service
+		if(is_array($config['log'])) $Sys->log = $config['log'];
 
 		// write into CACHE_DIR
 		file_put_contents(TMP_DIR.'core-sys', '<?php $Sys=unserialize(\''.serialize($Sys).'\'); $namespaces='.var_export($namespaces,true).';', LOCK_EX);
