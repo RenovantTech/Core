@@ -28,12 +28,14 @@ class TracerTest extends \PHPUnit\Framework\TestCase {
 		trigger_error('ERROR msg', E_USER_ERROR);
 		$trace = Tracer::export();
 
+		array_pop($trace);
 		$t = array_pop($trace);
 		$this->assertEquals(LOG_ERR, $t[2]);
 		$this->assertEquals(T_ERROR, $t[3]);
 		$this->assertEquals('E_USER_ERROR', $t[4]);
 		$this->assertEquals('ERROR msg', $t[5]);
 
+		array_pop($trace);
 		$t = array_pop($trace);
 		$this->assertEquals(LOG_ERR, $t[2]);
 		$this->assertEquals(T_ERROR, $t[3]);
@@ -45,6 +47,8 @@ class TracerTest extends \PHPUnit\Framework\TestCase {
 		$Ex = new \Exception('test', 123);
 		Tracer::onException($Ex);
 		$trace = Tracer::export();
+
+		array_pop($trace);
 		$t = array_pop($trace);
 		$this->assertEquals(LOG_ERR, $t[2]);
 		$this->assertEquals(T_ERROR, $t[3]);
