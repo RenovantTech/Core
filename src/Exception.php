@@ -7,6 +7,7 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\T_INFO;
+use metadigit\core\trace\Tracer;
 /**
  * Base Exception class
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -50,6 +51,6 @@ class Exception extends \Exception {
 	}
 
 	function trace() {
-		KernelDebugger::traceException($this);
+		Tracer::onException($this);
 	}
 }

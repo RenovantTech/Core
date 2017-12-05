@@ -9,7 +9,8 @@ namespace metadigit\core\console;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+	metadigit\core\cli\Response,
+	metadigit\core\trace\Tracer;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -60,7 +61,7 @@ class Dispatcher {
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
 			$this->context()->trigger(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
-			KernelDebugger::onException($Ex);
+			Tracer::onException($Ex);
 		}
 		$Res->send();
 	}
