@@ -142,7 +142,7 @@ class sys {
 	/**
 	 * Dispatch HTTP/CLI request
 	 * @param string $api PHP_SAPI
-	 * @throws KernelException
+	 * @throws SysException
 	 */
 	static function dispatch($api=PHP_SAPI) {
 		Tracer::traceFn(__METHOD__);
