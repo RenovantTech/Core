@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\view;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
 /**
@@ -22,7 +22,7 @@ class JsonView implements \metadigit\core\http\ViewInterface {
 	const CONTENT_TYPE = 'application/json';
 
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
-		trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO);
 		$Res->contentType(self::CONTENT_TYPE);
 		echo json_encode($Res->getData(), $options);
 		switch(json_last_error()) {

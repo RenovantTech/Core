@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\session;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * HTTP Session Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -60,7 +60,7 @@ class SessionManager {
 	 * Destroys all of the data associated with the current session.
 	 */
 	function destroy() {
-		trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO);
 		session_destroy();
 		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* 1980-01-01 */, $this->path, $this->domain, $this->secure);
 	}

@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\session\handler;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\{pdo, trace};
-use metadigit\core\session\SessionException;
+use metadigit\core\sys,
+	metadigit\core\session\SessionException;
 /**
  * HTTP Session Handler implementation with an Sqlite database.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -52,8 +52,8 @@ class Sqlite implements \SessionHandlerInterface {
 	function __construct($pdo, $table='sessions') {
 		$this->pdo = $pdo;
 		$this->table = $table;
-		trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, __METHOD__);
-		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table, $table));
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, __METHOD__);
+		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table, $table));
 	}
 
 	/**
@@ -65,7 +65,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function open($p, $n) {
-		if(!pdo($this->pdo)) throw new SessionException(13);
+		if(!sys::pdo($this->pdo)) throw new SessionException(13);
 		return true;
 	}
 
@@ -85,7 +85,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 */
 	function read($id) {
 		try {
-			$st = pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
+			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
 			list($ip, $uid, $locked, $data) = $raw = $st->fetch(\PDO::FETCH_NUM);
 			if(empty($ip)) define('SESSION_UID', null);
@@ -122,8 +122,8 @@ class Sqlite implements \SessionHandlerInterface {
 			];
 			if(self::$id != $id) { // can be a new session OR a regenerated session
 				$params['startTime'] = time();
-				$st = pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
-			} else $st = pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table));
+				$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_INSERT, $this->table));
+			} else $st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table));
 			$st->execute($params);
 			return true;
 		} catch(\Exception $Ex) {
@@ -139,7 +139,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 */
 	function destroy($id) {
 		try {
-			$st = pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
+			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
 			$st->execute(['id'=>$id]);
 			return (boolean) $st->rowCount();
 		} catch(\Exception $Ex) {
@@ -154,7 +154,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 */
 	function gc($maxlifetime) {
 		try {
-			return pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
+			return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
 		} catch(\Exception $Ex) {
 			return false;
 		}
