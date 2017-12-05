@@ -45,6 +45,7 @@ class PDO extends \PDO {
 	 * @param string $password the password for the DSN string, optional for some PDO drivers
 	 * @param array	 $options  a key=>value array of driver-specific connection options
 	 * @param string $id database ID, default "master"
+	 * @throws \PDOException
 	 */
 	function __construct($dsn, $username=null, $password=null, array $options=null, $id='master') {
 		$this->_id =$id;

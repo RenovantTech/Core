@@ -155,6 +155,19 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 */
+	function testPdoException() {
+		try {
+			sys::pdo('WRONG');
+			$this->fail('Expected PDOException not thrown');
+		} catch(\PDOException $Ex) {
+			$this->assertEquals(0, $Ex->getCode());
+			$this->assertRegExp('/invalid data source name/', $Ex->getMessage());
+		}
+	}
+
+	/**
+	 * @depends testInit
+	 */
 	function _testDispatchCLI() {
 		$_SERVER['argv'] = [
 			0 => \metadigit\core\BOOTSTRAP,

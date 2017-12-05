@@ -270,6 +270,7 @@ class sys {
 	 * PDO helper
 	 * @param string $id database ID, default "master"
 	 * @return db\PDO shared PDO instance
+	 * @throws \PDOException
 	 */
 	static function pdo($id='master') {
 		static $_ = [];
