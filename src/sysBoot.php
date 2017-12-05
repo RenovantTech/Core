@@ -22,10 +22,10 @@ class sysBoot extends sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::log('sys bootstrap', LOG_INFO, 'kernel');
 		// directories
-		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(KernelException::ERR21);
-		if(!defined('\metadigit\core\BASE_DIR')) die(KernelException::ERR22);
-		if(!defined('\metadigit\core\DATA_DIR')) die(KernelException::ERR23);
-		if(!is_writable(DATA_DIR)) die(KernelException::ERR24);
+		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(SysException::ERR21);
+		if(!defined('\metadigit\core\BASE_DIR')) die(SysException::ERR22);
+		if(!defined('\metadigit\core\DATA_DIR')) die(SysException::ERR23);
+		if(!is_writable(DATA_DIR)) die(SysException::ERR24);
 		// DATA_DIR
 		if(!file_exists(ASSETS_DIR)) mkdir(ASSETS_DIR, 0770, true);
 		if(!file_exists(BACKUP_DIR)) mkdir(BACKUP_DIR, 0770, true);
