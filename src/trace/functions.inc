@@ -44,7 +44,7 @@ function traceError($n, $str, $file, $line) {
 		implode('<br/>',$textTraceArray)."\n".
 		'------------------------------------------------------------------------------------------------';
 	sys::trace(LOG_ERR, T_ERROR, $str, $data, LABELS[$n]);
-//	sys::log(sprintf('%s - FILE: %s:%s', $str, $file, $line), LOG_ERR, 'kernel');
+	sys::log(sprintf('%s - FILE: %s:%s', $str, $file, $line), LOG_ERR, 'kernel');
 }
 
 
@@ -63,7 +63,7 @@ function traceException(\Throwable $Ex) {
 		implode("\n",$textTraceArray)."\n".
 		'------------------------------------------------------------------------------------------------';
 	sys::trace(LOG_ERR, T_ERROR, $msg, $data, get_class($Ex));
-//	sys::log(sprintf('%s[%s]: %s - %s - FILE: %s:%s', get_class($Ex), $Ex->getCode(), $Ex->getMessage(), $info, $Ex->getFile(), $Ex->getLine()), LOG_ERR, 'kernel');
+	sys::log(sprintf('%s[%s]: %s - %s - FILE: %s:%s', get_class($Ex), $Ex->getCode(), $Ex->getMessage(), $info, $Ex->getFile(), $Ex->getLine()), LOG_ERR, 'kernel');
 }
 
 function formatTraceAsText(array $traceArray) {
