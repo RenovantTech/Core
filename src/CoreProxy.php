@@ -25,7 +25,7 @@ class CoreProxy {
 	protected $_Obj = null;
 
 	/**
-	 * @param string $id proxied object OID
+	 * @param string $id proxy-ed object OID
 	 */
 	function __construct($id) {
 		$this->_oid = $id;

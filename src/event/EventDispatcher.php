@@ -52,17 +52,12 @@ class EventDispatcher implements EventDispatcherInterface {
 		return ['_oid', 'listeners', 'namespace', 'xmlPath'];
 	}
 
-	/**
-	 * @see EventDispatcherInterface
-	 */
+
 	function listen($eventName, $callback, $priority=1) {
 		$this->listeners[$eventName][(int)$priority][] = $callback;
 		krsort($this->listeners[$eventName], SORT_NUMERIC);
 	}
 
-	/**
-	 * @see EventDispatcherInterface
-	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
 		if(is_null($Event)) $Event = new Event($target, $params);
 		$Event->setName($eventName);

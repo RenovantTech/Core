@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\html;
+use metadigit\core\sys;
 /**
  * HTML Writer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -65,7 +66,7 @@ class HtmlWriter {
 	 * @throws HtmlException
 	 */
 	function write($file) {
-		$this->trace(LOG_DEBUG, 1, __FUNCTION__, 'template: '.self::$template.' - output file: '.$file);
+		sys::trace(LOG_DEBUG, 1, __FUNCTION__, 'template: '.self::$template.' - output file: '.$file);
 		$html = self::execTemplate();
 		if(!$fh = fopen($file, 'w')) throw new HtmlException(3, $file);
 		fwrite($fh, $html);
