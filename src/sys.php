@@ -15,14 +15,14 @@ use metadigit\core\context\Context,
  */
 class sys {
 
-	const CACHE_FILE = CACHE_DIR.'sys';
+	const CACHE_FILE		= CACHE_DIR.'sys';
 	const EVENT_INIT		= 'sys:init';
 	const EVENT_SHUTDOWN	= 'sys:shutdown';
-	const INFO_NAMESPACE = 1;
-	const INFO_CLASS = 2;
-	const INFO_PATH = 3;
-	const INFO_PATH_DIR = 4;
-	const INFO_PATH_FILE = 5;
+	const INFO_NAMESPACE	= 1;
+	const INFO_CLASS		= 2;
+	const INFO_PATH			= 3;
+	const INFO_PATH_DIR		= 4;
+	const INFO_PATH_FILE	= 5;
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
 	static protected $namespaces = [
@@ -109,10 +109,9 @@ class sys {
 		// environment settings
 		ignore_user_abort(1);
 		ini_set('upload_tmp_dir', TMP_DIR);
-//		register_shutdown_function(__CLASS__.'::shutdown');
 
 		$Sys = $namespaces = null;
-		@include self::CACHE_FILE;
+		if(file_exists(self::CACHE_FILE)) include self::CACHE_FILE;
 		if(!isset($Sys)) list($Sys, $namespaces) = sysBoot::boot();
 		self::$namespaces = $namespaces;
 		self::$Sys = $Sys;
