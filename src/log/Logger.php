@@ -41,13 +41,6 @@ class Logger {
 	 * @var array */
 	protected $facilities = [];
 
-	function __construct($config=[]) {
-		foreach($config as $k => $cnf) {
-			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
-			$this->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
-		}
-	}
-
 	function __destruct() {
 		$this->flush();
 	}

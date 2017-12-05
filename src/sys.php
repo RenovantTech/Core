@@ -28,6 +28,9 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
+	/** Logger
+	 * @var \metadigit\core\log\Logger */
+	static protected $Logger;
 	/** Current HTTP/CLI Request
 	 * @var object */
 	static protected $Req;
@@ -120,11 +123,15 @@ class sys {
 		ini_set('default_charset', $Sys->settings['charset']);
 		// constants
 		foreach($Sys->constants as $k => $v) define($k, $v);
-		// ACL
+		// ACL service
 		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->acl['routes']);
 		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->acl['objects']);
 		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->acl['orm']);
-
+		// LOG service
+		foreach($Sys->log as $cnf) {
+			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
+			self::$Logger->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
+		}
 		// initialize
 		self::cache('sys');
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
@@ -255,9 +262,8 @@ class sys {
 	 * @param string $facility log facility
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		static $Logger;
-		if(!isset($Logger)) $Logger = new log\Logger(self::$Sys->log);
-		$Logger->log($message, $level, $facility);
+		if(!isset(self::$Logger)) self::$Logger = new log\Logger;
+		self::$Logger->log($message, $level, $facility);
 	}
 
 	/**
