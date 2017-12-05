@@ -42,7 +42,7 @@ class CoreProxy {
 			$this->_Obj || $this->_Obj = Context::factory(substr($this->_oid, 0, strrpos($this->_oid, '.')))->getContainer()->get($this->_oid, null, Container::FAILURE_SILENT);
 			if($this->_Obj) {
 				Tracer::traceFn($this->_oid.'->'.$method);
-				ACL_OBJECTS and !defined(get_class($this->_Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_oid, $method, SESSION_UID);
+				ACL_OBJECTS and !defined(get_class($this->_Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_oid, $method, SESSION_UID??null);
 				sys::trace(LOG_DEBUG, T_INFO);
 				$r = call_user_func_array([$this->_Obj, $method], $args);
 				Tracer::traceFn($prevTraceFn);
