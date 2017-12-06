@@ -72,7 +72,7 @@ class SqliteCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
-		$this->_oid = 'cache:'.$id;
+		$this->_oid = 'cache.'.$id;
 		$this->id = $id;
 		$this->pdo = $pdo;
 		$this->table = $table;
@@ -167,14 +167,17 @@ class SqliteCache implements CacheInterface {
 	 * Commit write buffer to SqLite on shutdown
 	 */
 	static function shutdown() {
+		$traceFn = sys::traceFn('cache::shutdown');
 		foreach(self::$buffer as $k=>$buffer) {
 			if(!isset(self::$bufferPDO[$k])) continue;
-			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
+			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k);
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
 				@self::$bufferPDO[$k]->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
 			}
 		}
+		sys::traceFn($traceFn);
 	}
 }
+register_shutdown_function(__NAMESPACE__.'\SqliteCache::shutdown');

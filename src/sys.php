@@ -121,10 +121,9 @@ class sys {
 			ini_set('precision', 16);
 			defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
 			ini_restore('precision');
-			self::$traceFn = __METHOD__;
+			self::trace(LOG_DEBUG, T_INFO, null, null, __CLASS__.'::shutdown');
 			register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
 			//self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
-			//cache\SqliteCache::shutdown();
 			if(PHP_SAPI != 'cli') session_write_close();
 		});
 
