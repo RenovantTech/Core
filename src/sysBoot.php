@@ -39,8 +39,8 @@ class sysBoot extends sys {
 		$config = self::yaml(SYS_YAML);
 
 		// APPS HTTP/CLI
-		$Sys->apps['HTTP'] = $config['apps'];
-		$Sys->apps['CLI'] = $config['cli'];
+		$Sys->cnfApps['HTTP'] = $config['apps'];
+		$Sys->cnfApps['CLI'] = $config['cli'];
 
 		// namespaces
 		$namespaces = self::$namespaces;
@@ -57,25 +57,25 @@ class sysBoot extends sys {
 		}
 
 		// constants
-		if(is_array($config['constants'])) $Sys->constants = $config['constants'];
+		if(is_array($config['constants'])) $Sys->cnfConstants = $config['constants'];
 
 		// settings
-		$Sys->settings = array_replace($Sys->settings, $config['settings']);
+		$Sys->cnfSettings = array_replace($Sys->cnfSettings, $config['settings']);
 
 		// ACL service
-		if(is_array($config['acl'])) $Sys->acl = array_merge($Sys->acl, $config['acl']);
+		if(is_array($config['acl'])) $Sys->cnfAcl = array_merge($Sys->cnfAcl, $config['acl']);
 
 		// Cache service
-		if(is_array($config['cache'])) $Sys->cache = array_merge($config['cache'], $Sys->cache);
+		if(is_array($config['cache'])) $Sys->cnfCache = array_merge($config['cache'], $Sys->cnfCache);
 
 		// DB service
-		if(is_array($config['database'])) $Sys->pdo = array_merge($config['database'], $Sys->pdo);
-		foreach ($Sys->pdo as $id => $conf) {
-			$Sys->pdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
+		if(is_array($config['database'])) $Sys->cnfPdo = array_merge($config['database'], $Sys->cnfPdo);
+		foreach ($Sys->cnfPdo as $id => $conf) {
+			$Sys->cnfPdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
 		}
 
 		// Log service
-		if(is_array($config['log'])) $Sys->log = $config['log'];
+		if(is_array($config['log'])) $Sys->cnfLog = $config['log'];
 
 		// write into CACHE_DIR
 		file_put_contents(TMP_DIR.'core-sys', '<?php $Sys=unserialize(\''.serialize($Sys).'\'); $namespaces='.var_export($namespaces,true).';', LOCK_EX);

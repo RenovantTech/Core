@@ -17,7 +17,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(realpath(__DIR__.'/../src/'), $namespaces['metadigit\core']);
 
 		// APPS HTTP/CLI
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'apps');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfApps');
 		$ReflProp->setAccessible(true);
 		$apps = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('webconsole', $apps['HTTP']);
@@ -33,42 +33,42 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('mock.console',			$apps['CLI']['console']);
 
 		// constants
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'constants');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfConstants');
 		$ReflProp->setAccessible(true);
 		$constants = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('ASSETS_DIR', $constants);
 		$this->assertEquals('/var/www/devel.com/data/assets/', $constants['ASSETS_DIR']);
 
 		// settings
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'settings');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfSettings');
 		$ReflProp->setAccessible(true);
 		$settings = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('timeZone', $settings);
 		$this->assertEquals('Europe/London', $settings['timeZone']);
 
 		// ACL service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'acl');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfAcl');
 		$ReflProp->setAccessible(true);
 		$acl = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('orm', $acl);
 		$this->assertEquals(true, $acl['orm']);
 
 		// Cache service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cache');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfCache');
 		$ReflProp->setAccessible(true);
 		$caches = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('sys', $caches);
 		$this->assertEquals('metadigit\core\cache\SqliteCache', $caches['sys']['class']);
 
 		// DB service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'pdo');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfPdo');
 		$ReflProp->setAccessible(true);
 		$pdo = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('sys-cache', $pdo);
 		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/sys-cache.sqlite', $pdo['sys-cache']['dns']);
 
 		// LOG service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'log');
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfLog');
 		$ReflProp->setAccessible(true);
 		$log = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('kernel', $log);

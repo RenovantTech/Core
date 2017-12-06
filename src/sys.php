@@ -45,7 +45,7 @@ class sys {
 	static protected $SystemContext;
 	/** ACL configurations
 	 * @var array */
-	protected $acl = [
+	protected $cnfAcl = [
 		'routes' => false,
 		'objects' => false,
 		'orm' => false,
@@ -56,10 +56,10 @@ class sys {
 	];
 	/** HTTP/CLI apps routing
 	 * @var array */
-	protected $apps = [];
+	protected $cnfApps = [];
 	/** Cache configurations
 	 * @var array */
-	protected $cache = [
+	protected $cnfCache = [
 		'sys' => [
 			'class' => 'metadigit\core\cache\SqliteCache',
 			'params' => ['sys-cache', 'cache', true]
@@ -67,19 +67,19 @@ class sys {
 	];
 	/** Constants
 	 * @var array */
-	protected $constants = [];
+	protected $cnfConstants = [];
 	/** LogWriters configurations
 	 * @var array */
-	protected $log = [];
+	protected $cnfLog = [];
 	/** Database PDO configurations
 	 * @var array */
-	protected $pdo = [
+	protected $cnfPdo = [
 		'sys-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'sys-cache.sqlite' ],
 		'sys-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'sys-trace.sqlite' ]
 	];
 	/** system settings
 	 * @var array */
-	protected $settings = [
+	protected $cnfSettings = [
 		'charset'		=> 'UTF-8',
 		'locale'		=> 'en_US.UTF-8',
 		'timeZone'		=> 'UTC'
@@ -123,9 +123,9 @@ class sys {
 		// constants
 		foreach($Sys->constants as $k => $v) define($k, $v);
 		// ACL service
-		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->acl['routes']);
-		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->acl['objects']);
-		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->acl['orm']);
+		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->cnfAcl['routes']);
+		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->cnfAcl['objects']);
+		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->cnfAcl['orm']);
 		// LOG service
 		foreach($Sys->log as $cnf) {
 			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
@@ -150,7 +150,7 @@ class sys {
 		$app = $dispatcherID = $namespace = null;
 		switch($api) {
 			case 'cli':
-				foreach(self::$Sys->apps['CLI'] as $id => $namespace) {
+				foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
 					if(self::$Req->CMD(0) == $id) {
 						$app = $id;
 						$dispatcherID = $namespace.'.Dispatcher';
@@ -160,7 +160,7 @@ class sys {
 				}
 				break;
 			default:
-				foreach(self::$Sys->apps['HTTP'] as $id => $conf) {
+				foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
 					$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
 					if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
 						$app = $id;
@@ -199,7 +199,7 @@ class sys {
 	static function acl() {
 		static $ACL;
 		if(!isset($ACL) && !$ACL = self::cache('sys')->get('ACL')) {
-			$ACL = new acl\ACL(self::$Sys->acl['config']['database'], self::$Sys->acl['config']['tables']);
+			$ACL = new acl\ACL(self::$Sys->cnfAcl['config']['database'], self::$Sys->cnfAcl['config']['tables']);
 			self::cache('sys')->set('ACL', $ACL);
 		}
 		return $ACL;
@@ -213,7 +213,7 @@ class sys {
 	static function cache($id='main') {
 		static $_ = [];
 		if(!isset($_[$id])) {
-			$cnf = self::$Sys->cache[$id];
+			$cnf = self::$Sys->cnfCache[$id];
 			$RefClass = new \ReflectionClass($cnf['class']);
 			$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
 			$Cache = $RefClass->newInstanceArgs($params);
@@ -274,7 +274,7 @@ class sys {
 	static function pdo($id='master') {
 		static $_ = [];
 		if(!isset($_[$id])) {
-			$cnf = self::$Sys->pdo[$id];
+			$cnf = self::$Sys->cnfPdo[$id];
 			self::trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
 			$pdo = @new db\PDO($cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
 			$_[$id] = $pdo;
