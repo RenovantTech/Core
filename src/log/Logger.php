@@ -15,7 +15,7 @@ use metadigit\core\sys;
  * * LogWriterFileTree
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Logger {
+class Logger extends sys {
 	use \metadigit\core\CoreTrait;
 
 	const LABELS = [
@@ -28,9 +28,6 @@ class Logger {
 		LOG_ALERT => 'ALERT',
 		LOG_EMERG => 'EMERG'
 	];
-	/** Log buffer
-	 * @var array */
-	protected $buffer = [];
 	/** attached LogWriters instances
 	 * @var array */
 	protected $writers = [];
@@ -61,7 +58,7 @@ class Logger {
 	 * Flush log buffer
 	 */
 	function flush() {
-		foreach($this->buffer as $log) {
+		foreach(self::$log as $log) {
 			list($message, $level, $facility, $time) = $log;
 			if(is_null($time)) $time = time();
 			foreach($this->levels as $k => $_level) {
@@ -69,16 +66,5 @@ class Logger {
 					$this->writers[$k]->write($time, $message, $level, $facility);
 			}
 		}
-	}
-
-	/**
-	 * Log entry
-	 * @param string $message log message
-	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
-	 * @param string $facility optional log facility, default NULL
-	 */
-	function log($message, $level=LOG_INFO, $facility=null) {
-		sys::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', self::LABELS[$level], $facility, $message), null, __METHOD__);
-		$this->buffer[] = [$message, $level, $facility, time()];
 	}
 }

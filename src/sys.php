@@ -8,6 +8,7 @@
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\context\Context,
+	metadigit\core\log\Logger,
 	metadigit\core\trace\Tracer;
 /**
  * System Kernel
@@ -31,6 +32,9 @@ class sys {
 	/** Logger
 	 * @var \metadigit\core\log\Logger */
 	static protected $Logger;
+	/** Log buffer
+	 * @var array */
+	static protected $log = [];
 	/** Current HTTP/CLI Request
 	 * @var object */
 	static protected $Req;
@@ -114,20 +118,22 @@ class sys {
 		if(file_exists(self::CACHE_FILE)) include self::CACHE_FILE;
 		if(!isset($Sys)) list($Sys, $namespaces) = sysBoot::boot();
 		self::$namespaces = $namespaces;
+		/** @var \metadigit\core\sys Sys */
 		self::$Sys = $Sys;
 
 		// settings
-		date_default_timezone_set($Sys->settings['timeZone']);
-		setlocale(LC_ALL, $Sys->settings['locale']);
-		ini_set('default_charset', $Sys->settings['charset']);
+		date_default_timezone_set($Sys->cnfSettings['timeZone']);
+		setlocale(LC_ALL, $Sys->cnfSettings['locale']);
+		ini_set('default_charset', $Sys->cnfSettings['charset']);
 		// constants
-		foreach($Sys->constants as $k => $v) define($k, $v);
+		foreach($Sys->cnfConstants as $k => $v) define($k, $v);
 		// ACL service
 		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->cnfAcl['routes']);
 		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->cnfAcl['objects']);
 		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->cnfAcl['orm']);
 		// LOG service
-		foreach($Sys->log as $cnf) {
+		self::$Logger = new log\Logger;
+		foreach($Sys->cnfLog as $cnf) {
 			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
 			self::$Logger->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
 		}
@@ -257,12 +263,12 @@ class sys {
 	/**
 	 * System log helper
 	 * @param string $message log message
-	 * @param integer $level log level, one of the LOG_* constants
-	 * @param string $facility log facility
+	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
+	 * @param string $facility optional log facility, default NULL
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		if(!isset(self::$Logger)) self::$Logger = new log\Logger;
-		self::$Logger->log($message, $level, $facility);
+		sys::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
+		self::$log[] = [$message, $level, $facility, time()];
 	}
 
 	/**
