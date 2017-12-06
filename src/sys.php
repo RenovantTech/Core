@@ -303,10 +303,12 @@ class sys {
 	static function pdo($id='master') {
 		static $_ = [];
 		if(!isset($_[$id])) {
+			$traceFn = self::traceFn(__METHOD__);
 			$cnf = self::$Sys->cnfPdo[$id];
 			self::trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
 			$pdo = @new db\PDO($cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
 			$_[$id] = $pdo;
+			self::traceFn($traceFn);
 		}
 		return $_[$id];
 	}

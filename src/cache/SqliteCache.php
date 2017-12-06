@@ -77,10 +77,12 @@ class SqliteCache implements CacheInterface {
 		$this->pdo = $pdo;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table, null, $this->_oid);
+		$traceFn = sys::traceFn($this->_oid);
+		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table);
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 		if($writeBuffer)
 			self::$bufferPDO[$this->id] = $this->_pdo_set = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
+		sys::traceFn($traceFn);
 	}
 
 	function get($id) {
