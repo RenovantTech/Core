@@ -8,8 +8,7 @@
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\context\Context,
-	metadigit\core\log\Logger,
-	metadigit\core\trace\Tracer;
+	metadigit\core\log\Logger;
 /**
  * System Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -116,9 +115,14 @@ class sys {
 	static function init() {
 		self::$traceFn = __METHOD__;
 		self::trace(LOG_DEBUG, T_INFO);
-		Tracer::init();
+		set_exception_handler(__NAMESPACE__.'\trace\Tracer::onException');
+		set_error_handler(__NAMESPACE__.'\trace\Tracer::onError');
 		register_shutdown_function(function () {
+			ini_set('precision', 16);
+			defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
+			ini_restore('precision');
 			self::$traceFn = __METHOD__;
+			register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
 			//self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 			//cache\SqliteCache::shutdown();
 			if(PHP_SAPI != 'cli') session_write_close();
@@ -320,6 +324,17 @@ class sys {
 		if($level > self::$traceLevel) return;
 		$fn = str_replace('metadigit\core', '\\', $function?:self::$traceFn);
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
+	}
+
+	/**
+	 * Setter/getter backtrace current scope
+	 * @param string|null $fn
+	 * @return string
+	 */
+	static function traceFn($fn=null) {
+		$prev = self::$traceFn;
+		if($fn) self::$traceFn = $fn;
+		return $prev;
 	}
 
 	/**

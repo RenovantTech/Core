@@ -8,8 +8,7 @@
 namespace metadigit\core\acl;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
-	metadigit\core\http\Request,
-	metadigit\core\trace\Tracer;
+	metadigit\core\http\Request;
 
 class ACL {
 
@@ -44,8 +43,7 @@ class ACL {
 	 * @param array|null $tables
 	 */
 	function __construct($pdo='master', array $tables=null) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL');
+		$prevTraceFn = sys::traceFn('ACL');
 		if($pdo) $this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
@@ -56,7 +54,7 @@ class ACL {
 			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
-		Tracer::traceFn($prevTraceFn);
+		sys::traceFn($prevTraceFn);
 	}
 
 	/**
@@ -66,8 +64,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
 		$target = $Req->URI();
 		$method = $Req->getMethod();
 		$matches = [];
@@ -87,10 +84,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -103,8 +100,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
@@ -114,10 +110,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -130,8 +126,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
@@ -141,10 +136,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}

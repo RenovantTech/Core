@@ -10,8 +10,7 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
-	metadigit\core\console\Exception,
-	metadigit\core\trace\Tracer;
+	metadigit\core\console\Exception;
 /**
  * MVC action Controller implementation.
  * Allows multiple requests types (aka action) to be handled by the same Controller class.
@@ -61,7 +60,7 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 				}
 			}
 		}
-		Tracer::traceFn($this->_oid.'->'.$action.'Action');
+		sys::traceFn($this->_oid.'->'.$action.'Action');
 		sys::trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);

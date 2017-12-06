@@ -21,17 +21,6 @@ class Tracer extends sys {
 	 * @var integer */
 	static protected $errorLevel = 0;
 
-	static function init() {
-		set_exception_handler(__CLASS__.'::onException');
-		set_error_handler(__CLASS__.'::onError');
-		register_shutdown_function(function() {
-			ini_set('precision', 16);
-			defined(__NAMESPACE__.'\TRACE_END_TIME') or define(__NAMESPACE__.'\TRACE_END_TIME',microtime(1));
-			ini_restore('precision');
-			register_shutdown_function(__CLASS__.'::shutdown');
-		});
-	}
-
 	/**
 	 * Error handler
 	 * @param integer $n       contains the level of the error raised
@@ -80,16 +69,6 @@ class Tracer extends sys {
 		if(self::$Sys->cnfTrace['storeFn']) {
 			call_user_func(self::$Sys->cnfTrace['storeFn'], self::$trace, self::$errorLevel);
 		}
-	}
-
-	/**
-	 * Setter/getter backtrace current scope
-	 * @param string|null $fn
-	 * @return string
-	 */
-	static function traceFn($fn=null) {
-		if($fn) self::$traceFn = $fn;
-		return self::$traceFn;
 	}
 	static function export() {
 		return self::$trace;

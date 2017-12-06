@@ -10,7 +10,6 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\trace\Tracer,
 	metadigit\core\http\Exception;
 /**
  * Convenient superclass for controller implementations.
@@ -63,7 +62,7 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 				}
 			}
 		}
-		Tracer::traceFn($this->_oid.'->doHandle');
+		sys::traceFn($this->_oid.'->doHandle');
 		sys::trace(LOG_DEBUG, T_INFO);
 		call_user_func_array([$this,'doHandle'], $args);
 		$this->postHandle($Req, $Res);
