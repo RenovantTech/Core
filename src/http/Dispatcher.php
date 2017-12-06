@@ -46,7 +46,7 @@ class Dispatcher {
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
 			if(!$this->context()->trigger(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
-				ACL_ROUTES and sys::acl()->onRoute($Req, SESSION_UID??null);
+				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
 				$Controller = $this->context()->get($this->resolveController($Req), 'metadigit\core\http\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
