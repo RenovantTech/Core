@@ -47,6 +47,16 @@ class sys {
 	/** System Context
 	 * @var \metadigit\core\context\Context */
 	static protected $SystemContext;
+	/** trace store
+	 * @var array */
+	static protected $trace = [];
+	/** trace current scope
+	 * @var string */
+	static protected $traceFn;
+	/** trace level
+	 * @var integer */
+	static protected $traceLevel = LOG_DEBUG;
+
 	/** ACL configurations
 	 * @var array */
 	protected $cnfAcl = [
@@ -88,6 +98,12 @@ class sys {
 		'locale'		=> 'en_US.UTF-8',
 		'timeZone'		=> 'UTC'
 	];
+	/** trace settings
+	 * @var array */
+	protected $cnfTrace = [
+		'level'			=> LOG_DEBUG,
+		'storeFn'		=> null
+	];
 
 	/**
 	 * System Kernel bootstrap.
@@ -98,10 +114,11 @@ class sys {
 	 * - register error & exception handlers.
 	 */
 	static function init() {
-		Tracer::traceFn(__METHOD__);
+		self::$traceFn = __METHOD__;
 		self::trace(LOG_DEBUG, T_INFO);
+		Tracer::init();
 		register_shutdown_function(function () {
-			Tracer::traceFn(__METHOD__);
+			self::$traceFn = __METHOD__;
 			//self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
 			//cache\SqliteCache::shutdown();
 			if(PHP_SAPI != 'cli') session_write_close();
@@ -137,6 +154,9 @@ class sys {
 			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
 			self::$Logger->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
 		}
+		// TRACE service
+		self::$traceLevel = $Sys->cnfTrace['level'];
+
 		// initialize
 		self::cache('sys');
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
@@ -150,7 +170,7 @@ class sys {
 	 * @throws SysException
 	 */
 	static function dispatch($api=PHP_SAPI) {
-		Tracer::traceFn(__METHOD__);
+		self::$traceFn = __METHOD__;
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
 		$app = $dispatcherID = $namespace = null;
@@ -294,11 +314,12 @@ class sys {
 	 * @param integer $type trace type, use a T_* constant value
 	 * @param string $msg the trace message
 	 * @param mixed $data the trace data
-	 * @param string $function the calling object method
-	 * @return void
+	 * @param string $function the tracing object method / function
 	 */
 	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
-		Tracer::trace($level, $type, $msg, $data, $function);
+		if($level > self::$traceLevel) return;
+		$fn = str_replace('metadigit\core', '\\', $function?:self::$traceFn);
+		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
 	}
 
 	/**

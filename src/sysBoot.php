@@ -77,6 +77,10 @@ class sysBoot extends sys {
 		// Log service
 		if(is_array($config['log'])) $Sys->cnfLog = $config['log'];
 
+		// Trace service
+		$Sys->cnfTrace = array_replace($Sys->cnfTrace, $config['trace']);
+		if(is_string($Sys->cnfTrace['level'])) $Sys->cnfTrace['level'] = constant($Sys->cnfTrace['level']);
+
 		// write into CACHE_DIR
 		file_put_contents(TMP_DIR.'core-sys', '<?php $Sys=unserialize(\''.serialize($Sys).'\'); $namespaces='.var_export($namespaces,true).';', LOCK_EX);
 		rename(TMP_DIR.'core-sys', self::CACHE_FILE);

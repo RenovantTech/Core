@@ -20,7 +20,6 @@ define('XSENDFILE_PATH', __DIR__.'/_mock/http/templates/');
 define('XSENDFILE_URL', '/web/templates/');
 
 require __DIR__.'/../src/constants.inc';
-require __DIR__.'/../src/trace/Tracer.php';
 require __DIR__.'/../src/CoreProxy.php';
 require __DIR__.'/../src/CoreTrait.php';
 require __DIR__.'/../src/sys.php';
@@ -32,5 +31,4 @@ exec('rm -fr '.DATA_DIR);
 register_shutdown_function(function() {
 	exec('rm -fr '.DATA_DIR);
 });
-trace\Tracer::init();
 sys::init();
