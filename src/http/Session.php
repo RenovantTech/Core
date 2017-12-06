@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\session;
+namespace metadigit\core\http;
 /**
  * HTTP Session.
  * @author Daniele Sciacchitano <dan@metadigit.it>

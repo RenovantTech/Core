@@ -1,18 +1,19 @@
 <?php
-namespace test\session;
-use metadigit\core\session\Session;
+namespace test\http;
+use metadigit\core\http\Session;
 
 class SessionTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		session_start();
 		$Session = new Session;
-		$this->assertInstanceOf('metadigit\core\session\Session', $Session);
+		$this->assertInstanceOf('metadigit\core\http\Session', $Session);
 		return $Session;
 	}
 
 	/**
 	 * @depends testConstruct
+	 * @param Session $Session
 	 */
 	function testSet(Session $Session) {
 		$Session->name = 'Jack';
@@ -29,6 +30,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
+	 * @param Session $Session
 	 */
 	function testIsset(Session $Session) {
 		$Session->name = 'Jack';
@@ -37,6 +39,7 @@ class SessionTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
+	 * @param Session $Session
 	 */
 	function testGet(Session $Session) {
 		$Session->name = 'Jack';
@@ -48,11 +51,11 @@ class SessionTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testSetExpirationHops() {
-		$ReflProperty = new \ReflectionProperty('metadigit\core\session\Session', '_expiringData');
+		$ReflProperty = new \ReflectionProperty('metadigit\core\http\Session', '_expiringData');
 		$ReflProperty->setAccessible(true);
-		$ReflMethod1 = new \ReflectionMethod('metadigit\core\session\Session', 'expireData');
+		$ReflMethod1 = new \ReflectionMethod('metadigit\core\http\Session', 'expireData');
 		$ReflMethod1->setAccessible(true);
-		$ReflMethod2 = new \ReflectionMethod('metadigit\core\session\Session', 'expireGlobalData');
+		$ReflMethod2 = new \ReflectionMethod('metadigit\core\http\Session', 'expireGlobalData');
 		$ReflMethod2->setAccessible(true);
 		$Session = new Session('red');
 		$Session->foo = 'Foo';
