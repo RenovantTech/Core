@@ -43,7 +43,7 @@ class ACL {
 	 * @param array|null $tables
 	 */
 	function __construct($pdo='master', array $tables=null) {
-		$prevTraceFn = sys::traceFn('ACL');
+		$prevTraceFn = sys::traceFn('sys.ACL');
 		if($pdo) $this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
@@ -64,7 +64,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
-		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		$target = $Req->URI();
 		$method = $Req->getMethod();
 		$matches = [];
@@ -100,7 +100,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
@@ -126,7 +126,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))

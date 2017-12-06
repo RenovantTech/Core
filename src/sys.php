@@ -215,7 +215,7 @@ class sys {
 	 */
 	static function autoload($class) {
 		if(@file_exists($file = self::info($class, self::INFO_PATH).'.php')) {
-			self::trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __FUNCTION__);
+			self::trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
 			require($file);
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
