@@ -1,12 +1,12 @@
 <?php
 namespace test\db;
-use function metadigit\core\pdo;
-use metadigit\core\db\Query;
+use metadigit\core\sys,
+	metadigit\core\db\Query;
 
 class QueryTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `people` (
 				id			SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
 				name		VARCHAR(20),
@@ -64,14 +64,14 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	static function tearDownAfterClass() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `people`;
 			DROP PROCEDURE IF EXISTS sp_people;
 		');
 	}
 
 	protected function setUp() {
-		pdo('mysql')->exec('
+		sys::pdo('mysql')->exec('
 			TRUNCATE `people`;
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (1, "Albert",	"Brown", 21, 32.5);
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (2, "Barbara",	"Yellow",25, 8.6);

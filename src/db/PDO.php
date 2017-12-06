@@ -8,7 +8,7 @@
 namespace metadigit\core\db;
 // @TODO use const metadigit\core\TMP_DIR;
 use const metadigit\core\trace\T_DB;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * PDO wrapper
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -32,7 +32,7 @@ class PDO extends \PDO {
 			$statement = preg_replace($keys, $values, $statement, 1);
 		}
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
+		sys::trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
 	}
 
 	/** database ID
@@ -45,6 +45,7 @@ class PDO extends \PDO {
 	 * @param string $password the password for the DSN string, optional for some PDO drivers
 	 * @param array	 $options  a key=>value array of driver-specific connection options
 	 * @param string $id database ID, default "master"
+	 * @throws \PDOException
 	 */
 	function __construct($dsn, $username=null, $password=null, array $options=null, $id='master') {
 		$this->_id =$id;
@@ -56,10 +57,7 @@ class PDO extends \PDO {
 		// SqLite specific settings
 		if('sqlite'==$this->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
 			// @TODO if(file_exists(TMP_DIR.$id.'.vacuum')) unlink(TMP_DIR.$id.'.vacuum') && $this->exec('VACUUM');
-			$this->exec('PRAGMA journal_mode = WAL');
-			$this->exec('PRAGMA temp_store = MEMORY');
-			$this->exec('PRAGMA synchronous = OFF');
-			$this->exec('PRAGMA foreign_keys = ON');
+			$this->exec('PRAGMA journal_mode = WAL; PRAGMA temp_store = MEMORY; PRAGMA synchronous = OFF; PRAGMA foreign_keys = ON');
 		}
 	}
 
@@ -68,7 +66,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function beginTransaction() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
 		return parent::beginTransaction();
 	}
 
@@ -77,7 +75,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function commit() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
 		return parent::commit();
 	}
 
@@ -89,7 +87,7 @@ class PDO extends \PDO {
 	 */
 	function exec($statement, $traceLevel=LOG_INFO) {
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
+		sys::trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
 	}
 
@@ -113,7 +111,7 @@ class PDO extends \PDO {
 	 * @return PDOStatement
 	 */
 	function query($statement, $traceLevel=LOG_INFO) {
-		trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
+		sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
 		$st = parent::query($statement);
 		if(func_num_args()>1) {
 			$args = array_shift(func_get_args());
@@ -128,7 +126,7 @@ class PDO extends \PDO {
 	 * @return boolean TRUE on success
 	 */
 	function rollBack() {
-		trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
 		return parent::rollBack();
 	}
 }

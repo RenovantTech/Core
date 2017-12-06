@@ -1,0 +1,112 @@
+# =========================================================
+# APPs definitions
+# =========================================================
+apps:
+  webconsole:
+    httpPort:   8080
+    baseUrl:    /
+    namespace:  metadigit.webconsole
+  CP:
+    httpPort:   80
+    baseUrl:    /ControlPanel/
+    namespace:  project.cp
+  Web:
+    httpPort:   80
+    baseUrl:    /
+    namespace:  web
+
+# =========================================================
+# CLI definitions
+# =========================================================
+cli:
+  console:      mock.console
+
+# =========================================================
+# __autoload map namespace/directory
+# =========================================================
+namespaces:
+  mock:           _mock
+  metadigit\lib:  /opt/metadigit-lib/src
+
+# =========================================================
+# Environment constants
+# =========================================================
+constants:
+  ASSETS_DIR:   /var/www/devel.com/data/assets/
+  ASSETS_URL:   /assets/
+  UPLOAD_DIR:   /var/www/devel.com/data/files/
+  SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
+
+# =========================================================
+# Php settings
+# =========================================================
+settings:
+  charset:      UTF-8
+  locale:       en_GB.UTF-8
+  timeZone:     Europe/London
+
+# =========================================================
+# ACL service
+# =========================================================
+acl:
+  routes:   true  # enable ACL checks on routing
+  objects:  true  # enable ACL checks on objects methods calls
+  orm:      true  # enable ACL checks on ORM operations
+  config:
+    database: mysql
+    tables:
+      acl:    sys_acl
+      users:  sys_users
+      roles:  sys_roles
+      u2r:    sys_users_2_roles
+
+# =========================================================
+# CACHE service
+# =========================================================
+cache:
+  #sys:         ### System cache, override with CAUTION
+  #  class:    metadigit\core\cache\SqliteCache
+  #  params:   ['sys-cache', 'cache', true]
+  main:
+    class:    metadigit\core\cache\SqliteCache
+    params:   ['sqlite', 'cache', false]
+
+
+# =========================================================
+# DB service
+# =========================================================
+database:
+  #sys-cache:  ### System cache DB, override with CAUTION
+  #  dns:      sqlite:{{CACHE_DIR}}sys-cache.sqlite
+  #sys-trace:  ### System trace DB, override with CAUTION
+  #  dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
+  sqlite:
+    dns:      sqlite:/tmp/metadigit-core/db.sqlite
+  mysql:
+    dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
+    user:     phpunit
+    pwd:      phpunit
+
+# =========================================================
+# LOG service
+# =========================================================
+log:
+  kernel:
+    level:    LOG_INFO
+    facility: kernel
+    class:    metadigit\core\log\writer\FileWriter
+    param1:   kernel.log
+    param2:   null
+  system:
+    level:    LOG_DEBUG
+    facility: null
+    class:    metadigit\core\log\writer\FileWriter
+    param1:   system.log
+    param2:   null
+
+# =========================================================
+# TRACE service
+# =========================================================
+trace:
+  level:      LOG_DEBUG
+  storeFn:    null

@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\util\excel;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * Excel Writer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -64,7 +64,7 @@ class ExcelWriter {
 	 * @param string $file output file
 	 */
 	function write($file) {
-		trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
+		sys::trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
 		$fh = fopen($file, 'w');
 		// header
 		$output = '<table>'.chr(10);

@@ -7,12 +7,13 @@
  */
 namespace metadigit\core\cache;
 use const metadigit\core\trace\T_CACHE;
-use function metadigit\core\{pdo, trace};
+use metadigit\core\sys;
 /**
  * Sqlite implementation of CacheInterface
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class SqliteCache implements CacheInterface {
+	use \metadigit\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
@@ -71,36 +72,41 @@ class SqliteCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
+		$this->_oid = 'cache.'.$id;
 		$this->id = $id;
 		$this->pdo = $pdo;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table, null, $this->id);
-		pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
+		$traceFn = sys::traceFn($this->_oid);
+		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table);
+		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 		if($writeBuffer)
-			self::$bufferPDO[$this->id] = $this->_pdo_set = pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
+			self::$bufferPDO[$this->id] = $this->_pdo_set = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
+		sys::traceFn($traceFn);
 	}
 
 	function get($id) {
 		if(isset($this->cache[$id])) {
-			trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_oid);
 			return $this->cache[$id];
 		} else {
-			if(is_null($this->_pdo_get)) $this->_pdo_get = pdo($this->pdo)->prepare(sprintf(self::SQL_GET, $this->table));
+			$traceFn = sys::traceFn($this->_oid);
+			if(is_null($this->_pdo_get)) $this->_pdo_get = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_GET, $this->table));
 			$this->_pdo_get->execute(['id'=>$id, 't'=>time()]);
 			$data = $this->_pdo_get->fetchColumn();
+			sys::traceFn($traceFn);
 			if($data===false) {
-				trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->id);
+				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_oid);
 				return false;
 			}
-			trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_oid);
 			return $this->cache[$id] = unserialize((string)$data);
 		}
 	}
 
 	function has($id) {
 		if(isset($this->cache[$id])) return true;
-		if(is_null($this->_pdo_has)) $this->_pdo_has = pdo($this->pdo)->prepare(sprintf(self::SQL_HAS, $this->table));
+		if(is_null($this->_pdo_has)) $this->_pdo_has = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_HAS, $this->table));
 		$this->_pdo_has->execute(['id'=>$id]);
 		return (boolean)$this->_pdo_has->fetchColumn();
 	}
@@ -112,26 +118,26 @@ class SqliteCache implements CacheInterface {
 	function set($id, $value, $expire=null, $tags=null) {
 		try {
 			if($this->writeBuffer) {
-				trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->id);
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_oid);
 				self::$buffer[$this->id][] = [$id, serialize($value), $expire, $tags];
 			} else {
-				trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->id);
-				if(is_null($this->_pdo_set)) $this->_pdo_set = pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_oid);
+				if(is_null($this->_pdo_set)) $this->_pdo_set = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
 				if(is_array($tags)) $tags = implode('|', $tags);
 				$this->_pdo_set->execute(['id'=>$id, 'data'=>serialize($value), 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
 			}
 			$this->cache[$id] = $value;
 			return true;
 		} catch(\PDOException $Ex) {
-			trace(LOG_ERR, T_CACHE, '[STORE] '.$id.' FAILURE', null, $this->id);
+			sys::trace(LOG_ERR, T_CACHE, '[STORE] '.$id.' FAILURE', null, $this->_oid);
 			return false;
 		}
 	}
 
 	function delete($id) {
-		trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_oid);
 		if(isset($this->cache[$id])) unset($this->cache[$id]);
-		if(is_null($this->_pdo_del)) $this->_pdo_del = pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table));
+		if(is_null($this->_pdo_del)) $this->_pdo_del = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table));
 		$this->_pdo_del->execute(['id'=>$id]);
 		return true;
 	}
@@ -140,10 +146,10 @@ class SqliteCache implements CacheInterface {
 		$this->cache = [];
 		switch($mode) {
 			case self::CLEAN_ALL:
-				pdo($this->pdo)->exec(sprintf('DELETE FROM `%s`',$this->table));
+				sys::pdo($this->pdo)->exec(sprintf('DELETE FROM `%s`',$this->table));
 				break;
 			case self::CLEAN_OLD:
-				pdo($this->pdo)->exec(sprintf('DELETE FROM `%s` WHERE expireAt <= %s',$this->table, time()));
+				sys::pdo($this->pdo)->exec(sprintf('DELETE FROM `%s` WHERE expireAt <= %s',$this->table, time()));
 				break;
 			case self::CLEAN_ALL_TAG:
 				//@TODO
@@ -163,14 +169,17 @@ class SqliteCache implements CacheInterface {
 	 * Commit write buffer to SqLite on shutdown
 	 */
 	static function shutdown() {
+		$traceFn = sys::traceFn('cache::shutdown');
 		foreach(self::$buffer as $k=>$buffer) {
 			if(!isset(self::$bufferPDO[$k])) continue;
-			trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
+			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k);
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
 				@self::$bufferPDO[$k]->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()]);
 			}
 		}
+		sys::traceFn($traceFn);
 	}
 }
+register_shutdown_function(__NAMESPACE__.'\SqliteCache::shutdown');

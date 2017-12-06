@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\cache;
 use const metadigit\core\trace\T_CACHE;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * Array implementation of CacheInterface, useful for testing.
  * ATTENTION: it's volatile, only in the current Request.
@@ -22,7 +22,7 @@ class ArrayCache implements CacheInterface {
 
 	function get($id) {
 		if(isset($this->store[$id])) return $this->store[$id];
-		trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id);
 		return false;
 	}
 
@@ -39,13 +39,13 @@ class ArrayCache implements CacheInterface {
 	}
 
 	function set($id, $value, $expire=0, $tag=null) {
-		trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id);
 		$this->store[$id] = $value;
 		return true;
 	}
 
 	function delete($id) {
-		trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id);
 		if(isset($this->store[$id])) {
 			unset($this->store[$id]);
 			return true;

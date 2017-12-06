@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\util\validator;
 use const metadigit\core\trace\T_ERROR;
-use function metadigit\core\{cache, trace};
+use metadigit\core\sys;
 /**
  * Validator
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -33,7 +33,7 @@ class Validator {
 			foreach($constraints as $func => $param) {
 				if(!Validator::$func($value, $param)) {
 					$errors[$prop] = $func;
-					trace(LOG_DEBUG, T_ERROR, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")', __METHOD__);
+					sys::trace(LOG_DEBUG, T_ERROR, 'INVALID '.get_class($Object).'->'.$prop, $value.' NOT @validate('.$func.'="'.$param.'")', __METHOD__);
 				}
 			}
 		}
@@ -45,9 +45,9 @@ class Validator {
 		$class = get_class($Object);
 		if(isset($cache[$class])) return $cache[$class];
 		$k = '#'.$class.'#validator';
-		if(!$cache[$class] = cache('kernel')->get($k)) {
+		if(!$cache[$class] = sys::cache('sys')->get($k)) {
 			$cache[$class] = (new ClassParser)->parse($class);
-			cache('kernel')->set($k, $cache[$class], null, 'validator');
+			sys::cache('sys')->set($k, $cache[$class], null, 'validator');
 		}
 		return $cache[$class];
 	}

@@ -6,44 +6,20 @@
  * @license New BSD License
  */
 namespace metadigit\core\trace;
-use const metadigit\core\CORE_YAML;
-use function metadigit\core\yaml;
+use metadigit\core\sys;
 /**
  * Tracer
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Tracer {
+class Tracer extends sys {
 
 	const E_NOTICE = 1;
 	const E_WARNING = 2;
 	const E_ERROR = 3;
 
-	static protected $conf = [
-		'level'		=> LOG_DEBUG,
-		'storeFn'	=> null
-	];
 	/** current Error level, incremented by errors & exceptions
 	 * @var integer */
 	static protected $errorLevel = 0;
-	/** backtrace store
-	 * @var array */
-	static protected $trace = [];
-	/** backtrace current scope
-	 * @var string */
-	static protected $traceFn;
-
-	static function init() {
-		self::$conf = array_merge(self::$conf, yaml(CORE_YAML, 'trace'));
-		if(is_string(self::$conf['level'])) self::$conf['level'] = constant(self::$conf['level']);
-		set_exception_handler(__CLASS__.'::onException');
-		set_error_handler(__CLASS__.'::onError');
-		register_shutdown_function(function() {
-			ini_set('precision', 16);
-			defined(__NAMESPACE__.'\TRACE_END_TIME') or define(__NAMESPACE__.'\TRACE_END_TIME',microtime(1));
-			ini_restore('precision');
-			register_shutdown_function(__CLASS__.'::shutdown');
-		});
-	}
 
 	/**
 	 * Error handler
@@ -90,32 +66,9 @@ class Tracer {
 		if(in_array($err['type'], [E_ERROR,E_PARSE,E_CORE_ERROR,E_CORE_WARNING,E_COMPILE_ERROR,E_COMPILE_WARNING])) {
 			self::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 		}
-		if(self::$conf['storeFn']) {
-			call_user_func(self::$conf['storeFn'], self::$trace, self::$errorLevel);
+		if(self::$Sys->cnfTrace['storeFn']) {
+			call_user_func(self::$Sys->cnfTrace['storeFn'], self::$trace, self::$errorLevel);
 		}
-	}
-
-	/**
-	 * @param integer $level trace level, use a LOG_* constant value
-	 * @param integer $type trace type, use a T_* constant value
-	 * @param string $msg the trace message
-	 * @param mixed $data the trace data
-	 * @param string $function the tracing object method / function
-	 */
-	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
-		if($level > self::$conf['level']) return;
-		$fn = str_replace('metadigit\core', '\\', $function?:self::$traceFn);
-		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
-	}
-
-	/**
-	 * Setter/getter backtrace current scope
-	 * @param string|null $fn
-	 * @return string
-	 */
-	static function traceFn($fn=null) {
-		if($fn) self::$traceFn = $fn;
-		return self::$traceFn;
 	}
 	static function export() {
 		return self::$trace;

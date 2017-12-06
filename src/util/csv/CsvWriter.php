@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\util\csv;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
+use metadigit\core\sys;
 /**
  * CSV Writer
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -90,7 +90,7 @@ class CsvWriter {
 	 * @param string $file output file
 	 */
 	function write($file) {
-		trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
+		sys::trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
 		$fh = fopen($file, 'w');
 		// labels
 		$output = '';

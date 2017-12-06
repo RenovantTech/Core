@@ -7,10 +7,10 @@
  */
 namespace metadigit\core\console;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\KernelDebugger,
+use metadigit\core\sys,
 	metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+	metadigit\core\cli\Response,
+	metadigit\core\trace\Tracer;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -61,7 +61,7 @@ class Dispatcher {
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
 			$this->context()->trigger(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
-			KernelDebugger::onException($Ex);
+			Tracer::onException($Ex);
 		}
 		$Res->send();
 	}
@@ -76,7 +76,7 @@ class Dispatcher {
 	protected function resolveController(Request $Req, Response $Res) {
 		foreach($this->mappings as $cmd => $controllerID) {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
-				trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
+				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
@@ -103,7 +103,7 @@ class Dispatcher {
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
-			trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
+			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
 			$class = $this->viewEngines[$engine];
 			$View = new $class;
 			return [$View, $resource];

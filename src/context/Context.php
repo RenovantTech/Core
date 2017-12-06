@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\context;
 use const metadigit\core\trace\{T_DEPINJ, T_EVENT};
-use function metadigit\core\{cache, trace};
-use metadigit\core\CoreProxy,
+use metadigit\core\sys,
+	metadigit\core\CoreProxy,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException,
 	metadigit\core\event\Event,
@@ -37,12 +37,12 @@ class Context implements EventDispatcherInterface {
 	static function factory($namespace, $useCache=true) {
 		if($useCache && isset(self::$_instances[$namespace]))
 			return self::$_instances[$namespace];
-		elseif($useCache && $Context = cache('kernel')->get($namespace.'.Context'))
+		elseif($useCache && $Context = sys::cache('sys')->get($namespace.'.Context'))
 			return self::$_instances[$namespace] = $Context;
 		else {
-			trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+			sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 			self::$_instances[$namespace] = $Context = new Context($namespace);
-			cache('kernel')->set($namespace.'.Context', $Context);
+			sys::cache('sys')->set($namespace.'.Context', $Context);
 			return $Context;
 		}
 	}
@@ -75,7 +75,7 @@ class Context implements EventDispatcherInterface {
 		ContextYamlParser::parse($this->namespace, $this->includedNamespaces, $this->id2classMap, $this->listeners);
 		// create Container
 		$Container = new Container($namespace, $this->includedNamespaces);
-		cache('kernel')->set($namespace.'.Container', $Container);
+		sys::cache('sys')->set($namespace.'.Container', $Container);
 	}
 
 	function __sleep() {
@@ -114,7 +114,7 @@ class Context implements EventDispatcherInterface {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
@@ -142,7 +142,7 @@ class Context implements EventDispatcherInterface {
 	 * @return \metadigit\core\container\Container
 	 */
 	function getContainer() {
-		return cache('kernel')->get($this->namespace.'.Container');
+		return sys::cache('sys')->get($this->namespace.'.Container');
 	}
 
 	/**
@@ -155,7 +155,7 @@ class Context implements EventDispatcherInterface {
 	 * @return Event the Event object
 	 */
 	function trigger($eventName, $target=null, array $params=null, $Event=null) {
-		trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
+		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
 		$params['Context'] = $this;
 		if(is_null($Event)) $Event = new Event($target, $params);
 		$Event->setName($eventName);

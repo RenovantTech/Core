@@ -7,8 +7,8 @@
  */
 namespace metadigit\core\http\view;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\http\Request,
+use metadigit\core\sys,
+	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
 /**
@@ -31,7 +31,7 @@ class PhpView implements \metadigit\core\http\ViewInterface {
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);
-		trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);
+		sys::trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);
 		self::$model = $Res->getData();
 		self::execTemplate();
 	}

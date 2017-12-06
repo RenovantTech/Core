@@ -7,10 +7,10 @@
  */
 namespace metadigit\core;
 /**
- * KernelException
+ * SysException
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class KernelException extends Exception {
+class SysException extends Exception {
 	// bootstrap
 	const ERR21 = 'FATAL ERROR: PUBLIC_DIR not defined in your index.php!';
 	const ERR22 = 'FATAL ERROR: BASE_DIR not defined in your index.php!';

@@ -31,9 +31,9 @@
 			<directory>http/controller</directory>
 			<file>http/DispatcherTest.php</file>
 		</testsuite>
-		<testsuite name="kernel">
+		<testsuite name="sys">
 			<file>ExceptionTest.php</file>
-			<file>KernelTest.php</file>
+			<file>sysTest.php</file>
 		</testsuite>
 	</testsuites>
 </phpunit>

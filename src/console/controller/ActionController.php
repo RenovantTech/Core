@@ -7,11 +7,10 @@
  */
 namespace metadigit\core\console\controller;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\trace;
-use metadigit\core\cli\Request,
+use metadigit\core\sys,
+	metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
-	metadigit\core\console\Exception,
-	metadigit\core\trace\Tracer;
+	metadigit\core\console\Exception;
 /**
  * MVC action Controller implementation.
  * Allows multiple requests types (aka action) to be handled by the same Controller class.
@@ -40,12 +39,12 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
-			trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
 			return null;
 		}
 		$args = array($Req, $Res);
 		if(isset($this->_actions[$action]['params'])) {
-			trace(LOG_DEBUG, T_INFO, 'building action params');
+			sys::trace(LOG_DEBUG, T_INFO, 'building action params');
 			foreach($this->_actions[$action]['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
 					$paramClass = $param['class'];
@@ -61,8 +60,8 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 				}
 			}
 		}
-		Tracer::traceFn($this->_oid.'->'.$action.'Action');
-		trace(LOG_DEBUG, T_INFO);
+		sys::traceFn($this->_oid.'->'.$action.'Action');
+		sys::trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
 		return $View;
@@ -83,7 +82,7 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param \metadigit\core\web\ViewInterface|string $View the View or view name
+	 * @param \metadigit\core\console\ViewInterface|string $View the View or view name
 	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res, $View=null) {

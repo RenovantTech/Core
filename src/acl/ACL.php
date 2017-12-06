@@ -7,9 +7,8 @@
  */
 namespace metadigit\core\acl;
 use const metadigit\core\trace\T_INFO;
-use function metadigit\core\{pdo, trace};
-use metadigit\core\http\Request,
-	metadigit\core\trace\Tracer;
+use metadigit\core\sys,
+	metadigit\core\http\Request;
 
 class ACL {
 
@@ -44,19 +43,18 @@ class ACL {
 	 * @param array|null $tables
 	 */
 	function __construct($pdo='master', array $tables=null) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL');
+		$prevTraceFn = sys::traceFn('sys.ACL');
 		if($pdo) $this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
-		trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
-		$PDO = pdo($this->pdo);
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
+		$PDO = sys::pdo($this->pdo);
 		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 		$PDO->exec(str_replace(
 			['acl', 't_u2r', 't_users', 't_roles'],
 			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
 			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
 		));
-		Tracer::traceFn($prevTraceFn);
+		sys::traceFn($prevTraceFn);
 	}
 
 	/**
@@ -66,13 +64,12 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		$target = $Req->URI();
 		$method = $Req->getMethod();
 		$matches = [];
 		try {
-			$aclArray = pdo($this->pdo)
+			$aclArray = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
 				->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 			foreach($aclArray as $item) {
@@ -87,10 +84,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -103,10 +100,9 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		try {
-			$matches = pdo($this->pdo)
+			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
 				->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 			foreach($matches as $acl) {
@@ -114,10 +110,10 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
@@ -130,10 +126,9 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = Tracer::traceFn();
-		Tracer::traceFn('ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
 		try {
-			$matches = pdo($this->pdo)
+			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
 				->execute(['target'=>$target, 'method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
 			foreach($matches as $acl) {
@@ -141,37 +136,37 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			return true;
 		} catch (\Exception $Ex) {
-			Tracer::traceFn($prevTraceFn);
+			sys::traceFn($prevTraceFn);
 			throw $Ex;
 		}
 	}
 
 	protected function checkAction(array $acl, $userId) {
-		$actionCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_ACTION_CODE, $this->tables['acl'], $acl['action']))->fetchColumn();
+		$actionCode = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_ACTION_CODE, $this->tables['acl'], $acl['action']))->fetchColumn();
 		if(
-			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_USER, $this->tables['acl']))
+			!sys::pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_USER, $this->tables['acl']))
 				->execute(['action_id'=>$acl['action'], 'user_id'=>$userId])->fetchColumn()
 			&&
-			!pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2r']))
+			!sys::pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_ACTION_GROUP, $this->tables['acl'], $this->tables['u2r']))
 				->execute(['action_id'=>$acl['action'], 'user_id'=>$userId])->fetchColumn()
 		) {
 //echo "\t ACTION [$acl[action]] $actionCode => EXCEPTION 100 \n";
 			throw new Exception(100, [$actionCode]);
 		} else {
-			trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - ACTION: $actionCode => OK ");
+			sys::trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - ACTION: $actionCode => OK ");
 //echo "\t ACTION [$acl[action]] $actionCode => OK \n";
 		}
 	}
 
 	protected function checkFilter(array $acl, $userId) {
-		$filterCode = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
-		$values1 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
+		$filterCode = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
+		$values1 = (array) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
 			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$userId])->fetchAll(\PDO::FETCH_COLUMN);
 
-		$values2 = (array) pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_GROUP, $this->tables['acl'], $this->tables['u2r']))
+		$values2 = (array) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_GROUP, $this->tables['acl'], $this->tables['u2r']))
 			->execute(['filter_id'=>$acl['filter'], 'user_id'=>$userId])->fetchAll(\PDO::FETCH_COLUMN);
 
 		$values = array_merge($values1, $values2);
@@ -179,12 +174,12 @@ class ACL {
 //echo "\t FILTER [$acl[filter]] $filterCode => EXCEPTION 200 \n";
 			throw new Exception(200, [$filterCode]);
 		} elseif(array_search('*', $values) !== false) {
-			trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - FILTER: $filterCode VALUE: * => OK ");
+			sys::trace(LOG_DEBUG, T_INFO, "$acl[type] $acl[target] $acl[method] - FILTER: $filterCode VALUE: * => OK ");
 //echo "\t FILTER [$acl[filter]] $filterCode * => OK \n";
 			return true;
 		} else {
 //echo "\t FILTER [$acl[filter]] $filterCode VALUES: ".implode(' ', $values)." \n";
-			$query = pdo($this->pdo)->query(sprintf(self::SQL_FETCH_QUERY, $this->tables['acl'], $acl['filter_sql']))->fetchColumn();
+			$query = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_QUERY, $this->tables['acl'], $acl['filter_sql']))->fetchColumn();
 //echo "\t QUERY: $query \n";
 
 			// parse qyery params
@@ -196,7 +191,7 @@ class ACL {
 					return true;
 					break;
 				default:
-					if($r = pdo($this->pdo)->prepare($query)->execute($params)->fetchColumn()) {
+					if($r = sys::pdo($this->pdo)->prepare($query)->execute($params)->fetchColumn()) {
 //echo "\t QUERY $r => OK \n";
 						return true;
 					} else {
