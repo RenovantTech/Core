@@ -27,8 +27,8 @@ class Session {
 		'lifetime'	=> 3600,
 		'path'		=> '/',
 		'domain'	=> null,
-		'secure'	=> false,
-		'httponly'	=> true
+		'secure'	=> null,
+		'httponly'	=> null
 	];
 	/** Handler config
 	 * @var array */
@@ -49,7 +49,7 @@ class Session {
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->cookie['name']);
 		session_set_cookie_params($this->cookie['lifetime'], $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
-		$this->Handler = new $this->handler['class']($this->handler['params']);
+		$this->Handler = new $this->handler['class'](...array_values((array)$this->handler['params']));
 		session_set_save_handler($this->Handler, true);
 		session_start();
 		$this->context()->trigger(self::EVENT_START, $this);
