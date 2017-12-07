@@ -10,6 +10,9 @@ objects:
       preferences:
         p1: hello
         p2: bye
+        subpref:
+          s1: red
+          s2: yellow
   mock.container.Mock2:
     class: mock\container\Mock2
     constructor: [ Mock2, !obj system.Mock ]
