@@ -71,15 +71,8 @@ class Container {
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_oid, $id, $class]);
 			$objClass = $this->id2classMap[$id][0];
 			$args = $this->getYamlParser()->parseObjectConstructorArgs($id);
-			$ReflClass = new \ReflectionClass($objClass);
-			$Obj = (empty($args)) ? $ReflClass->newInstance() : $ReflClass->newInstanceArgs($args);
-			$ReflObject = new \ReflectionObject($Obj);
-			$this->setProperty('_oid', $id, $Obj, $ReflObject);
 			$properties = $this->getYamlParser()->parseObjectProperties($id);
-			foreach ($properties as $k=>$v) {
-				$this->setProperty($k, $v, $Obj, $ReflObject);
-			}
-			$this->objects[$id] = $Obj;
+			$this->objects[$id] = $Obj = ObjBuilder::build($id, $objClass, $args, $properties);
 			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
@@ -137,21 +130,5 @@ class Container {
 	 */
 	protected function getYamlParser() {
 		return (!is_null($this->YamlParser)) ? $this->YamlParser : $this->YamlParser = new ContainerYamlParser(array_merge((array)$this->namespace, $this->includes));
-	}
-
-	/**
-	 * Set Object property using reflection
-	 * @param string $k property name
-	 * @param mixed $v property value
-	 * @param object $Obj
-	 * @param \ReflectionObject $ReflObject
-	 */
-	private function setProperty($k, $v, $Obj, \ReflectionObject $ReflObject) {
-		if($ReflObject->hasProperty($k)) {
-			$ReflProperty = $ReflObject->getProperty($k);
-			$ReflProperty->setAccessible(true);
-			$ReflProperty->setValue($Obj, $v);
-			$ReflProperty->setAccessible(false);
-		}
 	}
 }
