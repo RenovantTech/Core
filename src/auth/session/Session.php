@@ -52,7 +52,7 @@ class Session {
 		$this->Handler = new $this->handler['class'](...array_values((array)$this->handler['params']));
 		session_set_save_handler($this->Handler, true);
 		session_start();
-		sys::event(self::EVENT_START, $this);
+		sys::event(self::EVENT_START);
 	}
 
 	/**
@@ -70,7 +70,7 @@ class Session {
 	 * @return void
 	 */
 	function end() {
-		sys::event(self::EVENT_END, $this);
+		sys::event(self::EVENT_END);
 		session_write_close();
 	}
 }

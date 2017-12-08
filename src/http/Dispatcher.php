@@ -45,27 +45,27 @@ class Dispatcher {
 		$Controller = null;
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
-			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
 				$Controller = $this->context()->get($this->resolveController($Req), 'metadigit\core\http\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {
 				$Res->setView(null, null, $this->viewEngine);
-				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
 			list($View, $viewResource, $viewOptions) = $this->resolveView($Req, $Res, $DispatcherEvent);
 			if($View) {
-				if(!sys::event(DispatcherEvent::EVENT_VIEW, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(DispatcherEvent::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
 					$View->render($Req, $Res, $viewResource, $viewOptions);
 				}
 			}
-			sys::event(DispatcherEvent::EVENT_RESPONSE, $this, [], $DispatcherEvent);
+			sys::event(DispatcherEvent::EVENT_RESPONSE, $DispatcherEvent);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
-			sys::event(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
+			sys::event(DispatcherEvent::EVENT_EXCEPTION, $DispatcherEvent);
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
 		}

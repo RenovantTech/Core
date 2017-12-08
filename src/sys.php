@@ -276,17 +276,13 @@ class sys {
 
 	/**
 	 * Trigger an Event, calling attached listeners
-	 * @param string		$eventName	the name of the event
-	 * @param mixed			$target		Event's target
-	 * @param array			$params		Event's parameters
-	 * @param \metadigit\core\event\Event|null	$Event		optional custom Event object
+	 * @param string $eventName	the name of the event
+	 * @param \metadigit\core\event\Event|array|null $EventOrParams custom Event object or params array
 	 * @return \metadigit\core\event\Event the Event object
 	 */
-	static function event($eventName, $target=null, array $params=null, $Event=null): Event {
+	static function event($eventName, $EventOrParams=null): Event {
 		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
-//		$params['Context'] = $this;
-		if(is_null($Event)) $Event = new Event($target, $params);
-		$Event->setName($eventName);
+		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
 		if(!isset(self::$listeners[$eventName])) return $Event;
 		foreach(self::$listeners[$eventName] as $listeners) {
 			foreach($listeners as $callback) {

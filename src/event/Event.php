@@ -12,12 +12,6 @@ namespace metadigit\core\event;
  */
 class Event {
 
-	/** Event name
-	 * @var string */
-	protected $name;
-	/** Event target
-	 * @var mixed */
-	protected $target = null;
 	/** Event's parameters
 	 * @var array */
 	protected $params = [];
@@ -26,39 +20,14 @@ class Event {
 	protected $_stopped = false;
 
 	/**
-	 * @param mixed $target Event's target
 	 * @param array $params Event's parameters
 	 */
-	function __construct($target=null, array $params=null) {
-		$this->target = $target;
+	function __construct(array $params=null) {
 		$this->params = $params;
 	}
 
 	function __get($id) {
 		return (isset($this->params[$id])) ? $this->params[$id]: null;
-	}
-
-	/**
-	 * Return the Event's name
-	 * @return string
-	 */
-	function getName() {
-		return $this->name;
-	}
-
-	/**
-	 * Return the Event's context
-	 * @return mixed
-	 */
-	function getTarget() {
-		return $this->target;
-	}
-
-	/**
-	 * @param string $name Event name
-	 */
-	function setName($name) {
-		$this->name = $name;
 	}
 
 	/**
