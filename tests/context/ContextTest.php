@@ -1,32 +1,33 @@
 <?php
 namespace test\context;
 use metadigit\core\sys,
+	metadigit\core\container\Container,
 	metadigit\core\context\Context;
 
 class ContextTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Context = new Context('mock.context');
-		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
+		$Context = new Context('test.context');
+		$this->assertInstanceOf(Context::class, $Context);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'namespace');
+		$ReflProp = new \ReflectionProperty(Context::class, 'namespace');
 		$ReflProp->setAccessible(true);
 		$namespace = $ReflProp->getValue($Context);
-		$this->assertEquals('mock.context', $namespace);
+		$this->assertEquals('test.context', $namespace);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'includedNamespaces');
+		$ReflProp = new \ReflectionProperty(Context::class, 'includedNamespaces');
 		$ReflProp->setAccessible(true);
 		$includedNamespaces = $ReflProp->getValue($Context);
 		$this->assertContains('system', $includedNamespaces);
 		$this->assertNotContains('foo', $includedNamespaces);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'id2classMap');
+		$ReflProp = new \ReflectionProperty(Context::class, 'id2classMap');
 		$ReflProp->setAccessible(true);
 		$id2classMap = $ReflProp->getValue($Context);
-		$this->assertArrayHasKey('mock.context.Mock1', $id2classMap);
-		$this->assertArrayNotHasKey('mock.context.NotExists', $id2classMap);
+		$this->assertArrayHasKey('test.context.Mock1', $id2classMap);
+		$this->assertArrayNotHasKey('test.context.NotExists', $id2classMap);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'listeners');
+		$ReflProp = new \ReflectionProperty(Context::class, 'listeners');
 		$ReflProp->setAccessible(true);
 		$listeners = $ReflProp->getValue($Context);
 		$this->assertCount(2, $listeners);
@@ -34,11 +35,11 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertArrayHasKey('event2', $listeners);
 		$this->assertCount(2, $listeners['event1']);
 		$this->assertCount(1, $listeners['event2']);
-		$this->assertEquals('mock.context.EventSubscriber->onEvent1', $listeners['event1'][1][0]);
-		$this->assertEquals('mock.context.Mock1->onEvent1', $listeners['event1'][2][0]);
-		$this->assertEquals('mock.context.Mock1->onEvent2', $listeners['event2'][1][0]);
-		$this->assertEquals('mock.context.Mock1->onEvent2bis', $listeners['event2'][1][1]);
-		$this->assertEquals('mock.context.EventSubscriber->onEvent2', $listeners['event2'][1][2]);
+		$this->assertEquals('test.context.EventSubscriber->onEvent1', $listeners['event1'][1][0]);
+		$this->assertEquals('test.context.Mock1->onEvent1', $listeners['event1'][2][0]);
+		$this->assertEquals('test.context.Mock1->onEvent2', $listeners['event2'][1][0]);
+		$this->assertEquals('test.context.Mock1->onEvent2bis', $listeners['event2'][1][1]);
+		$this->assertEquals('test.context.EventSubscriber->onEvent2', $listeners['event2'][1][2]);
 
 		return $Context;
 	}
@@ -48,15 +49,15 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testFactory() {
-		$Context = Context::factory('mock.context');
-		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
-		$this->assertInstanceOf('metadigit\core\context\Context', sys::cache('sys')->get('mock.context.Context'));
+		$Context = Context::factory('test.context');
+		$this->assertInstanceOf(Context::class, $Context);
+		$this->assertInstanceOf(Context::class, sys::cache('sys')->get('test.context.Context'));
 		return $Context;
 	}
 
 	function testFactoryWithCycledGraphs() {
-		$Context = Context::factory('mock.context.cyclic1');
-		$this->assertInstanceOf('metadigit\core\context\Context', $Context);
+		$Context = Context::factory('test.context.cyclic1');
+		$this->assertInstanceOf(Context::class, $Context);
 	}
 
 	/**
@@ -64,8 +65,8 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $Context
 	 */
 	function testHas(Context $Context) {
-		$this->assertTrue($Context->has('mock.context.Mock1', 'mock\context\Mock1'));
-		$this->assertFalse($Context->has('mock.context.NotExists'));
+		$this->assertTrue($Context->has('test.context.Mock1', 'test\context\Mock1'));
+		$this->assertFalse($Context->has('test.context.NotExists'));
 	}
 
 	/**
@@ -74,7 +75,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testFactory2() {
 		$GlobalContext = Context::factory('system');
-		$this->assertInstanceOf('metadigit\core\context\Context', $GlobalContext);
+		$this->assertInstanceOf(Context::class, $GlobalContext);
 		$this->assertTrue(sys::cache('sys')->has('system.Context'));
 		return $GlobalContext;
 	}
@@ -84,7 +85,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $GlobalContext
 	 */
 	function testHas2(Context $GlobalContext) {
-		$this->assertTrue($GlobalContext->has('system.Mock', 'mock\GlobalMock'));
+		$this->assertTrue($GlobalContext->has('system.Mock', 'test\GlobalMock'));
 		$this->assertFalse($GlobalContext->has('system.NotExists'));
 	}
 
@@ -93,10 +94,10 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $Context
 	 */
 	function testGetContainer(Context $Context) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\context\Context', 'getContainer');
+		$ReflMethod = new \ReflectionMethod(Context::class, 'getContainer');
 		$ReflMethod->setAccessible(true);
-		$this->assertInstanceOf('metadigit\core\container\Container', $ReflMethod->invoke($Context));
-		$this->assertTrue(sys::cache('sys')->has('mock.context.Container'));
+		$this->assertInstanceOf(Container::class, $ReflMethod->invoke($Context));
+		$this->assertTrue(sys::cache('sys')->has('test.context.Container'));
 	}
 
 	/**
@@ -106,7 +107,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @return Context
 	 */
 	function testGet(Context $Context) {
-		$Mock = $Context->get('mock.context.Mock1');
+		$Mock = $Context->get('test.context.Mock1');
 		$this->assertEquals('foo', $Mock->getProp1());
 		$this->assertEquals('bar', $Mock->getProp2());
 		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock->getChild());
@@ -120,7 +121,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $Context
 	 */
 	function testGet2(Context $Context) {
-		$Mock = $Context->get('mock.context.Mock1');
+		$Mock = $Context->get('test.context.Mock1');
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
 	}
 
@@ -132,7 +133,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $Context
 	 */
 	function testGetException1(Context $Context) {
-		$Context->get('mock.context.NotExists');
+		$Context->get('test.context.NotExists');
 	}
 
 	/**
@@ -157,7 +158,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$Context->listen('bar', 'callback1');
 		$Context->listen('bar', 'callback2');
 		$Context->listen('bar', 'callback0', 2);
-		$ReflProp = new \ReflectionProperty('metadigit\core\context\Context', 'listeners');
+		$ReflProp = new \ReflectionProperty(Context::class, 'listeners');
 		$ReflProp->setAccessible(true);
 		$listeners = $ReflProp->getValue($Context);
 		$this->assertCount(4, $listeners);
@@ -181,7 +182,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(4, $var);
 
 		$var = 2;
-		$Context->listen('trigger2', 'mock.context.Mock1->onEvent1');
+		$Context->listen('trigger2', 'test.context.Mock1->onEvent1');
 		$Context->trigger('trigger2', $Context);
 		$this->assertEquals(3, $var);
 

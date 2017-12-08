@@ -5,7 +5,7 @@ use metadigit\core\util\validator\Validator;
 class ValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	function testValidate() {
-		$Object = new \mock\util\validator\Class1;
+		$Object = new \test\util\validator\Class1;
 		$this->assertCount(7, Validator::validate($Object));
 
 		// min & max

@@ -7,7 +7,7 @@ use metadigit\core\console\controller\ActionController,
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$ActionController = new \mock\console\controller\ActionController;
+		$ActionController = new \test\console\controller\ActionController;
 		$this->assertInstanceOf('metadigit\core\console\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\console\controller\ActionController', $ActionController);
 
@@ -39,7 +39,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 */
-	function testResolveActionMethod(\mock\console\controller\ActionController $ActionController) {
+	function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
 		$ReflMethod = new \ReflectionMethod('metadigit\core\console\controller\ActionController', 'resolveActionMethod');
 		$ReflMethod->setAccessible(true);
 
@@ -64,7 +64,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
-		$ActionController2 = new \mock\console\controller\ActionController2;
+		$ActionController2 = new \test\console\controller\ActionController2;
 		$ReflMethod = new \ReflectionMethod('metadigit\core\console\controller\ActionController', 'resolveActionMethod');
 		$ReflMethod->setAccessible(true);
 
@@ -76,7 +76,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 */
-	function testHandle(\mock\console\controller\ActionController $ActionController) {
+	function testHandle(\test\console\controller\ActionController $ActionController) {
 		$_SERVER['argv'] = ['sys','mod1','action2','--id=7'];
 		$Req = new Request;
 		$Res = new Response;

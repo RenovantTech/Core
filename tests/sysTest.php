@@ -14,7 +14,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		list($Sys, $namespaces) = sysboot::boot();
 
 		$this->assertArrayHasKey('metadigit\core', $namespaces);
-		$this->assertEquals(realpath(__DIR__.'/../src/'), $namespaces['metadigit\core']);
+		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['metadigit\core']);
+		$this->assertArrayHasKey('test', $namespaces);
+		$this->assertEquals(__DIR__, realpath($namespaces['test']));
 
 		// APPS HTTP/CLI
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfApps');
@@ -30,7 +32,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('project.cp',		$apps['HTTP']['CP']['namespace']);
 		$this->assertCount(1, $apps['CLI']);
 //@TODO		$this->assertEquals('metadigit.webconsole',	$apps['CLI']['webconsole']);
-		$this->assertEquals('mock.console',			$apps['CLI']['console']);
+		$this->assertEquals('test.console',			$apps['CLI']['console']);
 
 		// constants
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfConstants');
@@ -102,15 +104,15 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testInfo2() {
 		// test ID namespaces
-		$this->assertEquals('mock\app', sys::info('mock.app.Dispatcher', sys::INFO_NAMESPACE));
-		$this->assertEquals('Dispatcher', sys::info('mock.app.Dispatcher', sys::INFO_CLASS));
-		$this->assertEquals(MOCK_DIR.'/app/Dispatcher', sys::info('mock.app.Dispatcher', sys::INFO_PATH));
-		$this->assertEquals(MOCK_DIR.'/app', sys::info('mock.app.Dispatcher', sys::INFO_PATH_DIR));
-		$this->assertEquals('Dispatcher', sys::info('mock.app.Dispatcher', sys::INFO_PATH_FILE));
-		list($namespace, $className, $dir, $file) = sys::info('mock.app.Dispatcher');
-		$this->assertEquals('mock\app', $namespace);
+		$this->assertEquals('test\app', sys::info('test.app.Dispatcher', sys::INFO_NAMESPACE));
+		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_CLASS));
+		$this->assertEquals(TEST_DIR.'//app/Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH));
+		$this->assertEquals(TEST_DIR.'//app', sys::info('test.app.Dispatcher', sys::INFO_PATH_DIR));
+		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH_FILE));
+		list($namespace, $className, $dir, $file) = sys::info('test.app.Dispatcher');
+		$this->assertEquals('test\app', $namespace);
 		$this->assertEquals('Dispatcher', $className);
-		$this->assertEquals(MOCK_DIR.'/app', $dir);
+		$this->assertEquals(TEST_DIR.'//app', $dir);
 		$this->assertEquals('Dispatcher', $file);
 	}
 

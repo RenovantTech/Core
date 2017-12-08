@@ -1,0 +1,17 @@
+includes:
+  - system
+objects:
+  test.db.orm.StatsRepository:
+    class: metadigit\core\db\orm\Repository
+    constructor: [ 'test\db\orm\Stats', mysql ]
+  test.db.orm.UserRepository:
+    class: metadigit\core\db\orm\Repository
+    constructor: [ 'test\db\orm\User', mysql ]
+  test.db.orm.User2Repository:
+    class: metadigit\core\db\orm\Repository
+    constructor: [ 'test\db\orm\User2', mysql ]
+events:
+  event1:
+    #'EventTester::test1'
+    LocalMock->foo:
+      priority: 2

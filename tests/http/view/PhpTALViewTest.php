@@ -20,7 +20,7 @@ class PhpTALViewTest extends \PHPUnit\Framework\TestCase {
 		$this->expectOutputRegex('/<title>index<\/title>/');
 		$Req = new Request;
 		$Res = new Response;
-		$PhpTALView->render($Req, $Res, MOCK_DIR.'/http/templates/index');
+		$PhpTALView->render($Req, $Res, TEST_DIR.'/http/templates/index');
 		$Res->send();
 	}
 }

@@ -41,7 +41,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstructor() {
-		$StatsRepository = Context::factory('mock.db.orm')->getContainer()->get('mock.db.orm.StatsRepository');
+		$StatsRepository = Context::factory('test.db.orm')->getContainer()->get('test.db.orm.StatsRepository');
 		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $StatsRepository);
 		return $StatsRepository;
 	}
@@ -52,7 +52,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	 */
 	function testCreate(Repository $StatsRepository) {
 		$Stats = $StatsRepository->create(['code'=>'EE', 'year'=>2013, 'score'=>3.5]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertEquals('EE', $Stats->code);
 		$this->assertEquals(2013, $Stats->year);
 		$this->assertEquals(3.5, $Stats->score);
@@ -65,11 +65,11 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	function testDelete(Repository $StatsRepository) {
 		// passing Entity
 		$Stats = $StatsRepository->fetch(['AA',2013]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->delete($Stats));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->delete($Stats));
 		$this->assertFalse($StatsRepository->fetch(['AA',2013]));
 
 		// passing key
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->delete(['BB',2013]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->delete(['BB',2013]));
 		$this->assertFalse($StatsRepository->fetch(['BB',2013]));
 	}
 
@@ -86,7 +86,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($StatsRepository->fetch(['BB',2014]));
 		$this->assertFalse($StatsRepository->fetch(['CC',2014]));
 		$this->assertFalse($StatsRepository->fetch(['DD',2014]));
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->fetch(['AA',2014]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->fetch(['AA',2014]));
 	}
 
 	/**
@@ -96,7 +96,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	function testFetch(Repository $StatsRepository) {
 		// FETCH_OBJ
 		$Stats = $StatsRepository->fetch(['AA',2013]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('AA', $Stats->code);
 		$this->assertSame(2013, $Stats->year);
 		$this->assertSame(6.5, $Stats->score);
@@ -117,7 +117,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	function testFetchOne(Repository $StatsRepository) {
 		// FETCH_OBJ
 		$Stats = $StatsRepository->fetchOne(2, 'score.ASC', 'year,EQ,2014');
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('BB', $Stats->code);
 		$this->assertSame(2014, $Stats->year);
 
@@ -137,7 +137,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		// FETCH_OBJ
 		$stats = $StatsRepository->fetchAll(1, 3, 'code.DESC', 'score,LTE,8');
 		$this->assertCount(3, $stats);
-		$this->assertInstanceOf('mock\db\orm\Stats', $stats[0]);
+		$this->assertInstanceOf('test\db\orm\Stats', $stats[0]);
 		$this->assertSame('DD', $stats[0]->code);
 		$this->assertSame('CC', $stats[1]->code);
 
@@ -176,27 +176,27 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	 */
 	function testInsert(Repository $StatsRepository) {
 		// INSERT null key & object
-		$Stats = new \mock\db\orm\Stats(['code'=>'EE', 'year'=>2015, 'score'=>9.5]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(null, $Stats));
+		$Stats = new \test\db\orm\Stats(['code'=>'EE', 'year'=>2015, 'score'=>9.5]);
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(null, $Stats));
 		$Stats = $StatsRepository->fetch(['EE', 2015]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('EE', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(9.5, $Stats->score);
 
 		// INSERT null key & values
-		$Stats = new \mock\db\orm\Stats;
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
+		$Stats = new \test\db\orm\Stats;
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
 		$Stats = $StatsRepository->fetch(['FF', 2015]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('FF', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(8.4, $Stats->score);
 
 		// INSERT key & values
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->insert(['HH', 2015], [ 'score'=>null ]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(['HH', 2015], [ 'score'=>null ]));
 		$Stats = $StatsRepository->fetch(['HH', 2015]);
-		$this->assertInstanceOf('mock\db\orm\Stats', $Stats);
+		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('HH', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(0.0, $Stats->score);
@@ -211,12 +211,12 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		// 1 - change Entity directly
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$Stats->score = 12;
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update(['AA', 2013], $Stats));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->update(['AA', 2013], $Stats));
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$this->assertSame(12.0, $Stats->score);
 
 		// 2 - pass new values array
-		$this->assertInstanceOf('mock\db\orm\Stats', $StatsRepository->update(['BB',2013], ['score'=>11]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->update(['BB',2013], ['score'=>11]));
 		$Stats = $StatsRepository->fetch(['BB', 2013]);
 		$this->assertSame(11.0, $Stats->score);
 

@@ -1,0 +1,17 @@
+objects:
+  # Dispatcher
+  test.console.Dispatcher:
+    class: metadigit\core\console\Dispatcher
+    properties:
+      mappings:
+        db: test.console.AbstractController
+        mod1: test.console.ActionController
+        cron: test.console.SimpleController
+      resourcesDir: templates/
+  # controllers
+  test.console.SimpleController:
+    class: test\console\controller\SimpleController
+  test.console.ActionController:
+    class: test\console\controller\ActionController
+  test.console.AbstractController:
+    class: test\console\controller\AbstractController

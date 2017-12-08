@@ -1,0 +1,20 @@
+objects:
+  # Dispatcher
+  test.http.Dispatcher:
+    class: metadigit\core\http\Dispatcher
+    properties:
+      routes:
+        /catalog/*: test.http.AbstractController
+        /mod1/*:    test.http.ActionController
+        /rest/*:    test.http.RestActionController
+        /home:      test.http.SimpleController
+      resourcesDir: templates/
+  # controllers
+  test.http.SimpleController:
+    class: test\http\controller\SimpleController
+  test.http.ActionController:
+    class: test\http\controller\ActionController
+  test.http.AbstractController:
+    class: test\http\controller\AbstractController
+  test.http.RestActionController:
+    class: test\http\controller\RestActionController

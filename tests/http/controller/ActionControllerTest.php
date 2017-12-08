@@ -6,7 +6,7 @@ use metadigit\core\http\Request,
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$ActionController = new \mock\http\controller\ActionController;
+		$ActionController = new \test\http\controller\ActionController;
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
@@ -37,10 +37,10 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @param \mock\http\controller\ActionController $ActionController
-	 * @return \mock\http\controller\ActionController
+	 * @param \test\http\controller\ActionController $ActionController
+	 * @return \test\http\controller\ActionController
 	 */
-	function testResolveActionMethod(\mock\http\controller\ActionController $ActionController) {
+	function testResolveActionMethod(\test\http\controller\ActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
@@ -65,7 +65,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
-		$ActionController2 = new \mock\http\controller\ActionController;
+		$ActionController2 = new \test\http\controller\ActionController;
 		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
@@ -76,9 +76,9 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @param \mock\http\controller\ActionController $ActionController
+	 * @param \test\http\controller\ActionController $ActionController
 	 */
-	function testHandle(\mock\http\controller\ActionController $ActionController) {
+	function testHandle(\test\http\controller\ActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/mod1/action2';
 		$_GET['id'] = 7;
 		$Req = new Request;

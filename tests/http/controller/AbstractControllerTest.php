@@ -6,7 +6,7 @@ use metadigit\core\http\Request,
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$AbstractController = new \mock\http\controller\AbstractController;
+		$AbstractController = new AbstractController;
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $AbstractController);
 		$this->assertInstanceOf('metadigit\core\http\controller\AbstractController', $AbstractController);
 
@@ -30,9 +30,9 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @param \mock\http\controller\AbstractController $AbstractController
+	 * @param \test\http\controller\AbstractController $AbstractController
 	 */
-	function testHandle(\mock\http\controller\AbstractController $AbstractController) {
+	function testHandle(AbstractController $AbstractController) {
 		$_SERVER['REQUEST_URI'] = '/books/history+math/32';
 		$_GET['name'] = 'Jack';
 		$Req = new Request;

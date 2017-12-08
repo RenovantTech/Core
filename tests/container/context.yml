@@ -1,0 +1,18 @@
+includes:
+  - system
+objects:
+  test.container.Mock1:
+    class: test\container\Mock1
+    properties:
+      Child: !obj system.Mock
+      name: Mock1
+      numbers: [ 2, 5, 8 ]
+      preferences:
+        p1: hello
+        p2: bye
+        subpref:
+          s1: red
+          s2: yellow
+  test.container.Mock2:
+    class: test\container\Mock2
+    constructor: [ Mock2, !obj system.Mock ]

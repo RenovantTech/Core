@@ -6,7 +6,7 @@ use metadigit\core\http\Request,
 class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$ActionController = new \mock\http\controller\RestActionController;
+		$ActionController = new \test\http\controller\RestActionController;
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
@@ -27,10 +27,10 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @param \mock\http\controller\RestActionController $ActionController
-	 * @return \mock\http\controller\RestActionController
+	 * @param \test\http\controller\RestActionController $ActionController
+	 * @return \test\http\controller\RestActionController
 	 */
-	function testResolveActionMethod(\mock\http\controller\RestActionController $ActionController) {
+	function testResolveActionMethod(\test\http\controller\RestActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
@@ -68,7 +68,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
-		$ActionController2 = new \mock\http\controller\RestActionController;
+		$ActionController2 = new \test\http\controller\RestActionController;
 		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
@@ -79,9 +79,9 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @param \mock\http\controller\RestActionController $ActionController
+	 * @param \test\http\controller\RestActionController $ActionController
 	 */
-	function testHandle(\mock\http\controller\RestActionController $ActionController) {
+	function testHandle(\test\http\controller\RestActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/book';
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$_POST = ['id'=>53];

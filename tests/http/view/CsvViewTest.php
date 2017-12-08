@@ -8,7 +8,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$CsvView = new CsvView;
-		$this->assertInstanceOf('metadigit\core\http\view\CsvView', $CsvView);
+		$this->assertInstanceOf(CsvView::class, $CsvView);
 		return $CsvView;
 	}
 
@@ -19,13 +19,13 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	function testRender(CsvView $CsvView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$Res->set('data', [
 			['name'=>'John', 'surname'=>'Red', 'age'=>23],
 			['name'=>'Robert', 'surname'=>'Brown', 'age'=>18],
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		]);
-		$CsvView->render($Req, $Res, '/http/templates/csv-mock');
+		$CsvView->render($Req, $Res, '/http/templates/csv-test');
 		$output = $Res->getContent();
 		$this->assertRegExp('/"Surname","Age"/', $output);
 		$this->assertRegExp('/"GREEN","24"/', $output);
@@ -40,7 +40,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException1(CsvView $CsvView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$CsvView->render($Req, $Res, '/http/templates/not-exists');
 	}
 
@@ -53,8 +53,8 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException2(CsvView $CsvView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
-		$CsvView->render($Req, $Res, '/http/templates/csv-mock');
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
+		$CsvView->render($Req, $Res, '/http/templates/csv-test');
 	}
 
 	/**
@@ -66,8 +66,8 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException3(CsvView $CsvView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$Res->set('data', 'foo');
-		$CsvView->render($Req, $Res, '/http/templates/csv-mock');
+		$CsvView->render($Req, $Res, '/http/templates/csv-test');
 	}
 }

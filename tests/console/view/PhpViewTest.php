@@ -20,7 +20,7 @@ class PhpViewTest extends \PHPUnit\Framework\TestCase {
 		$this->expectOutputRegex('/<title>index<\/title>/');
 		$Req = new Request;
 		$Res = new Response;
-		$PhpView->render($Req, $Res, MOCK_DIR.'/console/templates/index');
+		$PhpView->render($Req, $Res, TEST_DIR.'/console/templates/index');
 		$Res->send();
 	}
 }

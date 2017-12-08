@@ -42,19 +42,19 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('metadigit\core\event\EventDispatcher', 'listeners');
 		$ReflProp->setAccessible(true);
 
-		$EventDispatcher = new EventDispatcher('mock', MOCK_DIR.'/event/eventdispatcher.xml');
+		$EventDispatcher = new EventDispatcher('test', TEST_DIR.'/event/eventdispatcher.xml');
 		$this->assertInstanceOf('metadigit\core\event\EventDispatcher', $EventDispatcher);
 		$listeners = $ReflProp->getValue($EventDispatcher);
 		$this->assertCount(2, $listeners);
-		$this->assertCount(3, $listeners['mock.event1'][1]);
-		$this->assertEquals('substr', $listeners['mock.event1'][1][0]);
-		$this->assertEquals('EventTester::test1', $listeners['mock.event1'][1][1]);
-		$this->assertEquals(['LocalMock','foo'], $listeners['mock.event1'][1][2]);
-		$this->assertEquals('foo1', $listeners['mock.event2'][1][0]);
-		$this->assertEquals('foo2', $listeners['mock.event2'][1][1]);
-		$this->assertEquals('bar', $listeners['mock.event2'][2][0]);
+		$this->assertCount(3, $listeners['test.event1'][1]);
+		$this->assertEquals('substr', $listeners['test.event1'][1][0]);
+		$this->assertEquals('EventTester::test1', $listeners['test.event1'][1][1]);
+		$this->assertEquals(['LocalMock','foo'], $listeners['test.event1'][1][2]);
+		$this->assertEquals('foo1', $listeners['test.event2'][1][0]);
+		$this->assertEquals('foo2', $listeners['test.event2'][1][1]);
+		$this->assertEquals('bar', $listeners['test.event2'][2][0]);
 
-		$EventDispatcher = new EventDispatcher('mock');
+		$EventDispatcher = new EventDispatcher('test');
 		$this->assertInstanceOf('metadigit\core\event\EventDispatcher', $EventDispatcher);
 		$listeners = $ReflProp->getValue($EventDispatcher);
 		$this->assertEmpty($listeners);

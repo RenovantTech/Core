@@ -7,11 +7,11 @@ use metadigit\core\cli\Request,
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$AbstractController = new \mock\console\controller\AbstractController;
+		$AbstractController = new \test\console\controller\AbstractController;
 		$this->assertInstanceOf('metadigit\core\console\ControllerInterface', $AbstractController);
-		$this->assertInstanceOf('metadigit\core\console\controller\AbstractController', $AbstractController);
+		$this->assertInstanceOf(AbstractController::class, $AbstractController);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\console\controller\AbstractController', '_handle');
+		$ReflProp = new \ReflectionProperty(AbstractController::class, '_handle');
 		$ReflProp->setAccessible(true);
 		$_handle = $ReflProp->getValue($AbstractController);
 
@@ -26,8 +26,9 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param \test\console\controller\AbstractController $AbstractController
 	 */
-	function testHandle(\mock\console\controller\AbstractController $AbstractController) {
+	function testHandle(\test\console\controller\AbstractController $AbstractController) {
 		$_SERVER['argv'] = ['sys','db','--name=Jack'];
 		$Req = new Request;
 		$Res = new Response;

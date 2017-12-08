@@ -13,8 +13,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
-		$Dispatcher = Context::factory('mock.console')
-			->getContainer()->get('mock.console.Dispatcher');
+		$Dispatcher = Context::factory('test.console')
+			->getContainer()->get('test.console.Dispatcher');
 		$this->assertInstanceOf('metadigit\core\console\Dispatcher', $Dispatcher);
 		return $Dispatcher;
 	}
@@ -32,19 +32,19 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'db optimize');
-		$this->assertSame('mock.console.AbstractController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.AbstractController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','mod1','foo'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo');
-		$this->assertSame('mock.console.ActionController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.ActionController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','cron','backup'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'cron backup');
-		$this->assertSame('mock.console.SimpleController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.SimpleController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
 
 		return $Dispatcher;
 	}
@@ -61,7 +61,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
+		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
@@ -73,7 +73,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo1');
-		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
+		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
@@ -96,7 +96,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
+		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		$ReflMethod->invoke($Dispatcher, 'xxx:index', $Req, $Res);
 	}
 
@@ -105,13 +105,13 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');
-		sys::cache('sys')->delete('mock.console.Dispatcher');
-		$Dispatcher = Context::factory('mock.console',false)->get('mock.console.Dispatcher');
+		sys::cache('sys')->delete('test.console.Dispatcher');
+		$Dispatcher = Context::factory('test.console',false)->get('test.console.Dispatcher');
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', MOCK_DIR.'/console/');
+		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		$this->assertNull($Dispatcher->dispatch($Req, $Res));
 	}
 }

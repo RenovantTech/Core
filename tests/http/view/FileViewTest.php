@@ -20,7 +20,7 @@ class FileViewTest extends \PHPUnit\Framework\TestCase {
 		$this->expectOutputRegex('/Hello America/');
 		$Req = new Request;
 		$Res = new Response;
-		$FileView->render($Req, $Res, MOCK_DIR.'/http/templates/test.txt');
+		$FileView->render($Req, $Res, TEST_DIR.'/http/templates/test.txt');
 		$Res->send();
 	}
 
@@ -33,7 +33,7 @@ class FileViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException(FileView $FileView) {
 		$Req = new Request;
 		$Res = new Response;
-		$FileView->render($Req, $Res, MOCK_DIR.'/http/templates/not-exists.txt');
+		$FileView->render($Req, $Res, TEST_DIR.'/http/templates/not-exists.txt');
 		$Res->send();
 	}
 }

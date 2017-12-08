@@ -5,7 +5,7 @@ use metadigit\core\util\reflection;
 class DocCommentTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$DocComment = (new reflection\ReflectionClass('mock\util\reflection\Mock'))->getDocComment();
+		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
 		$this->assertInstanceOf('metadigit\core\util\reflection\DocComment', $DocComment);
 	}
 
@@ -13,16 +13,16 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetDescription() {
-		$DocComment = (new reflection\ReflectionClass('mock\util\reflection\Mock'))->getDocComment();
+		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
 		$this->assertEquals('MockClass used for testing metadigit\core\util\reflection\*', $DocComment->getDescription());
 
-		$DocComment = (new reflection\ReflectionProperty('mock\util\reflection\Mock', 'var1'))->getDocComment();
+		$DocComment = (new reflection\ReflectionProperty('test\util\reflection\Mock', 'var1'))->getDocComment();
 		$this->assertEquals("Var 1\n var 1 description", $DocComment->getDescription());
 
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'method1'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'method1'))->getDocComment();
 		$this->assertEquals('Test method 1', $DocComment->getDescription());
 
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'method2'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'method2'))->getDocComment();
 		$this->assertEquals("Method 2\n method 2 line 2\n\n method 2 line 4", $DocComment->getDescription());
 	}
 
@@ -30,7 +30,7 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetAllTags() {
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'functionTag'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'functionTag'))->getDocComment();
 		$tags = $DocComment->getAllTags();
 		$this->assertCount(3, $tags);
 		$this->assertArrayHasKey('tag1', $tags);
@@ -43,7 +43,7 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testCountTag() {
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'functionTag'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'functionTag'))->getDocComment();
 		$this->assertEquals(2, $DocComment->countTag('tag1'));
 		$this->assertEquals(1, $DocComment->countTag('tag2'));
 		$this->assertEquals(0, $DocComment->countTag('not-exists'));
@@ -53,7 +53,7 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetTag() {
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'functionTag'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'functionTag'))->getDocComment();
 		$this->assertEquals('foo bar', $DocComment->getTag('tag1'));
 		$this->assertEquals(['foo'=>13, 'bar'=>289], $DocComment->getTag('tag1', 1));
 		$this->assertCount(4, $DocComment->getTag('tag2'));
@@ -64,15 +64,15 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 */
 	function testGetTagValues() {
-		$DocComment = (new reflection\ReflectionClass('mock\util\reflection\Mock'))->getDocComment();
+		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
 		$this->assertCount(1, $DocComment->getTagValues('author'));
 		$this->assertEquals('Daniele Sciacchitano <dan@metadigit.it>', $DocComment->getTagValues('author')[0]);
 
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'method1'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'method1'))->getDocComment();
 		$this->assertCount(2, $DocComment->getTagValues('param'));
 		$this->assertEquals('integer $id', $DocComment->getTagValues('param')[0]);
 
-		$DocComment = (new reflection\ReflectionMethod('mock\util\reflection\Mock', 'functionTag'))->getDocComment();
+		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'functionTag'))->getDocComment();
 		$this->assertCount(2, $DocComment->getTagValues('tag1'));
 		$this->assertEquals('foo bar', $DocComment->getTagValues('tag1')[0]);
 		$this->assertEquals('id', $DocComment->getTagValues('tag2')[0]['key']);

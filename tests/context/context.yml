@@ -1,0 +1,20 @@
+includes:
+  - system
+objects:
+  test.context.Mock1:
+    class: test\context\Mock1
+    constructor: [foo]
+    properties:
+      prop2: bar
+      Child: !obj system.Mock
+  test.context.Mock2:
+      class: test\context\Mock2
+  test.context.EventSubscriber:
+      class: test\context\EventSubscriber
+events:
+  event1:
+    - listener: test.context.Mock1->onEvent1
+      priority: 2
+  event2:
+    - test.context.Mock1->onEvent2
+    - test.context.Mock1->onEvent2bis

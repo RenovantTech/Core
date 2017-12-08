@@ -19,13 +19,13 @@ apps:
 # CLI definitions
 # =========================================================
 cli:
-  console:      mock.console
+  console:      test.console
 
 # =========================================================
 # __autoload map namespace/directory
 # =========================================================
 namespaces:
-  mock:           _mock
+  test:           /
   metadigit\lib:  /opt/metadigit-lib/src
 
 # =========================================================

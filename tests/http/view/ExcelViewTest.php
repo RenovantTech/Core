@@ -19,13 +19,13 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 	function testRender(ExcelView $ExcelView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$Res->set('data', [
 			['name'=>'John', 'surname'=>'Red', 'age'=>23],
 			['name'=>'Robert', 'surname'=>'Brown', 'age'=>18],
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		]);
-		$ExcelView->render($Req, $Res, '/http/templates/excel-mock');
+		$ExcelView->render($Req, $Res, '/http/templates/excel-test');
 		$output = preg_replace('/\s+/', '', $Res->getContent());
 		$this->assertRegExp('/<thnowrap>Surname<\/th><thnowrap>Age<\/th>/', $output);
 		$this->assertRegExp('/<tdnowrap>GREEN<\/td><tdnowrap>24<\/td>/', $output);
@@ -40,7 +40,7 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException1(ExcelView $ExcelView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$ExcelView->render($Req, $Res, '/http/templates/not-exists');
 	}
 
@@ -53,8 +53,8 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException2(ExcelView $ExcelView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
-		$ExcelView->render($Req, $Res, '/http/templates/excel-mock');
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
+		$ExcelView->render($Req, $Res, '/http/templates/excel-test');
 	}
 
 	/**
@@ -66,8 +66,8 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 	function testRenderException3(ExcelView $ExcelView) {
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('RESOURCES_DIR', MOCK_DIR);
+		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
 		$Res->set('data', 'foo');
-		$ExcelView->render($Req, $Res, '/http/templates/excel-mock');
+		$ExcelView->render($Req, $Res, '/http/templates/excel-test');
 	}
 }

@@ -5,7 +5,7 @@ use metadigit\core\db\orm\Metadata;
 class MetadataTest extends \PHPUnit\Framework\TestCase {
 
 	function testParse1() {
-		$Metadata = new Metadata('mock\db\orm\User');
+		$Metadata = new Metadata('test\db\orm\User');
 
 		// data sources
 		$this->assertEquals('users', $Metadata->sql('source'));
@@ -59,7 +59,7 @@ class MetadataTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testParse2() {
-		$Metadata = new Metadata('mock\db\orm\User2');
+		$Metadata = new Metadata('test\db\orm\User2');
 		// data sources
 		$this->assertEquals('users', $Metadata->sql('source'));
 		$this->assertEquals('users', $Metadata->sql('target'));
@@ -67,7 +67,7 @@ class MetadataTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testParse3() {
-		$Metadata = new Metadata('mock\db\orm\Stats');
+		$Metadata = new Metadata('test\db\orm\Stats');
 
 		$pkeys = $Metadata->pkeys();
 		$this->assertCount(2, $pkeys);
@@ -85,14 +85,14 @@ class MetadataTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testPkCriteria() {
-		$Metadata = new Metadata('mock\db\orm\User');
+		$Metadata = new Metadata('test\db\orm\User');
 		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(1));
 		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(847));
-		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>1])));
-		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(new \mock\db\orm\User(['id'=>847])));
+		$this->assertEquals('id,EQ,1', $Metadata->pkCriteria(new \test\db\orm\User(['id'=>1])));
+		$this->assertEquals('id,EQ,847', $Metadata->pkCriteria(new \test\db\orm\User(['id'=>847])));
 
-		$Metadata = new Metadata('mock\db\orm\Stats');
+		$Metadata = new Metadata('test\db\orm\Stats');
 		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(['AA', 2014]));
-		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(new \mock\db\orm\Stats(['code'=>'AA', 'year'=>2014])));
+		$this->assertEquals('code,EQ,AA|year,EQ,2014', $Metadata->pkCriteria(new \test\db\orm\Stats(['code'=>'AA', 'year'=>2014])));
 	}
 }
