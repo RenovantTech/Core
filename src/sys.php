@@ -276,7 +276,6 @@ class sys {
 
 	/**
 	 * Trigger an Event, calling attached listeners
-	 * @see \metadigit\core\event\EventDispatcherInterface
 	 * @param string		$eventName	the name of the event
 	 * @param mixed			$target		Event's target
 	 * @param array			$params		Event's parameters
@@ -338,7 +337,6 @@ class sys {
 
 	/**
 	 * Add an Event listener on the specified event
-	 * @see \metadigit\core\event\EventDispatcherInterface
 	 * @param string   $eventName the name of the event to listen for
 	 * @param callable $callback  the callback function to be invoked
 	 * @param int      $priority  trigger precedence on the listeners chain (higher values execute earliest)
