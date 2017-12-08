@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\session\handler;
+namespace metadigit\core\auth\session\handler;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
-	metadigit\core\session\SessionException;
+	metadigit\core\http\SessionException;
 /**
  * HTTP Session Handler implementation with a Mysql database.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -62,7 +62,7 @@ class Mysql implements \SessionHandlerInterface {
 	 * Is first function called by PHP when a session is started
 	 * @param string $p save path
 	 * @param string $n session name
-	 * @throws \metadigit\core\session\SessionException
+	 * @throws \metadigit\core\http\SessionException
 	 * @return boolean TRUE on success
 	 */
 	function open($p, $n) {

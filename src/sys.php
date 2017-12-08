@@ -67,6 +67,12 @@ class sys {
 			'tables' => null
 		]
 	];
+	/** AUTH configurations
+	 * @var array */
+	protected $cnfAuth = [
+		'enableJWT' => false,
+		'enableSESSION' => true
+	];
 	/** HTTP/CLI apps routing
 	 * @var array */
 	protected $cnfApps = [];
@@ -232,6 +238,19 @@ class sys {
 			self::cache('sys')->set('ACL', $ACL);
 		}
 		return $ACL;
+	}
+
+	/**
+	 * AUTH helper
+	 * @return auth\AUTH
+	 */
+	static function auth() {
+		static $AUTH;
+		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get('sys.AUTH')) {
+ 			$AUTH = new auth\AUTH(self::$Sys->cnfAuth['enableJWT'], self::$Sys->cnfAuth['enableSESSION']);
+			self::cache('sys')->set('sys.AUTH', $AUTH);
+		}
+		return $AUTH;
 	}
 
 	/**

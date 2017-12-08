@@ -65,6 +65,9 @@ class sysBoot extends sys {
 		// ACL service
 		if(is_array($config['acl'])) $Sys->cnfAcl = array_merge($Sys->cnfAcl, $config['acl']);
 
+		// AUTH service
+		if(is_array($config['auth'])) $Sys->cnfAuth = array_merge($Sys->cnfAuth, $config['auth']);
+
 		// Cache service
 		if(is_array($config['cache'])) $Sys->cnfCache = array_merge($config['cache'], $Sys->cnfCache);
 

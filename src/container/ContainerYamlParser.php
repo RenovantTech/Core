@@ -8,7 +8,7 @@
 namespace metadigit\core\container;
 use const metadigit\core\trace\T_DEPINJ;
 use metadigit\core\sys,
-	metadigit\core\CoreProxy;
+	metadigit\core\util\yaml\YamlParser;
 /**
  * Dependency Injection ContainerParser
  * @internal
@@ -92,41 +92,7 @@ class ContainerYamlParser {
 		$args = [];
 		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
 			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
-			$i = 0;
-			foreach ($this->YAML['objects'][$id]['constructor'] as $yamlArg) {
-				switch(self::parseType($yamlArg)) {
-					case 'boolean':
-						$args[$i] = (boolean) $yamlArg;
-						break;
-					case 'integer':
-						$args[$i] = (integer) $yamlArg;
-						break;
-					case 'array':
-						foreach($yamlArg as $key => $yamlItem) {
-							switch(self::parseType($yamlItem)) {
-								case 'boolean':
-									$value = (boolean) $yamlItem;
-									break;
-								case 'integer':
-									$value = (integer) $yamlItem;
-									break;
-								case 'object':
-									$value = new CoreProxy(substr($yamlItem, 5));
-									break;
-								default: // string
-									$value = (string) $yamlItem;
-							}
-							$args[$i][$key] = $value;
-						}
-						break;
-					case 'object':
-						$args[$i] = new CoreProxy(substr($yamlArg, 5));
-						break;
-					default: // string
-						$args[$i] = (string) $yamlArg;
-				}
-				$i++;
-			}
+			$args = (new YamlParser())->typeCast($this->YAML['objects'][$id]['constructor']);
 		}
 		return $args;
 	}
@@ -141,39 +107,7 @@ class ContainerYamlParser {
 		$properties = [];
 		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
 			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
-			foreach ($this->YAML['objects'][$id]['properties'] as $propName => $yamlProp) {
-				switch (self::parseType($yamlProp)) {
-					case 'boolean':
-						$properties[$propName] = (boolean) $yamlProp;
-						break;
-					case 'integer':
-						$properties[$propName] = (integer) $yamlProp;
-						break;
-					case 'array':
-						foreach($yamlProp as $key => $yamlItem) {
-							switch (self::parseType($yamlItem)) {
-								case 'boolean':
-									$value = (boolean) $yamlItem;
-									break;
-								case 'integer':
-									$value = (integer) $yamlItem;
-									break;
-								case 'object':
-									$value = new CoreProxy(substr($yamlItem, 5));
-									break;
-								default: // string
-									$value = (string) $yamlItem;
-							}
-							$properties[$propName][$key] = $value;
-						}
-						break;
-					case 'object':
-						$properties[$propName] = new CoreProxy(substr($yamlProp, 5));
-						break;
-					default: // string
-						$properties[$propName] = (string) $yamlProp;
-				}
-			}
+			$properties = (new YamlParser())->typeCast($this->YAML['objects'][$id]['properties']);
 		}
 		return $properties;
 	}

@@ -61,6 +61,13 @@ acl:
       u2r:    sys_users_2_roles
 
 # =========================================================
+# AUTH service
+# =========================================================
+auth:
+  enableJWT:      false
+  enableSESSION:  true
+
+# =========================================================
 # CACHE service
 # =========================================================
 cache:
@@ -70,7 +77,6 @@ cache:
   main:
     class:    metadigit\core\cache\SqliteCache
     params:   ['sqlite', 'cache', false]
-
 
 # =========================================================
 # DB service

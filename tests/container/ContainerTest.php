@@ -42,9 +42,13 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('mock\container\Mock1', 'preferences');
 		$ReflProp->setAccessible(true);
 		$preferences = $ReflProp->getValue($Mock);
-		$this->assertCount(2, $preferences);
+		$this->assertCount(3, $preferences);
 		$this->assertArrayHasKey('p1', $preferences);
 		$this->assertEquals('hello', $preferences['p1']);
+		$this->assertCount(2, $preferences['subpref']);
+		$this->assertArrayHasKey('subpref', $preferences);
+		$this->assertArrayHasKey('s1', $preferences['subpref']);
+		$this->assertEquals('red', $preferences['subpref']['s1']);
 
 		// ID & class
 		$Mock = $Container->get('mock.container.Mock1','mock\container\Mock1');
