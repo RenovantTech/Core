@@ -16,8 +16,8 @@ class ContextException extends \metadigit\core\Exception {
 	const COD2 = '%1$s: object OID "%2$s" NOT implementing required class/interface %2$s';
 	// configuration
 	const COD11 = '%s: YAML config file NOT FOUND in path %s';
-	const COD12 = 'Context: invalid XML configuration, XSD not validated: %s';
-	const COD14 = '%s: invalid object ID namespace in XML: <object id="%s">, must be inside namespace "%s"';
-	const COD15 = '%s: invalid object constructor reference: <arg name="%s" type="object">%s</arg>, must be inside available namespaces: %s';
-	const COD16 = '%s: invalid object property reference: <property name="%s" type="object">%s</property>, must be inside available namespaces: %s';
+	const COD12 = 'Context: invalid YAML configuration, YAML not validated: %s';
+	const COD14 = '%s: invalid object ID namespace in YAML: "%s" must be inside namespace "%s"';
+	const COD15 = '%s: invalid object constructor reference: "%s: %s" must be inside available namespaces: %s';
+	const COD16 = '%s: invalid object property reference: "%s: %s" must be inside available namespaces: %s';
 }
