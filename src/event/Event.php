@@ -29,7 +29,7 @@ class Event {
 	 * @param mixed $target Event's target
 	 * @param array $params Event's parameters
 	 */
-	function __construct($target=null, array $params=[]) {
+	function __construct($target=null, array $params=null) {
 		$this->target = $target;
 		$this->params = $params;
 	}

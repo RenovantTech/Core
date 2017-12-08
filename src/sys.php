@@ -6,8 +6,9 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_EVENT, T_INFO};
 use metadigit\core\context\Context,
+	metadigit\core\event\Event,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -28,6 +29,9 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
+	/** Events listeners (callbacks)
+	 * @var array */
+	static protected $listeners = [];
 	/** Logger
 	 * @var \metadigit\core\log\Logger */
 	static protected $Logger;
@@ -271,6 +275,35 @@ class sys {
 	}
 
 	/**
+	 * Trigger an Event, calling attached listeners
+	 * @see \metadigit\core\event\EventDispatcherInterface
+	 * @param string		$eventName	the name of the event
+	 * @param mixed			$target		Event's target
+	 * @param array			$params		Event's parameters
+	 * @param \metadigit\core\event\Event|null	$Event		optional custom Event object
+	 * @return \metadigit\core\event\Event the Event object
+	 */
+	static function event($eventName, $target=null, array $params=null, $Event=null): Event {
+		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
+//		$params['Context'] = $this;
+		if(is_null($Event)) $Event = new Event($target, $params);
+		$Event->setName($eventName);
+		if(!isset(self::$listeners[$eventName])) return $Event;
+		foreach(self::$listeners[$eventName] as $listeners) {
+			foreach($listeners as $callback) {
+				if(is_string($callback) && strpos($callback,'->')>0) {
+					list($objID, $method) = explode('->', $callback);
+					Context::factory(substr($objID, 0, strrpos($objID, '.')));
+					$callback = [new CoreProxy($objID), $method];
+				}
+				call_user_func($callback, $Event);
+				if($Event->isPropagationStopped()) break;
+			}
+		}
+		return $Event;
+	}
+
+	/**
 	 * Parse class or namespace, returning: namespace, class name (without namespace), full path, directory, file
 	 * @param string $path
 	 * @param int|null $return
@@ -301,6 +334,19 @@ class sys {
 			case self::INFO_PATH_FILE: return basename($realPath); break;
 			default: return [$namespace, $class, dirname($realPath), basename($realPath)];
 		}
+	}
+
+	/**
+	 * Add an Event listener on the specified event
+	 * @see \metadigit\core\event\EventDispatcherInterface
+	 * @param string   $eventName the name of the event to listen for
+	 * @param callable $callback  the callback function to be invoked
+	 * @param int      $priority  trigger precedence on the listeners chain (higher values execute earliest)
+	 * @throws \Exception
+	 */
+	static function listen($eventName, $callback, $priority=1) {
+		self::$listeners[$eventName][(int)$priority][] = $callback;
+		krsort(self::$listeners[$eventName], SORT_NUMERIC);
 	}
 
 	/**
