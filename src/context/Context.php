@@ -6,18 +6,16 @@
  * @license New BSD License
  */
 namespace metadigit\core\context;
-use const metadigit\core\trace\{T_DEPINJ, T_EVENT};
+use const metadigit\core\trace\{T_DEPINJ};
 use metadigit\core\sys,
 	metadigit\core\CoreProxy,
 	metadigit\core\container\Container,
-	metadigit\core\container\ContainerException,
-	metadigit\core\event\Event,
-	metadigit\core\event\EventDispatcherInterface;
+	metadigit\core\container\ContainerException;
 /**
  * Context
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Context implements EventDispatcherInterface {
+class Context {
 	use \metadigit\core\CoreTrait;
 	const ACL_SKIP = true;
 
@@ -76,27 +74,25 @@ class Context implements EventDispatcherInterface {
 		// create Container
 		$Container = new Container($namespace, $this->includedNamespaces);
 		sys::cache('sys')->set($namespace.'.Container', $Container);
+		$this->__wakeup();
 	}
 
 	function __sleep() {
 		return ['_oid', 'id2classMap', 'includedNamespaces', 'listeners', 'namespace'];
 	}
 
-	/**
-	 * Add an Event listener on the specified event
-	 * @see \metadigit\core\event\EventDispatcherInterface
-	 * @param string   $eventName the name of the event to listen for
-	 * @param callable $callback  the callback function to be invoked
-	 * @param int      $priority  trigger precedence on the listeners chain (higher values execute earliest)
-	 * @throws \Exception
-	 */
-	function listen($eventName, $callback, $priority=1) {
-		$this->listeners[$eventName][(int)$priority][] = $callback;
-		krsort($this->listeners[$eventName], SORT_NUMERIC);
+	function __wakeup() {
+		foreach ($this->listeners as $eventName => $eventListeners) {
+			foreach ($eventListeners as $priority => $listeners) {
+				foreach ($listeners as $callback) {
+					sys::listen($eventName, $callback, $priority);
+				}
+			}
+		}
 	}
 
 	/**
-	 *  Return TRUE if contains object (optionally verifiyng class)
+	 * Return TRUE if contains object (optionally verifying class)
 	 * @param string $id object OID
 	 * @param string $class class/interface that object must extend/implement (optional)
 	 * @return boolean
@@ -143,33 +139,5 @@ class Context implements EventDispatcherInterface {
 	 */
 	function getContainer() {
 		return sys::cache('sys')->get($this->namespace.'.Container');
-	}
-
-	/**
-	 * Trigger an Event, calling attached listeners
-	 * @see \metadigit\core\event\EventDispatcherInterface
-	 * @param string		$eventName	the name of the event
-	 * @param mixed			$target		Event's target
-	 * @param array			$params		Event's parameters
-	 * @param Event|null	$Event		optional custom Event object
-	 * @return Event the Event object
-	 */
-	function trigger($eventName, $target=null, array $params=null, $Event=null) {
-		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
-		$params['Context'] = $this;
-		if(is_null($Event)) $Event = new Event($target, $params);
-		$Event->setName($eventName);
-		if(!isset($this->listeners[$eventName])) return $Event;
-		foreach($this->listeners[$eventName] as $listeners) {
-			foreach($listeners as $callback) {
-				if(is_string($callback) && strpos($callback,'->')>0) {
-					$callback = explode('->', $callback);
-					$callback[0] = $this->get($callback[0]);
-				}
-				call_user_func($callback, $Event);
-				if($Event->isPropagationStopped()) break;
-			}
-		}
-		return $Event;
 	}
 }

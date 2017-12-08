@@ -40,12 +40,12 @@ class Dispatcher {
 		$Controller = $resource = null;
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
-			if(!$this->context()->trigger(DispatcherEvent::EVENT_ROUTE, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				$Controller = $this->context()->get($this->resolveController($Req, $Res), 'metadigit\core\console\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {
-				if(!$this->context()->trigger(DispatcherEvent::EVENT_CONTROLLER, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
@@ -53,14 +53,14 @@ class Dispatcher {
 				if(is_string($View)) list($View, $resource) = $this->resolveView($View, $Req, $Res);
 				if(!$View instanceof ViewInterface) throw new Exception(13);
 				$DispatcherEvent->setView($View);
-				if(!$this->context()->trigger(DispatcherEvent::EVENT_VIEW, $this, [], $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(DispatcherEvent::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
 					$View->render($Req, $Res, $resource);
 				}
 			}
-			$this->context()->trigger(DispatcherEvent::EVENT_RESPONSE, $this, [], $DispatcherEvent);
+			sys::event(DispatcherEvent::EVENT_RESPONSE, $DispatcherEvent);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
-			$this->context()->trigger(DispatcherEvent::EVENT_EXCEPTION, $this, [], $DispatcherEvent);
+			sys::event(DispatcherEvent::EVENT_EXCEPTION, $DispatcherEvent);
 			Tracer::onException($Ex);
 		}
 		$Res->send();
