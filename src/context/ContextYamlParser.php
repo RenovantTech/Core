@@ -83,9 +83,7 @@ class ContextYamlParser {
 		if(isset($YAML['objects'])) {
 			sys::trace(LOG_DEBUG, T_INFO, 'parsing objects', null, $oid);
 			$filter = function($v) {
-				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
 				if((boolean)strpos($v,'Abstract')) return false;
-				if((boolean)strpos('-'.$v,'xi')) return false;
 				return true;
 			};
 			foreach($YAML['objects'] as $id => $objYAML) {
