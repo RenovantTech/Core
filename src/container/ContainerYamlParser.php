@@ -63,9 +63,7 @@ class ContainerYamlParser {
 			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
 			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
-				if(in_array($v, ['\metadigit\core\BaseObject'])) return false;
 				if((boolean)strpos($v,'Abstract')) return false;
-				if((boolean)strpos('-'.$v,'xi')) return false;
 				return true;
 			};
 			foreach($this->YAML['objects'] as $id => $objYAML) {
