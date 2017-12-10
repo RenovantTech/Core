@@ -18,20 +18,16 @@ trait CoreTrait {
 
 	/** OID (Object Identifier)
 	 * @var string */
-	protected $_oid;
+	protected $_;
 
-	function _oid() {
-		return is_null($this->_oid) ? __CLASS__ : $this->_oid;
-	}
-
-	protected function _namespace() {
-		return (is_null($this->_oid)) ? 'global' : substr($this->_oid, 0, strrpos($this->_oid,'.'));
+	function _() {
+		return is_null($this->_) ? __CLASS__ : $this->_;
 	}
 
 	/**
 	 * @return Context
 	 */
 	protected function context() {
-		return Context::factory(substr($this->_oid, 0, strrpos($this->_oid,'.')));
+		return Context::factory(substr($this->_, 0, strrpos($this->_,'.')));
 	}
 }

@@ -22,7 +22,7 @@ class ObjBuilder {
 		$RClass = new \ReflectionClass($class);
 		$Obj = (empty($args)) ? $RClass->newInstance() : $RClass->newInstanceArgs($args);
 		$RObject = new \ReflectionObject($Obj);
-		self::setProperty('_oid', $id, $Obj, $RObject);
+		self::setProperty('_', $id, $Obj, $RObject);
 		foreach ($properties as $k=>$v) {
 			self::setProperty($k, $v, $Obj, $RObject);
 		}

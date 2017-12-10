@@ -76,7 +76,7 @@ class Dispatcher {
 	protected function resolveController(Request $Req, Response $Res) {
 		foreach($this->mappings as $cmd => $controllerID) {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
-				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
+				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
@@ -103,7 +103,7 @@ class Dispatcher {
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
-			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
+			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);
 			$class = $this->viewEngines[$engine];
 			$View = new $class;
 			return [$View, $resource];

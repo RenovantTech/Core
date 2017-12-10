@@ -45,14 +45,14 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function __construct($namespace, $includes=[]) {
-		$this->_oid = $namespace.'.Container';
+		$this->_ = $namespace.'.Container';
 		$this->namespace = $namespace;
 		$this->includes = $includes;
 		$this->getYamlParser()->parseMaps($this->id2classMap, $this->class2idMap);
 	}
 
 	function __sleep() {
-		return ['_oid', 'includes', 'id2classMap', 'class2idMap', 'namespace'];
+		return ['_', 'includes', 'id2classMap', 'class2idMap', 'namespace'];
 	}
 
 	/**
@@ -64,11 +64,11 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
-			if(!$this->has($id)) throw new ContainerException(1, [$this->_oid, $id]);
-			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_oid, $id, $class]);
+			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
+			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
 			$objClass = $this->id2classMap[$id][0];
 			$args = $this->getYamlParser()->parseObjectConstructorArgs($id);
 			$properties = $this->getYamlParser()->parseObjectProperties($id);
@@ -112,7 +112,7 @@ class Container {
 	 */
 	function getType($id) {
 		if(isset($this->id2classMap[$id])) return $this->id2classMap[$id][0];
-		throw new ContainerException(1, [$this->_oid, $id]);
+		throw new ContainerException(1, [$this->_, $id]);
 	}
 
 	/**

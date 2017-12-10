@@ -32,13 +32,13 @@ class ContainerYamlParser {
 	 * @throws ContainerException
 	 */
 	function __construct(array $namespaces) {
-		$this->_oid = $namespaces[0].'.ContainerParser';
-		$dirName = sys::info($this->_oid, sys::INFO_PATH_DIR);
+		$this->_ = $namespaces[0].'.ContainerParser';
+		$dirName = sys::info($this->_, sys::INFO_PATH_DIR);
 		if (empty($dirName))
 			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yml';
 		else
 			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_oid, $this->yamlPath]);
+		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_, $this->yamlPath]);
 		$this->YAML = sys::yaml($this->yamlPath, null, [
 			'!obj' => function($value, $tag, $flags) {
 				return '!obj '.$value;
@@ -60,7 +60,7 @@ class ContainerYamlParser {
 	 */
 	function parseMaps(array &$id2classMap, array &$class2idMap) {
 		if(isset($this->YAML['objects'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_);
 			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
 				if((boolean)strpos($v,'Abstract')) return false;
@@ -76,7 +76,7 @@ class ContainerYamlParser {
 					$class2idMap[$class][] = $id;
 				}
 			}
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_);
 		}
 	}
 
@@ -89,7 +89,7 @@ class ContainerYamlParser {
 	function parseObjectConstructorArgs($id) {
 		$args = [];
 		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_);
 			$args = (new YamlParser())->typeCast($this->YAML['objects'][$id]['constructor']);
 		}
 		return $args;
@@ -104,7 +104,7 @@ class ContainerYamlParser {
 	function parseObjectProperties($id) {
 		$properties = [];
 		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_oid);
+			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_);
 			$properties = (new YamlParser())->typeCast($this->YAML['objects'][$id]['properties']);
 		}
 		return $properties;

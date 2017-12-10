@@ -81,7 +81,7 @@ class Dispatcher {
 	protected function resolveController(Request $Req) {
 		foreach($this->routes as $url => $controllerID) {
 			if(fnmatch($url, $Req->getAttribute('APP_URI'))) {
-				sys::trace(LOG_DEBUG, T_INFO, $url.' => '.$controllerID, null, $this->_oid.'->'.__FUNCTION__);
+				sys::trace(LOG_DEBUG, T_INFO, $url.' => '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
@@ -112,7 +112,7 @@ class Dispatcher {
 				$resource = str_replace('//','/', (substr($view,0,1) != '/' ) ? dirname($Req->getAttribute('APP_URI').'*').'/'.$view : $view);
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			} else $resource = null;
-			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_oid.'->'.__FUNCTION__);
+			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);
 			return [$View, $resource, $viewOptions];
 		} catch (\Exception $Ex) {
 			http_response_code(500);

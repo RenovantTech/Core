@@ -67,7 +67,7 @@ class Context {
 	 * @throws ContextException
 	 */
 	function __construct($namespace) {
-		$this->_oid = $namespace.'.Context';
+		$this->_ = $namespace.'.Context';
 		$this->namespace = $namespace;
 		// parse YAML
 		ContextYamlParser::parse($this->namespace, $this->includedNamespaces, $this->id2classMap, $this->listeners);
@@ -78,7 +78,7 @@ class Context {
 	}
 
 	function __sleep() {
-		return ['_oid', 'id2classMap', 'includedNamespaces', 'listeners', 'namespace'];
+		return ['_', 'id2classMap', 'includedNamespaces', 'listeners', 'namespace'];
 	}
 
 	function __wakeup() {
@@ -110,7 +110,7 @@ class Context {
 	 * @throws ContextException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_oid);
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_);
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$Obj = null;
@@ -124,7 +124,7 @@ class Context {
 				if(!is_null($ctxNamespace))
 					$Obj = self::factory($ctxNamespace)->get($id, $class);
 			}
-			if(is_null($Obj)) throw new ContextException(1, [$this->_oid, $id]);
+			if(is_null($Obj)) throw new ContextException(1, [$this->_, $id]);
 			$this->objects[$id] = $Obj;
 			return $Obj;
 		} catch(ContainerException $Ex) {

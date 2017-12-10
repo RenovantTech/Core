@@ -32,7 +32,7 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 
 	function handle(Request $Req, Response $Res) {
 		if(true!==$this->preHandle($Req, $Res)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
 			return null;
 		}
 		$args = [$Req, $Res];
@@ -53,7 +53,7 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 				}
 			}
 		}
-		sys::traceFn($this->_oid.'->doHandle');
+		sys::traceFn($this->_.'->doHandle');
 		sys::trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,'doHandle'], $args);
 		$this->postHandle($Req, $Res, $View);

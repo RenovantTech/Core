@@ -64,12 +64,12 @@ class Mailer {
 
 	function __call($method, $args) {
 		if(is_null($this->Mailer)) $this->initMailer();
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_oid.'->'.$method);
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->'.$method);
 		return call_user_func_array([$this->Mailer, $method], $args);
 	}
 
 	function __sleep() {
-		return ['_oid', 'transportOptions', 'transportType', 'swiftDirectory'];
+		return ['_', 'transportOptions', 'transportType', 'swiftDirectory'];
 	}
 
 	/**

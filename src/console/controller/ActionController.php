@@ -39,7 +39,7 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_oid.'->preHandle');
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
 			return null;
 		}
 		$args = array($Req, $Res);
@@ -60,7 +60,7 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 				}
 			}
 		}
-		sys::traceFn($this->_oid.'->'.$action.'Action');
+		sys::traceFn($this->_.'->'.$action.'Action');
 		sys::trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
@@ -102,6 +102,6 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 		if(isset($this->_actions[$action])) return $action;
 		if(isset($this->_actions[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
 		http_response_code(404);
-		throw new Exception(111, [$this->_oid, $action.'Action']);
+		throw new Exception(111, [$this->_, $action.'Action']);
 	}
 }
