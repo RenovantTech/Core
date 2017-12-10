@@ -20,10 +20,6 @@ trait CoreTrait {
 	 * @var string */
 	protected $_;
 
-	function _() {
-		return is_null($this->_) ? __CLASS__ : $this->_;
-	}
-
 	/**
 	 * @return Context
 	 */
