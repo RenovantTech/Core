@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_EVENT, T_INFO};
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_DEPINJ, T_EVENT, T_INFO};
 use metadigit\core\context\Context,
 	metadigit\core\event\Event,
 	metadigit\core\log\Logger;
@@ -181,6 +181,7 @@ class sys {
 	 * Dispatch HTTP/CLI request
 	 * @param string $api PHP_SAPI
 	 * @throws SysException
+	 * @throws \metadigit\core\context\ContextException
 	 */
 	static function dispatch($api=PHP_SAPI) {
 		self::$traceFn = __METHOD__;
@@ -350,7 +351,7 @@ class sys {
 	 * @param string $facility optional log facility, default NULL
 	 */
 	static function log($message, $level=LOG_INFO, $facility=null) {
-		sys::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
+		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}
 
@@ -407,6 +408,7 @@ class sys {
 	 * @throws Exception
 	 */
 	static function yaml($file, $section=null, array $callbacks=[]) {
+		self::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
 		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
 		if(file_exists($fileEnv)) $file = $fileEnv;
 		elseif(!file_exists($file)) throw new Exception(__FUNCTION__.' YAML not found: '.$file);
