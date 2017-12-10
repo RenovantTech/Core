@@ -28,7 +28,7 @@ interface CacheInterface {
 	/**
 	 * Get a cached item
 	 * @param string $id item ID
-	 * @return mixed
+	 * @return mixed|false FALSE if cache missing
 	 */
 	function get($id);
 
