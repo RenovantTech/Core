@@ -7,16 +7,18 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\T_INFO;
+use metadigit\core\util\yaml\Yaml;
 /**
  * System bootstrap helper
- * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @internal
  */
 class sysBoot extends sys {
 
 	/**
 	 * Framework bootstrap on first launch (or cache missing)
 	 * @return array
+	 * @throws util\yaml\YamlException
 	 */
 	static function boot() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
@@ -36,7 +38,7 @@ class sysBoot extends sys {
 
 		$Sys = new sys();
 
-		$config = self::yaml(SYS_YAML);
+		$config = Yaml::parseFile(SYS_YAML);
 
 		// APPS HTTP/CLI
 		$Sys->cnfApps['HTTP'] = $config['apps'];

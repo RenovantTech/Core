@@ -6,12 +6,15 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\yaml;
-use metadigit\core\CoreProxy;
+use const metadigit\core\{ENVIRONMENT, TMP_DIR};
+use const metadigit\core\trace\T_DEPINJ;
+use metadigit\core\sys,
+	metadigit\core\CoreProxy;
 /**
  * YAML Parser
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class YamlParser {
+class Yaml {
 
 	const TYPE_NULL		= 0;
 	const TYPE_BOOLEAN	= 1;
@@ -22,11 +25,34 @@ class YamlParser {
 	const TYPE_OBJ		= 6;
 
 	/**
+	 * YAML parser utility, supporting PHAR & ENVIRONMENT switch
+	 * @param string $file YAML file path
+	 * @param string|null $section optional YAML section to be parsed
+	 * @param array $callbacks content handlers for YAML nodes
+	 * @return array
+	 * @throws YamlException
+	 */
+	static function parseFile($file, $section=null, array $callbacks=[]) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
+		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
+		if(file_exists($fileEnv)) $file = $fileEnv;
+		elseif(!file_exists($file)) throw new YamlException(2, [__METHOD__, $file]);
+		if(strpos($file, 'phar://')!==false) {
+			$tmp = tempnam(TMP_DIR, 'yaml-');
+			file_put_contents($tmp, file_get_contents($file));
+			$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
+			unlink($tmp);
+		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
+		if($YAML==false) throw new YamlException(1, [__METHOD__, $file]);
+		return ($section) ? $YAML[$section] : $YAML;
+	}
+
+	/**
 	 * Iterate on YAML, casting properties with PHP boolean, integer, float, array
 	 * @param mixed $yamlNode
 	 * @return mixed
 	 */
-	function typeCast($yamlNode) {
+	static function typeCast($yamlNode) {
 		switch (self::parseType($yamlNode)) {
 			case self::TYPE_NULL:
 				return null; break;
@@ -38,7 +64,7 @@ class YamlParser {
 				return (float) $yamlNode; break;
 			case self::TYPE_ARRAY:
 				foreach ($yamlNode as $k => $val) {
-					$yamlNode[$k] = $this->typeCast($val);
+					$yamlNode[$k] = self::typeCast($val);
 				}
 				return $yamlNode;
 			case self::TYPE_OBJ:

@@ -8,7 +8,8 @@
 namespace metadigit\core\event;
 use const metadigit\core\trace\{T_INFO, T_DEPINJ};
 use metadigit\core\sys,
-	metadigit\core\Exception;
+	metadigit\core\Exception,
+	metadigit\core\util\yaml\Yaml;
 /**
  * Event YAML Parser
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -31,7 +32,7 @@ class EventYamlParser {
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		sys::trace(LOG_DEBUG, T_DEPINJ, 'context: '.$namespace, null, __METHOD__);
 		if(!file_exists($yamlPath)) throw new EventDispatcherException(11, [__METHOD__, $yamlPath]);
-		$yaml = sys::yaml($yamlPath, 'events');
+		$yaml = Yaml::parseFile($yamlPath, 'events');
 		// @TODO verify YAML content
 //		if(
 //			!is_array($YAML) ||

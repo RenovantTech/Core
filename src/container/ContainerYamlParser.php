@@ -8,7 +8,7 @@
 namespace metadigit\core\container;
 use const metadigit\core\trace\T_DEPINJ;
 use metadigit\core\sys,
-	metadigit\core\util\yaml\YamlParser;
+	metadigit\core\util\yaml\Yaml;
 /**
  * Dependency Injection ContainerParser
  * @internal
@@ -30,6 +30,7 @@ class ContainerYamlParser {
 	/**
 	 * @param array $namespaces Container namespaces
 	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function __construct(array $namespaces) {
 		$this->_ = $namespaces[0].'.ContainerParser';
@@ -39,7 +40,7 @@ class ContainerYamlParser {
 		else
 			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_, $this->yamlPath]);
-		$this->YAML = sys::yaml($this->yamlPath, null, [
+		$this->YAML = Yaml::parseFile($this->yamlPath, null, [
 			'!obj' => function($value, $tag, $flags) {
 				return '!obj '.$value;
 			}
@@ -84,13 +85,12 @@ class ContainerYamlParser {
 	 * Return object constructor args
 	 * @param string $id object OID
 	 * @return array constructor args
-	 * @throws ContainerException
 	 */
 	function parseObjectConstructorArgs($id) {
 		$args = [];
 		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
 			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_);
-			$args = (new YamlParser())->typeCast($this->YAML['objects'][$id]['constructor']);
+			$args = Yaml::typeCast($this->YAML['objects'][$id]['constructor']);
 		}
 		return $args;
 	}
@@ -99,13 +99,12 @@ class ContainerYamlParser {
 	 * Return object properties
 	 * @param string $id object OID
 	 * @return array properties
-	 * @throws ContainerException
 	 */
 	function parseObjectProperties($id) {
 		$properties = [];
 		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
 			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_);
-			$properties = (new YamlParser())->typeCast($this->YAML['objects'][$id]['properties']);
+			$properties = Yaml::typeCast($this->YAML['objects'][$id]['properties']);
 		}
 		return $properties;
 	}

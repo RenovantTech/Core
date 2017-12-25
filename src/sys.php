@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_DEPINJ, T_INFO};
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\context\Context,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
@@ -384,28 +384,6 @@ class sys {
 		$prev = self::$traceFn;
 		if($fn) self::$traceFn = $fn;
 		return $prev;
-	}
-
-	/**
-	 * YAML parser utility, supporting PHAR & ENVIRONMENT switch
-	 * @param string $file YAML file path
-	 * @param string|null $section optional YAML section to be parsed
-	 * @param array $callbacks content handlers for YAML nodes
-	 * @return array
-	 * @throws Exception
-	 */
-	static function yaml($file, $section=null, array $callbacks=[]) {
-		self::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
-		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
-		if(file_exists($fileEnv)) $file = $fileEnv;
-		elseif(!file_exists($file)) throw new Exception(__FUNCTION__.' YAML not found: '.$file);
-		if(strpos($file, 'phar://')!==false) {
-			$tmp = tempnam(TMP_DIR, 'yaml-');
-			file_put_contents($tmp, file_get_contents($file));
-			$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
-			unlink($tmp);
-		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
-		return ($section) ? $YAML[$section] : $YAML;
 	}
 }
 spl_autoload_register(__NAMESPACE__.'\sys::autoload');
