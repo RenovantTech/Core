@@ -110,21 +110,6 @@ class ContextYamlParser {
 				krsort($listeners[$eventName], SORT_NUMERIC);
 			}
 		}
-		// scan for EventListenerInterface objects
-		if(isset($YAML['objects'])) {
-			foreach($YAML['objects'] as $id => $objYAML) {
-				if((new \ReflectionClass($objYAML['class']))->implementsInterface('metadigit\core\event\EventSubscriberInterface')) {
-					$events = call_user_func([$objYAML['class'], 'getSubscribedEvents']);
-					foreach($events as $eventName => $callbackArray) {
-						foreach($callbackArray as $callbackParams) {
-							$method = $callbackParams[0];
-							$priority = $callbackParams[1];
-							$listeners[$eventName][$priority][] = $id.'->'.$method;
-						}
-					}
-				}
-			}
-		}
 		sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Context ready', null, $oid);
 	}
 }

@@ -1,5 +1,3 @@
-objects:
-  test.event
 events:
   test.event1:
     - substr
