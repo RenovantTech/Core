@@ -6,9 +6,10 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_DEPINJ, T_EVENT, T_INFO};
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_DEPINJ, T_INFO};
 use metadigit\core\context\Context,
 	metadigit\core\event\Event,
+	metadigit\core\event\EventDispatcher,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -29,9 +30,9 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
-	/** Events listeners (callbacks)
-	 * @var array */
-	static protected $listeners = [];
+	/** EventDispatcher
+	 * @var \metadigit\core\event\EventDispatcher */
+	static protected $EventDispatcher;
 	/** Logger
 	 * @var \metadigit\core\log\Logger */
 	static protected $Logger;
@@ -172,9 +173,10 @@ class sys {
 
 		// initialize
 		self::cache('sys');
+		self::$EventDispatcher = new EventDispatcher;
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
 //		self::$SystemContext = Context::factory('system');
-//		self::$SystemContext->trigger(self::EVENT_INIT);
+		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
 	/**
@@ -276,27 +278,13 @@ class sys {
 	}
 
 	/**
-	 * Trigger an Event, calling attached listeners
+	 * EventDispatcher helper
 	 * @param string $eventName	the name of the event
 	 * @param \metadigit\core\event\Event|array|null $EventOrParams custom Event object or params array
 	 * @return \metadigit\core\event\Event the Event object
 	 */
 	static function event($eventName, $EventOrParams=null): Event {
-		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
-		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
-		if(!isset(self::$listeners[$eventName])) return $Event;
-		foreach(self::$listeners[$eventName] as $listeners) {
-			foreach($listeners as $callback) {
-				if(is_string($callback) && strpos($callback,'->')>0) {
-					list($objID, $method) = explode('->', $callback);
-					Context::factory(substr($objID, 0, strrpos($objID, '.')));
-					$callback = [new CoreProxy($objID), $method];
-				}
-				call_user_func($callback, $Event);
-				if($Event->isPropagationStopped()) break;
-			}
-		}
-		return $Event;
+		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
 	}
 
 	/**
@@ -340,8 +328,7 @@ class sys {
 	 * @throws \Exception
 	 */
 	static function listen($eventName, $callback, $priority=1) {
-		self::$listeners[$eventName][(int)$priority][] = $callback;
-		krsort(self::$listeners[$eventName], SORT_NUMERIC);
+		self::$EventDispatcher->listen($eventName, $callback, $priority);
 	}
 
 	/**

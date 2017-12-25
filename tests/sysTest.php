@@ -149,52 +149,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 */
-	function testListen() {
-		sys::listen('foo', 'callback1');
-		sys::listen('foo', 'callback2');
-		sys::listen('foo', 'callback0', 2);
-		sys::listen('bar', 'callback1');
-		sys::listen('bar', 'callback2');
-		sys::listen('bar', 'callback0', 2);
-		$ReflProp = new \ReflectionProperty(sys::class, 'listeners');
-		$ReflProp->setAccessible(true);
-		$listeners = $ReflProp->getValue();
-		$this->assertCount(4, $listeners);
-		$this->assertArrayHasKey('foo', $listeners);
-		$this->assertEquals('callback1', $listeners['foo'][1][0]);
-		$this->assertEquals('callback2', $listeners['foo'][1][1]);
-		$this->assertEquals('callback0', $listeners['foo'][2][0]);
-	}
-
-	/**
-	 * @depends testListen
-	 */
-	function testEvent() {
-		global $var;
-		$var = 1;
-		sys::listen('trigger1', function() use (&$var) { $var++; });
-		sys::listen('trigger1', function() use (&$var) { $var = $var + 2; }, 2);
-		$this->assertEquals(1, $var);
-		sys::event('trigger1');
-		$this->assertEquals(4, $var);
-
-		$var = 2;
-		sys::listen('trigger2', 'test.context.Mock1->onEvent1');
-		sys::event('trigger2');
-		$this->assertEquals(3, $var);
-
-		sys::listen('trigger3', function($Ev) {
-			/** @var \metadigit\core\event\Event $Ev */
-			$Ev->stopPropagation();
-		});
-		$Event = sys::event('trigger3');
-		$this->assertInstanceOf('metadigit\core\event\Event', $Event);
-		$this->assertTrue($Event->isPropagationStopped());
-	}
-
-	/**
-	 * @depends testInit
-	 */
 	function testPdo() {
 		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('sys-cache'));
 		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('mysql'));
