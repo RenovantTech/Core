@@ -108,10 +108,6 @@ class SqliteCache implements CacheInterface {
 		return (boolean)$this->_pdo_has->fetchColumn();
 	}
 
-	function mget(array $ids) {
-		// @TODO
-	}
-
 	function set($id, $value, $expire=null, $tags=null) {
 		try {
 			if($this->writeBuffer) {

@@ -30,14 +30,6 @@ class ArrayCache implements CacheInterface {
 		return isset($this->store[$id]);
 	}
 
-	function mget(array $ids) {
-		$items = [];
-		foreach($ids as $id) {
-			if(isset($this->store[$id])) $items[$id] = $this->store[$id];
-		}
-		return $items;
-	}
-
 	function set($id, $value, $expire=0, $tag=null) {
 		sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id);
 		$this->store[$id] = $value;

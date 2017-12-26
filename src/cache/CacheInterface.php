@@ -33,13 +33,6 @@ interface CacheInterface {
 	function get($id);
 
 	/**
-	 * Get a set of cached items.
-	 * @param array $ids items IDs
-	 * @return array
-	 */
-	function mget(array $ids);
-
-	/**
 	 * Store an item into cache
 	 * @param string $id
 	 * @param mixed $value

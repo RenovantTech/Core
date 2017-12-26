@@ -62,10 +62,6 @@ class OpCache implements CacheInterface {
 		return file_exists($this->_file($this->id, $id));
 	}
 
-	function mget(array $ids) {
-		// @TODO
-	}
-
 	function set($id, $value, $expire=null, $tags=null) {
 		if($this->writeBuffer) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->id);
