@@ -135,15 +135,7 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO);
 		set_exception_handler(__NAMESPACE__.'\trace\Tracer::onException');
 		set_error_handler(__NAMESPACE__.'\trace\Tracer::onError');
-		register_shutdown_function(function () {
-			ini_set('precision', 16);
-			defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
-			ini_restore('precision');
-			self::trace(LOG_DEBUG, T_INFO, null, null, __CLASS__.'::shutdown');
-			register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
-			self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
-			if(PHP_SAPI != 'cli') session_write_close();
-		});
+		register_shutdown_function(__CLASS__.'::shutdown');
 
 		// ENVIRONMENT FIX
 		if(isset($_SERVER['REDIRECT_PORT'])) $_SERVER['SERVER_PORT'] = $_SERVER['REDIRECT_PORT'];
@@ -169,12 +161,7 @@ class sys {
 		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->cnfAcl['routes']);
 		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->cnfAcl['objects']);
 		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->cnfAcl['orm']);
-		// LOG service
-		self::$Logger = new log\Logger;
-		foreach($Sys->cnfLog as $cnf) {
-			$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
-			self::$Logger->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
-		}
+
 		// TRACE service
 		self::$traceLevel = $Sys->cnfTrace['level'];
 
@@ -185,6 +172,24 @@ class sys {
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
+	}
+
+	static function shutdown() {
+		ini_set('precision', 16);
+		defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
+		ini_restore('precision');
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
+		self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
+		if(PHP_SAPI != 'cli') session_write_close();
+		// LOG service
+		if(!empty(self::$log)) {
+			$Logger = new log\Logger;
+			foreach(self::$Sys->cnfLog as $cnf) {
+				$Writer = new $cnf['class']($cnf['param1'], $cnf['param2']);
+				$Logger->addWriter($Writer, constant($cnf['level']), $cnf['facility']);
+			}
+		}
 	}
 
 	/**
