@@ -141,7 +141,7 @@ class sys {
 			ini_restore('precision');
 			self::trace(LOG_DEBUG, T_INFO, null, null, __CLASS__.'::shutdown');
 			register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
-			//self::$SystemContext->trigger(self::EVENT_SHUTDOWN);
+			self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 			if(PHP_SAPI != 'cli') session_write_close();
 		});
 
