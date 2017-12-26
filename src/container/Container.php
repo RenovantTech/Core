@@ -36,7 +36,6 @@ class Container {
 	 * Initialize namespace
 	 * @param string $namespace Container namespace
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function init($namespace) {
 		if(in_array($namespace, $this->namespaces)) return;

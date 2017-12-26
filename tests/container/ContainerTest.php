@@ -15,7 +15,6 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Container $Container
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testInit(Container $Container) {
 		/** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -25,7 +24,6 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Container $Container
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testInitException(Container $Container) {
 		try {
