@@ -11,109 +11,84 @@ use metadigit\core\sys,
 	metadigit\core\util\yaml\Yaml;
 /**
  * Dependency Injection ContainerParser
- * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @internal
  */
 class ContainerYamlParser {
-	use \metadigit\core\CoreTrait;
-
-	/** Included Container namespaces
-	 * @var array */
-	protected $namespaces = [];
-	/** Container YAML path
-	 * @var string */
-	protected $yamlPath;
-	/** Container YAML
-	 * @var array */
-	protected $YAML;
 
 	/**
-	 * @param array $namespaces Container namespaces
+	 * Parse YAML namespace config
+	 * @param $namespace
+	 * @return array id2class and class2id maps
 	 * @throws ContainerException
 	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	function __construct(array $namespaces) {
-		$this->_ = $namespaces[0].'.ContainerParser';
-		$dirName = sys::info($this->_, sys::INFO_PATH_DIR);
+	static function parseNamespace($namespace) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for namespace '.$namespace, null, __METHOD__);
+		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
 		if (empty($dirName))
-			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yml';
+			$yamlPath = \metadigit\core\BASE_DIR . sys::info($namespace.'.Context', sys::INFO_NAMESPACE) . '-context.yml';
 		else
-			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_, $this->yamlPath]);
-		$this->YAML = Yaml::parseFile($this->yamlPath, null, [
+			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
+		if(!file_exists($yamlPath)) throw new ContainerException(11, [__METHOD__, $yamlPath]);
+		$yaml = Yaml::parseFile($yamlPath, 'objects', [
 			'!obj' => function($value, $tag, $flags) {
 				return '!obj '.$value;
 			}
 		]);
-		// @TODO verify YAML content
-		if(
-			!is_array($this->YAML) ||
-			(isset($this->YAML['objects']) && !is_array($this->YAML['objects']))
-		) throw new ContainerException(12, [$this->yamlPath]);
-		sort($namespaces);
-		$this->namespaces = $namespaces;
+
+		$id2classMap = $class2idMap = [];
+		$filter = function($v) {
+			if((boolean)strpos($v,'Abstract')) return false;
+			return true;
+		};
+		foreach($yaml as $id => $objYAML) {
+			$parents = array_values(class_parents($objYAML['class']));
+			$interfaces = array_values(class_implements($objYAML['class']));
+			$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
+			$all_classes = array_filter($all_classes, $filter);
+			$id2classMap[$id] = $all_classes;
+			foreach($all_classes as $class)
+				$class2idMap[$class][] = $id;
+		}
+		return [$id2classMap, $class2idMap];
 	}
 
+
 	/**
-	 * @param array $id2classMap
-	 * @param array $class2idMap
-	 * @internal
+	 * Parse YAML object config
+	 * @param string $id object ID
+	 * @return array class, constructor args, properties
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	function parseMaps(array &$id2classMap, array &$class2idMap) {
-		if(isset($this->YAML['objects'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_);
-			$id2classMap = $class2idMap = [];
-			$filter = function($v) {
-				if((boolean)strpos($v,'Abstract')) return false;
-				return true;
-			};
-			foreach($this->YAML['objects'] as $id => $objYAML) {
-				$parents = array_values(class_parents($objYAML['class']));
-				$interfaces = array_values(class_implements($objYAML['class']));
-				$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
-				$all_classes = array_filter($all_classes, $filter);
-				$id2classMap[$id] = $all_classes;
-				foreach($all_classes as $class){
-					$class2idMap[$class][] = $id;
-				}
+	static function parseObject($id) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for object '.$id, null, __METHOD__);
+		$dirName = sys::info($id, sys::INFO_PATH_DIR);
+		if (empty($dirName))
+			$yamlPath = \metadigit\core\BASE_DIR . sys::info($id, sys::INFO_NAMESPACE) . '-context.yml';
+		else
+			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
+		if(!file_exists($yamlPath)) throw new ContainerException(11, [__METHOD__, $yamlPath]);
+		$yaml = Yaml::parseFile($yamlPath, 'objects', [
+			'!obj' => function($value, $tag, $flags) {
+				return '!obj '.$value;
 			}
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_);
-		}
-	}
+		]);
 
-	/**
-	 * Return object constructor args
-	 * @param string $id object OID
-	 * @return array constructor args
-	 */
-	function parseObjectConstructorArgs($id) {
+		// @TODO verify YAML content
+		if(!is_array($yaml[$id])) throw new ContainerException(1, [__METHOD__, $id, $yamlPath]);
+
+		// class
+		$class = $yaml[$id]['class'];
+		// constructor args
 		$args = [];
-		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_);
-			$args = Yaml::typeCast($this->YAML['objects'][$id]['constructor']);
-		}
-		return $args;
-	}
-
-	/**
-	 * Return object properties
-	 * @param string $id object OID
-	 * @return array properties
-	 */
-	function parseObjectProperties($id) {
+		if(isset($yaml[$id]['constructor']) && is_array($yaml[$id]['constructor']))
+			$args = Yaml::typeCast($yaml[$id]['constructor']);
+		// properties
 		$properties = [];
-		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_);
-			$properties = Yaml::typeCast($this->YAML['objects'][$id]['properties']);
-		}
-		return $properties;
-	}
-
-	static function parseType($yamlNode) {
-		if(is_array($yamlNode)) return 'array';
-		elseif(substr($yamlNode, 0, 4) == '!obj') return 'object';
-		elseif(is_bool($yamlNode)) return 'boolean';
-		elseif(is_numeric($yamlNode)) return 'integer';
-		else return 'string';
+		if(isset($yaml[$id]['properties']) && is_array($yaml[$id]['properties']))
+			$properties = Yaml::typeCast($yaml[$id]['properties']);
+		return [$class, $args, $properties];
 	}
 }

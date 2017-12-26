@@ -1,27 +1,47 @@
 <?php
 namespace test\container;
-use metadigit\core\container\Container;
+use metadigit\core\container\Container,
+	metadigit\core\container\ContainerException;
 
 class ContainerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Container = new Container('test.container');
+		$Container = new Container;
 		$this->assertInstanceOf('metadigit\core\container\Container', $Container);
 		return $Container;
 	}
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException		\metadigit\core\container\ContainerException
-	 * @expectedExceptionCode	11
+	 * @param Container $Container
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	function testConstructorException() {
-		new Container('project.web');
+	function testInit(Container $Container) {
+		/** @noinspection PhpVoidFunctionResultUsedInspection */
+		$this->assertNull($Container->init('test.container'));
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param Container $Container
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
+	function testInitException(Container $Container) {
+		try {
+			$Container->init('test.xxxxxxx');
+			$this->fail('Expected ContainerException not thrown');
+		} catch(ContainerException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/xxxx\/context.yml/', $Ex->getMessage());
+		}
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param Container $Container
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testGet(Container $Container) {
 		// only ID
@@ -67,13 +87,18 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends                  testConstructor
-	 * @expectedException        \metadigit\core\container\ContainerException
-	 * @expectedExceptionCode    1
+	 * @depends testConstructor
 	 * @param Container $Container
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testGetException(Container $Container) {
-		$Container->get('test.NotExists');
+		try {
+			$Container->get('test.container.NotExists');
+			$this->fail('Expected ContainerException not thrown');
+		} catch(ContainerException $Ex) {
+			$this->assertEquals(1, $Ex->getCode());
+			$this->assertRegExp('/NOT defined/', $Ex->getMessage());
+		}
 	}
 
 	/**
@@ -101,6 +126,8 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Container $Container
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testGetAllByType(Container $Container) {
 		$objs = $Container->getAllByType('test\container\Mock1');
@@ -112,6 +139,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Container $Container
+	 * @throws ContainerException
 	 */
 	function testGetType(Container $Container) {
 		$this->assertEquals('test\container\Mock1', $Container->getType('test.container.Mock1'));
@@ -119,11 +147,15 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends                  testConstructor
-	 * @expectedException        \metadigit\core\container\ContainerException
-	 * @expectedExceptionCode    1
 	 * @param Container $Container
 	 */
 	function testGetTypeException(Container $Container) {
-		$Container->getType('test.container.NotExists');
+		try {
+			$Container->getType('test.container.NotExists');
+			$this->fail('Expected ContainerException not thrown');
+		} catch(ContainerException $Ex) {
+			$this->assertEquals(1, $Ex->getCode());
+			$this->assertRegExp('/NOT defined/', $Ex->getMessage());
+		}
 	}
 }
