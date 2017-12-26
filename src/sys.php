@@ -195,7 +195,7 @@ class sys {
 	 * @throws EventDispatcherException
 	 */
 	static function dispatch($api=PHP_SAPI) {
-		self::$traceFn = __METHOD__;
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
 		$app = $dispatcherID = $namespace = null;
@@ -226,7 +226,6 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
-		self::trace(LOG_DEBUG, T_INFO, $dispatcherID);
 		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 

@@ -29,6 +29,7 @@ class EventDispatcher {
 	 * @throws EventDispatcherException
 	 */
 	function init($namespace, array $eventsMaps=null) {
+		sys::trace(LOG_DEBUG, T_EVENT, $namespace, null, 'sys.EventDispatcher->init');
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
 		$listeners = $eventsMaps ?: EventYamlParser::parseNamespace($namespace);

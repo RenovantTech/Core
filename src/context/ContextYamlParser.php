@@ -24,7 +24,7 @@ class ContextYamlParser {
 	 * @throws ContextException
 	 */
 	static function parseNamespace($namespace) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for namespace '.$namespace, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$includes = [];
 		try {
 			$yaml = Yaml::parseContext($namespace);
@@ -75,8 +75,6 @@ class ContextYamlParser {
 					}
 				}
 			}
-
-			return $includes;
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:

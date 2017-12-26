@@ -59,11 +59,11 @@ class Yaml {
 		if(strpos($file, 'phar://')!==false) {
 			$tmp = tempnam(TMP_DIR, 'yaml-');
 			file_put_contents($tmp, file_get_contents($file));
-			$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
+			$yaml = yaml_parse_file($tmp, 0, $n, $callbacks);
 			unlink($tmp);
-		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
-		if($YAML==false) throw new YamlException(2, [__METHOD__, $file]);
-		return $section ? ($YAML[$section] ?: null) : $YAML;
+		} else $yaml = yaml_parse_file($file, 0, $n, $callbacks);
+		if($yaml==false) throw new YamlException(2, [__METHOD__, $file]);
+		return $section ? isset($yaml[$section]) ? $yaml[$section] : null : $yaml;
 	}
 
 	/**

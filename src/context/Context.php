@@ -66,6 +66,7 @@ class Context {
 	function init($namespace) {
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
 		if(!$context = sys::cache('sys')->get($namespace.'#context')) {
 			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
@@ -96,7 +97,7 @@ class Context {
 	 * @throws EventDispatcherException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Context->get');
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			sys::context()->init(substr($id, 0, strrpos($id, '.')));

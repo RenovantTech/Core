@@ -39,6 +39,7 @@ class Container {
 	 * @throws ContainerException
 	 */
 	function init($namespace, array $containerMaps=null) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
 		list($id2classMap, $class2idMap) = $containerMaps ?: ContainerYamlParser::parseNamespace($namespace);
@@ -56,7 +57,7 @@ class Container {
 	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
 			$namespace = substr($id, 0, strrpos($id, '.'));

@@ -24,15 +24,14 @@ class ContainerYamlParser {
 	 * @throws ContainerException
 	 */
 	static function parseNamespace($namespace) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for namespace '.$namespace, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+		$id2classMap = $class2idMap = [];
 		try {
 			$yaml = Yaml::parseContext($namespace, 'objects', [
-				'!obj' => function($value, $tag, $flags) {
+				'!obj' => function($value) {
 					return '!obj '.$value;
 				}
 			]);
-
-			$id2classMap = $class2idMap = [];
 			$filter = function($v) {
 				if((boolean)strpos($v,'Abstract')) return false;
 				return true;
@@ -46,7 +45,6 @@ class ContainerYamlParser {
 				foreach($all_classes as $class)
 					$class2idMap[$class][] = $id;
 			}
-			return [$id2classMap, $class2idMap];
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
@@ -55,6 +53,7 @@ class ContainerYamlParser {
 					throw new ContainerException(12, [__METHOD__, $namespace]); break;
 			}
 		}
+		return [$id2classMap, $class2idMap];
 	}
 
 	/**
@@ -68,7 +67,7 @@ class ContainerYamlParser {
 		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for object '.$id, null, __METHOD__);
 		$namespace = substr($id, 0, strrpos($id, '.'));
 		$yaml = Yaml::parseContext($namespace, 'objects', [
-			'!obj' => function($value, $tag, $flags) {
+			'!obj' => function($value) {
 				return '!obj '.$value;
 			}
 		]);

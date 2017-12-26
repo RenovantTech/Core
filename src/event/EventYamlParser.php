@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\event;
-use const metadigit\core\trace\{T_INFO, T_DEPINJ};
+use const metadigit\core\trace\T_DEPINJ;
 use metadigit\core\sys,
 	metadigit\core\util\yaml\Yaml,
 	metadigit\core\util\yaml\YamlException;
@@ -24,16 +24,19 @@ class EventYamlParser {
 	 * @throws EventDispatcherException
 	 */
 	static function parseNamespace($namespace) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for namespace '.$namespace, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+		$listeners = [];
 		try {
-			$yaml = Yaml::parseContext($namespace, 'events');
-			/* @TODO verify YAML content
-			if(
+			$yaml = (array) Yaml::parseContext($namespace, 'events');
+			if(is_array($yaml)) {
+				/* @TODO verify YAML content
+				if(
 				!is_array($YAML) ||
 				(isset($YAML['events']) && !is_array($YAML['events']))
-			) throw new EventDispatcherException(12, [__METHOD__, $yamlPath]);
-			*/
-			return self::parseYaml($yaml);
+				) throw new EventDispatcherException(12, [__METHOD__, $yamlPath]);
+				 */
+				$listeners = self::parseYaml($yaml);
+			}
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
@@ -42,6 +45,7 @@ class EventYamlParser {
 					throw new EventDispatcherException(12, [__METHOD__, $namespace]); break;
 			}
 		}
+		return $listeners;
 	}
 
 	/**
@@ -50,7 +54,6 @@ class EventYamlParser {
 	 * @return array listeners map
 	 */
 	static function parseYaml(array $yaml) {
-		sys::trace(LOG_DEBUG, T_INFO, 'parsing YAML events listeners', $yaml, __METHOD__);
 		$listeners = [];
 		foreach($yaml as $eventName => $eventYAML) {
 
