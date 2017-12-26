@@ -21,6 +21,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @return Context
 	 * @throws ContainerException
 	 * @throws EventDispatcherException
+	 * @throws ContextException
 	 */
 	function testInit(Context $Context) {
 		/** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -32,12 +33,13 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Context $Context
 	 * @throws EventDispatcherException
+	 * @throws ContainerException
 	 */
 	function testInitException(Context $Context) {
 		try {
 			$Context->init('test.xxxxxxx');
 			$this->fail('Expected ContainerException not thrown');
-		} catch(ContainerException $Ex) {
+		} catch(ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}

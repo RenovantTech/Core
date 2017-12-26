@@ -7,7 +7,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Container = new Container;
-		$this->assertInstanceOf('metadigit\core\container\Container', $Container);
+		$this->assertInstanceOf(Container::class, $Container);
 		return $Container;
 	}
 
