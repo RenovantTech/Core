@@ -7,9 +7,12 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\context\Context,
+use metadigit\core\container\Container,
+	metadigit\core\context\Context,
+	metadigit\core\context\ContextException,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
+	metadigit\core\event\EventDispatcherException,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -30,7 +33,13 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
-	/** EventDispatcher
+	/** System Container
+	 * @var \metadigit\core\container\Container */
+	static protected $Container;
+	/** System Context
+	 * @var \metadigit\core\context\Context */
+	static protected $Context;
+	/** System EventDispatcher
 	 * @var \metadigit\core\event\EventDispatcher */
 	static protected $EventDispatcher;
 	/** Logger
@@ -48,9 +57,6 @@ class sys {
 	/** Singleton instance
 	 * @var sys */
 	static protected $Sys;
-	/** System Context
-	 * @var \metadigit\core\context\Context */
-	static protected $SystemContext;
 	/** trace store
 	 * @var array */
 	static protected $trace = [];
@@ -122,6 +128,7 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
+	 * @throws util\yaml\YamlException
 	 */
 	static function init() {
 		self::$traceFn = __METHOD__;
@@ -173,9 +180,10 @@ class sys {
 
 		// initialize
 		self::cache('sys');
+		self::$Container = new Container;
 		self::$EventDispatcher = new EventDispatcher;
+		self::$Context = new Context(self::$Container, self::$EventDispatcher);
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
-//		self::$SystemContext = Context::factory('system');
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
@@ -183,7 +191,8 @@ class sys {
 	 * Dispatch HTTP/CLI request
 	 * @param string $api PHP_SAPI
 	 * @throws SysException
-	 * @throws \metadigit\core\context\ContextException
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	static function dispatch($api=PHP_SAPI) {
 		self::$traceFn = __METHOD__;
@@ -218,7 +227,7 @@ class sys {
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
 		self::trace(LOG_DEBUG, T_INFO, $dispatcherID);
-		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
 	/**
@@ -275,6 +284,14 @@ class sys {
 			$_[$id] = $Cache;
 		}
 		return $_[$id];
+	}
+
+	/**
+	 * Context helper
+	 * @return Context
+	 */
+	static function context(): Context {
+		return self::$Context;
 	}
 
 	/**
