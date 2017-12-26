@@ -75,6 +75,7 @@ class Context {
 		}
 		$this->Container->init($namespace, $context['container']);
 		$this->EventDispatcher->init($namespace, $context['events']);
+		foreach ($context['includes'] as $ns) $this->init($ns);
 	}
 
 	/**
