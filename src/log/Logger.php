@@ -16,7 +16,6 @@ use metadigit\core\sys;
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class Logger extends sys {
-	use \metadigit\core\CoreTrait;
 
 	const LABELS = [
 		LOG_DEBUG => 'DEBUG',
@@ -58,6 +57,7 @@ class Logger extends sys {
 	 * Flush log buffer
 	 */
 	function flush() {
+		self::trace(LOG_DEBUG, T_INFO, null, null, 'sys.Logger->flush');
 		foreach(self::$log as $log) {
 			list($message, $level, $facility, $time) = $log;
 			if(is_null($time)) $time = time();
@@ -66,5 +66,6 @@ class Logger extends sys {
 					$this->writers[$k]->write($time, $message, $level, $facility);
 			}
 		}
+		self::$log = null;
 	}
 }
