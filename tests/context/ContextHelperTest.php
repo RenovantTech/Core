@@ -6,6 +6,6 @@ class ContextHelperTest extends \PHPUnit\Framework\TestCase {
 
 	function testGetAllContexts() {
 		$contexts = ContextHelper::getAllContexts();
-		$this->assertCount(8, $contexts);
+		$this->assertCount(10, $contexts);
 	}
 }

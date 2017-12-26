@@ -8,113 +8,85 @@
 namespace metadigit\core\container;
 use const metadigit\core\trace\T_DEPINJ;
 use metadigit\core\sys,
-	metadigit\core\util\yaml\YamlParser;
+	metadigit\core\util\yaml\Yaml,
+	metadigit\core\util\yaml\YamlException;
 /**
  * Dependency Injection ContainerParser
- * @internal
  * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @internal
  */
 class ContainerYamlParser {
-	use \metadigit\core\CoreTrait;
-
-	/** Included Container namespaces
-	 * @var array */
-	protected $namespaces = [];
-	/** Container YAML path
-	 * @var string */
-	protected $yamlPath;
-	/** Container YAML
-	 * @var array */
-	protected $YAML;
 
 	/**
-	 * @param array $namespaces Container namespaces
+	 * Parse YAML namespace config
+	 * @param $namespace
+	 * @return array id2class and class2id maps
 	 * @throws ContainerException
 	 */
-	function __construct(array $namespaces) {
-		$this->_ = $namespaces[0].'.ContainerParser';
-		$dirName = sys::info($this->_, sys::INFO_PATH_DIR);
-		if (empty($dirName))
-			$this->yamlPath = \metadigit\core\BASE_DIR . $namespaces[0] . '-context.yml';
-		else
-			$this->yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		if(!file_exists($this->yamlPath)) throw new ContainerException(11, [$this->_, $this->yamlPath]);
-		$this->YAML = sys::yaml($this->yamlPath, null, [
-			'!obj' => function($value, $tag, $flags) {
+	static function parseNamespace($namespace) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+		$id2classMap = $class2idMap = [];
+		try {
+			$yaml = Yaml::parseContext($namespace, 'objects', [
+				'!obj' => function($value) {
+					return '!obj '.$value;
+				}
+			]);
+			if(isset($yaml) && is_array($yaml)) {
+				$filter = function($v) {
+					if((boolean)strpos($v,'Abstract')) return false;
+					return true;
+				};
+				foreach($yaml as $id => $objYAML) {
+					$parents = array_values(class_parents($objYAML['class']));
+					$interfaces = array_values(class_implements($objYAML['class']));
+					$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
+					$all_classes = array_filter($all_classes, $filter);
+					$id2classMap[$id] = $all_classes;
+					foreach($all_classes as $class)
+						$class2idMap[$class][] = $id;
+				}
+			}
+		} catch (YamlException $Ex) {
+			switch ($Ex->getCode()) {
+				case 1:
+					throw new ContainerException(11, [__METHOD__, $namespace]); break;
+				case 2:
+					throw new ContainerException(12, [__METHOD__, $namespace]); break;
+			}
+		}
+		return [$id2classMap, $class2idMap];
+	}
+
+	/**
+	 * Parse YAML object config
+	 * @param string $id object ID
+	 * @return array class, constructor args, properties
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
+	static function parseObject($id) {
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for object '.$id, null, __METHOD__);
+		$namespace = substr($id, 0, strrpos($id, '.'));
+		$yaml = Yaml::parseContext($namespace, 'objects', [
+			'!obj' => function($value) {
 				return '!obj '.$value;
 			}
 		]);
+
 		// @TODO verify YAML content
-		if(
-			!is_array($this->YAML) ||
-			(isset($this->YAML['objects']) && !is_array($this->YAML['objects']))
-		) throw new ContainerException(12, [$this->yamlPath]);
-		sort($namespaces);
-		$this->namespaces = $namespaces;
-	}
+		if(!is_array($yaml[$id])) throw new ContainerException(1, [__METHOD__, $id]);
 
-	/**
-	 * @param array $id2classMap
-	 * @param array $class2idMap
-	 * @internal
-	 */
-	function parseMaps(array &$id2classMap, array &$class2idMap) {
-		if(isset($this->YAML['objects'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[START] parsing Container YAML', null, $this->_);
-			$id2classMap = $class2idMap = [];
-			$filter = function($v) {
-				if((boolean)strpos($v,'Abstract')) return false;
-				return true;
-			};
-			foreach($this->YAML['objects'] as $id => $objYAML) {
-				$parents = array_values(class_parents($objYAML['class']));
-				$interfaces = array_values(class_implements($objYAML['class']));
-				$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
-				$all_classes = array_filter($all_classes, $filter);
-				$id2classMap[$id] = $all_classes;
-				foreach($all_classes as $class){
-					$class2idMap[$class][] = $id;
-				}
-			}
-			sys::trace(LOG_DEBUG, T_DEPINJ, '[END] Container ready', null, $this->_);
-		}
-	}
-
-	/**
-	 * Return object constructor args
-	 * @param string $id object OID
-	 * @return array constructor args
-	 * @throws ContainerException
-	 */
-	function parseObjectConstructorArgs($id) {
+		// class
+		$class = $yaml[$id]['class'];
+		// constructor args
 		$args = [];
-		if(isset($this->YAML['objects'][$id]['constructor']) && is_array($this->YAML['objects'][$id]['constructor'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing constructor args for object `'.$id.'`', null, $this->_);
-			$args = (new YamlParser())->typeCast($this->YAML['objects'][$id]['constructor']);
-		}
-		return $args;
-	}
-
-	/**
-	 * Return object properties
-	 * @param string $id object OID
-	 * @return array properties
-	 * @throws ContainerException
-	 */
-	function parseObjectProperties($id) {
+		if(isset($yaml[$id]['constructor']) && is_array($yaml[$id]['constructor']))
+			$args = Yaml::typeCast($yaml[$id]['constructor']);
+		// properties
 		$properties = [];
-		if(isset($this->YAML['objects'][$id]['properties']) && is_array($this->YAML['objects'][$id]['properties'])) {
-			sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing properties for object `'.$id.'`', null, $this->_);
-			$properties = (new YamlParser())->typeCast($this->YAML['objects'][$id]['properties']);
-		}
-		return $properties;
-	}
-
-	static function parseType($yamlNode) {
-		if(is_array($yamlNode)) return 'array';
-		elseif(substr($yamlNode, 0, 4) == '!obj') return 'object';
-		elseif(is_bool($yamlNode)) return 'boolean';
-		elseif(is_numeric($yamlNode)) return 'integer';
-		else return 'string';
+		if(isset($yaml[$id]['properties']) && is_array($yaml[$id]['properties']))
+			$properties = Yaml::typeCast($yaml[$id]['properties']);
+		return [$class, $args, $properties];
 	}
 }

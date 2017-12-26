@@ -5,11 +5,12 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\event;
+namespace metadigit\core\util\yaml;
 /**
- * EventSubscriberInterface
+ * Yaml Exception
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-interface EventSubscriberInterface {
-
+class YamlException extends \metadigit\core\Exception {
+	const COD1 = '%s: YAML config file NOT FOUND in path %s';
+	const COD2 = '%s: invalid YAML file: %s';
 }

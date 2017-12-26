@@ -1,0 +1,14 @@
+foo:
+  - foo1
+  - foo2
+objects:
+  test.util.yaml.Mock1:
+    class: test\context\Mock1
+  test.util.yaml.Mock2:
+      class: test\context\Mock2
+events:
+  event1:
+    - test.context.Mock1->onEvent1
+  event2:
+    - test.context.Mock1->onEvent2
+    - test.context.Mock1->onEvent2bis

@@ -44,16 +44,13 @@ class CoreProxy {
 	function __call($method, $args) {
 		$prevTraceFn = sys::traceFn($this->_.'->'.$method);
 		try {
-			$this->Obj || $this->Obj =
-				sys::cache('sys')->get($this->_)
-					?:
-				Context::factory(substr($this->_, 0, strrpos($this->_, '.')))->getContainer()->get($this->_, null, Container::FAILURE_SILENT);
-			if($this->Obj) {
-				ACL_OBJECTS and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, defined('SESSION_UID')? SESSION_UID : null);
-				sys::trace(LOG_DEBUG, T_INFO);
-				return call_user_func_array([$this->Obj, $method], $args);
+			if(!$this->Obj) {
+				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
+				$this->Obj = sys::cache('sys')->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
 			}
-			throw new ContainerException(4, [$this->_]);
+			ACL_OBJECTS and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, defined('SESSION_UID')? SESSION_UID : null);
+			sys::trace(LOG_DEBUG, T_INFO);
+			return call_user_func_array([$this->Obj, $method], $args);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

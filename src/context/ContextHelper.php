@@ -16,6 +16,8 @@ class ContextHelper extends sys {
 
 	/**
 	 * @return array[Context]
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
 	static function getAllContexts() {
 		$contexts = [];
@@ -23,7 +25,7 @@ class ContextHelper extends sys {
 		$files = scandir(\metadigit\core\BASE_DIR);
 		foreach($files as $file) {
 			if(is_file(\metadigit\core\BASE_DIR.$file) && substr($file,-12)=='-context.yml') {
-				$contexts[] = Context::factory(substr($file, 0, -12));
+				$contexts[] = sys::context()->init(substr($file, 0, -12));
 			}
 		}
 		// iterate on namespaces directories
@@ -37,7 +39,7 @@ class ContextHelper extends sys {
 		$files = scandir($dir);
 		foreach($files as $file) {
 			if(is_file($dir.'/'.$file) && $file=='context.yml') {
-				$contexts[] = Context::factory(str_replace('\\', '.', $namespace));
+				$contexts[] = sys::context()->init(str_replace('\\', '.', $namespace));
 			} elseif(is_dir($dir.'/'.$file) && !in_array($file, ['.','..'])) {
 				self::scanNamespaceDir($namespace.'\\'.$file, $dir.'/'.$file, $contexts);
 			}

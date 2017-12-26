@@ -1,0 +1,10 @@
+events:
+  test.event1:
+    - substr
+    - EventTester::test1
+    - LocalMock->foo
+  test.event2:
+    - foo1
+    - listener: bar
+      priority: 2
+    - foo2

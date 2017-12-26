@@ -6,9 +6,13 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_DEPINJ, T_EVENT, T_INFO};
-use metadigit\core\context\Context,
+use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
+use metadigit\core\container\Container,
+	metadigit\core\context\Context,
+	metadigit\core\context\ContextException,
 	metadigit\core\event\Event,
+	metadigit\core\event\EventDispatcher,
+	metadigit\core\event\EventDispatcherException,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -29,9 +33,15 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
-	/** Events listeners (callbacks)
-	 * @var array */
-	static protected $listeners = [];
+	/** System Container
+	 * @var \metadigit\core\container\Container */
+	static protected $Container;
+	/** System Context
+	 * @var \metadigit\core\context\Context */
+	static protected $Context;
+	/** System EventDispatcher
+	 * @var \metadigit\core\event\EventDispatcher */
+	static protected $EventDispatcher;
 	/** Logger
 	 * @var \metadigit\core\log\Logger */
 	static protected $Logger;
@@ -47,9 +57,6 @@ class sys {
 	/** Singleton instance
 	 * @var sys */
 	static protected $Sys;
-	/** System Context
-	 * @var \metadigit\core\context\Context */
-	static protected $SystemContext;
 	/** trace store
 	 * @var array */
 	static protected $trace = [];
@@ -121,6 +128,7 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
+	 * @throws util\yaml\YamlException
 	 */
 	static function init() {
 		self::$traceFn = __METHOD__;
@@ -172,19 +180,22 @@ class sys {
 
 		// initialize
 		self::cache('sys');
+		self::$Container = new Container;
+		self::$EventDispatcher = new EventDispatcher;
+		self::$Context = new Context(self::$Container, self::$EventDispatcher);
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
-//		self::$SystemContext = Context::factory('system');
-//		self::$SystemContext->trigger(self::EVENT_INIT);
+		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
 	/**
 	 * Dispatch HTTP/CLI request
 	 * @param string $api PHP_SAPI
 	 * @throws SysException
-	 * @throws \metadigit\core\context\ContextException
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	static function dispatch($api=PHP_SAPI) {
-		self::$traceFn = __METHOD__;
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
 		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
 		$app = $dispatcherID = $namespace = null;
@@ -215,8 +226,7 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
-		self::trace(LOG_DEBUG, T_INFO, $dispatcherID);
-		Context::factory($namespace)->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
 	/**
@@ -276,27 +286,21 @@ class sys {
 	}
 
 	/**
-	 * Trigger an Event, calling attached listeners
+	 * Context helper
+	 * @return Context
+	 */
+	static function context(): Context {
+		return self::$Context;
+	}
+
+	/**
+	 * EventDispatcher helper
 	 * @param string $eventName	the name of the event
 	 * @param \metadigit\core\event\Event|array|null $EventOrParams custom Event object or params array
 	 * @return \metadigit\core\event\Event the Event object
 	 */
 	static function event($eventName, $EventOrParams=null): Event {
-		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
-		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
-		if(!isset(self::$listeners[$eventName])) return $Event;
-		foreach(self::$listeners[$eventName] as $listeners) {
-			foreach($listeners as $callback) {
-				if(is_string($callback) && strpos($callback,'->')>0) {
-					list($objID, $method) = explode('->', $callback);
-					Context::factory(substr($objID, 0, strrpos($objID, '.')));
-					$callback = [new CoreProxy($objID), $method];
-				}
-				call_user_func($callback, $Event);
-				if($Event->isPropagationStopped()) break;
-			}
-		}
-		return $Event;
+		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
 	}
 
 	/**
@@ -340,8 +344,7 @@ class sys {
 	 * @throws \Exception
 	 */
 	static function listen($eventName, $callback, $priority=1) {
-		self::$listeners[$eventName][(int)$priority][] = $callback;
-		krsort(self::$listeners[$eventName], SORT_NUMERIC);
+		self::$EventDispatcher->listen($eventName, $callback, $priority);
 	}
 
 	/**
@@ -397,28 +400,6 @@ class sys {
 		$prev = self::$traceFn;
 		if($fn) self::$traceFn = $fn;
 		return $prev;
-	}
-
-	/**
-	 * YAML parser utility, supporting PHAR & ENVIRONMENT switch
-	 * @param string $file YAML file path
-	 * @param string|null $section optional YAML section to be parsed
-	 * @param array $callbacks content handlers for YAML nodes
-	 * @return array
-	 * @throws Exception
-	 */
-	static function yaml($file, $section=null, array $callbacks=[]) {
-		self::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
-		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
-		if(file_exists($fileEnv)) $file = $fileEnv;
-		elseif(!file_exists($file)) throw new Exception(__FUNCTION__.' YAML not found: '.$file);
-		if(strpos($file, 'phar://')!==false) {
-			$tmp = tempnam(TMP_DIR, 'yaml-');
-			file_put_contents($tmp, file_get_contents($file));
-			$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
-			unlink($tmp);
-		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
-		return ($section) ? $YAML[$section] : $YAML;
 	}
 }
 spl_autoload_register(__NAMESPACE__.'\sys::autoload');

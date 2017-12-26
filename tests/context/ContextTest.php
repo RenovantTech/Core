@@ -1,67 +1,52 @@
 <?php
 namespace test\context;
-use metadigit\core\sys,
-	metadigit\core\container\Container,
-	metadigit\core\context\Context;
+use metadigit\core\container\Container,
+	metadigit\core\container\ContainerException,
+	metadigit\core\context\Context,
+	metadigit\core\context\ContextException,
+	metadigit\core\event\EventDispatcher,
+	metadigit\core\event\EventDispatcherException;
 
 class ContextTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Context = new Context('test.context');
+		$Context = new Context(new Container, new EventDispatcher);
 		$this->assertInstanceOf(Context::class, $Context);
-
-		$ReflProp = new \ReflectionProperty(Context::class, 'namespace');
-		$ReflProp->setAccessible(true);
-		$namespace = $ReflProp->getValue($Context);
-		$this->assertEquals('test.context', $namespace);
-
-		$ReflProp = new \ReflectionProperty(Context::class, 'includedNamespaces');
-		$ReflProp->setAccessible(true);
-		$includedNamespaces = $ReflProp->getValue($Context);
-		$this->assertContains('system', $includedNamespaces);
-		$this->assertNotContains('foo', $includedNamespaces);
-
-		$ReflProp = new \ReflectionProperty(Context::class, 'id2classMap');
-		$ReflProp->setAccessible(true);
-		$id2classMap = $ReflProp->getValue($Context);
-		$this->assertArrayHasKey('test.context.Mock1', $id2classMap);
-		$this->assertArrayNotHasKey('test.context.NotExists', $id2classMap);
-
-		$ReflProp = new \ReflectionProperty(Context::class, 'listeners');
-		$ReflProp->setAccessible(true);
-		$listeners = $ReflProp->getValue($Context);
-		$this->assertCount(2, $listeners);
-		$this->assertArrayHasKey('event1', $listeners);
-		$this->assertArrayHasKey('event2', $listeners);
-		$this->assertCount(2, $listeners['event1']);
-		$this->assertCount(1, $listeners['event2']);
-		$this->assertEquals('test.context.EventSubscriber->onEvent1', $listeners['event1'][1][0]);
-		$this->assertEquals('test.context.Mock1->onEvent1', $listeners['event1'][2][0]);
-		$this->assertEquals('test.context.Mock1->onEvent2', $listeners['event2'][1][0]);
-		$this->assertEquals('test.context.Mock1->onEvent2bis', $listeners['event2'][1][1]);
-		$this->assertEquals('test.context.EventSubscriber->onEvent2', $listeners['event2'][1][2]);
-
 		return $Context;
 	}
 
 	/**
-	 * Test normal Context namespace
 	 * @depends testConstructor
+	 * @param Context $Context
+	 * @return Context
+	 * @throws ContainerException
+	 * @throws EventDispatcherException
+	 * @throws ContextException
 	 */
-	function testFactory() {
-		$Context = Context::factory('test.context');
-		$this->assertInstanceOf(Context::class, $Context);
-		$this->assertInstanceOf(Context::class, sys::cache('sys')->get('test.context.Context'));
+	function testInit(Context $Context) {
+		/** @noinspection PhpVoidFunctionResultUsedInspection */
+		$this->assertNull($Context->init('test.context'));
 		return $Context;
 	}
 
-	function testFactoryWithCycledGraphs() {
-		$Context = Context::factory('test.context.cyclic1');
-		$this->assertInstanceOf(Context::class, $Context);
+	/**
+	 * @depends testConstructor
+	 * @param Context $Context
+	 * @throws EventDispatcherException
+	 * @throws ContainerException
+	 */
+	function testInitException(Context $Context) {
+		try {
+			$Context->init('test.xxxxxxx');
+			$this->fail('Expected ContainerException not thrown');
+		} catch(ContextException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
+		}
 	}
 
 	/**
-	 * @depends testFactory
+	 * @depends testInit
 	 * @param Context $Context
 	 */
 	function testHas(Context $Context) {
@@ -70,41 +55,11 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * Test global Context namespace
-	 * @depends testConstructor
-	 */
-	function testFactory2() {
-		$GlobalContext = Context::factory('system');
-		$this->assertInstanceOf(Context::class, $GlobalContext);
-		$this->assertTrue(sys::cache('sys')->has('system.Context'));
-		return $GlobalContext;
-	}
-
-	/**
-	 * @depends testFactory2
-	 * @param Context $GlobalContext
-	 */
-	function testHas2(Context $GlobalContext) {
-		$this->assertTrue($GlobalContext->has('system.Mock', 'test\GlobalMock'));
-		$this->assertFalse($GlobalContext->has('system.NotExists'));
-	}
-
-	/**
-	 * @depends testFactory
-	 * @param Context $Context
-	 */
-	function testGetContainer(Context $Context) {
-		$ReflMethod = new \ReflectionMethod(Context::class, 'getContainer');
-		$ReflMethod->setAccessible(true);
-		$this->assertInstanceOf(Container::class, $ReflMethod->invoke($Context));
-		$this->assertTrue(sys::cache('sys')->has('test.context.Container'));
-	}
-
-	/**
 	 * Test GET inside Context
-	 * @depends testFactory
+	 * @depends testInit
 	 * @param Context $Context
-	 * @return Context
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	function testGet(Context $Context) {
 		$Mock = $Context->get('test.context.Mock1');
@@ -112,38 +67,25 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('bar', $Mock->getProp2());
 		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock->getChild());
 		$this->assertEquals('SystemMock', $Mock->getChild()->name());
-		return $Context;
-	}
 
-	/**
-	 * Test GET on included Contexts via ObjectProxy
-	 * @depends testGet
-	 * @param Context $Context
-	 */
-	function testGet2(Context $Context) {
+		// Test GET on included Contexts via ObjectProxy
 		$Mock = $Context->get('test.context.Mock1');
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
 	}
 
 	/**
 	 * Test GET Exception inside Context
-	 * @depends                  testGet
-	 * @expectedException        \metadigit\core\context\ContextException
-	 * @expectedExceptionCode    1
+	 * @depends testInit
 	 * @param Context $Context
+	 * @throws EventDispatcherException
 	 */
 	function testGetException1(Context $Context) {
-		$Context->get('test.context.NotExists');
-	}
-
-	/**
-	 * Test GET Exception on included Contexts
-	 * @depends                  testGet
-	 * @expectedException        \metadigit\core\context\ContextException
-	 * @expectedExceptionCode    1
-	 * @param Context $Context
-	 */
-	function testGetException2(Context $Context) {
-		$Context->get('system.NotExists');
+		try {
+			$Context->get('test.context.NotExists');
+			$this->fail('Expected ContextException not thrown');
+		} catch(ContextException $Ex) {
+			$this->assertEquals(1, $Ex->getCode());
+			$this->assertRegExp('/is NOT defined/', $Ex->getMessage());
+		}
 	}
 }

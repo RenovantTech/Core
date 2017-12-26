@@ -89,7 +89,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstructor() {
-		$UsersRepository = Context::factory('test.db.orm')->getContainer()->get('test.db.orm.UserRepository');
+		$UsersRepository = sys::context()->container()->get('test.db.orm.UserRepository');
 		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $UsersRepository);
 		return $UsersRepository;
 	}

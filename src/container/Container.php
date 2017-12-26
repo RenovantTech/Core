@@ -19,60 +19,53 @@ class Container {
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;
 
-	/** Included Container namespaces
-	 * @var array */
-	protected $includes = [];
 	/** Mapping between objects IDs and their parent classes and interfaces.
 	 * @var array */
 	protected $id2classMap = [];
 	/** Mapping between classes and objects IDs.
 	 * @var array */
 	protected $class2idMap = [];
-	/** Container namespace
-	 * @var string */
-	protected $namespace;
+	/** initialized namespaces
+	 * @var array */
+	protected $namespaces = [];
 	/** Array of instantiated objects (to avoid replication)
 	 * @var array */
 	protected $objects = [];
-	/** YAML Parser
-	 * @var ContainerYamlParser */
-	protected $YamlParser;
 
 	/**
-	 * Constructor
+	 * Initialize namespace
 	 * @param string $namespace Container namespace
-	 * @param array  $includes  available namespaces
+	 * @param array|null $containerMaps
 	 * @throws ContainerException
 	 */
-	function __construct($namespace, $includes=[]) {
-		$this->_ = $namespace.'.Container';
-		$this->namespace = $namespace;
-		$this->includes = $includes;
-		$this->getYamlParser()->parseMaps($this->id2classMap, $this->class2idMap);
-	}
-
-	function __sleep() {
-		return ['_', 'includes', 'id2classMap', 'class2idMap', 'namespace'];
+	function init($namespace, array $containerMaps=null) {
+		if(in_array($namespace, $this->namespaces)) return;
+		//sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
+		$this->namespaces[] = $namespace;
+		list($id2classMap, $class2idMap) = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
+		$this->id2classMap = array_merge($this->id2classMap, $id2classMap);
+		$this->class2idMap = array_merge($this->class2idMap, $class2idMap);
 	}
 
 	/**
 	 * Get an object
-	 * @param string $id object OID
-	 * @param string $class required object class
+	 * @param string $id           object OID
+	 * @param string $class        required object class
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'GET '.$id, null, $this->_);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
 		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
 		try {
+			$namespace = substr($id, 0, strrpos($id, '.'));
+			if(!in_array($namespace, $this->namespaces)) $this->init($namespace);
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
-			$objClass = $this->id2classMap[$id][0];
-			$args = $this->getYamlParser()->parseObjectConstructorArgs($id);
-			$properties = $this->getYamlParser()->parseObjectProperties($id);
-			$this->objects[$id] = $Obj = ObjBuilder::build($id, $objClass, $args, $properties);
+			list($class, $args, $properties) = ContainerYamlParser::parseObject($id);
+			$this->objects[$id] = $Obj = ObjBuilder::build($id, $class, $args, $properties);
 			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
@@ -85,14 +78,16 @@ class Container {
 	 * Get all objects of desired class/interface.
 	 * @param string $class desired class/interface
 	 * @return object[] objects (can be empty)
+	 * @throws ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function getAllByType($class) {
 		$ids = $this->getListByType($class);
-		$objs = [];
+		$_ = [];
 		foreach($ids as $id){
-			$objs[] = $this->get($id);
+			$_[] = $this->get($id);
 		}
-		return $objs;
+		return $_;
 	}
 
 	/**
@@ -101,7 +96,7 @@ class Container {
 	 * @return array[string] objects IDs (can be empty)
 	 */
 	function getListByType($class) {
-		return (isset($this->class2idMap[$class])) ? $this->class2idMap[$class] : [];
+		return $this->class2idMap[$class] ?: [];
 	}
 
 	/**
@@ -116,19 +111,12 @@ class Container {
 	}
 
 	/**
-	 * Return TRUE if contains object (optionally verifiyng class)
+	 * Return TRUE if contains object (optionally verifying class)
 	 * @param string $id object identifier
 	 * @param string $class class/interface that object must extend/implement (optional)
 	 * @return bool
 	 */
 	function has($id, $class=null) {
 		return ( isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) ) ) ? true : false;
-	}
-
-	/**
-	 * @return ContainerYamlParser
-	 */
-	protected function getYamlParser() {
-		return (!is_null($this->YamlParser)) ? $this->YamlParser : $this->YamlParser = new ContainerYamlParser(array_merge((array)$this->namespace, $this->includes));
 	}
 }

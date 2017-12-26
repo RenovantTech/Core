@@ -5,16 +5,15 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\container;
+namespace metadigit\core\event;
 /**
- * ContainerException
+ * EventDispatcherException
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class ContainerException extends \metadigit\core\Exception {
+class EventDispatcherException extends \metadigit\core\Exception {
 	// runtime
-	const COD1 = '%s: object ID "%s" NOT defined';
-	const COD2 = '%s: object OID "%2$s" NOT implementing required class/interface %2$s';
-	const COD4 = 'CoreProxy `%s`: can not retrieve proxied object';
+	const COD1 = '';
+	const COD4 = '';
 	// configuration
 	const COD11 = '%s: namespace %s - YAML config file NOT FOUND';
 	const COD12 = '%s: namespace %s - invalid YAML configuration';

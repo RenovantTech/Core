@@ -15,7 +15,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
-		$Dispatcher = Context::factory('test.http')->getContainer()->get('test.http.Dispatcher');
+		$Dispatcher = sys::context()->container()->get('test.http.Dispatcher');
 
 		$RefProp = new \ReflectionProperty('metadigit\core\http\Dispatcher', 'routes');
 		$RefProp->setAccessible(true);
@@ -150,7 +150,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>index<\/title>/');
 		sys::cache('sys')->delete('test.http.Dispatcher');
-		$Dispatcher = Context::factory('test.http',false)->get('test.http.Dispatcher');
+		$Dispatcher = sys::context()->container()->get('test.http.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
 		define('SESSION_UID', 1);
 		$Req = new Request;
