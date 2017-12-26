@@ -337,17 +337,6 @@ class sys {
 	}
 
 	/**
-	 * Add an Event listener on the specified event
-	 * @param string   $eventName the name of the event to listen for
-	 * @param callable $callback  the callback function to be invoked
-	 * @param int      $priority  trigger precedence on the listeners chain (higher values execute earliest)
-	 * @throws \Exception
-	 */
-	static function listen($eventName, $callback, $priority=1) {
-		self::$EventDispatcher->listen($eventName, $callback, $priority);
-	}
-
-	/**
 	 * System log helper
 	 * @param string $message log message
 	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
