@@ -26,10 +26,10 @@ class Yaml {
 
 	/**
 	 * YAML Context parser utility, supporting PHAR & ENVIRONMENT switch
-	 * @param string $namespace    Context namespace
+	 * @param string $namespace Context namespace
 	 * @param string|null $section optional YAML section to be parsed
-	 * @param array $callbacks     content handlers for YAML nodes
-	 * @return array
+	 * @param array $callbacks content handlers for YAML nodes
+	 * @return mixed|null
 	 * @throws YamlException
 	 */
 	static function parseContext($namespace, $section=null, array $callbacks=[]) {
@@ -48,7 +48,7 @@ class Yaml {
 	 * @param string $file YAML file path
 	 * @param string|null $section optional YAML section to be parsed
 	 * @param array $callbacks content handlers for YAML nodes
-	 * @return array
+	 * @return mixed|null
 	 * @throws YamlException
 	 */
 	static function parseFile($file, $section=null, array $callbacks=[]) {
