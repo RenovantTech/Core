@@ -32,18 +32,20 @@ class ContainerYamlParser {
 					return '!obj '.$value;
 				}
 			]);
-			$filter = function($v) {
-				if((boolean)strpos($v,'Abstract')) return false;
-				return true;
-			};
-			foreach($yaml as $id => $objYAML) {
-				$parents = array_values(class_parents($objYAML['class']));
-				$interfaces = array_values(class_implements($objYAML['class']));
-				$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
-				$all_classes = array_filter($all_classes, $filter);
-				$id2classMap[$id] = $all_classes;
-				foreach($all_classes as $class)
-					$class2idMap[$class][] = $id;
+			if(isset($yaml) && is_array($yaml)) {
+				$filter = function($v) {
+					if((boolean)strpos($v,'Abstract')) return false;
+					return true;
+				};
+				foreach($yaml as $id => $objYAML) {
+					$parents = array_values(class_parents($objYAML['class']));
+					$interfaces = array_values(class_implements($objYAML['class']));
+					$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
+					$all_classes = array_filter($all_classes, $filter);
+					$id2classMap[$id] = $all_classes;
+					foreach($all_classes as $class)
+						$class2idMap[$class][] = $id;
+				}
 			}
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
