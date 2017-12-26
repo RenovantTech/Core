@@ -40,12 +40,11 @@ class ContextYamlParser {
 			*/
 
 			// includes
-			if(isset($yaml['includes'])) {
-				$includes = (array)$yaml['includes'];
-			}
+			if(isset($yaml['includes']) && is_array($yaml['includes']))
+				$includes = $yaml['includes'];
 
 			// verify Context namespaces
-			if(isset($yaml['objects'])) {
+			if(isset($yaml['objects']) && is_array($yaml['objects'])) {
 				$availableNamespaces = implode(', ', array_merge((array)$namespace, $includes));
 				foreach($yaml['objects'] as $id => $objYAML) {
 					if(strpos($id, $namespace) !== 0) throw new ContextException(14, [__METHOD__, $id, $namespace]);

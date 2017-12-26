@@ -65,8 +65,8 @@ class Context {
 	 */
 	function init($namespace) {
 		if(in_array($namespace, $this->namespaces)) return;
-		$this->namespaces[] = $namespace;
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
+		$this->namespaces[] = $namespace;
 		if(!$context = sys::cache('sys')->get($namespace.'#context')) {
 			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
