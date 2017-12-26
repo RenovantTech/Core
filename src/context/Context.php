@@ -59,13 +59,15 @@ class Context {
 	/**
 	 * Initialize namespace
 	 * @param string $namespace Context namespace
-	 * @throws EventDispatcherException
 	 * @throws ContainerException
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	function init($namespace) {
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
 		if(!$context = sys::cache('sys')->get($namespace.'#context')) {
+			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
 			$context['events'] = EventYamlParser::parseNamespace($namespace);
 			sys::cache('sys')->set($namespace.'#context', $context);
