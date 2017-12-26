@@ -19,11 +19,4 @@ trait CoreTrait {
 	/** OID (Object Identifier)
 	 * @var string */
 	protected $_;
-
-	/**
-	 * @return Context
-	 */
-	protected function context() {
-		return Context::factory(substr($this->_, 0, strrpos($this->_,'.')));
-	}
 }
