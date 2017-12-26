@@ -27,8 +27,8 @@ class EventYamlParser {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$listeners = [];
 		try {
-			$yaml = (array) Yaml::parseContext($namespace, 'events');
-			if(is_array($yaml)) {
+			$yaml = Yaml::parseContext($namespace, 'events');
+			if(isset($yaml) && is_array($yaml)) {
 				/* @TODO verify YAML content
 				if(
 				!is_array($YAML) ||

@@ -29,11 +29,13 @@ class EventDispatcher {
 	 * @throws EventDispatcherException
 	 */
 	function init($namespace, array $eventsMaps=null) {
-		sys::trace(LOG_DEBUG, T_EVENT, $namespace, null, 'sys.EventDispatcher->init');
 		if(in_array($namespace, $this->namespaces)) return;
+		//sys::trace(LOG_DEBUG, T_EVENT, $namespace, null, 'sys.EventDispatcher->init');
 		$this->namespaces[] = $namespace;
-		$listeners = $eventsMaps ?: EventYamlParser::parseNamespace($namespace);
+		$listeners = $eventsMaps ?? EventYamlParser::parseNamespace($namespace);
 		$this->listeners = array_merge($this->listeners, $listeners);
+		krsort($this->listeners, SORT_NUMERIC);
+
 	}
 
 	/**
