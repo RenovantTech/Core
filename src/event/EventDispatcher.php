@@ -19,6 +19,22 @@ class EventDispatcher {
 	/** registered listeners (callbacks)
 	 * @var array */
 	protected $listeners = [];
+	/** initialized namespaces
+	 * @var array */
+	protected $namespaces = [];
+
+	/**
+	 * Initialize namespace
+	 * @param string $namespace Container namespace
+	 * @throws EventDispatcherException
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
+	function init($namespace) {
+		if(in_array($namespace, $this->namespaces)) return;
+		$this->namespaces[] = $namespace;
+		$listeners = EventYamlParser::parseNamespace($namespace);
+		$this->listeners = array_merge($this->listeners, $listeners);
+	}
 
 	/**
 	 * Add an Event listener on the specified event

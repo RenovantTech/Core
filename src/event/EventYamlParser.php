@@ -18,13 +18,13 @@ use metadigit\core\sys,
 class EventYamlParser {
 
 	/**
-	 * Parse Context YAML
-	 * @param string $namespace Context namespace
-	 * @param EventDispatcher $EventDispatcher to attach listeners to
+	 * Parse YAML namespace config
+	 * @param string $namespace
+	 * @return array listeners map
 	 * @throws EventDispatcherException
-	 * @throws Exception
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	static function parseContext($namespace, EventDispatcher $EventDispatcher) {
+	static function parseNamespace($namespace) {
 		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
 		if (empty($dirName))
 			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
@@ -38,24 +38,27 @@ class EventYamlParser {
 //			!is_array($YAML) ||
 //			(isset($YAML['events']) && !is_array($YAML['events']))
 //		) throw new EventDispatcherException(12, [__METHOD__, $yamlPath]);
-		self::parseYaml($yaml, $EventDispatcher);
+		return self::parseYaml($yaml);
 	}
 
 	/**
 	 * Parse YAML config
 	 * @param array $yaml YAML config extract
-	 * @param EventDispatcher $EventDispatcher to attach listeners to
+	 * @return array listeners map
 	 */
-	static function parseYaml(array $yaml, EventDispatcher $EventDispatcher) {
+	static function parseYaml(array $yaml) {
 		sys::trace(LOG_DEBUG, T_INFO, 'parsing YAML events listeners', $yaml, __METHOD__);
+		$listeners = [];
 		foreach($yaml as $eventName => $eventYAML) {
+
 			foreach ($eventYAML as $listenerYAML) {
 				if(is_string($listenerYAML)) {
-					$EventDispatcher->listen($eventName, $listenerYAML);
+					$listeners[$eventName][1][] = $listenerYAML;
 				} elseif (is_array($listenerYAML)) {
-					$EventDispatcher->listen($eventName, $listenerYAML['listener'], $listenerYAML['priority']);
+					$listeners[$eventName][$listenerYAML['priority']][] = $listenerYAML['listener'];
 				}
 			}
 		}
+		return $listeners;
 	}
 }
