@@ -38,7 +38,7 @@ class Yaml {
 			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
 		else
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'context: '.$namespace, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		if(!file_exists($yamlPath)) throw new YamlException(1, [__METHOD__, $yamlPath]);
 		return Yaml::parseFile($yamlPath, $section, $callbacks);
 	}
@@ -63,7 +63,7 @@ class Yaml {
 			unlink($tmp);
 		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
 		if($YAML==false) throw new YamlException(2, [__METHOD__, $file]);
-		return ($section) ? $YAML[$section] : $YAML;
+		return $section ? ($YAML[$section] ?: null) : $YAML;
 	}
 
 	/**
