@@ -8,8 +8,7 @@
 namespace metadigit\core\event;
 use const metadigit\core\trace\T_EVENT;
 use metadigit\core\sys,
-	metadigit\core\CoreProxy,
-	metadigit\core\context\Context;
+	metadigit\core\CoreProxy;
 /**
  * The EventDispatcher is the core of the framework event system.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -26,12 +25,13 @@ class EventDispatcher {
 	/**
 	 * Initialize namespace
 	 * @param string $namespace Container namespace
+	 * @param array|null $eventsMaps
 	 * @throws EventDispatcherException
 	 */
-	function init($namespace) {
+	function init($namespace, array $eventsMaps=null) {
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
-		$listeners = EventYamlParser::parseNamespace($namespace);
+		$listeners = $eventsMaps ?: EventYamlParser::parseNamespace($namespace);
 		$this->listeners = array_merge($this->listeners, $listeners);
 	}
 
@@ -60,7 +60,6 @@ class EventDispatcher {
 			foreach($listeners as $callback) {
 				if(is_string($callback) && strpos($callback,'->')>0) {
 					list($objID, $method) = explode('->', $callback);
-					Context::factory(substr($objID, 0, strrpos($objID, '.')));
 					$callback = [new CoreProxy($objID), $method];
 				}
 				call_user_func($callback, $Event);
