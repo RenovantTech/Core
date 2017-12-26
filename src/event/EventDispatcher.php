@@ -27,7 +27,6 @@ class EventDispatcher {
 	 * Initialize namespace
 	 * @param string $namespace Container namespace
 	 * @throws EventDispatcherException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function init($namespace) {
 		if(in_array($namespace, $this->namespaces)) return;
