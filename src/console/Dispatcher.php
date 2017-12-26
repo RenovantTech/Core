@@ -41,7 +41,7 @@ class Dispatcher {
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
 			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				$Controller = $this->context()->get($this->resolveController($Req, $Res), 'metadigit\core\console\ControllerInterface');
+				$Controller = sys::context()->get($this->resolveController($Req, $Res), 'metadigit\core\console\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {

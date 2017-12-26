@@ -8,14 +8,18 @@ use metadigit\core\sys,
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
+	/**
+	 * @return Dispatcher
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
-		$Dispatcher = Context::factory('test.console')
-			->getContainer()->get('test.console.Dispatcher');
-		$this->assertInstanceOf('metadigit\core\console\Dispatcher', $Dispatcher);
+		$Dispatcher = sys::context()->container()->get('test.console.Dispatcher');
+		$this->assertInstanceOf(Dispatcher::class, $Dispatcher);
 		return $Dispatcher;
 	}
 
@@ -106,7 +110,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');
 		sys::cache('sys')->delete('test.console.Dispatcher');
-		$Dispatcher = Context::factory('test.console',false)->get('test.console.Dispatcher');
+		$Dispatcher = sys::context()->container()->get('test.console.Dispatcher');
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;
 		$Res = new Response;

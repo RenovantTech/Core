@@ -41,7 +41,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstructor() {
-		$StatsRepository = Context::factory('test.db.orm')->getContainer()->get('test.db.orm.StatsRepository');
+		$StatsRepository = sys::context()->container()->get('test.db.orm.StatsRepository');
 		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $StatsRepository);
 		return $StatsRepository;
 	}
