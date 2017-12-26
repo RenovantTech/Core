@@ -35,12 +35,13 @@ class Container {
 	/**
 	 * Initialize namespace
 	 * @param string $namespace Container namespace
+	 * @param array|null $containerMaps
 	 * @throws ContainerException
 	 */
-	function init($namespace) {
+	function init($namespace, array $containerMaps=null) {
 		if(in_array($namespace, $this->namespaces)) return;
 		$this->namespaces[] = $namespace;
-		list($id2classMap, $class2idMap) = ContainerYamlParser::parseNamespace($namespace);
+		list($id2classMap, $class2idMap) = $containerMaps ?: ContainerYamlParser::parseNamespace($namespace);
 		$this->id2classMap = array_merge($this->id2classMap, $id2classMap);
 		$this->class2idMap = array_merge($this->class2idMap, $class2idMap);
 	}
