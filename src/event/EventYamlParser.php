@@ -8,8 +8,8 @@
 namespace metadigit\core\event;
 use const metadigit\core\trace\{T_INFO, T_DEPINJ};
 use metadigit\core\sys,
-	metadigit\core\Exception,
-	metadigit\core\util\yaml\Yaml;
+	metadigit\core\util\yaml\Yaml,
+	metadigit\core\util\yaml\YamlException;
 /**
  * Event YAML Parser
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -22,23 +22,26 @@ class EventYamlParser {
 	 * @param string $namespace
 	 * @return array listeners map
 	 * @throws EventDispatcherException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	static function parseNamespace($namespace) {
-		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
-		if (empty($dirName))
-			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
-		else
-			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'context: '.$namespace, null, __METHOD__);
-		if(!file_exists($yamlPath)) throw new EventDispatcherException(11, [__METHOD__, $yamlPath]);
-		$yaml = Yaml::parseFile($yamlPath, 'events');
-		// @TODO verify YAML content
-//		if(
-//			!is_array($YAML) ||
-//			(isset($YAML['events']) && !is_array($YAML['events']))
-//		) throw new EventDispatcherException(12, [__METHOD__, $yamlPath]);
-		return self::parseYaml($yaml);
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for namespace '.$namespace, null, __METHOD__);
+		try {
+			$yaml = Yaml::parseContext($namespace, 'events');
+			/* @TODO verify YAML content
+			if(
+				!is_array($YAML) ||
+				(isset($YAML['events']) && !is_array($YAML['events']))
+			) throw new EventDispatcherException(12, [__METHOD__, $yamlPath]);
+			*/
+			return self::parseYaml($yaml);
+		} catch (YamlException $Ex) {
+			switch ($Ex->getCode()) {
+				case 1:
+					throw new EventDispatcherException(11, [__METHOD__, $namespace]); break;
+				case 2:
+					throw new EventDispatcherException(12, [__METHOD__, $namespace]); break;
+			}
+		}
 	}
 
 	/**

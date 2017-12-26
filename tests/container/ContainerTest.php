@@ -33,7 +33,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected ContainerException not thrown');
 		} catch(ContainerException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/xxxx\/context.yml/', $Ex->getMessage());
+			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}
 	}
 

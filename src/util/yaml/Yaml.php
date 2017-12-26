@@ -25,6 +25,25 @@ class Yaml {
 	const TYPE_OBJ		= 6;
 
 	/**
+	 * YAML Context parser utility, supporting PHAR & ENVIRONMENT switch
+	 * @param string $namespace    Context namespace
+	 * @param string|null $section optional YAML section to be parsed
+	 * @param array $callbacks     content handlers for YAML nodes
+	 * @return array
+	 * @throws YamlException
+	 */
+	static function parseContext($namespace, $section=null, array $callbacks=[]) {
+		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
+		if (empty($dirName))
+			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
+		else
+			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
+		sys::trace(LOG_DEBUG, T_DEPINJ, 'context: '.$namespace, null, __METHOD__);
+		if(!file_exists($yamlPath)) throw new YamlException(1, [__METHOD__, $yamlPath]);
+		return Yaml::parseFile($yamlPath, $section, $callbacks);
+	}
+
+	/**
 	 * YAML parser utility, supporting PHAR & ENVIRONMENT switch
 	 * @param string $file YAML file path
 	 * @param string|null $section optional YAML section to be parsed
@@ -36,14 +55,14 @@ class Yaml {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
 		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
 		if(file_exists($fileEnv)) $file = $fileEnv;
-		elseif(!file_exists($file)) throw new YamlException(2, [__METHOD__, $file]);
+		elseif(!file_exists($file)) throw new YamlException(1, [__METHOD__, $file]);
 		if(strpos($file, 'phar://')!==false) {
 			$tmp = tempnam(TMP_DIR, 'yaml-');
 			file_put_contents($tmp, file_get_contents($file));
 			$YAML = yaml_parse_file($tmp, 0, $n, $callbacks);
 			unlink($tmp);
 		} else $YAML = yaml_parse_file($file, 0, $n, $callbacks);
-		if($YAML==false) throw new YamlException(1, [__METHOD__, $file]);
+		if($YAML==false) throw new YamlException(2, [__METHOD__, $file]);
 		return ($section) ? $YAML[$section] : $YAML;
 	}
 

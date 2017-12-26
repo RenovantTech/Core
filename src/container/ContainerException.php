@@ -16,6 +16,6 @@ class ContainerException extends \metadigit\core\Exception {
 	const COD2 = '%s: object OID "%2$s" NOT implementing required class/interface %2$s';
 	const COD4 = 'CoreProxy `%s`: can not retrieve proxied object';
 	// configuration
-	const COD11 = '%s: YAML config file NOT FOUND in path %s';
-	const COD12 = 'DI Container: invalid YAML configuration: %s';
+	const COD11 = '%s: namespace %s - YAML config file NOT FOUND';
+	const COD12 = '%s: namespace %s - invalid YAML configuration';
 }

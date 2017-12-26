@@ -11,6 +11,6 @@ namespace metadigit\core\util\yaml;
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class YamlException extends \metadigit\core\Exception {
-	const COD1 = '%s: invalid YAML file: %s';
-	const COD2 = '%s: YAML config file NOT FOUND in path %s';
+	const COD1 = '%s: YAML config file NOT FOUND in path %s';
+	const COD2 = '%s: invalid YAML file: %s';
 }
