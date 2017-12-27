@@ -28,37 +28,38 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	const DEFAULT_ACTION = 'index';
 	/** Fallback action method to invoke. */
 	const FALLBACK_ACTION = null;
-	/** Controller actions methods configuration
+	/** Controller actions metadata (routing, params)
 	 * @var array */
-	protected $_actions = [];
+	protected $_config = [];
 
 	/**
 	 * ActionController constructor.
 	 * @throws Exception
 	 */
 	function __construct() {
-		$this->_actions = ActionControllerReflection::analyzeActions($this);
+		$this->_config = ActionControllerReflection::analyzeActions($this);
 	}
 
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @return \metadigit\core\console\ViewInterface|mixed|null|string
 	 * @throws Exception
 	 */
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
-			return null;
+			return;
 		}
-		$args = array($Req, $Res);
-		if(isset($this->_actions[$action]['params'])) {
-			sys::trace(LOG_DEBUG, T_INFO, 'building action params');
-			foreach($this->_actions[$action]['params'] as $i => $param) {
+		$args = [];
+		if(isset($this->_config[$action]['params'])) {
+			foreach($this->_config[$action]['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
-					$paramClass = $param['class'];
-					$args[$i] = new $paramClass($Req);
+					switch ($param['class']) {
+						case Request::class: $args[$i] = $Req; break;
+						case Response::class: $args[$i] = $Res; break;
+						default: $args[$i] = new $param['class']($Req);
+					}
 				} elseif (isset($param['type'])) {
 					switch($param['type']) {
 						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
@@ -74,7 +75,6 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 		sys::trace(LOG_DEBUG, T_INFO);
 		$View = call_user_func_array([$this,$action.'Action'], $args);
 		$this->postHandle($Req, $Res, $View);
-		return $View;
 	}
 
 	/**
@@ -82,7 +82,6 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	 * @param Request $Req current request
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
-	 * @throws Exception in case of errors
 	 */
 	protected function preHandle(Request $Req, Response $Res) {
 		return true;
@@ -93,7 +92,6 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	 * @param Request $Req current request
 	 * @param Response $Res current response
 	 * @param \metadigit\core\console\ViewInterface|string $View the View or view name
-	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res, $View=null) {
 	}
@@ -109,8 +107,8 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 		$action = substr(strrchr($Req->CMD(), ' '), 1);
 		$action = str_replace(['-','.'], '_', $action);
 		if(empty($action)) $action = self::DEFAULT_ACTION;
-		if(isset($this->_actions[$action])) return $action;
-		if(isset($this->_actions[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
+		if(isset($this->_config[$action])) return $action;
+		if(isset($this->_config[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
 		http_response_code(404);
 		throw new Exception(111, [$this->_, $action.'Action']);
 	}

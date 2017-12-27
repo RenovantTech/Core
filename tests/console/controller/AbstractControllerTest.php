@@ -12,15 +12,15 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf(ControllerInterface::class, $AbstractController);
 		$this->assertInstanceOf(AbstractController::class, $AbstractController);
 
-		$RefProp = new \ReflectionProperty(AbstractController::class, '_handle');
+		$RefProp = new \ReflectionProperty(AbstractController::class, '_config');
 		$RefProp->setAccessible(true);
-		$_handle = $RefProp->getValue($AbstractController);
+		$_config = $RefProp->getValue($AbstractController);
 
-		$this->assertEquals('name', $_handle['params'][2]['name']);
-		$this->assertNull($_handle['params'][2]['class']);
-		$this->assertEquals('string', $_handle['params'][2]['type']);
-		$this->assertTrue($_handle['params'][2]['optional']);
-		$this->assertEquals('Tom', $_handle['params'][2]['default']);
+		$this->assertEquals('name', $_config['params'][2]['name']);
+		$this->assertNull($_config['params'][2]['class']);
+		$this->assertEquals('string', $_config['params'][2]['type']);
+		$this->assertTrue($_config['params'][2]['optional']);
+		$this->assertEquals('Tom', $_config['params'][2]['default']);
 
 		return $AbstractController;
 	}
@@ -28,7 +28,6 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param \test\console\controller\AbstractController $AbstractController
-	 * @throws \metadigit\core\console\Exception
 	 */
 	function testHandle(\test\console\controller\AbstractController $AbstractController) {
 		$_SERVER['argv'] = ['sys','db','--name=Jack'];

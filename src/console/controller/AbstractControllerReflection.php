@@ -7,8 +7,6 @@
  */
 namespace metadigit\core\console\controller;
 use metadigit\core\console\Exception,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response,
 	metadigit\core\util\reflection\ReflectionClass;
 /**
  * Utility class for AbstractController
@@ -24,8 +22,7 @@ class AbstractControllerReflection {
 	 * @return array
 	 */
 	static function analyzeHandle(AbstractController $Controller) {
-		// check implementation methods signature
-		$handle = [];
+		$config = [];
 		$RefClass = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();
 		foreach($refMethods as $RefMethod) {
@@ -33,31 +30,20 @@ class AbstractControllerReflection {
 			$methodClass = $RefMethod->getDeclaringClass()->getName();
 			// skip framework methods
 			if(fnmatch('metadigit\core\*', $methodClass, FNM_NOESCAPE)) continue;
-			// check signature of preHanlde & postHanlde hooks
+			// check signature of preHandle & postHandle hooks
 			if(in_array($methodName,['preHandle','postHandle'])) {
 				if(!$RefMethod->isProtected()) throw new Exception(101, [$methodClass, $methodName]);
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
 			} elseif($RefMethod->isPublic() && $methodName=='doHandle') {
 				foreach($RefMethod->getParameters() as $i => $RefParam) {
-					switch($i){
-						case 0:
-							if(!$RefParam->getClass()->getName() == Request::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Request::class]);
-							break;
-						case 1:
-							if(!$RefParam->getClass()->getName() == Response::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Response::class]);
-							break;
-						default:
-							$handle['params'][$i]['name'] = $RefParam->getName();
-							$handle['params'][$i]['class'] = (!is_null($RefParam->getClass())) ? $RefParam->getClass()->getName() : null;
-							$handle['params'][$i]['type'] = $RefParam->getType();
-							$handle['params'][$i]['optional'] = $RefParam->isOptional();
-							$handle['params'][$i]['default'] = ($RefParam->isDefaultValueAvailable()) ? $RefParam->getDefaultValue() : null;
-					}
+					$config['params'][$i]['name'] = $RefParam->getName();
+					$config['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
+					$config['params'][$i]['type'] = $RefParam->getType();
+					$config['params'][$i]['optional'] = $RefParam->isOptional();
+					$config['params'][$i]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 				}
 			}
 		}
-		return $handle;
+		return $config;
 	}
 }

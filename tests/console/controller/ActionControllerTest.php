@@ -12,27 +12,27 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf(ControllerInterface::class, $ActionController);
 		$this->assertInstanceOf(ActionController::class, $ActionController);
 
-		$RefProp = new \ReflectionProperty(ActionController::class, '_actions');
+		$RefProp = new \ReflectionProperty(ActionController::class, '_config');
 		$RefProp->setAccessible(true);
-		$_actions = $RefProp->getValue($ActionController);
-		$this->assertCount(6, $_actions);
+		$_config = $RefProp->getValue($ActionController);
+		$this->assertCount(6, $_config);
 
-		$this->assertArrayHasKey('bar', $_actions);
-		$this->assertEmpty($_actions['bar']);
+		$this->assertArrayHasKey('bar', $_config);
+		$this->assertCount(1, $_config['bar']['params']);
 
-		$this->assertArrayHasKey('action2', $_actions);
-		$this->assertEquals('id', $_actions['action2']['params'][2]['name']);
-		$this->assertNull($_actions['action2']['params'][2]['class']);
-		$this->assertEquals('integer', $_actions['action2']['params'][2]['type']);
-		$this->assertFalse($_actions['action2']['params'][2]['optional']);
-		$this->assertNull($_actions['action2']['params'][2]['default']);
+		$this->assertArrayHasKey('action2', $_config);
+		$this->assertEquals('id', $_config['action2']['params'][1]['name']);
+		$this->assertNull($_config['action2']['params'][1]['class']);
+		$this->assertEquals('integer', $_config['action2']['params'][1]['type']);
+		$this->assertFalse($_config['action2']['params'][1]['optional']);
+		$this->assertNull($_config['action2']['params'][1]['default']);
 
-		$this->assertArrayHasKey('action3', $_actions);
-		$this->assertEquals('name', $_actions['action3']['params'][2]['name']);
-		$this->assertNull($_actions['action3']['params'][2]['class']);
-		$this->assertEquals('string', $_actions['action3']['params'][2]['type']);
-		$this->assertTrue($_actions['action3']['params'][2]['optional']);
-		$this->assertEquals('Tom', $_actions['action3']['params'][2]['default']);
+		$this->assertArrayHasKey('action3', $_config);
+		$this->assertEquals('name', $_config['action3']['params'][1]['name']);
+		$this->assertNull($_config['action3']['params'][1]['class']);
+		$this->assertEquals('string', $_config['action3']['params'][1]['type']);
+		$this->assertTrue($_config['action3']['params'][1]['optional']);
+		$this->assertEquals('Tom', $_config['action3']['params'][1]['default']);
 
 		return $ActionController;
 	}
@@ -43,20 +43,20 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @return \test\console\controller\ActionController
 	 */
 	function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
-		$ReflMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1'];
 		$Req = new Request;
-		$this->assertEquals('index', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('index', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['argv'] = ['sys','mod1','foo'];
 		$Req = new Request;
-		$this->assertEquals('foo', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('foo', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['argv'] = ['sys','mod1','not-exists'];
 		$Req = new Request;
-		$this->assertEquals('fallback', $ReflMethod->invoke($ActionController, $Req));
+		$this->assertEquals('fallback', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
 	}

@@ -24,41 +24,42 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 
 	/** Controller handle method configuration
 	 * @var array */
-	protected $_handle = [];
+	protected $_config = [];
 
 	/**
 	 * AbstractController constructor.
 	 * @throws Exception
 	 */
 	function __construct() {
-		$this->_handle = AbstractControllerReflection::analyzeHandle($this);
+		$this->_config = AbstractControllerReflection::analyzeHandle($this);
 	}
 
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
 	 * @return \metadigit\core\console\ViewInterface|mixed|null|string
-	 * @throws Exception
 	 */
 	function handle(Request $Req, Response $Res) {
 		if(true!==$this->preHandle($Req, $Res)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
 			return null;
 		}
-		$args = [$Req, $Res];
-		if(isset($this->_handle['params'])) {
-			sys::trace(LOG_DEBUG, T_INFO, 'building action params');
-			foreach($this->_handle['params'] as $i => $param) {
+		$args = [];
+		if(isset($this->_config['params'])) {
+			foreach($this->_config['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
-					$paramClass = $param['class'];
-					$args[$i] = new $paramClass($Req);
+					switch ($param['class']) {
+						case Request::class: $args[$i] = $Req; break;
+						case Response::class: $args[$i] = $Res; break;
+						default: $args[$i] = new $param['class']($Req);
+					}
 				} elseif (isset($param['type'])) {
 					switch($param['type']) {
-							case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
-							case 'integer': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
-							case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
-							case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
-							default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null: $v;
+						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
+						case 'integer': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
+						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
+						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
+						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null: $v;
 					}
 				}
 			}
@@ -74,7 +75,6 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 	 * Pre-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @throws Exception in case of errors
 	 * @return boolean TRUE on success, FALSE on error
 	 */
 	protected function preHandle(Request $Req, Response $Res) {
@@ -86,7 +86,6 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 	 * @param Request $Req current request
 	 * @param Response $Res current response
 	 * @param \metadigit\core\http\ViewInterface|string $View the View or view name
-	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res, $View=null) {
 	}
