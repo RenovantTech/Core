@@ -10,27 +10,28 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
-		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
+		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_config');
 		$RefProp->setAccessible(true);
-		$_actions = $RefProp->getValue($ActionController);
-		$this->assertCount(7, $_actions);
+		$_config = $RefProp->getValue($ActionController);
+		$this->assertCount(7, $_config);
 
-		$this->assertArrayHasKey('bar', $_actions);
-		$this->assertEmpty($_actions['bar']);
+		$this->assertArrayHasKey('bar', $_config);
+		$this->assertEquals('*', $_config['bar']['method']);
+		$this->assertEquals('/bar$/', $_config['bar']['pattern']);
 
-		$this->assertArrayHasKey('action2', $_actions);
-		$this->assertEquals('id', $_actions['action2']['params'][2]['name']);
-		$this->assertNull($_actions['action2']['params'][2]['class']);
-		$this->assertEquals('integer', $_actions['action2']['params'][2]['type']);
-		$this->assertFalse($_actions['action2']['params'][2]['optional']);
-		$this->assertNull($_actions['action2']['params'][2]['default']);
+		$this->assertArrayHasKey('action2', $_config);
+		$this->assertEquals('id', $_config['action2']['params'][2]['name']);
+		$this->assertNull($_config['action2']['params'][2]['class']);
+		$this->assertEquals('integer', $_config['action2']['params'][2]['type']);
+		$this->assertFalse($_config['action2']['params'][2]['optional']);
+		$this->assertNull($_config['action2']['params'][2]['default']);
 
-		$this->assertArrayHasKey('action3', $_actions);
-		$this->assertEquals('name', $_actions['action3']['params'][2]['name']);
-		$this->assertNull($_actions['action3']['params'][2]['class']);
-		$this->assertEquals('string', $_actions['action3']['params'][2]['type']);
-		$this->assertTrue($_actions['action3']['params'][2]['optional']);
-		$this->assertEquals('Tom', $_actions['action3']['params'][2]['default']);
+		$this->assertArrayHasKey('action3', $_config);
+		$this->assertEquals('name', $_config['action3']['params'][2]['name']);
+		$this->assertNull($_config['action3']['params'][2]['class']);
+		$this->assertEquals('string', $_config['action3']['params'][2]['type']);
+		$this->assertTrue($_config['action3']['params'][2]['optional']);
+		$this->assertEquals('Tom', $_config['action3']['params'][2]['default']);
 
 		return $ActionController;
 	}
@@ -77,6 +78,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\ActionController $ActionController
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\ActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/mod1/action2';

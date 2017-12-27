@@ -24,7 +24,6 @@ class AbstractControllerReflection {
 	 * @return array
 	 */
 	static function analyzeHandle(AbstractController $Controller) {
-		// check implementation methods signature
 		$config = [];
 		$RefClass = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();

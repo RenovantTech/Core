@@ -10,17 +10,17 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
 		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
 
-		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_actions');
+		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_config');
 		$RefProp->setAccessible(true);
-		$_actions = $RefProp->getValue($ActionController);
-		$this->assertCount(5, $_actions);
+		$_config = $RefProp->getValue($ActionController);
+		$this->assertCount(5, $_config);
 
-		$this->assertArrayHasKey('destroy', $_actions);
-		$this->assertEquals('id', $_actions['destroy']['params'][3]['name']);
-		$this->assertNull($_actions['destroy']['params'][3]['class']);
-		$this->assertEquals('integer', $_actions['destroy']['params'][3]['type']);
-		$this->assertFalse($_actions['destroy']['params'][3]['optional']);
-		$this->assertNull($_actions['destroy']['params'][3]['default']);
+		$this->assertArrayHasKey('destroy', $_config);
+		$this->assertEquals('id', $_config['destroy']['params'][3]['name']);
+		$this->assertNull($_config['destroy']['params'][3]['class']);
+		$this->assertEquals('integer', $_config['destroy']['params'][3]['type']);
+		$this->assertFalse($_config['destroy']['params'][3]['optional']);
+		$this->assertNull($_config['destroy']['params'][3]['default']);
 
 		return $ActionController;
 	}
@@ -80,6 +80,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\RestActionController $ActionController
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\RestActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/book';

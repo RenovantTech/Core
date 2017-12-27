@@ -21,7 +21,7 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	use \metadigit\core\CoreTrait;
 	const ACL_SKIP = true;
 
-	/** Controller handle method configuration
+	/** Controller handle method metadata (routing, params)
 	 * @var array */
 	protected $_config = [];
 	/** default View engine
