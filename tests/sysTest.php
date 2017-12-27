@@ -172,7 +172,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function _testDispatchCLI() {
 		$_SERVER['argv'] = [
-			0 => \metadigit\core\BOOTSTRAP,
+			0 => \metadigit\core\CLI_BOOTSTRAP,
 			1 => 'console',
 			2 => 'mod1',
 			3 => 'foo',

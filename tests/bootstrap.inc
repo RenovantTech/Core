@@ -1,7 +1,6 @@
 <?php
 namespace metadigit\core;
 // directories
-const BOOTSTRAP = __FILE__;
 const PUBLIC_DIR	= '/tmp/metadigit-core/httpdocs/';
 const BASE_DIR		= __DIR__.'/';
 const DATA_DIR		= '/tmp/metadigit-core/';
@@ -11,6 +10,8 @@ const CACHE_DIR		= '/tmp/metadigit-core/cache/';
 const LOG_DIR		= '/tmp/metadigit-core/log/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
+// paths
+const CLI_BOOTSTRAP = __FILE__;
 // environment
 const SYS_YAML		= BASE_DIR.'sys.yml';
 const ENVIRONMENT	= 'PHPUNIT';
