@@ -47,7 +47,6 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @return null
 	 * @throws Exception
 	 */
 	function handle(Request $Req, Response $Res) {
@@ -55,7 +54,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
-			return null;
+			return;
 		}
 		$args = [$Req, $Res];
 		if(isset($this->_actions[$action]['params'])) {

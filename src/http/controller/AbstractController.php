@@ -39,14 +39,13 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @return null
 	 * @throws Exception
 	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
 		if(true!==$this->preHandle($Req, $Res)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
-			return null;
+			return;
 		}
 		$args = [$Req, $Res];
 		if(isset($this->_config['route'])) {
