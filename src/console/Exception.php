@@ -12,7 +12,7 @@ namespace metadigit\core\console;
  */
 class Exception extends \metadigit\core\Exception {
 	/* Dispatcher */
-	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL/CMD: %s';
+	const COD11 = 'Dispatcher Exception - impossible to detect controller for this CMD: %s';
 	const COD12 = 'Dispatcher Exception - could not resolve view with name: %s, resource: %s';
 	const COD13 = 'Dispatcher Exception - View neither contains a view name nor a View object';
 	/* Controller - compile-time (user defined code checks) */

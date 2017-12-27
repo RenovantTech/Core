@@ -3,7 +3,7 @@ objects:
   test.console.Dispatcher:
     class: metadigit\core\console\Dispatcher
     properties:
-      mappings:
+      routes:
         db: test.console.AbstractController
         mod1: test.console.ActionController
         cron: test.console.SimpleController

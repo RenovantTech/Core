@@ -22,9 +22,9 @@ class Dispatcher {
 	/** default View engine
 	 * @var string */
 	protected $defaultViewEngine = 'php';
-	/** Array of mappings between Request URLs and Controllers names.
+	/** Array of routes between Request URLs and Controllers names.
 	 * @var array */
-	protected $mappings = [];
+	protected $routes = [];
 	/** customizable templates dir path, default to \metadigit\core\PUBLIC_DIR
 	 * @var string */
 	protected $resourcesDir = \metadigit\core\PUBLIC_DIR;
@@ -41,7 +41,7 @@ class Dispatcher {
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
 			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				$Controller = sys::context()->get($this->resolveController($Req, $Res), 'metadigit\core\console\ControllerInterface');
+				$Controller = sys::context()->get($this->doRoute($Req, $Res), 'metadigit\core\console\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {
@@ -73,8 +73,8 @@ class Dispatcher {
 	 * @return string Controller ID
 	 * @throws Exception
 	 */
-	protected function resolveController(Request $Req, Response $Res) {
-		foreach($this->mappings as $cmd => $controllerID) {
+	protected function doRoute(Request $Req, Response $Res) {
+		foreach($this->routes as $cmd => $controllerID) {
 			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
 				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);

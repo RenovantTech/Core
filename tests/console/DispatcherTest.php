@@ -2,7 +2,6 @@
 namespace test\console;
 use metadigit\core\sys,
 	metadigit\core\console\Dispatcher,
-	metadigit\core\context\Context,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response;
 
@@ -18,6 +17,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
+		/** @var Dispatcher $Dispatcher */
 		$Dispatcher = sys::context()->container()->get('test.console.Dispatcher');
 		$this->assertInstanceOf(Dispatcher::class, $Dispatcher);
 		return $Dispatcher;
@@ -28,8 +28,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @param Dispatcher $Dispatcher
 	 * @return Dispatcher
 	 */
-	function testResolveController(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveController');
+	function testDoRoute(Dispatcher $Dispatcher) {
+		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'doRoute');
 		$ReflMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['console','db','optimize'];
