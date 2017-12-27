@@ -53,12 +53,15 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
 			return;
 		}
-		$args = [$Req, $Res];
+		$args = [];
 		if(isset($this->_config[$action]['params'])) {
 			foreach($this->_config[$action]['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
-					$paramClass = $param['class'];
-					$args[$i] = new $paramClass($Req);
+					switch ($param['class']) {
+						case Request::class: $args[$i] = $Req; break;
+						case Response::class: $args[$i] = $Res; break;
+						default: $args[$i] = new $param['class']($Req);
+					}
 				} elseif (isset($param['type'])) {
 					switch($param['type']) {
 						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
@@ -82,7 +85,6 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * @param Request $Req current request
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
-	 * @throws Exception in case of errors
 	 */
 	protected function preHandle(Request $Req, Response $Res) {
 		return true;
@@ -92,7 +94,6 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res) {
 	}

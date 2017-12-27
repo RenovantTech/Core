@@ -7,8 +7,6 @@
  */
 namespace metadigit\core\http\controller;
 use metadigit\core\http\Exception,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
 	metadigit\core\util\reflection\ReflectionClass;
 /**
  * Utility class for ActionController
@@ -55,22 +53,11 @@ class ActionControllerReflection {
 				}
 				// parameters
 				foreach($RefMethod->getParameters() as $i => $RefParam) {
-					switch($i){
-						case 0:
-							if(!$RefParam->getClass()->getName() == Request::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Request::class]);
-							break;
-						case 1:
-							if(!$RefParam->getClass()->getName() == Response::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Response::class]);
-							break;
-						default:
-							$config[$action]['params'][$i]['name'] = $RefParam->getName();
-							$config[$action]['params'][$i]['class'] = (!is_null($RefParam->getClass())) ? $RefParam->getClass()->getName() : null;
-							$config[$action]['params'][$i]['type'] = $RefParam->getType();
-							$config[$action]['params'][$i]['optional'] = $RefParam->isOptional();
-							$config[$action]['params'][$i]['default'] = ($RefParam->isDefaultValueAvailable()) ? $RefParam->getDefaultValue() : null;
-					}
+					$config[$action]['params'][$i]['name'] = $RefParam->getName();
+					$config[$action]['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
+					$config[$action]['params'][$i]['type'] = $RefParam->getType();
+					$config[$action]['params'][$i]['optional'] = $RefParam->isOptional();
+					$config[$action]['params'][$i]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 				}
 			}
 		}
