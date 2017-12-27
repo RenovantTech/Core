@@ -29,7 +29,7 @@ class Response {
 	 * @var string|null */
 	private $view = null;
 	/** Current View Engine
-	 * @var \metadigit\core\http\ViewInterface|string|null */
+	 * @var ViewInterface|string|null */
 	private $viewEngine = null;
 	/** Current View options
 	 * @var array|null */
@@ -96,7 +96,7 @@ class Response {
 
 	/**
 	 * Get View, options and engine
-	 * @return \metadigit\core\http\ViewInterface|null|string
+	 * @return ViewInterface|null|string
 	 */
 	function getView() {
 		return [$this->view, $this->viewOptions, $this->viewEngine];

@@ -9,6 +9,15 @@ namespace metadigit\core\http;
 use const metadigit\core\ACL_ROUTES;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
+	metadigit\core\http\view\FileView,
+	metadigit\core\http\view\CsvView,
+	metadigit\core\http\view\ExcelView,
+	metadigit\core\http\view\JsonView,
+	metadigit\core\http\view\PhpView,
+	metadigit\core\http\view\PhpTALView,
+//	metadigit\core\http\view\SmartyView,
+//	metadigit\core\http\view\TwigView,
+	metadigit\core\http\view\XSendFileView,
 	metadigit\core\trace\Tracer;
 /**
  * High speed implementation of HTTP Dispatcher based on URLs.
@@ -30,15 +39,15 @@ class Dispatcher {
 	/** View engines mapping
 	 * @var array */
 	protected $viewEngines = [
-		ENGINE_FILE			=> 'metadigit\core\http\view\FileView',
-		ENGINE_FILE_CSV		=> 'metadigit\core\http\view\CsvView',
-		ENGINE_FILE_EXCEL	=> 'metadigit\core\http\view\ExcelView',
-		ENGINE_JSON			=> 'metadigit\core\http\view\JsonView',
-		ENGINE_PHP			=> 'metadigit\core\http\view\PhpView',
-		ENGINE_PHP_TAL		=> 'metadigit\core\http\view\PhpTALView',
-//		ENGINE_SMARTY		=> 'metadigit\core\http\view\SmartyView',
-//		ENGINE_TWIG			=> 'metadigit\core\http\view\TwigView',
-		ENGINE_X_SEND_FILE	=> 'metadigit\core\http\view\XSendFileView'
+		ENGINE_FILE			=> FileView::class,
+		ENGINE_FILE_CSV		=> CsvView::class,
+		ENGINE_FILE_EXCEL	=> ExcelView::class,
+		ENGINE_JSON			=> JsonView::class,
+		ENGINE_PHP			=> PhpView::class,
+		ENGINE_PHP_TAL		=> PhpTALView::class,
+//		ENGINE_SMARTY		=> SmartyView::class,
+//		ENGINE_TWIG			=> TwigView::class,
+		ENGINE_X_SEND_FILE	=> XSendFileView::class
 	];
 
 	function dispatch(Request $Req, Response $Res) {
@@ -47,7 +56,7 @@ class Dispatcher {
 		try {
 			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
-				$Controller = sys::context()->get($this->doRoute($Req), 'metadigit\core\http\ControllerInterface');
+				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {

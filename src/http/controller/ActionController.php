@@ -36,10 +36,20 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * @var string */
 	protected $viewEngine = null;
 
+	/**
+	 * ActionController constructor.
+	 * @throws Exception
+	 */
 	function __construct() {
 		list($this->_actions, $this->_routes) = ActionControllerReflection::analyzeActions($this);
 	}
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @return null
+	 * @throws Exception
+	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
 		$action = $this->resolveActionMethod($Req);
@@ -100,7 +110,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 */
 	protected function resolveActionMethod(Request $Req) {
 		$action = null;
-		foreach($this->_routes as $actioName=>$params) {
+		foreach($this->_routes as $actionName=>$params) {
 			if(
 				($params['method'] == '*' || $params['method'] == $_SERVER['REQUEST_METHOD'])
 				&&
@@ -109,7 +119,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
 				}
-				$action = $actioName;
+				$action = $actionName;
 				break;
 			}
 		}

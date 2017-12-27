@@ -10,15 +10,23 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface;
 /**
  * XSendFile View
  * View engine to output a file using Apache/Nginx X-Sendfile special header.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class XSendFileView implements \metadigit\core\http\ViewInterface {
+class XSendFileView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!defined('XSENDFILE_PATH')) throw new Exception(261);
 		if(!defined('XSENDFILE_URL')) throw new Exception(262);

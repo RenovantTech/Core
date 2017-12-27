@@ -10,14 +10,15 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\util\excel\ExcelWriter,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface,
+	metadigit\core\util\excel\ExcelWriter;
 /**
  * Excel View
  * It outputs a XLS file to the client.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class ExcelView implements \metadigit\core\http\ViewInterface {
+class ExcelView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	const CONTENT_TYPE = 'application/vnd.ms-excel';
@@ -27,6 +28,13 @@ class ExcelView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	static private $template;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['EXCEL Template', self::$template]);

@@ -10,14 +10,15 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\util\csv\CsvWriter,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface,
+	metadigit\core\util\csv\CsvWriter;
 /**
  * CSV View
  * It outputs a CSV file to the client.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class CsvView implements \metadigit\core\http\ViewInterface {
+class CsvView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	const CONTENT_TYPE = 'text/csv';
@@ -27,6 +28,13 @@ class CsvView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	static private $template;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['CSV Template', self::$template]);

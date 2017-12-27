@@ -28,10 +28,20 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	 * @var string */
 	protected $viewEngine = null;
 
+	/**
+	 * AbstractController constructor.
+	 * @throws Exception
+	 */
 	function __construct() {
 		$this->_config = AbstractControllerReflection::analyzeHandle($this);
 	}
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @return null
+	 * @throws Exception
+	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
 		if(true!==$this->preHandle($Req, $Res)) {

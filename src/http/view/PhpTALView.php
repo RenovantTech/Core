@@ -10,13 +10,14 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface;
 /**
  * PhpTAL View
  * View engine that use the PhpTAL template engine.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class PhpTALView implements \metadigit\core\http\ViewInterface {
+class PhpTALView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	/** template suffixes */
@@ -28,6 +29,14 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	protected $postFilterClass = null;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 * @throws \PHPTAL_ConfigurationException
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		$template = null;
 		$suffixes = explode('|', static::TEMPLATE_SUFFIXES);
@@ -49,6 +58,11 @@ class PhpTALView implements \metadigit\core\http\ViewInterface {
 		$this->postFilterClass = $class;
 	}
 
+	/**
+	 * @param $template
+	 * @param Response $Res
+	 * @throws \PHPTAL_ConfigurationException
+	 */
 	private function execTemplate($template, Response $Res) {
 		// build PHPTAL object & set options
 		$PhpTAL = new \PHPTAL($template);

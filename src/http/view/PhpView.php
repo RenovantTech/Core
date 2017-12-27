@@ -10,13 +10,14 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface;
 /**
  * Php View.
  * View engine that use normal php templates.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class PhpView implements \metadigit\core\http\ViewInterface {
+class PhpView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	/** template suffix */
@@ -28,6 +29,13 @@ class PhpView implements \metadigit\core\http\ViewInterface {
 	 * @var string */
 	static private $template;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);

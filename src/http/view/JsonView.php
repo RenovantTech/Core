@@ -10,17 +10,25 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface;
 /**
  * Json View
  * It outputs JSON formatted data to the client.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class JsonView implements \metadigit\core\http\ViewInterface {
+class JsonView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
 	const CONTENT_TYPE = 'application/json';
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		sys::trace(LOG_DEBUG, T_INFO);
 		$Res->contentType(self::CONTENT_TYPE);

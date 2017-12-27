@@ -63,6 +63,11 @@ class Session {
 		else return false;
 	}
 
+	/**
+	 * @param $k
+	 * @param $v
+	 * @throws SessionException
+	 */
 	final function __set($k, $v){
 		if($k==='') throw new SessionException("The '$k' key must be a non-empty string");
 		if($this->_isLocked) throw new SessionException(61, [$this->_namespace]);

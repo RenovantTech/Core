@@ -7,6 +7,8 @@
  */
 namespace metadigit\core\http\controller;
 use metadigit\core\http\Exception,
+	metadigit\core\http\Request,
+	metadigit\core\http\Response,
 	metadigit\core\util\reflection\ReflectionClass;
 /**
  * Utility class for AbstractController
@@ -49,12 +51,12 @@ class AbstractControllerReflection {
 				foreach($ReflMethod->getParameters() as $i => $ReflParam) {
 					switch($i){
 						case 0:
-							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Request')
-								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Request']);
+							if(!$ReflParam->getClass()->getName() == Request::class)
+								throw new Exception(102, [$methodClass, $methodName, $i+1, Request::class]);
 							break;
 						case 1:
-							if(!$ReflParam->getClass()->getName() == 'metadigit\core\http\Response')
-								throw new Exception(102, [$methodClass,$methodName,$i+1,'metadigit\core\http\Response']);
+							if(!$ReflParam->getClass()->getName() == Response::class)
+								throw new Exception(102, [$methodClass, $methodName, $i+1, Response::class]);
 							break;
 						default:
 							$config['params'][$i]['name'] = $ReflParam->getName();

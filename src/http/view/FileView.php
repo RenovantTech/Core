@@ -10,15 +10,23 @@ use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+	metadigit\core\http\Exception,
+	metadigit\core\http\ViewInterface;
 /**
  * File View
  * It outputs a file to the client.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class FileView implements \metadigit\core\http\ViewInterface {
+class FileView implements ViewInterface {
 	use \metadigit\core\CoreTrait;
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @param null $resource
+	 * @param array|null $options
+	 * @throws Exception
+	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!file_exists($resource)) throw new Exception(201, ['File', $resource]);
 		sys::trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
