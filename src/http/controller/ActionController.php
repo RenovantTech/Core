@@ -26,12 +26,9 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 
 	/** Default action method to invoke. */
 	const DEFAULT_ACTION = 'index';
-	/** Controller actions methods configuration
+	/** Controller actions metadata (routing, params)
 	 * @var array */
-	protected $_actions = [];
-	/** Controller actions routing configuration
-	 * @var array */
-	protected $_routes = [];
+	protected $_config = [];
 	/** default View engine
 	 * @var string */
 	protected $viewEngine = null;
@@ -41,7 +38,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * @throws Exception
 	 */
 	function __construct() {
-		list($this->_actions, $this->_routes) = ActionControllerReflection::analyzeActions($this);
+		$this->_config = ActionControllerReflection::analyzeActions($this);
 	}
 
 	/**
@@ -56,12 +53,15 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
 			return;
 		}
-		$args = [$Req, $Res];
-		if(isset($this->_actions[$action]['params'])) {
-			foreach($this->_actions[$action]['params'] as $i => $param) {
+		$args = [];
+		if(isset($this->_config[$action]['params'])) {
+			foreach($this->_config[$action]['params'] as $i => $param) {
 				if(!is_null($param['class'])) {
-					$paramClass = $param['class'];
-					$args[$i] = new $paramClass($Req);
+					switch ($param['class']) {
+						case Request::class: $args[$i] = $Req; break;
+						case Response::class: $args[$i] = $Res; break;
+						default: $args[$i] = new $param['class']($Req);
+					}
 				} elseif (isset($param['type'])) {
 					switch($param['type']) {
 						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
@@ -85,7 +85,6 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * @param Request $Req current request
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
-	 * @throws Exception in case of errors
 	 */
 	protected function preHandle(Request $Req, Response $Res) {
 		return true;
@@ -95,7 +94,6 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @throws Exception in case of errors
 	 */
 	protected function postHandle(Request $Req, Response $Res) {
 	}
@@ -109,7 +107,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	 */
 	protected function resolveActionMethod(Request $Req) {
 		$action = null;
-		foreach($this->_routes as $actionName=>$params) {
+		foreach($this->_config as $actionName=>$params) {
 			if(
 				($params['method'] == '*' || $params['method'] == $_SERVER['REQUEST_METHOD'])
 				&&
@@ -122,7 +120,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 				break;
 			}
 		}
-		if(isset($this->_actions[$action])) return $action;
+		if(isset($this->_config[$action])) return $action;
 		http_response_code(404);
 		throw new Exception(111, [$this->_, $action.'Action']);
 	}

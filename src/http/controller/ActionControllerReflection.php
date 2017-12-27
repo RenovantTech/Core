@@ -7,8 +7,6 @@
  */
 namespace metadigit\core\http\controller;
 use metadigit\core\http\Exception,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
 	metadigit\core\util\reflection\ReflectionClass;
 /**
  * Utility class for ActionController
@@ -24,8 +22,7 @@ class ActionControllerReflection {
 	 * @throws Exception
 	 */
 	static function analyzeActions(ActionController $Controller) {
-		// check implementation methods signature
-		$actions = $routes = [];
+		$config = [];
 		$RefClass = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();
 		foreach($refMethods as $RefMethod) {
@@ -37,44 +34,33 @@ class ActionControllerReflection {
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
 			} elseif($RefMethod->isPublic() && substr($methodName,-6)=='Action') {
 				$action = substr($methodName,0,-6);
-				$actions[$action] = [];
+				$config[$action] = [];
 				// routing
 				$DocComment = $RefMethod->getDocComment();
 				if($DocComment->hasTag('routing')) {
 					$tag = $DocComment->getTag('routing');
-					$routes[$action]['method'] = isset($tag['method']) ? $tag['method'] : '*';
+					$config[$action]['method'] = isset($tag['method']) ? $tag['method'] : '*';
 					if(isset($tag['pattern'])) {
 						$pattern = str_replace('/', '\/', $tag['pattern']);
 						$pattern = preg_replace('/<(\w+)>/', '(?<$1>[^\/]+)', $pattern);
 						$pattern = preg_replace('/<(\w+):([^>]+)>/', '(?<$1>$2)', $pattern);
-						$routes[$action]['pattern'] = '/'.$pattern.'$/';
-					} else $routes[$action]['pattern'] = '/'.$action.'$/';
+						$config[$action]['pattern'] = '/'.$pattern.'$/';
+					} else $config[$action]['pattern'] = '/'.$action.'$/';
 				} else {
-					$routes[$action]['method'] = '*';
-					if($action == constant(get_class($Controller).'::DEFAULT_ACTION')) $routes[$action]['pattern'] = '/\/$/';
-					else $routes[$action]['pattern'] = '/'.$action.'$/';
+					$config[$action]['method'] = '*';
+					if($action == constant(get_class($Controller).'::DEFAULT_ACTION')) $config[$action]['pattern'] = '/\/$/';
+					else $config[$action]['pattern'] = '/'.$action.'$/';
 				}
 				// parameters
 				foreach($RefMethod->getParameters() as $i => $RefParam) {
-					switch($i){
-						case 0:
-							if(!$RefParam->getClass()->getName() == Request::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Request::class]);
-							break;
-						case 1:
-							if(!$RefParam->getClass()->getName() == Response::class)
-								throw new Exception(102, [$methodClass, $methodName, $i+1, Response::class]);
-							break;
-						default:
-							$actions[$action]['params'][$i]['name'] = $RefParam->getName();
-							$actions[$action]['params'][$i]['class'] = (!is_null($RefParam->getClass())) ? $RefParam->getClass()->getName() : null;
-							$actions[$action]['params'][$i]['type'] = $RefParam->getType();
-							$actions[$action]['params'][$i]['optional'] = $RefParam->isOptional();
-							$actions[$action]['params'][$i]['default'] = ($RefParam->isDefaultValueAvailable()) ? $RefParam->getDefaultValue() : null;
-					}
+					$config[$action]['params'][$i]['name'] = $RefParam->getName();
+					$config[$action]['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
+					$config[$action]['params'][$i]['type'] = $RefParam->getType();
+					$config[$action]['params'][$i]['optional'] = $RefParam->isOptional();
+					$config[$action]['params'][$i]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 				}
 			}
 		}
-		return [$actions, $routes];
+		return $config;
 	}
 }

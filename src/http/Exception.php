@@ -16,7 +16,6 @@ class Exception extends \metadigit\core\Exception {
 	const COD12 = 'Dispatcher Exception - View Engine "%s" not valid, must be resolved to a class implementing ViewInterface';
 	/* Controller - compile-time (user defined code checks) */
 	const COD101 = 'Code Syntax Exception - Controller %s->%s() method MUST be declared "protected"';
-	const COD102 = 'Code Syntax Exception - Controller method %s->%s(), parameter n°%s must be of type %s';
 	/* Controller - run-time */
 	const COD111 = 'Controller Exception - invalid handler method %s->%s()';
 	/* View - run-time */
