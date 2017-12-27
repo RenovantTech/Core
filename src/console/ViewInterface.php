@@ -6,8 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
 /**
  * MVC View for a CLI Request.
  * Implementations are responsible for rendering content, and exposing the model. A single view exposes multiple model attributes.

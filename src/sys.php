@@ -201,8 +201,8 @@ class sys {
 	 */
 	static function dispatch($api=PHP_SAPI) {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
-		self::$Req = ($api=='cli') ? new cli\Request : new http\Request;
-		self::$Res = ($api=='cli') ? new cli\Response : new http\Response;
+		self::$Req = ($api=='cli') ? new console\Request : new http\Request;
+		self::$Res = ($api=='cli') ? new console\Response : new http\Response;
 		$app = $dispatcherID = $namespace = null;
 		switch($api) {
 			case 'cli':

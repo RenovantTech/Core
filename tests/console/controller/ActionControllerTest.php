@@ -1,19 +1,20 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\controller\ActionController,
-	metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+use metadigit\core\console\ControllerInterface,
+	metadigit\core\console\controller\ActionController,
+	metadigit\core\console\Request,
+	metadigit\core\console\Response;
 
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ActionController = new \test\console\controller\ActionController;
-		$this->assertInstanceOf('metadigit\core\console\ControllerInterface', $ActionController);
-		$this->assertInstanceOf('metadigit\core\console\controller\ActionController', $ActionController);
+		$this->assertInstanceOf(ControllerInterface::class, $ActionController);
+		$this->assertInstanceOf(ActionController::class, $ActionController);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\console\controller\ActionController', '_actions');
-		$ReflProp->setAccessible(true);
-		$_actions = $ReflProp->getValue($ActionController);
+		$RefProp = new \ReflectionProperty(ActionController::class, '_actions');
+		$RefProp->setAccessible(true);
+		$_actions = $RefProp->getValue($ActionController);
 		$this->assertCount(6, $_actions);
 
 		$this->assertArrayHasKey('bar', $_actions);
@@ -38,9 +39,11 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
+	 * @param \test\console\controller\ActionController $ActionController
+	 * @return \test\console\controller\ActionController
 	 */
 	function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\controller\ActionController', 'resolveActionMethod');
+		$ReflMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
 		$ReflMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1'];
@@ -65,16 +68,18 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testResolveActionException() {
 		$ActionController2 = new \test\console\controller\ActionController2;
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\controller\ActionController', 'resolveActionMethod');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1','not-exists'];
 		$Req = new Request;
-		$ReflMethod->invoke($ActionController2, $Req);
+		$RefMethod->invoke($ActionController2, $Req);
 	}
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @param \test\console\controller\ActionController $ActionController
+	 * @throws \metadigit\core\console\Exception
 	 */
 	function testHandle(\test\console\controller\ActionController $ActionController) {
 		$_SERVER['argv'] = ['sys','mod1','action2','--id=7'];

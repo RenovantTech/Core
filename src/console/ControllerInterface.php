@@ -6,8 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
 /**
  * Controller interface.
  * Is the interface that MVC controller must implements.

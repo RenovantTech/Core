@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\cli;
+namespace metadigit\core\console;
 /**
  * CLI Request.
  * @author Daniele Sciacchitano <dan@metadigit.it>

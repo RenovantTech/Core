@@ -6,9 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
-
 /**
  * MVC Dispatch Event
  * Main event passed throughout MVC flow.
@@ -23,10 +20,10 @@ class DispatcherEvent extends \metadigit\core\event\Event {
 	const EVENT_EXCEPTION	= 'dispatcher:exception';
 
 	/** CLI Request
-	 * @var \metadigit\core\cli\Request */
+	 * @var Request */
 	protected $Request;
 	/** CLI Response
-	 * @var \metadigit\core\cli\Response */
+	 * @var Response */
 	protected $Response;
 	/** Controller, if any
 	 * @var ControllerInterface */
@@ -45,7 +42,7 @@ class DispatcherEvent extends \metadigit\core\event\Event {
 
 	/**
 	 * Get current CLI Request
-	 * @return \metadigit\core\cli\Request
+	 * @return Request
 	 */
 	function getRequest() {
 		return $this->Request;
@@ -53,7 +50,7 @@ class DispatcherEvent extends \metadigit\core\event\Event {
 
 	/**
 	 * Get current CLI Response
-	 * @return \metadigit\core\cli\Response
+	 * @return Response
 	 */
 	function getResponse() {
 		return $this->Response;

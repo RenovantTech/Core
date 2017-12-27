@@ -8,8 +8,8 @@
 namespace metadigit\core\console\controller;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
-	metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
+	metadigit\core\console\Request,
+	metadigit\core\console\Response,
 	metadigit\core\console\Exception;
 
 /**
@@ -26,10 +26,20 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 	 * @var array */
 	protected $_handle = [];
 
+	/**
+	 * AbstractController constructor.
+	 * @throws Exception
+	 */
 	function __construct() {
 		$this->_handle = AbstractControllerReflection::analyzeHandle($this);
 	}
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @return \metadigit\core\console\ViewInterface|mixed|null|string
+	 * @throws Exception
+	 */
 	function handle(Request $Req, Response $Res) {
 		if(true!==$this->preHandle($Req, $Res)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');

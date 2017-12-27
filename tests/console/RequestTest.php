@@ -1,6 +1,6 @@
 <?php
-namespace test\cli;
-use metadigit\core\cli\Request;
+namespace test\console;
+use metadigit\core\console\Request;
 
 class RequestTest extends \PHPUnit\Framework\TestCase {
 
@@ -9,7 +9,7 @@ class RequestTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'][] = 'sys foo';
 		$_SERVER['argv'][] = '--id=7';
 		$Request = new Request;
-		$this->assertInstanceOf('metadigit\core\cli\Request', $Request);
+		$this->assertInstanceOf(Request::class, $Request);
 		$this->assertEquals(7, $Request->get('id'));
 
 		$argv[] = 'sys foo';

@@ -1,7 +1,7 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+use metadigit\core\console\Request,
+	metadigit\core\console\Response;
 
 class SimpleController implements \metadigit\core\console\ControllerInterface {
 

@@ -1,20 +1,21 @@
 <?php
 namespace test\console\view;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
+use metadigit\core\console\Request,
+	metadigit\core\console\Response,
 	metadigit\core\console\view\PhpView;
 
 class PhpViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$PhpView = new PhpView;
-		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $PhpView);
+		$this->assertInstanceOf(PhpView::class, $PhpView);
 		return $PhpView;
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param PhpView $PhpView
+	 * @throws \metadigit\core\console\Exception
 	 */
 	function testRender(PhpView $PhpView) {
 		$this->expectOutputRegex('/<title>index<\/title>/');

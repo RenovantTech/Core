@@ -1,19 +1,20 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
+use metadigit\core\console\ControllerInterface,
+	metadigit\core\console\Request,
+	metadigit\core\console\Response,
 	metadigit\core\console\controller\AbstractController;
 
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$AbstractController = new \test\console\controller\AbstractController;
-		$this->assertInstanceOf('metadigit\core\console\ControllerInterface', $AbstractController);
+		$this->assertInstanceOf(ControllerInterface::class, $AbstractController);
 		$this->assertInstanceOf(AbstractController::class, $AbstractController);
 
-		$ReflProp = new \ReflectionProperty(AbstractController::class, '_handle');
-		$ReflProp->setAccessible(true);
-		$_handle = $ReflProp->getValue($AbstractController);
+		$RefProp = new \ReflectionProperty(AbstractController::class, '_handle');
+		$RefProp->setAccessible(true);
+		$_handle = $RefProp->getValue($AbstractController);
 
 		$this->assertEquals('name', $_handle['params'][2]['name']);
 		$this->assertNull($_handle['params'][2]['class']);
@@ -27,6 +28,7 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param \test\console\controller\AbstractController $AbstractController
+	 * @throws \metadigit\core\console\Exception
 	 */
 	function testHandle(\test\console\controller\AbstractController $AbstractController) {
 		$_SERVER['argv'] = ['sys','db','--name=Jack'];

@@ -8,8 +8,8 @@
 namespace metadigit\core\console\controller;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
-	metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
+	metadigit\core\console\Request,
+	metadigit\core\console\Response,
 	metadigit\core\console\Exception;
 /**
  * MVC action Controller implementation.
@@ -32,10 +32,20 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 	 * @var array */
 	protected $_actions = [];
 
+	/**
+	 * ActionController constructor.
+	 * @throws Exception
+	 */
 	function __construct() {
 		$this->_actions = ActionControllerReflection::analyzeActions($this);
 	}
 
+	/**
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @return \metadigit\core\console\ViewInterface|mixed|null|string
+	 * @throws Exception
+	 */
 	function handle(Request $Req, Response $Res) {
 		$action = $this->resolveActionMethod($Req);
 		if(true!==$this->preHandle($Req, $Res)) {

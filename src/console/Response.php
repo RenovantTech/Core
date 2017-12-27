@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\cli;
+namespace metadigit\core\console;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys;
 /**
@@ -24,7 +24,7 @@ class Response {
 	 * @var int */
 	private $size = 0;
 	/** Current View/viewName
-	 * @var \metadigit\core\console\ViewInterface|string|null */
+	 * @var ViewInterface|string|null */
 	private $View = null;
 
 	function __construct() {
@@ -72,7 +72,7 @@ class Response {
 
 	/**
 	 * Get current View / viewName
-	 * @return \metadigit\core\console\ViewInterface|null|string
+	 * @return ViewInterface|null|string
 	 */
 	function getView() {
 		return $this->View;
@@ -111,7 +111,7 @@ class Response {
 
 	/**
 	 * Set the View / viewName to be rendered with Response data
-	 * @param \metadigit\core\console\ViewInterface|string $view
+	 * @param ViewInterface|string $view
 	 */
 	function setView($view) {
 		$this->View = $view;

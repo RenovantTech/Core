@@ -2,8 +2,8 @@
 namespace test\console;
 use metadigit\core\sys,
 	metadigit\core\console\Dispatcher,
-	metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+	metadigit\core\console\Request,
+	metadigit\core\console\Response;
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
@@ -29,26 +29,26 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @return Dispatcher
 	 */
 	function testDoRoute(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'doRoute');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'doRoute');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['console','db','optimize'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'db optimize');
-		$this->assertSame('test.console.AbstractController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.AbstractController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','mod1','foo'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo');
-		$this->assertSame('test.console.ActionController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.ActionController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','cron','backup'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'cron backup');
-		$this->assertSame('test.console.SimpleController', $ReflMethod->invoke($Dispatcher, $Req, $Res));
+		$this->assertSame('test.console.SimpleController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		return $Dispatcher;
 	}
@@ -58,18 +58,18 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveView');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 index');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'index', $Req, $Res);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'index', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/index', $Req, $Res);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, '/mod1/index', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 
@@ -78,22 +78,22 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Res = new Response;
 		$Req->setAttribute('APP_URI', 'mod1 foo1');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
-		list($View, $resource) = $ReflMethod->invoke($Dispatcher, '/mod1/foo1', $Req, $Res);
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, '/mod1/foo1', $Req, $Res);
 		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 	}
 
 	/**
-	 * @depends               testConstruct
+	 * @depends testConstruct
 	 * @expectedException \metadigit\core\console\Exception
 	 * @expectedExceptionCode 12
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
-		$ReflMethod = new \ReflectionMethod('metadigit\core\console\Dispatcher', 'resolveView');
+		$ReflMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
 		$ReflMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1','indexERR'];
@@ -106,6 +106,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');

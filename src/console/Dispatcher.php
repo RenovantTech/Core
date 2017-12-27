@@ -8,8 +8,6 @@
 namespace metadigit\core\console;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
-	metadigit\core\cli\Request,
-	metadigit\core\cli\Response,
 	metadigit\core\trace\Tracer;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
@@ -31,9 +29,9 @@ class Dispatcher {
 	/** View engines mapping
 	 * @var array */
 	protected $viewEngines = [
-		'php'		=> 'metadigit\core\console\view\PhpView'
-//		'smarty'	=> 'metadigit\core\console\view\SmartyView'
-//		'twig'		=> 'metadigit\core\console\view\TwigView'
+		'php'		=> view\PhpView::class
+//		'smarty'	=> view\SmartyView::class
+//		'twig'		=> view\TwigView::class
 	];
 
 	function dispatch(Request $Req, Response $Res) {
@@ -41,7 +39,7 @@ class Dispatcher {
 		$DispatcherEvent = new DispatcherEvent($Req, $Res);
 		try {
 			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				$Controller = sys::context()->get($this->doRoute($Req, $Res), 'metadigit\core\console\ControllerInterface');
+				$Controller = sys::context()->get($this->doRoute($Req, $Res), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {

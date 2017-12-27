@@ -1,13 +1,13 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\cli\Request,
-	metadigit\core\cli\Response;
+use metadigit\core\console\Request,
+	metadigit\core\console\Response;
 
 class AbstractController extends \metadigit\core\console\controller\AbstractController {
 
 	/**
-	 * @param \metadigit\core\cli\Request $Req
-	 * @param \metadigit\core\cli\Response $Res
+	 * @param Request $Req
+	 * @param Response $Res
 	 * @param string $name
 	 */
 	function doHandle(Request $Req, Response $Res, $name='Tom') {
