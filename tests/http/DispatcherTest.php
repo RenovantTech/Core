@@ -2,7 +2,6 @@
 namespace test\http;
 use const metadigit\core\http\ENGINE_PHP;
 use metadigit\core\sys,
-	metadigit\core\context\Context,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Dispatcher,
@@ -10,11 +9,17 @@ use metadigit\core\sys,
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
+	/**
+	 * @return Dispatcher
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
 		define('metadigit\core\APP_URI', '/');
 		new Request;
 		new Response;
+		/** @var Dispatcher $Dispatcher */
 		$Dispatcher = sys::context()->container()->get('test.http.Dispatcher');
 
 		$RefProp = new \ReflectionProperty('metadigit\core\http\Dispatcher', 'routes');
@@ -32,8 +37,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @param Dispatcher $Dispatcher
 	 * @return Dispatcher
 	 */
-	function testResolveController(Dispatcher $Dispatcher) {
-		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
+	function testDoRoute(Dispatcher $Dispatcher) {
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'doRoute');
 		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/home';
@@ -61,13 +66,13 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends               testConstruct
+	 * @depends testConstruct
 	 * @expectedException \metadigit\core\http\Exception
 	 * @expectedExceptionCode 11
 	 * @param Dispatcher $Dispatcher
 	 */
-	function testResolveControllerException11(Dispatcher $Dispatcher) {
-		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'resolveController');
+	function testDoRouteException11(Dispatcher $Dispatcher) {
+		$RefMethod = new \ReflectionMethod('metadigit\core\http\Dispatcher', 'doRoute');
 		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/not-exists/foo';

@@ -12,7 +12,7 @@ namespace metadigit\core\http;
  */
 class Exception extends \metadigit\core\Exception {
 	/* Dispatcher */
-	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL/CMD: %s';
+	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL: %s';
 	const COD12 = 'Dispatcher Exception - View Engine "%s" not valid, must be resolved to a class implementing ViewInterface';
 	/* Controller - compile-time (user defined code checks) */
 	const COD101 = 'Code Sintax Exception - Controller %s->%s() method MUST be declared "protected"';

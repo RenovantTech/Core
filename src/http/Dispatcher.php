@@ -47,7 +47,7 @@ class Dispatcher {
 		try {
 			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
-				$Controller = sys::context()->get($this->resolveController($Req), 'metadigit\core\http\ControllerInterface');
+				$Controller = sys::context()->get($this->doRoute($Req), 'metadigit\core\http\ControllerInterface');
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {
@@ -78,10 +78,10 @@ class Dispatcher {
 	 * @return string Controller ID
 	 * @throws Exception
 	 */
-	protected function resolveController(Request $Req) {
+	protected function doRoute(Request $Req) {
 		foreach($this->routes as $url => $controllerID) {
 			if(fnmatch($url, $Req->getAttribute('APP_URI'))) {
-				sys::trace(LOG_DEBUG, T_INFO, $url.' => '.$controllerID, null, $this->_.'->'.__FUNCTION__);
+				sys::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$url.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
