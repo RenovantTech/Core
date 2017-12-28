@@ -16,6 +16,8 @@ class SysException extends Exception {
 	const ERR22 = 'FATAL ERROR: BASE_DIR not defined in your index.php!';
 	const ERR23 = 'FATAL ERROR: DATA_DIR not defined in your index.php!';
 	const ERR24 = 'FATAL ERROR: DATA_DIR "{1}" is NOT writable!';
+	const ERR25 = 'FATAL ERROR: CLI_BOOTSTRAP not defined in your index.php!';
+	const ERR26 = 'FATAL ERROR: CLI_PHP_BIN not defined in your index.php!';
 	const ERR29 = 'FATAL ERROR: please set magic_quotes_gpc Off in your php.ini';
 
 	// constructor

@@ -24,9 +24,9 @@ class sysBoot extends sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::log('sys bootstrap', LOG_INFO, 'kernel');
 		// directories
-		if(!defined('\metadigit\core\PUBLIC_DIR') && PHP_SAPI!='cli') die(SysException::ERR21);
-		if(!defined('\metadigit\core\BASE_DIR')) die(SysException::ERR22);
-		if(!defined('\metadigit\core\DATA_DIR')) die(SysException::ERR23);
+		if(!defined(__NAMESPACE__.'\PUBLIC_DIR') && PHP_SAPI!='cli') die(SysException::ERR21);
+		if(!defined(__NAMESPACE__.'\BASE_DIR')) die(SysException::ERR22);
+		if(!defined(__NAMESPACE__.'\DATA_DIR')) die(SysException::ERR23);
 		if(!is_writable(DATA_DIR)) die(SysException::ERR24);
 		// DATA_DIR
 		if(!file_exists(ASSETS_DIR)) mkdir(ASSETS_DIR, 0770, true);
@@ -35,6 +35,9 @@ class sysBoot extends sys {
 		if(!file_exists(LOG_DIR)) mkdir(LOG_DIR, 0770, true);
 		if(!file_exists(TMP_DIR)) mkdir(TMP_DIR, 0770, true);
 		if(!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0770, true);
+		// CLI paths
+		if(!defined(__NAMESPACE__.'\CLI_BOOTSTRAP')) die(SysException::ERR25);
+		if(!defined(__NAMESPACE__.'\CLI_PHP_BIN')) die(SysException::ERR26);
 
 		$Sys = new sys();
 

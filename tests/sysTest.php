@@ -149,6 +149,13 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 */
+	function testExec() {
+		$this->assertInternalType(\PHPUnit\Framework\Constraint\IsType::TYPE_INT, sys::exec('sys'));
+	}
+
+	/**
+	 * @depends testInit
+	 */
 	function testPdo() {
 		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('sys-cache'));
 		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('mysql'));

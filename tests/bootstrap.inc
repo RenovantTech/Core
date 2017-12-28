@@ -10,8 +10,9 @@ const CACHE_DIR		= '/tmp/metadigit-core/cache/';
 const LOG_DIR		= '/tmp/metadigit-core/log/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
-// paths
-const CLI_BOOTSTRAP = __FILE__;
+// CLI paths
+const CLI_BOOTSTRAP	= __FILE__;
+const CLI_PHP_BIN	= '/usr/bin/php';
 // environment
 const SYS_YAML		= BASE_DIR.'sys.yml';
 const ENVIRONMENT	= 'PHPUNIT';
