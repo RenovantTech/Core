@@ -291,6 +291,21 @@ class sys {
 	}
 
 	/**
+	 * CmdManager helper
+	 * @return console\CmdManager
+	 * @throws container\ContainerException
+	 * @throws util\yaml\YamlException
+	 */
+	static function cmd() {
+		static $CmdManager;
+		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get('sys.CmdManager')) {
+			$CmdManager = self::$Container->get('sys.CmdManager');
+			self::cache('sys')->set('sys.CmdManager', $CmdManager);
+		}
+		return $CmdManager;
+	}
+
+	/**
 	 * Context helper
 	 * @return Context
 	 */

@@ -1,7 +1,8 @@
 <?php
 namespace test;
 use metadigit\core\sys,
-	metadigit\core\sysboot;
+	metadigit\core\sysboot,
+	metadigit\core\console\CmdManager;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
@@ -11,7 +12,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testBoot() {
-		list($Sys, $namespaces) = sysboot::boot();
+		list($Sys, $namespaces) = sysBoot::boot();
 
 		$this->assertArrayHasKey('metadigit\core', $namespaces);
 		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['metadigit\core']);
@@ -144,6 +145,14 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testCache() {
 		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', sys::cache('sys'));
+	}
+
+	/**
+	 * @depends testInit
+	 */
+	function testCmd() {
+		$CmdManager = sys::cmd();
+		$this->assertInstanceOf(CmdManager::class, $CmdManager);
 	}
 
 	/**

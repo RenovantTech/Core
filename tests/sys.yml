@@ -116,3 +116,16 @@ log:
 trace:
   level:      LOG_DEBUG
   storeFn:    null
+
+
+
+objects:
+
+# =========================================================
+# CmdManager service
+# =========================================================
+  sys.CmdManager:
+    class: metadigit\core\console\CmdManager
+    constructor:
+      pdo:    sqlite
+      table:  sys_cmd
