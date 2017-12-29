@@ -36,12 +36,12 @@ class Container {
 	 * Build an Object using reflection
 	 * @param string $id Object ID
 	 * @param string $class Object class
-	 * @param array $args constructor args
+	 * @param array|null $args constructor args
 	 * @param array $properties Object properties
 	 * @return object
 	 * @internal
 	 */
-	function build($id, $class, $args, $properties) {
+	function build($id, $class, array $args=null, array $properties=[]) {
 		$RClass = new \ReflectionClass($class);
 		$Obj = (empty($args)) ? $RClass->newInstance() : $RClass->newInstanceArgs($args);
 		$RObject = new \ReflectionObject($Obj);
