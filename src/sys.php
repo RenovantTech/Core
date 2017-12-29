@@ -324,17 +324,6 @@ class sys {
 	}
 
 	/**
-	 * CLI command execution
-	 * @param string $cmd
-	 * @return integer command process PID
-	 */
-	static function exec($cmd) {
-		$cmd = CLI_PHP_BIN.' '.CLI_BOOTSTRAP.' '.$cmd;
-		self::trace(LOG_DEBUG, T_INFO, $cmd, null, __METHOD__);
-		return (int) shell_exec('nohup '.$cmd.' > /dev/null 2>&1 & echo $!');
-	}
-
-	/**
 	 * Parse class or namespace, returning: namespace, class name (without namespace), full path, directory, file
 	 * @param string $path
 	 * @param int|null $return

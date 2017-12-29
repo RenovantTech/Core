@@ -11,6 +11,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(realpath(__DIR__.'/../src/'), \metadigit\core\DIR);
 	}
 
+	/**
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
 	function testBoot() {
 		list($Sys, $namespaces) = sysBoot::boot();
 
@@ -80,6 +83,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testBoot
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testInit() {
 		sys::init();
@@ -126,9 +130,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue(\metadigit\core\ACL_ROUTES);
 		$this->assertTrue(\metadigit\core\ACL_OBJECTS);
 		$this->assertTrue(\metadigit\core\ACL_ORM);
-		$ReflProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
-		$ReflProp->setAccessible(true);
-		$pdo = $ReflProp->getValue($ACL);
+		$RefProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
+		$RefProp->setAccessible(true);
+		$pdo = $RefProp->getValue($ACL);
 		$this->assertEquals('mysql', $pdo);
 	}
 
@@ -153,13 +157,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	function testCmd() {
 		$CmdManager = sys::cmd();
 		$this->assertInstanceOf(CmdManager::class, $CmdManager);
-	}
-
-	/**
-	 * @depends testInit
-	 */
-	function testExec() {
-		$this->assertInternalType(\PHPUnit\Framework\Constraint\IsType::TYPE_INT, sys::exec('sys'));
 	}
 
 	/**
