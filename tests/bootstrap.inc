@@ -28,9 +28,9 @@ require __DIR__.'/../src/sys.php';
 require __DIR__.'/../vendor/autoload.php';
 
 // clean DATA_DIR
-exec('rm -fr '.DATA_DIR);
+//exec('rm -fr '.DATA_DIR);
 @mkdir(DATA_DIR, 0777, true);
 register_shutdown_function(function() {
-	exec('rm -fr '.DATA_DIR);
+	exec('nohup sleep 2 && rm -fr '.DATA_DIR);
 });
 sys::init();
