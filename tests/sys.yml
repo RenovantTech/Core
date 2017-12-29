@@ -79,6 +79,15 @@ cache:
     params:   ['sqlite', 'cache', false]
 
 # =========================================================
+# CmdManager service
+# =========================================================
+sys.CmdManager:
+  # class: metadigit\core\console\CmdManager
+  constructor:
+    pdo:    sqlite
+    table:  sys_cmd
+
+# =========================================================
 # DB service
 # =========================================================
 database:
@@ -119,13 +128,4 @@ trace:
 
 
 
-objects:
 
-# =========================================================
-# CmdManager service
-# =========================================================
-  sys.CmdManager:
-    class: metadigit\core\console\CmdManager
-    constructor:
-      pdo:    sqlite
-      table:  sys_cmd

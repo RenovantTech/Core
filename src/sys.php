@@ -7,13 +7,15 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\container\Container,
+use metadigit\core\console\CmdManager,
+	metadigit\core\container\Container,
 	metadigit\core\context\Context,
 	metadigit\core\context\ContextException,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
-	metadigit\core\log\Logger;
+	metadigit\core\log\Logger,
+	metadigit\core\util\yaml\Yaml;
 /**
  * System Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -293,13 +295,13 @@ class sys {
 	/**
 	 * CmdManager helper
 	 * @return console\CmdManager
-	 * @throws container\ContainerException
 	 * @throws util\yaml\YamlException
 	 */
 	static function cmd() {
 		static $CmdManager;
 		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get('sys.CmdManager')) {
-			$CmdManager = self::$Container->get('sys.CmdManager');
+			$yaml = Yaml::parseFile(SYS_YAML, 'sys.CmdManager');
+			$CmdManager = self::$Container->build('sys.CmdManager', CmdManager::class, $yaml['constructor']);
 			self::cache('sys')->set('sys.CmdManager', $CmdManager);
 		}
 		return $CmdManager;

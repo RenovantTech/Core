@@ -153,10 +153,21 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testCmd() {
 		$CmdManager = sys::cmd();
 		$this->assertInstanceOf(CmdManager::class, $CmdManager);
+
+		$RefProp = new \ReflectionProperty(CmdManager::class, 'pdo');
+		$RefProp->setAccessible(true);
+		$pdo = $RefProp->getValue($CmdManager);
+		$this->assertEquals('sqlite', $pdo);
+
+		$RefProp = new \ReflectionProperty(CmdManager::class, 'table');
+		$RefProp->setAccessible(true);
+		$table = $RefProp->getValue($CmdManager);
+		$this->assertEquals('sys_cmd', $table);
 	}
 
 	/**
