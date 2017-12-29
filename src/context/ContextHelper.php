@@ -15,33 +15,46 @@ use metadigit\core\sys;
 class ContextHelper extends sys {
 
 	/**
-	 * @return array[Context]
+	 * Get all contexts namespaces
+	 * @return array
 	 * @throws \metadigit\core\container\ContainerException
 	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws ContextException
 	 */
 	static function getAllContexts() {
-		$contexts = [];
+		$namespaces = [];
 		// scan global namespaces
 		$files = scandir(\metadigit\core\BASE_DIR);
 		foreach($files as $file) {
 			if(is_file(\metadigit\core\BASE_DIR.$file) && substr($file,-12)=='-context.yml') {
-				$contexts[] = sys::context()->init(substr($file, 0, -12));
+				$namespace = substr($file, 0, -12);
+				$namespaces[] = $namespace;
+				sys::context()->init($namespace);
 			}
 		}
 		// iterate on namespaces directories
 		foreach(self::$namespaces as $namespace => $nsDir) {
-			self::scanNamespaceDir($namespace, $nsDir, $contexts);
+			self::scanNamespaceDir($namespace, $nsDir, $namespaces);
 		}
-		return $contexts;
+		return $namespaces;
 	}
 
-	static private function scanNamespaceDir($namespace, $dir, &$contexts) {
+	/**
+	 * @param $namespace
+	 * @param $dir
+	 * @param $namespaces
+	 * @throws ContextException
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\event\EventDispatcherException
+	 */
+	static private function scanNamespaceDir($namespace, $dir, &$namespaces) {
 		$files = scandir($dir);
 		foreach($files as $file) {
 			if(is_file($dir.'/'.$file) && $file=='context.yml') {
-				$contexts[] = sys::context()->init(str_replace('\\', '.', $namespace));
+				$namespaces[] = $namespace;
+				sys::context()->init(str_replace('\\', '.', $namespace));
 			} elseif(is_dir($dir.'/'.$file) && !in_array($file, ['.','..'])) {
-				self::scanNamespaceDir($namespace.'\\'.$file, $dir.'/'.$file, $contexts);
+				self::scanNamespaceDir($namespace.'\\'.$file, $dir.'/'.$file, $namespaces);
 			}
 		}
 	}
