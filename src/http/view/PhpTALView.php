@@ -18,7 +18,6 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class PhpTALView implements ViewInterface {
-	use \metadigit\core\CoreTrait;
 
 	/** template suffixes */
 	const TEMPLATE_SUFFIXES = '.html|.xml';
@@ -42,7 +41,7 @@ class PhpTALView implements ViewInterface {
 		$suffixes = explode('|', static::TEMPLATE_SUFFIXES);
 		foreach($suffixes as $suffix) {
 			if(file_exists($template = $Req->getAttribute('RESOURCES_DIR').$resource.$suffix)) {
-				sys::trace(LOG_DEBUG, T_INFO, 'template: '.$template);
+				sys::trace(LOG_DEBUG, T_INFO, 'template: '.$template, null, 'sys.http.PhpTALView->render');
 				$this->execTemplate($template, $Res);
 				return;
 			}
@@ -71,11 +70,11 @@ class PhpTALView implements ViewInterface {
 		if(!file_exists(\metadigit\core\CACHE_DIR.'phptal')) mkdir(\metadigit\core\CACHE_DIR.'phptal', 0750);
 		$PhpTAL->setPhpCodeDestination(\metadigit\core\CACHE_DIR.'phptal');
 		if(!is_null($class = $this->preFilterClass)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class);
+			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class, null, 'sys.http.PhpTALView->execTemplate');
 			$PhpTAL->addPreFilter(new $class);
 		}
 		if(!is_null($class = $this->postFilterClass)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class);
+			sys::trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class, null, 'sys.http.PhpTALView->execTemplate');
 			$PhpTAL->setPostFilter(new $class);
 		}
 		// assign Model values

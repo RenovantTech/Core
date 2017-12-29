@@ -8,6 +8,7 @@
 namespace metadigit\core\console;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
+	metadigit\core\console\view\PhpView,
 	metadigit\core\trace\Tracer;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
@@ -29,7 +30,7 @@ class Dispatcher {
 	/** View engines mapping
 	 * @var array */
 	protected $viewEngines = [
-		'php'		=> view\PhpView::class
+		'php'		=> PhpView::class
 //		'smarty'	=> view\SmartyView::class
 //		'twig'		=> view\TwigView::class
 	];

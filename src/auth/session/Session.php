@@ -43,6 +43,9 @@ class Session {
 	 * @var \SessionHandlerInterface */
 	protected $Handler;
 
+	/**
+	 * @throws SessionException
+	 */
 	function start() {
 		if(PHP_SAPI=='cli') return;
 		if(session_status() == PHP_SESSION_ACTIVE) throw new SessionException(11);
@@ -59,7 +62,7 @@ class Session {
 	 * Destroys all of the data associated with the current session.
 	 */
 	function destroy() {
-		sys::trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO, null, null, 'sys.auth.Session->destroy');
 		session_destroy();
 		if (isset($_COOKIE[$this->cookie['name']])) setcookie($this->cookie['name'], false, 315554400 /* 1980-01-01 */, $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
 	}

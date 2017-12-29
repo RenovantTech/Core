@@ -19,7 +19,6 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class ExcelView implements ViewInterface {
-	use \metadigit\core\CoreTrait;
 
 	const CONTENT_TYPE = 'application/vnd.ms-excel';
 	/** template suffix */
@@ -38,7 +37,7 @@ class ExcelView implements ViewInterface {
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['EXCEL Template', self::$template]);
-		sys::trace(LOG_DEBUG, T_INFO, 'template: '.self::$template);
+		sys::trace(LOG_DEBUG, T_INFO, 'template: '.self::$template, null, 'sys.http.ExcelView->render');
 		$fileName = $options['fileName'] ?? pathinfo($resource, PATHINFO_FILENAME);
 		$Res->contentType(self::CONTENT_TYPE);
 		header('Content-Disposition: attachment; filename='.$fileName.'.xls');

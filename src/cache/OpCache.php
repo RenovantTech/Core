@@ -14,6 +14,7 @@ use metadigit\core\sys;
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class OpCache implements CacheInterface {
+	use \metadigit\core\CoreTrait;
 
 	/** Write buffer
 	 * @var array */
@@ -34,25 +35,26 @@ class OpCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($id, $writeBuffer=false) {
+		$this->_ = 'sys.cache'.strtoupper($id);
 		$this->id = $id;
 		$DIR = CACHE_DIR.'opc-'.$id.'/';
 		$this->writeBuffer = (boolean) $writeBuffer;
-		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$DIR, null, $this->id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$DIR, null, $this->_);
 		mkdir($DIR, 0755, true);
 	}
 
 	function get($id) {
 		if(isset($this->cache[$id])) {
-			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
 			return $this->cache[$id];
 		} else {
 			@include($this->_file($this->id, $id));
 			$value = (isset($data) && isset($expire) && ($expire==0 || $expire>time())) ? $data: false;
 			if($value===false) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->id);
+				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
 				return false;
 			}
-			sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
 			return $this->cache[$id] = $value;
 		}
 	}
@@ -64,10 +66,10 @@ class OpCache implements CacheInterface {
 
 	function set($id, $value, $expire=null, $tags=null) {
 		if($this->writeBuffer) {
-			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
 			self::$buffer[$this->id][] = [$id, $value, $expire, $tags];
 		} else {
-			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->id);
+			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 			$this->_write($this->id, $id, $value, $expire);
 		}
 		$this->cache[$id] = $value;
@@ -76,7 +78,7 @@ class OpCache implements CacheInterface {
 	}
 
 	function delete($id) {
-		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->id);
+		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 		if(isset($this->cache[$id])) unset($this->cache[$id]);
 		$file = $this->_file($this->id, $id);
 		return file_exists($file) ? unlink($file) : true;

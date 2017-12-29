@@ -18,7 +18,6 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class JsonView implements ViewInterface {
-	use \metadigit\core\CoreTrait;
 
 	const CONTENT_TYPE = 'application/json';
 
@@ -30,7 +29,7 @@ class JsonView implements ViewInterface {
 	 * @throws Exception
 	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
-		sys::trace(LOG_DEBUG, T_INFO);
+		sys::trace(LOG_DEBUG, T_INFO, null, null, 'sys.http.JsonView->render');
 		$Res->contentType(self::CONTENT_TYPE);
 		echo json_encode($Res->getData(), $options);
 		switch(json_last_error()) {

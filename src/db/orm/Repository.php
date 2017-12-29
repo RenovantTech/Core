@@ -89,6 +89,8 @@ class Repository {
 	 * Count entities by a set of Criteria
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer
+	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function count($criteriaExp=null) {
 		return $this->execCount($criteriaExp);
@@ -110,6 +112,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function delete($EntityOrKey, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
@@ -128,6 +131,7 @@ class Repository {
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer n° of deleted entities
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function deleteAll($limit, $orderExp=null, $criteriaExp=null) {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
@@ -140,6 +144,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|false Entity, false if not found
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function fetch($id, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$criteriaExp = Metadata::get($this->class)->pkCriteria($id);
@@ -155,6 +160,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|null Entity, NULL if not found
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function fetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		if($offset) $offset--;
@@ -171,6 +177,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function fetchAll($page=null, $pageSize=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
@@ -186,6 +193,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function insert($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
@@ -200,6 +208,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function update($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
@@ -221,6 +230,7 @@ class Repository {
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execCount($criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -240,6 +250,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execDeleteOne($Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
@@ -269,6 +280,7 @@ class Repository {
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer n° of deleted entities
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execDeleteAll($limit, $orderExp=null, $criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -292,6 +304,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object Entity
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execFetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -317,6 +330,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array entities
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execFetchAll($offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -341,6 +355,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execInsertOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($this->class);
@@ -379,6 +394,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function execUpdateOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($this->class);

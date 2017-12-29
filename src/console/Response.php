@@ -125,7 +125,7 @@ class Response {
 	 */
 	function send() {
 		$this->size = ob_get_length();
-		sys::trace(LOG_DEBUG, T_INFO, null, null. __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, null, null. 'sys.console.Response->send');
 		ob_flush();
 		ini_set('precision', 16);
 		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));

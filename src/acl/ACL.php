@@ -44,17 +44,20 @@ class ACL {
 	 */
 	function __construct($pdo='master', array $tables=null) {
 		$prevTraceFn = sys::traceFn('sys.ACL');
-		if($pdo) $this->pdo = $pdo;
-		if($tables) $this->tables = array_merge($this->tables, $tables);
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
-		$PDO = sys::pdo($this->pdo);
-		$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
-		$PDO->exec(str_replace(
-			['acl', 't_u2r', 't_users', 't_roles'],
-			[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
-			file_get_contents(__DIR__.'/sql/init-'.$driver.'.sql')
-		));
-		sys::traceFn($prevTraceFn);
+		try {
+			if ($pdo) $this->pdo = $pdo;
+			if ($tables) $this->tables = array_merge($this->tables, $tables);
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
+			$PDO = sys::pdo($this->pdo);
+			$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
+			$PDO->exec(str_replace(
+				['acl', 't_u2r', 't_users', 't_roles'],
+				[$this->tables['acl'], $this->tables['u2r'], $this->tables['users'], $this->tables['roles']],
+				file_get_contents(__DIR__ . '/sql/init-' . $driver . '.sql')
+			));
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**
@@ -86,9 +89,8 @@ class ACL {
 			}
 			sys::traceFn($prevTraceFn);
 			return true;
-		} catch (\Exception $Ex) {
+		} finally {
 			sys::traceFn($prevTraceFn);
-			throw $Ex;
 		}
 	}
 
@@ -112,9 +114,8 @@ class ACL {
 			}
 			sys::traceFn($prevTraceFn);
 			return true;
-		} catch (\Exception $Ex) {
+		} finally {
 			sys::traceFn($prevTraceFn);
-			throw $Ex;
 		}
 	}
 
@@ -138,12 +139,16 @@ class ACL {
 			}
 			sys::traceFn($prevTraceFn);
 			return true;
-		} catch (\Exception $Ex) {
+		} finally {
 			sys::traceFn($prevTraceFn);
-			throw $Ex;
 		}
 	}
 
+	/**
+	 * @param array $acl
+	 * @param $userId
+	 * @throws Exception
+	 */
 	protected function checkAction(array $acl, $userId) {
 		$actionCode = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_ACTION_CODE, $this->tables['acl'], $acl['action']))->fetchColumn();
 		if(
@@ -161,6 +166,12 @@ class ACL {
 		}
 	}
 
+	/**
+	 * @param array $acl
+	 * @param $userId
+	 * @return bool
+	 * @throws Exception
+	 */
 	protected function checkFilter(array $acl, $userId) {
 		$filterCode = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_FILTER_CODE, $this->tables['acl'], $acl['filter']))->fetchColumn();
 		$values1 = (array) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_MATCH_FILTER_USER, $this->tables['acl']))
@@ -182,7 +193,7 @@ class ACL {
 			$query = sys::pdo($this->pdo)->query(sprintf(self::SQL_FETCH_QUERY, $this->tables['acl'], $acl['filter_sql']))->fetchColumn();
 //echo "\t QUERY: $query \n";
 
-			// parse qyery params
+			// parse query params
 			$params = null;
 
 			// execute

@@ -18,7 +18,6 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class FileView implements ViewInterface {
-	use \metadigit\core\CoreTrait;
 
 	/**
 	 * @param Request $Req
@@ -29,7 +28,7 @@ class FileView implements ViewInterface {
 	 */
 	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
 		if(!file_exists($resource)) throw new Exception(201, ['File', $resource]);
-		sys::trace(LOG_DEBUG, T_INFO, 'file: '.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'file: '.$resource, null, 'sys.http.FileView->render');
 		$fileName = $options['fileName'] ?? pathinfo($resource, PATHINFO_FILENAME);
 		$Res->contentType((new \finfo(FILEINFO_MIME_TYPE))->file($resource));
 		header('Content-Disposition: attachment; filename='.$fileName.'.'.pathinfo($resource, PATHINFO_EXTENSION));

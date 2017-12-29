@@ -36,7 +36,7 @@ class PhpView implements \metadigit\core\console\ViewInterface {
 	function render(Request $Req, Response $Res, $resource) {
 		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
 		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);
-		sys::trace(LOG_DEBUG, T_INFO, 'render PHP template '.self::$template);
+		sys::trace(LOG_DEBUG, T_INFO, 'render PHP template '.self::$template, null, 'sys.console.PhpView->render');
 		self::$model = $Res->getData();
 		self::execTemplate();
 	}

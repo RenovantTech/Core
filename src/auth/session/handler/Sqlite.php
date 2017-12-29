@@ -52,7 +52,7 @@ class Sqlite implements \SessionHandlerInterface {
 	function __construct($pdo, $table='sessions') {
 		$this->pdo = $pdo;
 		$this->table = $table;
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, 'sys.auth.session.Sqlite->__construct');
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table, $table));
 	}
 

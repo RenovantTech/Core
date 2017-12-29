@@ -71,10 +71,14 @@ abstract class ActionController implements \metadigit\core\console\ControllerInt
 				}
 			}
 		}
-		sys::traceFn($this->_.'->'.$action.'Action');
-		sys::trace(LOG_DEBUG, T_INFO);
-		$View = call_user_func_array([$this,$action.'Action'], $args);
-		$this->postHandle($Req, $Res, $View);
+		$prevTraceFn = sys::traceFn($this->_.'->'.$action.'Action');
+		try {
+			sys::trace(LOG_DEBUG, T_INFO);
+			$View = call_user_func_array([$this,$action.'Action'], $args);
+			$this->postHandle($Req, $Res, $View);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**

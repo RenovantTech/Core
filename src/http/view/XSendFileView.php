@@ -18,7 +18,6 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class XSendFileView implements ViewInterface {
-	use \metadigit\core\CoreTrait;
 
 	/**
 	 * @param Request $Req
@@ -31,7 +30,7 @@ class XSendFileView implements ViewInterface {
 		if(!defined('XSENDFILE_PATH')) throw new Exception(261);
 		if(!defined('XSENDFILE_URL')) throw new Exception(262);
 		if(!file_exists(XSENDFILE_PATH.$resource)) throw new Exception(201, ['X-SendFile', XSENDFILE_PATH.$resource]);
-		sys::trace(LOG_DEBUG, T_INFO, 'file: '.XSENDFILE_PATH.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'file: '.XSENDFILE_PATH.$resource, null, 'sys.http.XSendFileView->render');
 		$fileName = $options['fileName'] ?? pathinfo(XSENDFILE_PATH.$resource, PATHINFO_FILENAME);
 		$Res->reset();
 		header('Content-Type: '.((new \finfo(FILEINFO_MIME_TYPE))->file(XSENDFILE_PATH.$resource)));
@@ -41,7 +40,7 @@ class XSendFileView implements ViewInterface {
 			$resource = XSENDFILE_PATH.$resource;
 		else
 			$resource = XSENDFILE_URL.$resource;
-		sys::trace(LOG_DEBUG, T_INFO, 'X-Sendfile: '.$resource);
+		sys::trace(LOG_DEBUG, T_INFO, 'X-Sendfile: '.$resource, null, 'sys.http.XSendFileView->render');
 		header('X-Accel-Redirect: '.$resource);
 		header('X-Sendfile: '.$resource);
 	}

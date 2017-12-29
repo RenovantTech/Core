@@ -27,7 +27,7 @@ class AUTH {
 	}
 
 	function init() {
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH module');
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH module', null, 'sys.AUTH->init');
 		if($this->enableJWT) {
 			// @TODO initialize JWT module
 		}

@@ -180,7 +180,7 @@ class Response {
 			if(substr($location,0,1)!='/') $url .= dirname($_SERVER['REQUEST_URI']).'/';
 			$location = $url.$location;
 		}
-		sys::trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, 'REDIRECT to '.$location, null, 'sys.http.Response->redirect');
 		header('Location: '.$location, true, $statusCode);
 		if(session_status() == PHP_SESSION_ACTIVE) session_write_close();
 	}
@@ -203,7 +203,7 @@ class Response {
 	function send() {
 		$this->size = ob_get_length();
 		if($this->size) header('Content-Type: '.(($this->contentType)?:self::DEFAULT_MIME));
-		sys::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_INFO, null, null, 'sys.http.Response->send');
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
 		ini_set('precision', 16);

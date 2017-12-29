@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core;
-use metadigit\core\context\Context;
 /**
  * Basic trait used by almost all framework classes.
  * It implements:

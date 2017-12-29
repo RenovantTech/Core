@@ -64,11 +64,15 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 				}
 			}
 		}
-		sys::traceFn($this->_.'->doHandle');
-		sys::trace(LOG_DEBUG, T_INFO);
-		$View = call_user_func_array([$this,'doHandle'], $args);
-		$this->postHandle($Req, $Res, $View);
-		return $View;
+		$prevTraceFn = sys::traceFn($this->_ . '->doHandle');
+		try {
+			sys::trace(LOG_DEBUG, T_INFO);
+			$View = call_user_func_array([$this, 'doHandle'], $args);
+			$this->postHandle($Req, $Res, $View);
+			return $View;
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**

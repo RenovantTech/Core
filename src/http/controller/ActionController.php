@@ -74,10 +74,14 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 				}
 			}
 		}
-		sys::traceFn($this->_.'->'.$action.'Action');
-		sys::trace(LOG_DEBUG, T_INFO);
-		call_user_func_array([$this, $action.'Action'], $args);
-		$this->postHandle($Req, $Res);
+		$prevTraceFn = sys::traceFn($this->_.'->'.$action.'Action');
+		try {
+			sys::trace(LOG_DEBUG, T_INFO);
+			call_user_func_array([$this, $action.'Action'], $args);
+			$this->postHandle($Req, $Res);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**

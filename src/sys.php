@@ -178,7 +178,7 @@ class sys {
 		ini_set('precision', 16);
 		defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
 		ini_restore('precision');
-		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		self::$traceFn = __METHOD__;
 		register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
 		self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 		if(PHP_SAPI != 'cli') session_write_close();
