@@ -33,6 +33,26 @@ class Container {
 	protected $objects = [];
 
 	/**
+	 * Build an Object using reflection
+	 * @param string $id Object ID
+	 * @param string $class Object class
+	 * @param array $args constructor args
+	 * @param array $properties Object properties
+	 * @return object
+	 * @internal
+	 */
+	function build($id, $class, $args, $properties) {
+		$RClass = new \ReflectionClass($class);
+		$Obj = (empty($args)) ? $RClass->newInstance() : $RClass->newInstanceArgs($args);
+		$RObject = new \ReflectionObject($Obj);
+		self::setProperty('_', $id, $Obj, $RObject);
+		foreach ($properties as $k=>$v) {
+			self::setProperty($k, $v, $Obj, $RObject);
+		}
+		return $Obj;
+	}
+
+	/**
 	 * Initialize namespace
 	 * @param string $namespace Container namespace
 	 * @param array|null $containerMaps
@@ -65,7 +85,7 @@ class Container {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
 			list($class, $args, $properties) = ContainerYamlParser::parseObject($id);
-			$this->objects[$id] = $Obj = ObjBuilder::build($id, $class, $args, $properties);
+			$this->objects[$id] = $Obj = $this->build($id, $class, $args, $properties);
 			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
@@ -118,5 +138,21 @@ class Container {
 	 */
 	function has($id, $class=null) {
 		return ( isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) ) ) ? true : false;
+	}
+
+	/**
+	 * Set Object property using reflection
+	 * @param string $k property name
+	 * @param mixed $v property value
+	 * @param object $Obj
+	 * @param \ReflectionObject $RObject
+	 */
+	static protected function setProperty($k, $v, $Obj, \ReflectionObject $RObject) {
+		if($RObject->hasProperty($k)) {
+			$RProperty = $RObject->getProperty($k);
+			$RProperty->setAccessible(true);
+			$RProperty->setValue($Obj, $v);
+			$RProperty->setAccessible(false);
+		}
 	}
 }
