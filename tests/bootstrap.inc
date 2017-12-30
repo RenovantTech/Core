@@ -8,6 +8,7 @@ const ASSETS_DIR	= '/tmp/metadigit-core/assets/';
 const BACKUP_DIR	= '/tmp/metadigit-core/backup/';
 const CACHE_DIR		= '/tmp/metadigit-core/cache/';
 const LOG_DIR		= '/tmp/metadigit-core/log/';
+const RUN_DIR		= '/tmp/metadigit-core/run/';
 const TMP_DIR		= '/tmp/metadigit-core/tmp/';
 const UPLOAD_DIR	= '/tmp/metadigit-core/upload/';
 // CLI paths

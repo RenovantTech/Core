@@ -33,6 +33,7 @@ class sysBoot extends sys {
 		if(!file_exists(BACKUP_DIR)) mkdir(BACKUP_DIR, 0770, true);
 		if(!file_exists(CACHE_DIR)) mkdir(CACHE_DIR, 0770, true);
 		if(!file_exists(LOG_DIR)) mkdir(LOG_DIR, 0770, true);
+		if(!file_exists(RUN_DIR)) mkdir(RUN_DIR, 0770, true);
 		if(!file_exists(TMP_DIR)) mkdir(TMP_DIR, 0770, true);
 		if(!file_exists(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0770, true);
 		// CLI paths
