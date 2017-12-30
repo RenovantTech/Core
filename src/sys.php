@@ -202,34 +202,55 @@ class sys {
 	 * @throws EventDispatcherException
 	 */
 	static function dispatch($api=PHP_SAPI) {
+		($api=='cli') ? self::dispatchCLI() : self::dispatchHTTP();
+	}
+
+	/**
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
+	 */
+	static protected function dispatchCLI() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
-		self::$Req = ($api=='cli') ? new console\Request : new http\Request;
-		self::$Res = ($api=='cli') ? new console\Response : new http\Response;
+		self::$Req = new console\Request;
+		self::$Res = new console\Response;
 		$app = $dispatcherID = $namespace = null;
-		switch($api) {
-			case 'cli':
-				foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
-					if(self::$Req->CMD(0) == $id) {
-						$app = $id;
-						$dispatcherID = $namespace.'.Dispatcher';
-						self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
-						break;
-					};
-				}
+		foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
+			if(self::$Req->CMD(0) == $id) {
+				$app = $id;
+				$dispatcherID = $namespace.'.Dispatcher';
+				self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
 				break;
-			default:
-				foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
-					$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
-					if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
-						$app = $id;
-						$namespace = $conf['namespace'];
-						$dispatcherID = $namespace.'.Dispatcher';
-						self::$Req->setAttribute('APP_URI', str_replace($conf['baseUrl'], '/', self::$Req->URI()));
-						break;
-					}
-				}
+			};
 		}
-		if(is_null($app)) throw new SysException(1, [PHP_SAPI, ($api=='cli') ? self::$Req->CMD() : self::$Req->URI()]);
+		if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
+		self::$Req->setAttribute('APP', $app);
+		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
+		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+	}
+
+	/**
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
+	 */
+	static protected function dispatchHTTP() {
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		self::$Req = new http\Request;
+		self::$Res = new http\Response;
+		$app = $dispatcherID = $namespace = null;
+		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
+			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
+			if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
+				$app = $id;
+				$namespace = $conf['namespace'];
+				$dispatcherID = $namespace.'.Dispatcher';
+				self::$Req->setAttribute('APP_URI', str_replace($conf['baseUrl'], '/', self::$Req->URI()));
+				break;
+			}
+		}
+		if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->URI()]);
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
