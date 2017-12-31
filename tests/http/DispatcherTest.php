@@ -5,7 +5,7 @@ use metadigit\core\sys,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Dispatcher,
-	metadigit\core\http\DispatcherEvent;
+	metadigit\core\http\Event;
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
@@ -94,11 +94,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', '/');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 		$Res = (new Response)->setView('/index', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 
@@ -107,11 +107,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', '/mod1/');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 		$Res = (new Response)->setView('/mod1/index', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 
@@ -121,11 +121,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', '/mod1/foo1');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('foo1', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 		$Res = (new Response)->setView('/mod1/foo1', null, ENGINE_PHP);
-		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 	}
@@ -146,7 +146,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = new Response;
 		$Res->setView('index', null, 'xxx');
-		$RefMethod->invoke($Dispatcher, $Req, $Res, new DispatcherEvent($Req, $Res));
+		$RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 	}
 
 	/**

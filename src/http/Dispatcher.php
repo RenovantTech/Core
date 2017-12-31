@@ -52,33 +52,33 @@ class Dispatcher {
 
 	function dispatch(Request $Req, Response $Res) {
 		$Controller = null;
-		$DispatcherEvent = new DispatcherEvent($Req, $Res);
+		$DispatcherEvent = new Event($Req, $Res);
 		try {
-			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
+			if(!sys::event(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
 				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
 			if($Controller) {
 				$Res->setView(null, null, $this->viewEngine);
-				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(Event::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
 			list($View, $viewResource, $viewOptions) = $this->resolveView($Req, $Res, $DispatcherEvent);
 			if($View) {
-				if(!sys::event(DispatcherEvent::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(Event::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
 					$View->render($Req, $Res, $viewResource, $viewOptions);
 				}
 			}
-			sys::event(DispatcherEvent::EVENT_RESPONSE, $DispatcherEvent);
+			sys::event(Event::EVENT_RESPONSE, $DispatcherEvent);
+			$Res->send();
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
-			sys::event(DispatcherEvent::EVENT_EXCEPTION, $DispatcherEvent);
+			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
 		}
-		$Res->send();
 	}
 
 	/**
@@ -103,19 +103,19 @@ class Dispatcher {
 	 * Resolve View name into an instantiated View object with template
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @param DispatcherEvent $DispatcherEvent
+	 * @param Event $Event
 	 * @return array $View, $resource, $viewOptions
 	 * @throws \Exception
 	 */
-	protected function resolveView(Request $Req, Response $Res, DispatcherEvent $DispatcherEvent) {
+	protected function resolveView(Request $Req, Response $Res, Event $Event) {
 		try {
-			list($view, $viewOptions, $viewEngine) = $Res->getView() ?: $DispatcherEvent->getView();
+			list($view, $viewOptions, $viewEngine) = $Res->getView() ?: $Event->getView();
 			if(!$viewEngine) return [null, null, null];
 			// detect View class
 			$viewClass = (array_key_exists($viewEngine, $this->viewEngines)) ? $this->viewEngines[$viewEngine] : $viewEngine;
 			if(!class_exists($viewClass) || $viewClass instanceof ViewInterface) throw new Exception(12, $viewEngine);
 			$View = new $viewClass;
-			$DispatcherEvent->setView($View);
+			$Event->setView($View);
 			// detect resource
 			if(!empty($view)) {
 				$resource = str_replace('//','/', (substr($view,0,1) != '/' ) ? dirname($Req->getAttribute('APP_URI').'*').'/'.$view : $view);
