@@ -37,32 +37,33 @@ class Dispatcher {
 
 	function dispatch(Request $Req, Response $Res) {
 		$Controller = $resource = null;
-		$DispatcherEvent = new DispatcherEvent($Req, $Res);
+		$Event = new Event($Req, $Res);
 		try {
-			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
+			if(!sys::event(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
 				$Controller = sys::context()->get($this->doRoute($Req, $Res), ControllerInterface::class);
-				$DispatcherEvent->setController($Controller);
+				$Event->setController($Controller);
 			}
 			if($Controller) {
-				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
+				if(!sys::event(Event::EVENT_CONTROLLER, $Event)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
-			if($View = $Res->getView() ?: $DispatcherEvent->getView()) {
+			if($View = $Res->getView() ?: $Event->getView()) {
 				if(is_string($View)) list($View, $resource) = $this->resolveView($View, $Req, $Res);
 				if(!$View instanceof ViewInterface) throw new Exception(13);
-				$DispatcherEvent->setView($View);
-				if(!sys::event(DispatcherEvent::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
+				$Event->setView($View);
+				if(!sys::event(Event::EVENT_VIEW, $Event)->isPropagationStopped()) {
 					$View->render($Req, $Res, $resource);
 				}
 			}
-			sys::event(DispatcherEvent::EVENT_RESPONSE, $DispatcherEvent);
+			sys::event(Event::EVENT_RESPONSE, $Event);
+			$Res->send();
+
 		} catch(\Exception $Ex) {
-			$DispatcherEvent->setException($Ex);
-			sys::event(DispatcherEvent::EVENT_EXCEPTION, $DispatcherEvent);
+			$Event->setException($Ex);
+			sys::event(Event::EVENT_EXCEPTION, $Event);
 			Tracer::onException($Ex);
 		}
-		$Res->send();
 	}
 
 	/**

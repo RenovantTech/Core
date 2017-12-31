@@ -11,13 +11,13 @@ namespace metadigit\core\console;
  * Main event passed throughout MVC flow.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class DispatcherEvent extends \metadigit\core\event\Event {
+class Event extends \metadigit\core\event\Event {
 
-	const EVENT_ROUTE		= 'dispatcher:route';
-	const EVENT_CONTROLLER	= 'dispatcher:controller';
-	const EVENT_VIEW		= 'dispatcher:view';
-	const EVENT_RESPONSE	= 'dispatcher:response';
-	const EVENT_EXCEPTION	= 'dispatcher:exception';
+	const EVENT_ROUTE		= 'console:route';
+	const EVENT_CONTROLLER	= 'console:controller';
+	const EVENT_VIEW		= 'console:view';
+	const EVENT_RESPONSE	= 'console:response';
+	const EVENT_EXCEPTION	= 'console:exception';
 
 	/** CLI Request
 	 * @var Request */
