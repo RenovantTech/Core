@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
-use const metadigit\core\{CLI_BOOTSTRAP, CLI_PHP_BIN};
+use const metadigit\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR};
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys;
 /**
@@ -15,25 +15,6 @@ use metadigit\core\sys;
  */
 class CmdManager {
 	use \metadigit\core\CoreTrait;
-
-	/** PDO instance ID
-	 * @var \PDO */
-	protected $pdo;
-	/** PDO table name
-	 * @var string */
-	protected $table;
-	/** Timestamps of running batches
-	 * @var array */
-	protected $timestamps = [];
-
-	/**
-	 * @param string $pdo PDO instance ID
-	 * @param string $table table name
-	 */
-	function __construct($pdo='system', $table='sys_batches') {
-		$this->pdo = $pdo;
-		$this->table = $table;
-	}
 
 	/**
 	 * CLI command start
@@ -44,5 +25,11 @@ class CmdManager {
 		$cmd = CLI_PHP_BIN.' '.CLI_BOOTSTRAP.' '.$cmd;
 		sys::trace(LOG_DEBUG, T_INFO, 'START '.$cmd, null, 'sys.CmdManager');
 		return (int) shell_exec('nohup '.$cmd.' > /dev/null 2>&1 & echo $!');
+	}
+
+	function stop($cmd) {
+		$pidLock = RUN_DIR.str_replace(' ', '-', $cmd).'.pid';
+		$pid = file_get_contents($pidLock);
+		posix_kill($pid, SIGTERM);
 	}
 }
