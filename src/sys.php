@@ -214,20 +214,26 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new console\Request;
 		self::$Res = new console\Response;
-		$app = $dispatcherID = $namespace = null;
-		foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
-			if(self::$Req->CMD(0) == $id) {
-				$app = $id;
-				$dispatcherID = $namespace.'.Dispatcher';
-				self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
-				break;
-			};
+		try {
+			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
+			file_put_contents($pidLock, getmypid());
+			$app = $dispatcherID = $namespace = null;
+			foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
+				if(self::$Req->CMD(0) == $id) {
+					$app = $id;
+					$dispatcherID = $namespace.'.Dispatcher';
+					self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
+					break;
+				};
+			}
+			if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
+			self::$Req->setAttribute('APP', $app);
+			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
+			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		} finally {
+			unlink($pidLock);
 		}
-		if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
-		self::$Req->setAttribute('APP', $app);
-		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
-		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
-		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
 	/**
