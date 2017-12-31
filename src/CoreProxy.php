@@ -44,6 +44,7 @@ class CoreProxy {
 	function __call($method, $args) {
 		$prevTraceFn = sys::traceFn($this->_.'->'.$method);
 		try {
+			pcntl_signal_dispatch();
 			if(!$this->Obj) {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache('sys')->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
@@ -53,6 +54,7 @@ class CoreProxy {
 			return call_user_func_array([$this->Obj, $method], $args);
 		} finally {
 			sys::traceFn($prevTraceFn);
+			pcntl_signal_dispatch();
 		}
 	}
 }
