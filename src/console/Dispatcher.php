@@ -48,21 +48,24 @@ class Dispatcher {
 	];
 
 	function dispatch(Request $Req, Response $Res) {
-		$Controller = $resource = null;
+		$Controller = $controllerID = $resource = null;
 		$Event = new Event($Req, $Res);
 		try {
 			if(!sys::event(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
-				$Controller = sys::context()->get($this->doRoute($Req, $Res), ControllerInterface::class);
+				$controllerID = $this->doRoute($Req, $Res);
+				$Controller = sys::context()->get($controllerID, ControllerInterface::class);
 				$Event->setController($Controller);
 			}
 			if($Controller) {
 				if(ENVIRONMENT != 'PHPUNIT') {
-					$signalFn = function($sig) use ($Controller, $Event) {
+					$signalFn = function($sig) use ($Controller, $Event, $controllerID) {
 						sys::trace(LOG_DEBUG, T_INFO, self::SIGNALS[$sig], null, 'sys');
-						if($sig == SIGTERM) sys::event(Event::EVENT_SIGTERM, $Event);
 						$method = 'on'.self::SIGNALS[$sig];
-						if(method_exists($Controller, $method)) $Controller->$method();
-						if($sig == SIGTERM) exit;
+						if(method_exists(sys::context()->container()->getType($controllerID), $method)) $Controller->$method();
+						if($sig == SIGTERM) {
+							sys::event(Event::EVENT_SIGTERM, $Event);
+							exit;
+						}
 					};
 					foreach (self::SIGNALS as $k=>$v) pcntl_signal($k, $signalFn);
 				}
