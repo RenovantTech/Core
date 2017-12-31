@@ -322,13 +322,11 @@ class sys {
 	/**
 	 * CmdManager helper
 	 * @return console\CmdManager
-	 * @throws util\yaml\YamlException
 	 */
 	static function cmd() {
 		static $CmdManager;
 		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get('sys.CmdManager')) {
-			$yaml = Yaml::parseFile(SYS_YAML, 'sys.CmdManager');
-			$CmdManager = self::$Container->build('sys.CmdManager', CmdManager::class, $yaml['constructor']);
+			$CmdManager = self::$Container->build('sys.CmdManager', CmdManager::class);
 			self::cache('sys')->set('sys.CmdManager', $CmdManager);
 		}
 		return $CmdManager;
