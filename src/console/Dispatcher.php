@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
+use const metadigit\core\ENVIRONMENT;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\console\view\PhpView,
@@ -17,6 +18,17 @@ use metadigit\core\sys,
 class Dispatcher {
 	use \metadigit\core\CoreTrait;
 	const ACL_SKIP = true;
+	const SIGNALS = [
+		SIGHUP => 'SIGHUP',
+		SIGINT => 'SIGINT',
+		SIGQUIT => 'SIGQUIT',
+		SIGABRT => 'SIGABRT',
+		SIGUSR1 => 'SIGUSR1',
+		SIGUSR2 => 'SIGUSR2',
+		SIGTERM => 'SIGTERM',
+		SIGCHLD => 'SIGCHLD',
+		SIGCONT => 'SIGCONT'
+	];
 
 	/** default View engine
 	 * @var string */
@@ -44,6 +56,16 @@ class Dispatcher {
 				$Event->setController($Controller);
 			}
 			if($Controller) {
+				if(ENVIRONMENT != 'PHPUNIT') {
+					$signalFn = function($sig) use ($Controller, $Event) {
+						sys::trace(LOG_DEBUG, T_INFO, self::SIGNALS[$sig], null, 'sys');
+						if($sig == SIGTERM) sys::event(Event::EVENT_SIGTERM, $Event);
+						$method = 'on'.self::SIGNALS[$sig];
+						if(method_exists($Controller, $method)) $Controller->$method();
+						if($sig == SIGTERM) exit;
+					};
+					foreach (self::SIGNALS as $k=>$v) pcntl_signal($k, $signalFn);
+				}
 				if(!sys::event(Event::EVENT_CONTROLLER, $Event)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
@@ -58,7 +80,6 @@ class Dispatcher {
 			}
 			sys::event(Event::EVENT_RESPONSE, $Event);
 			$Res->send();
-
 		} catch(\Exception $Ex) {
 			$Event->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $Event);

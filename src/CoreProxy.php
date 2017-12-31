@@ -7,8 +7,7 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\T_INFO;
-use metadigit\core\context\Context,
-	metadigit\core\container\Container,
+use metadigit\core\container\Container,
 	metadigit\core\container\ContainerException;
 /**
  * Proxy for injected objects.
@@ -42,9 +41,9 @@ class CoreProxy {
 	 * @throws \Exception
 	 */
 	function __call($method, $args) {
+		pcntl_signal_dispatch();
 		$prevTraceFn = sys::traceFn($this->_.'->'.$method);
 		try {
-			pcntl_signal_dispatch();
 			if(!$this->Obj) {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache('sys')->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);

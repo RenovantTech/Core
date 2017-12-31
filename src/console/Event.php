@@ -18,6 +18,7 @@ class Event extends \metadigit\core\event\Event {
 	const EVENT_VIEW		= 'console:view';
 	const EVENT_RESPONSE	= 'console:response';
 	const EVENT_EXCEPTION	= 'console:exception';
+	const EVENT_SIGTERM		= 'console:sigterm';
 
 	/** CLI Request
 	 * @var Request */
