@@ -56,11 +56,13 @@ class EventDispatcher {
 	 * @return Event the Event object
 	 */
 	function trigger($eventName, $EventOrParams=null): Event {
-		sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
+		if(!isset($this->listeners[$eventName]))
+			sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
 		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
 		if(!isset($this->listeners[$eventName])) return $Event;
-		foreach($this->listeners[$eventName] as $listeners) {
+		foreach($this->listeners[$eventName] as $priority => $listeners) {
 			foreach($listeners as $callback) {
+				sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$callback);
 				if(is_string($callback) && strpos($callback,'->')>0) {
 					list($objID, $method) = explode('->', $callback);
 					$callback = [new CoreProxy($objID), $method];
