@@ -16,14 +16,6 @@ use metadigit\core\sys,
  */
 class Yaml {
 
-	const TYPE_NULL		= 0;
-	const TYPE_BOOLEAN	= 1;
-	const TYPE_INTEGER	= 2;
-	const TYPE_FLOAT	= 3;
-	const TYPE_STRING	= 4;
-	const TYPE_ARRAY	= 5;
-	const TYPE_OBJ		= 6;
-
 	/**
 	 * YAML Context parser utility, supporting PHAR & ENVIRONMENT switch
 	 * @param string $namespace Context namespace
@@ -74,34 +66,23 @@ class Yaml {
 	 * @return mixed
 	 */
 	static function typeCast($yamlNode) {
-		switch (self::parseType($yamlNode)) {
-			case self::TYPE_NULL:
-				return null; break;
-			case self::TYPE_BOOLEAN:
-				return (boolean) $yamlNode; break;
-			case self::TYPE_INTEGER:
-				return (integer) $yamlNode; break;
-			case self::TYPE_FLOAT:
-				return (float) $yamlNode; break;
-			case self::TYPE_ARRAY:
-				foreach ($yamlNode as $k => $val) {
-					$yamlNode[$k] = self::typeCast($val);
-				}
-				return $yamlNode;
-			case self::TYPE_OBJ:
-				return new CoreProxy(substr($yamlNode, 5));
-			default:
-				return (string) $yamlNode;
+		// NULL
+		if(is_null($yamlNode))return null;
+		// BOOLEAN
+		elseif(is_bool($yamlNode)) return (boolean) $yamlNode;
+		// INTEGER
+		elseif(is_int($yamlNode)) return (integer) $yamlNode;
+		// FLOAT
+		elseif(is_float($yamlNode)) return (float) $yamlNode;
+		// ARRAY
+		elseif(is_array($yamlNode)) {
+			foreach ($yamlNode as $k => $val)
+				$yamlNode[$k] = self::typeCast($val);
+			return $yamlNode;
 		}
-	}
-
-	static function parseType($yamlNode) {
-		if(is_null($yamlNode)) return self::TYPE_NULL;
-		elseif(is_bool($yamlNode)) return self::TYPE_BOOLEAN;
-		elseif(is_int($yamlNode)) return self::TYPE_INTEGER;
-		elseif(is_float($yamlNode)) return self::TYPE_FLOAT;
-		elseif(is_array($yamlNode)) return self::TYPE_ARRAY;
-		elseif(substr($yamlNode, 0, 4) == '!obj') return self::TYPE_OBJ;
-		else return self::TYPE_STRING;
+		// OBJECT
+		elseif(substr($yamlNode, 0, 4) == '!obj') return new CoreProxy(substr($yamlNode, 5));
+		// STRING
+		else return (string) $yamlNode;
 	}
 }
