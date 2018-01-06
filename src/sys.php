@@ -9,13 +9,13 @@ namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\console\CmdManager,
 	metadigit\core\container\Container,
+	metadigit\core\container\ContainerException,
 	metadigit\core\context\Context,
 	metadigit\core\context\ContextException,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
-	metadigit\core\log\Logger,
-	metadigit\core\util\yaml\Yaml;
+	metadigit\core\log\Logger;
 /**
  * System Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -130,6 +130,9 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws ContainerException
 	 * @throws util\yaml\YamlException
 	 */
 	static function init() {
@@ -172,6 +175,7 @@ class sys {
 		self::$Container = new Container;
 		self::$EventDispatcher = new EventDispatcher;
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
+		self::$Context->init('sys');
 		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
