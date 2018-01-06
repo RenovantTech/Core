@@ -62,9 +62,9 @@ class Container {
 		if(in_array($namespace, $this->namespaces)) return;
 		//sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
 		$this->namespaces[] = $namespace;
-		list($id2classMap, $class2idMap) = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
-		$this->id2classMap = array_merge($this->id2classMap, $id2classMap);
-		$this->class2idMap = array_merge($this->class2idMap, $class2idMap);
+		$maps = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
+		$this->id2classMap = array_merge($this->id2classMap, $maps['id2class']);
+		$this->class2idMap = array_merge($this->class2idMap, $maps['class2id']);
 	}
 
 	/**

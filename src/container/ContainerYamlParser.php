@@ -55,7 +55,7 @@ class ContainerYamlParser {
 					throw new ContainerException(12, [__METHOD__, $namespace]); break;
 			}
 		}
-		return [$id2classMap, $class2idMap];
+		return ['id2class'=>$id2classMap, 'class2id'=>$class2idMap];
 	}
 
 	/**
