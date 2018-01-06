@@ -84,9 +84,9 @@ class Dispatcher {
 			sys::event(Event::EVENT_RESPONSE, $Event);
 			$Res->send();
 		} catch(\Exception $Ex) {
+			Tracer::onException($Ex);
 			$Event->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $Event);
-			Tracer::onException($Ex);
 		}
 	}
 
