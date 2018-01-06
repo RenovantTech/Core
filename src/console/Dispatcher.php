@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\console;
+use const metadigit\core\ENVIRONMENT;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\console\view\PhpView,
@@ -17,6 +18,17 @@ use metadigit\core\sys,
 class Dispatcher {
 	use \metadigit\core\CoreTrait;
 	const ACL_SKIP = true;
+	const SIGNALS = [
+		SIGHUP => 'SIGHUP',
+		SIGINT => 'SIGINT',
+		SIGQUIT => 'SIGQUIT',
+		SIGABRT => 'SIGABRT',
+		SIGUSR1 => 'SIGUSR1',
+		SIGUSR2 => 'SIGUSR2',
+		SIGTERM => 'SIGTERM',
+		SIGCHLD => 'SIGCHLD',
+		SIGCONT => 'SIGCONT'
+	];
 
 	/** default View engine
 	 * @var string */
@@ -36,33 +48,46 @@ class Dispatcher {
 	];
 
 	function dispatch(Request $Req, Response $Res) {
-		$Controller = $resource = null;
-		$DispatcherEvent = new DispatcherEvent($Req, $Res);
+		$Controller = $controllerID = $resource = null;
+		$Event = new Event($Req, $Res);
 		try {
-			if(!sys::event(DispatcherEvent::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				$Controller = sys::context()->get($this->doRoute($Req, $Res), ControllerInterface::class);
-				$DispatcherEvent->setController($Controller);
+			if(!sys::event(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
+				$controllerID = $this->doRoute($Req, $Res);
+				$Controller = sys::context()->get($controllerID, ControllerInterface::class);
+				$Event->setController($Controller);
 			}
 			if($Controller) {
-				if(!sys::event(DispatcherEvent::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
+				if(ENVIRONMENT != 'PHPUNIT') {
+					$signalFn = function($sig) use ($Controller, $Event, $controllerID) {
+						sys::trace(LOG_DEBUG, T_INFO, self::SIGNALS[$sig], null, 'sys');
+						$method = 'on'.self::SIGNALS[$sig];
+						if(method_exists(sys::context()->container()->getType($controllerID), $method)) $Controller->$method();
+						if($sig == SIGTERM) {
+							sys::event(Event::EVENT_SIGTERM, $Event);
+							exit;
+						}
+					};
+					foreach (self::SIGNALS as $k=>$v) pcntl_signal($k, $signalFn);
+				}
+				if(!sys::event(Event::EVENT_CONTROLLER, $Event)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
-			if($View = $Res->getView() ?: $DispatcherEvent->getView()) {
+			if($View = $Res->getView() ?: $Event->getView()) {
 				if(is_string($View)) list($View, $resource) = $this->resolveView($View, $Req, $Res);
 				if(!$View instanceof ViewInterface) throw new Exception(13);
-				$DispatcherEvent->setView($View);
-				if(!sys::event(DispatcherEvent::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
+				$Event->setView($View);
+				if(!sys::event(Event::EVENT_VIEW, $Event)->isPropagationStopped()) {
 					$View->render($Req, $Res, $resource);
 				}
 			}
-			sys::event(DispatcherEvent::EVENT_RESPONSE, $DispatcherEvent);
+			sys::event(Event::EVENT_RESPONSE, $Event);
+			$Res->send();
 		} catch(\Exception $Ex) {
-			$DispatcherEvent->setException($Ex);
-			sys::event(DispatcherEvent::EVENT_EXCEPTION, $DispatcherEvent);
 			Tracer::onException($Ex);
+			$Event->setException($Ex);
+			sys::event(Event::EVENT_EXCEPTION, $Event);
 		}
-		$Res->send();
 	}
 
 	/**

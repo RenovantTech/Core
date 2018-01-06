@@ -5,25 +5,25 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\console;
+namespace metadigit\core\http;
 /**
  * MVC Dispatch Event
  * Main event passed throughout MVC flow.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class DispatcherEvent extends \metadigit\core\event\Event {
+class Event extends \metadigit\core\event\Event {
 
-	const EVENT_ROUTE		= 'dispatcher:route';
-	const EVENT_CONTROLLER	= 'dispatcher:controller';
-	const EVENT_VIEW		= 'dispatcher:view';
-	const EVENT_RESPONSE	= 'dispatcher:response';
-	const EVENT_EXCEPTION	= 'dispatcher:exception';
+	const EVENT_ROUTE		= 'http:route';
+	const EVENT_CONTROLLER	= 'http:controller';
+	const EVENT_VIEW		= 'http:view';
+	const EVENT_RESPONSE	= 'http:response';
+	const EVENT_EXCEPTION	= 'http:exception';
 
-	/** CLI Request
-	 * @var Request */
+	/** HTTP Request
+	 * @var \metadigit\core\http\Request */
 	protected $Request;
-	/** CLI Response
-	 * @var Response */
+	/** HTTP Response
+	 * @var \metadigit\core\http\Response */
 	protected $Response;
 	/** Controller, if any
 	 * @var ControllerInterface */
@@ -41,16 +41,16 @@ class DispatcherEvent extends \metadigit\core\event\Event {
 	}
 
 	/**
-	 * Get current CLI Request
-	 * @return Request
+	 * Get current HTTP Request
+	 * @return \metadigit\core\http\Request
 	 */
 	function getRequest() {
 		return $this->Request;
 	}
 
 	/**
-	 * Get current CLI Response
-	 * @return Response
+	 * Get current HTTP Response
+	 * @return \metadigit\core\http\Response
 	 */
 	function getResponse() {
 		return $this->Response;

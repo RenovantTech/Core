@@ -1,7 +1,8 @@
 <?php
 namespace test;
 use metadigit\core\sys,
-	metadigit\core\sysboot;
+	metadigit\core\sysboot,
+	metadigit\core\console\CmdManager;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
@@ -10,8 +11,11 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(realpath(__DIR__.'/../src/'), \metadigit\core\DIR);
 	}
 
+	/**
+	 * @throws \metadigit\core\util\yaml\YamlException
+	 */
 	function testBoot() {
-		list($Sys, $namespaces) = sysboot::boot();
+		list($Sys, $namespaces) = sysBoot::boot();
 
 		$this->assertArrayHasKey('metadigit\core', $namespaces);
 		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['metadigit\core']);
@@ -79,6 +83,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testBoot
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testInit() {
 		sys::init();
@@ -125,9 +130,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue(\metadigit\core\ACL_ROUTES);
 		$this->assertTrue(\metadigit\core\ACL_OBJECTS);
 		$this->assertTrue(\metadigit\core\ACL_ORM);
-		$ReflProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
-		$ReflProp->setAccessible(true);
-		$pdo = $ReflProp->getValue($ACL);
+		$RefProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
+		$RefProp->setAccessible(true);
+		$pdo = $RefProp->getValue($ACL);
 		$this->assertEquals('mysql', $pdo);
 	}
 
@@ -148,9 +153,11 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	function testExec() {
-		$this->assertInternalType(\PHPUnit\Framework\Constraint\IsType::TYPE_INT, sys::exec('sys'));
+	function testCmd() {
+		$CmdManager = sys::cmd();
+		$this->assertInstanceOf(CmdManager::class, $CmdManager);
 	}
 
 	/**

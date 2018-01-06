@@ -15,6 +15,9 @@ class Exception extends \metadigit\core\Exception {
 	const COD11 = 'Dispatcher Exception - impossible to detect controller for this CMD: %s';
 	const COD12 = 'Dispatcher Exception - could not resolve view with name: %s, resource: %s';
 	const COD13 = 'Dispatcher Exception - View neither contains a view name nor a View object';
+	/* Response */
+	const COD31 = 'Response Exception - setOutput() must set a writable stream resource';
+
 	/* Controller - compile-time (user defined code checks) */
 	const COD101 = 'Code Sintax Exception - Controller %s->%s() method MUST be declared "protected"';
 	const COD102 = 'Code Sintax Exception - Controller method %s->%s(), parameter n°%s must be of type %s';

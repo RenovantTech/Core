@@ -14,25 +14,31 @@ use metadigit\core\sys;
  */
 class Response {
 
+	const LINE_NORMAL = 0;
+	const LINE_INFO = 1;
+	const LINE_SUCCESS = 11;
+	const LINE_WARNING = 12;
+	const LINE_ERROR = 13;
+
 	/** Response data, aka Models passed to the MVC View
 	 * @var array */
-	private $data = [];
+	protected $data = [];
 	/** Exit status
 	 * @var int */
 	protected $exit = 0;
-	/** Response size (bytes)
-	 * @var int */
-	private $size = 0;
+	/** Output buffer ON/OFF
+	 * @var bool */
+	protected $outputBuffer = false;
+	/** Output stream
+	 * @var resource */
+	protected $STDOUT = STDOUT;
 	/** Current View/viewName
 	 * @var ViewInterface|string|null */
-	private $View = null;
-
-	function __construct() {
-		ob_start();
-	}
+	protected $View = null;
 
 	function __destruct() {
-		ob_end_clean();
+		if ($this->outputBuffer)
+			ob_end_clean();
 	}
 
 	// === getter & setter ========================================================================
@@ -59,7 +65,7 @@ class Response {
 	 * @return string
 	 */
 	function getContent() {
-		return ob_get_contents();
+		return ($this->outputBuffer) ? ob_get_contents() : file_get_contents($this->STDOUT);
 	}
 
 	/**
@@ -67,7 +73,7 @@ class Response {
 	 * @return int
 	 */
 	function getSize() {
-		return ($this->size) ? $this->size : ob_get_length();
+		return ($this->outputBuffer) ? ob_get_length() : filesize($this->STDOUT);
 	}
 
 	/**
@@ -97,16 +103,29 @@ class Response {
 	 * @return Response (fluent interface)
 	 */
 	function setContent($output) {
-		ob_clean();
-		echo $output;
+		if($this->outputBuffer) ob_clean();
+		fwrite($this->STDOUT, $output);
 		return $this;
 	}
 
-	/** Set exit status
+	/**
+	 * Set exit status
 	 * @param int $exit
 	 */
 	function setExitStatus($exit) {
 		$this->exit = $exit;
+	}
+
+	/**
+	 * Set Output stream
+	 * @param resource $handle
+	 * @throws Exception
+	 */
+	function setOutput($handle) {
+		if(!is_resource($handle)) throw new Exception(31);
+		if(!is_writable(stream_get_meta_data($handle)['uri'])) throw new Exception(31);
+		if(stream_get_meta_data($handle)['mode'] == 'r') throw new Exception(31);
+		$this->STDOUT = $handle;
 	}
 
 	/**
@@ -117,6 +136,53 @@ class Response {
 		$this->View = $view;
 	}
 
+	// === OUTPUT methods =========================================================================
+
+	function error($text, $newLine=false) {
+		$this->write($text, false, self::LINE_ERROR);
+	}
+
+	function errorLn($text) {
+		$this->write($text, true, self::LINE_ERROR);
+	}
+
+	function info($text, $newLine=false) {
+		$this->write($text, false, self::LINE_INFO);
+	}
+
+	function infoLn($text) {
+		$this->write($text, true, self::LINE_INFO);
+	}
+
+	function success($text, $newLine=false) {
+		$this->write($text, false, self::LINE_SUCCESS);
+	}
+
+	function successLn($text) {
+		$this->write($text, true, self::LINE_SUCCESS);
+	}
+
+	function warning($text, $newLine=false) {
+		$this->write($text, false, self::LINE_WARNING);
+	}
+
+	function warningLn($text) {
+		$this->write($text, true, self::LINE_WARNING);
+	}
+
+	/**
+	 * @param string $text output message
+	 * @param boolean $newLine add new line at end
+	 * @param $type
+	 */
+	function write($text, $newLine=false, $type=self::LINE_NORMAL) {
+		fwrite($this->STDOUT, $text.($newLine?chr(10):''));
+	}
+
+	function writeLn($text) {
+		$this->write($text, true);
+	}
+
 	// === methods ================================================================================
 
 	/**
@@ -124,9 +190,8 @@ class Response {
 	 * A call to this method automatically commits the Response.
 	 */
 	function send() {
-		$this->size = ob_get_length();
 		sys::trace(LOG_DEBUG, T_INFO, null, null. 'sys.console.Response->send');
-		ob_flush();
+		if($this->outputBuffer) ob_flush();
 		ini_set('precision', 16);
 		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));
 		ini_restore('precision');
@@ -136,8 +201,7 @@ class Response {
 	 * Clears any data that exists in the buffer as well as the exit status.
 	 */
 	function reset() {
-		$this->size = 0;
 		$this->exit = 0;
-		ob_clean();
+		if($this->outputBuffer) ob_clean();
 	}
 }

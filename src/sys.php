@@ -7,13 +7,15 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\container\Container,
+use metadigit\core\console\CmdManager,
+	metadigit\core\container\Container,
 	metadigit\core\context\Context,
 	metadigit\core\context\ContextException,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
-	metadigit\core\log\Logger;
+	metadigit\core\log\Logger,
+	metadigit\core\util\yaml\Yaml;
 /**
  * System Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -200,34 +202,61 @@ class sys {
 	 * @throws EventDispatcherException
 	 */
 	static function dispatch($api=PHP_SAPI) {
+		($api=='cli') ? self::dispatchCLI() : self::dispatchHTTP();
+	}
+
+	/**
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
+	 */
+	static protected function dispatchCLI() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
-		self::$Req = ($api=='cli') ? new console\Request : new http\Request;
-		self::$Res = ($api=='cli') ? new console\Response : new http\Response;
-		$app = $dispatcherID = $namespace = null;
-		switch($api) {
-			case 'cli':
-				foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
-					if(self::$Req->CMD(0) == $id) {
-						$app = $id;
-						$dispatcherID = $namespace.'.Dispatcher';
-						self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
-						break;
-					};
-				}
-				break;
-			default:
-				foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
-					$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
-					if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
-						$app = $id;
-						$namespace = $conf['namespace'];
-						$dispatcherID = $namespace.'.Dispatcher';
-						self::$Req->setAttribute('APP_URI', str_replace($conf['baseUrl'], '/', self::$Req->URI()));
-						break;
-					}
-				}
+		self::$Req = new console\Request;
+		self::$Res = new console\Response;
+		try {
+			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
+			file_put_contents($pidLock, getmypid());
+			$app = $dispatcherID = $namespace = null;
+			foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
+				if(self::$Req->CMD(0) == $id) {
+					$app = $id;
+					$dispatcherID = $namespace.'.Dispatcher';
+					self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
+					break;
+				};
+			}
+			if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
+			self::$Req->setAttribute('APP', $app);
+			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
+			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		} finally {
+			unlink($pidLock);
 		}
-		if(is_null($app)) throw new SysException(1, [PHP_SAPI, ($api=='cli') ? self::$Req->CMD() : self::$Req->URI()]);
+	}
+
+	/**
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
+	 */
+	static protected function dispatchHTTP() {
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+		self::$Req = new http\Request;
+		self::$Res = new http\Response;
+		$app = $dispatcherID = $namespace = null;
+		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
+			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
+			if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
+				$app = $id;
+				$namespace = $conf['namespace'];
+				$dispatcherID = $namespace.'.Dispatcher';
+				self::$Req->setAttribute('APP_URI', str_replace($conf['baseUrl'], '/', self::$Req->URI()));
+				break;
+			}
+		}
+		if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->URI()]);
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
@@ -291,6 +320,19 @@ class sys {
 	}
 
 	/**
+	 * CmdManager helper
+	 * @return console\CmdManager
+	 */
+	static function cmd() {
+		static $CmdManager;
+		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get('sys.CmdManager')) {
+			$CmdManager = self::$Container->build('sys.CmdManager', CmdManager::class);
+			self::cache('sys')->set('sys.CmdManager', $CmdManager);
+		}
+		return $CmdManager;
+	}
+
+	/**
 	 * Context helper
 	 * @return Context
 	 */
@@ -306,17 +348,6 @@ class sys {
 	 */
 	static function event($eventName, $EventOrParams=null): Event {
 		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
-	}
-
-	/**
-	 * CLI command execution
-	 * @param string $cmd
-	 * @return integer command process PID
-	 */
-	static function exec($cmd) {
-		$cmd = CLI_PHP_BIN.' '.CLI_BOOTSTRAP.' '.$cmd;
-		self::trace(LOG_DEBUG, T_INFO, $cmd, null, __METHOD__);
-		return (int) shell_exec('nohup '.$cmd.' > /dev/null 2>&1 & echo $!');
 	}
 
 	/**

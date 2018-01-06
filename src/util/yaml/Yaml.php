@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace metadigit\core\util\yaml;
-use const metadigit\core\{ENVIRONMENT, TMP_DIR};
+use const metadigit\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
 use const metadigit\core\trace\T_DEPINJ;
 use metadigit\core\sys,
 	metadigit\core\CoreProxy;
@@ -34,8 +34,10 @@ class Yaml {
 	 */
 	static function parseContext($namespace, $section=null, array $callbacks=[]) {
 		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
-		if (empty($dirName))
-			$yamlPath = \metadigit\core\BASE_DIR . $namespace . '-context.yml';
+		if($namespace == 'sys')
+			$yamlPath = SYS_YAML;
+		elseif (empty($dirName))
+			$yamlPath = BASE_DIR . $namespace . '-context.yml';
 		else
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
