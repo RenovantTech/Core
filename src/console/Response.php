@@ -124,6 +124,7 @@ class Response {
 	function setOutput($handle) {
 		if(!is_resource($handle)) throw new Exception(31);
 		if(!is_writable(stream_get_meta_data($handle)['uri'])) throw new Exception(31);
+		if(stream_get_meta_data($handle)['mode'] == 'r') throw new Exception(31);
 		$this->STDOUT = $handle;
 	}
 
