@@ -25,7 +25,7 @@ class ContainerYamlParser {
 	 */
 	static function parseNamespace($namespace) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
-		$id2classMap = $class2idMap = [];
+		$id2classMap = $class2idMap = $services = [];
 		try {
 			$yaml = Yaml::parseContext($namespace, 'objects', [
 				'!obj' => function($value) {
@@ -45,6 +45,7 @@ class ContainerYamlParser {
 					$id2classMap[$id] = $all_classes;
 					foreach($all_classes as $class)
 						$class2idMap[$class][] = $id;
+					$services[$id] = self::parseYaml($objYAML);
 				}
 			}
 		} catch (YamlException $Ex) {
@@ -55,38 +56,29 @@ class ContainerYamlParser {
 					throw new ContainerException(12, [__METHOD__, $namespace]); break;
 			}
 		}
-		return ['id2class'=>$id2classMap, 'class2id'=>$class2idMap];
+		return ['id2class'=>$id2classMap, 'class2id'=>$class2idMap, 'services'=>$services];
 	}
 
+
 	/**
-	 * Parse YAML object config
-	 * @param string $id object ID
+	 * Parse Object YAML config
+	 * @param array $yaml Object YAML
 	 * @return array class, constructor args, properties
-	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
-	static function parseObject($id) {
-		sys::trace(LOG_DEBUG, T_DEPINJ, 'parsing YAML for object '.$id, null, __METHOD__);
-		$namespace = substr($id, 0, strrpos($id, '.'));
-		$yaml = Yaml::parseContext($namespace, 'objects', [
-			'!obj' => function($value) {
-				return '!obj '.$value;
-			}
-		]);
-
-		// @TODO verify YAML content
-		if(!is_array($yaml[$id])) throw new ContainerException(1, [__METHOD__, $id]);
-
+	static function parseYaml(array $yaml) {
+		$obj = [
+			'class' => \stdClass::class,
+			'constructor' => [],
+			'properties' => []
+		];
 		// class
-		$class = $yaml[$id]['class'];
+		if($yaml['class']) $obj['class'] = $yaml['class'];
 		// constructor args
-		$args = [];
-		if(isset($yaml[$id]['constructor']) && is_array($yaml[$id]['constructor']))
-			$args = Yaml::typeCast($yaml[$id]['constructor']);
+		if(isset($yaml['constructor']) && is_array($yaml['constructor']))
+			$obj['constructor'] = Yaml::typeCast($yaml['constructor']);
 		// properties
-		$properties = [];
-		if(isset($yaml[$id]['properties']) && is_array($yaml[$id]['properties']))
-			$properties = Yaml::typeCast($yaml[$id]['properties']);
-		return [$class, $args, $properties];
+		if(isset($yaml['properties']) && is_array($yaml['properties']))
+			$obj['properties'] = Yaml::typeCast($yaml['properties']);
+		return $obj;
 	}
 }

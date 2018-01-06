@@ -65,6 +65,7 @@ class Container {
 		$maps = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
 		$this->id2classMap = array_merge($this->id2classMap, $maps['id2class']);
 		$this->class2idMap = array_merge($this->class2idMap, $maps['class2id']);
+		if(!$containerMaps) sys::cache('sys')->set($namespace.'#services', $maps['services']);
 	}
 
 	/**
@@ -74,7 +75,6 @@ class Container {
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
@@ -84,8 +84,8 @@ class Container {
 			if(!in_array($namespace, $this->namespaces)) $this->init($namespace);
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
-			list($class, $args, $properties) = ContainerYamlParser::parseObject($id);
-			$this->objects[$id] = $Obj = $this->build($id, $class, $args, $properties);
+			$obj = sys::cache('sys')->get($namespace.'#services')[$id];
+			$this->objects[$id] = $Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
 			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
@@ -99,7 +99,6 @@ class Container {
 	 * @param string $class desired class/interface
 	 * @return object[] objects (can be empty)
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function getAllByType($class) {
 		$ids = $this->getListByType($class);
