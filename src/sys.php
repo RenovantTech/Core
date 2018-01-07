@@ -22,7 +22,7 @@ use metadigit\core\console\CmdManager,
  */
 class sys {
 
-	const CACHE_FILE		= CACHE_DIR.'sys';
+	const CACHE_FILE		= CACHE_DIR.'sys.php';
 	const EVENT_INIT		= 'sys:init';
 	const EVENT_SHUTDOWN	= 'sys:shutdown';
 	const INFO_NAMESPACE	= 1;
