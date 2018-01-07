@@ -18,6 +18,11 @@ class Container {
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;
+	const YAML_OBJ_SKELETON = [
+		'class' => \stdClass::class,
+		'constructor' => [],
+		'properties' => []
+	];
 
 	/** Mapping between services IDs and their parent classes and interfaces.
 	 * @var array */
