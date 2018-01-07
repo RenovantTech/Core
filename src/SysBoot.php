@@ -70,9 +70,6 @@ class SysBoot extends sys {
 		// ACL service
 		if(is_array($config['acl'])) self::$Sys->cnfAcl = array_merge(self::$Sys->cnfAcl, $config['acl']);
 
-		// AUTH service
-		if(is_array($config['auth'])) self::$Sys->cnfAuth = array_merge(self::$Sys->cnfAuth, $config['auth']);
-
 		// Cache service
 		self::$Sys->cnfCache['sys'] = [
 			'class' => 'metadigit\core\cache\SqliteCache',

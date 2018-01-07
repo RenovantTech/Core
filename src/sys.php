@@ -7,7 +7,8 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\console\CmdManager,
+use metadigit\core\auth\AUTH,
+	metadigit\core\console\CmdManager,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException,
 	metadigit\core\context\Context,
@@ -82,12 +83,6 @@ class sys {
 			'database' => 'master',
 			'tables' => null
 		]
-	];
-	/** AUTH configurations
-	 * @var array */
-	protected $cnfAuth = [
-		'enableJWT' => false,
-		'enableSESSION' => true
 	];
 	/** HTTP/CLI apps routing
 	 * @var array */
@@ -289,13 +284,13 @@ class sys {
 
 	/**
 	 * AUTH helper
-	 * @return auth\AUTH
+	 * @return AUTH
+	 * @throws ContainerException
 	 */
 	static function auth() {
 		static $AUTH;
-		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get('sys.AUTH')) {
- 			$AUTH = new auth\AUTH(self::$Sys->cnfAuth['enableJWT'], self::$Sys->cnfAuth['enableSESSION']);
-			self::cache('sys')->set('sys.AUTH', $AUTH);
+		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get($_ = 'sys.AUTH')) {
+			$AUTH = self::$Container->get($_, AUTH::class);
 		}
 		return $AUTH;
 	}
