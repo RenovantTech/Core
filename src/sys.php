@@ -15,6 +15,7 @@ use metadigit\core\console\CmdManager,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
+	metadigit\core\http\Event as HttpEvent,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -253,6 +254,8 @@ class sys {
 				self::cache('sys')->set($_, $SessionMgr);
 			}
 			$SessionMgr->start();
+			self::$EventDispatcher->listen(HttpEvent::EVENT_VIEW, [$SessionMgr, 'end']);
+			self::$EventDispatcher->listen(HttpEvent::EVENT_EXCEPTION, [$SessionMgr, 'end']);
 		}
 		// invoke HTTP Dispatcher
 		$app = $dispatcherID = $namespace = null;
