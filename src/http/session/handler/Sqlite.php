@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\http\session\handler;
-use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\SessionException;
 /**
@@ -14,6 +13,7 @@ use metadigit\core\sys,
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 class Sqlite implements \SessionHandlerInterface {
+	use \metadigit\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
@@ -35,25 +35,23 @@ class Sqlite implements \SessionHandlerInterface {
 	const SQL_DESTROY = 'DELETE FROM `%s` WHERE id = :id';
 	const SQL_GC = 'DELETE FROM `%s` WHERE expireTime < :time';
 
-	/** database table name
-	 * @var string */
-	protected $table;
 	/** PDO instance ID
 	 * @var \PDO */
 	protected $pdo;
+	/** database table name
+	 * @var string */
+	protected $table;
 	/** session ID on read(), to support session_regenerate_id()
 	 * @var string */
 	static protected $id;
 
-	/**
-	 * @param string $pdo PDO instance ID
-	 * @param string $table table name
-	 */
-	function __construct($pdo, $table='sessions') {
-		$this->pdo = $pdo;
-		$this->table = $table;
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, 'sys.auth.session.Sqlite->__construct');
-		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table, $table));
+	function init() {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			sys::pdo($this->pdo)->exec(sprintf(self::SQL_INIT, $this->table, $this->table));
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**
@@ -84,6 +82,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 * @return string session data, EMPTY string if non session data!
 	 */
 	function read($id) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
@@ -98,6 +97,8 @@ class Sqlite implements \SessionHandlerInterface {
 		} catch(\Exception $Ex) {
 			trigger_error($Ex->getMessage());
 			return '';
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -108,6 +109,7 @@ class Sqlite implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function write($id, $data) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$uid = (defined('SESSION_NEW_UID')) ? SESSION_NEW_UID : (defined('SESSION_UID') ? SESSION_UID : null);
 			$locked = (defined('SESSION_LOCKED')) ? (int)SESSION_LOCKED : 0;
@@ -129,6 +131,8 @@ class Sqlite implements \SessionHandlerInterface {
 		} catch(\Exception $Ex) {
 			trigger_error($Ex->getMessage());
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -138,12 +142,15 @@ class Sqlite implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function destroy($id) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
 			$st->execute(['id'=>$id]);
 			return (boolean) $st->rowCount();
 		} catch(\Exception $Ex) {
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -153,11 +160,14 @@ class Sqlite implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function gc($maxlifetime) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
 			return true;
 		} catch(\Exception $Ex) {
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 }

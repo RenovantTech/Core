@@ -124,7 +124,7 @@ log:
 # =========================================================
 session:
   class: metadigit\core\http\session\Manager
-  properties:
+  constructor:
     # session cookie parameters
     cookie:
       name:     SESSION   # cookie name
@@ -136,7 +136,7 @@ session:
     # session handler
     handler:
       class: metadigit\core\http\session\handler\Mysql
-      constructor:
+      properties:
         pdo:    master
         table:  sys_auth_sessions
 

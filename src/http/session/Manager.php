@@ -8,6 +8,7 @@
 namespace metadigit\core\http\session;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
+	metadigit\core\container\Container,
 	metadigit\core\http\SessionException;
 /**
  * HTTP Session Manager.
@@ -32,9 +33,10 @@ class Manager {
 	];
 	/** Handler config
 	 * @var array */
-	protected $handler = [
-		'class' => 'metadigit\core\http\session\handler\Sqlite',
-		'constructor' => [
+	protected $handlerCnf = [
+		'class' => 'metadigit\core\http\session\handler\Mysql',
+		'constructor' => null,
+		'properties' => [
 			'pdo' => 'master',
 			'table' => 'sys_auth_session'
 		]
@@ -42,6 +44,18 @@ class Manager {
 	/** Session Handler
 	 * @var \SessionHandlerInterface */
 	protected $Handler;
+
+	/**
+	 * Manager constructor.
+	 * @param array $cookie cookie params
+	 * @param array $handler Handler config
+	 */
+	function __construct(array $cookie=null, array $handler=null) {
+		if($cookie) $this->cookie = $cookie;
+		if($handler) $this->handlerCnf = array_merge(Container::YAML_OBJ_SKELETON, $handler);
+		$this->Handler = (new Container())->build('sys.http.SessionHandler', $this->handlerCnf['class'], $this->handlerCnf['constructor'], $this->handlerCnf['properties']);
+		$this->Handler->init();
+	}
 
 	/**
 	 * @throws SessionException
@@ -52,7 +66,6 @@ class Manager {
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->cookie['name']);
 		session_set_cookie_params($this->cookie['lifetime'], $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
-		$this->Handler = new $this->handler['class'](...array_values((array)$this->handler['constructor']));
 		session_set_save_handler($this->Handler, true);
 		session_start();
 		sys::event(self::EVENT_START);
