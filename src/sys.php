@@ -279,9 +279,9 @@ class sys {
 	 */
 	static function acl() {
 		static $ACL;
-		if(!isset($ACL) && !$ACL = self::cache('sys')->get('ACL')) {
+		if(!isset($ACL) && !$ACL = self::cache('sys')->get('sys.ACL')) {
 			$ACL = new acl\ACL(self::$Sys->cnfAcl['config']['database'], self::$Sys->cnfAcl['config']['tables']);
-			self::cache('sys')->set('ACL', $ACL);
+			self::cache('sys')->set('sys.ACL', $ACL);
 		}
 		return $ACL;
 	}
@@ -305,14 +305,14 @@ class sys {
 	 * @return cache\CacheInterface
 	 */
 	static function cache($id='main') {
-		static $_ = [];
+		static $c = [];
 		if($id=='sys') return self::$Cache;
-		if(!isset($_[$id]) && !$_[$id] = self::cache('sys')->get('sys.cache'.strtoupper($id))) {
+		if(!isset($c[$id]) && !$c[$id] = self::cache('sys')->get($_ = 'sys.cache.'.strtoupper($id))) {
 			$cnf = self::$Sys->cnfCache[$id];
-			$_[$id] = self::$Container->build('sys.cache'.strtoupper($id), $cnf['class'], $cnf['constructor'], $cnf['properties']);
-			self::cache('sys')->set('sys.cache'.strtoupper($id), $_[$id]);
+			$c[$id] = self::$Container->build($_, $cnf['class'], $cnf['constructor'], $cnf['properties']);
+			self::cache('sys')->set($_, $c[$id]);
 		}
-		return $_[$id];
+		return $c[$id];
 	}
 
 	/**
