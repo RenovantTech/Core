@@ -7,7 +7,8 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\T_INFO;
-use metadigit\core\util\yaml\Yaml;
+use metadigit\core\container\Container,
+	metadigit\core\util\yaml\Yaml;
 /**
  * System bootstrap helper
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -73,8 +74,19 @@ class SysBoot extends sys {
 		if(is_array($config['auth'])) self::$Sys->cnfAuth = array_merge(self::$Sys->cnfAuth, $config['auth']);
 
 		// Cache service
+		self::$Sys->cnfCache['sys'] = [
+			'class' => 'metadigit\core\cache\SqliteCache',
+			'constructor' => ['sys-cache', 'cache', true]
+		];
 		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge($config['cache'], self::$Sys->cnfCache);
-//		self::$Cache = (new Container())->build('sys.cache.SYS', self::$Sys->cnfCache['sys']['class'], self::$Sys->cnfCache['sys']['constructor'], self::$Sys->cnfCache['sys']['properties']);
+		foreach (self::$Sys->cnfCache as $id => $conf)
+			self::$Sys->cnfCache[$id] = array_merge([
+				'class' => \stdClass::class,
+				'constructor' => [],
+				'properties' => []
+			], $conf);
+		$sysCacheConf = self::$Sys->cnfCache['sys'];
+		unset(self::$Sys->cnfCache['sys']);
 
 		// DB service
 		if(is_array($config['database'])) self::$Sys->cnfPdo = array_merge($config['database'], self::$Sys->cnfPdo);
@@ -89,13 +101,18 @@ class SysBoot extends sys {
 		self::$Sys->cnfTrace = array_replace(self::$Sys->cnfTrace, $config['trace']);
 		if(is_string(self::$Sys->cnfTrace['level'])) self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
 
-		// write into CACHE_DIR
+		// initialize
+		self::$Cache = (new Container())->build('sys.cache.SYS', $sysCacheConf['class'], $sysCacheConf['constructor'], $sysCacheConf['properties']);
+
+		// write into CACHE_FILE
 		$Sys = serialize(self::$Sys);
 		$namespaces = var_export(self::$namespaces,true);
+		$Cache = serialize(self::$Cache);
 		$cache = <<<CACHE
 <?php
 self::\$Sys = unserialize('$Sys');
 self::\$namespaces = $namespaces;
+self::\$Cache = unserialize('$Cache');
 CACHE;
 		file_put_contents(TMP_DIR.'core-sys', $cache, LOCK_EX);
 		rename(TMP_DIR.'core-sys', self::CACHE_FILE);

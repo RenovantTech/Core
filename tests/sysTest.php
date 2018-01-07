@@ -2,7 +2,10 @@
 namespace test;
 use metadigit\core\sys,
 	metadigit\core\SysBoot,
-	metadigit\core\console\CmdManager;
+	metadigit\core\SysException,
+	metadigit\core\console\CmdManager,
+	metadigit\core\context\ContextException,
+	metadigit\core\event\EventDispatcherException;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
@@ -70,8 +73,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfCache');
 		$ReflProp->setAccessible(true);
 		$caches = $ReflProp->getValue($Sys);
-		$this->assertArrayHasKey('sys', $caches);
-		$this->assertEquals('metadigit\core\cache\SqliteCache', $caches['sys']['class']);
+		$this->assertArrayHasKey('main', $caches);
+		$this->assertEquals('metadigit\core\cache\SqliteCache', $caches['main']['class']);
 
 		// DB service
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfPdo');
@@ -90,6 +93,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testBoot
+	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testInit() {
@@ -160,7 +166,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
-	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testCmd() {
 		$CmdManager = sys::cmd();
@@ -209,6 +214,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
 	 */
 	function _testDispatchHTTP() {
 		$_SERVER['REQUEST_URI'] = '/';

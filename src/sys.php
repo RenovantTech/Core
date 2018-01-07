@@ -35,6 +35,9 @@ class sys {
 	static protected $namespaces = [
 		__NAMESPACE__ => __DIR__
 	];
+	/** System Cache
+	 * @var \metadigit\core\cache\CacheInterface */
+	static protected $Cache;
 	/** System Container
 	 * @var \metadigit\core\container\Container */
 	static protected $Container;
@@ -91,12 +94,7 @@ class sys {
 	protected $cnfApps = [];
 	/** Cache configurations
 	 * @var array */
-	protected $cnfCache = [
-		'sys' => [
-			'class' => 'metadigit\core\cache\SqliteCache',
-			'params' => ['sys-cache', 'cache', true]
-		]
-	];
+	protected $cnfCache = [];
 	/** Constants
 	 * @var array */
 	protected $cnfConstants = [];
@@ -167,7 +165,6 @@ class sys {
 		self::$traceLevel = self::$Sys->cnfTrace['level'];
 
 		// initialize
-		self::cache('sys');
 		self::$Container = new Container;
 		self::$EventDispatcher = new EventDispatcher;
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
@@ -309,12 +306,10 @@ class sys {
 	 */
 	static function cache($id='main') {
 		static $_ = [];
+		if($id=='sys') return self::$Cache;
 		if(!isset($_[$id])) {
 			$cnf = self::$Sys->cnfCache[$id];
-			$RefClass = new \ReflectionClass($cnf['class']);
-			$params = ($cnf['params']) ? array_merge(['id'=>$id], $cnf['params']) : ['id'=>$id];
-			$Cache = $RefClass->newInstanceArgs($params);
-			$_[$id] = $Cache;
+			$_[$id] = $Cache = self::$Container->build('sys.cache'.strtoupper($id), $cnf['class'], $cnf['constructor'], $cnf['properties']);
 		}
 		return $_[$id];
 	}

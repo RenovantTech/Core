@@ -73,10 +73,10 @@ auth:
 cache:
   #sys:         ### System cache, override with CAUTION
   #  class:    metadigit\core\cache\SqliteCache
-  #  params:   ['sys-cache', 'cache', true]
+  #  constructor:   ['sys-cache', 'cache', true]
   main:
-    class:    metadigit\core\cache\SqliteCache
-    params:   ['sqlite', 'cache', false]
+    class:        metadigit\core\cache\SqliteCache
+    constructor:  [ 'sqlite', 'cache', false ]
 
 # =========================================================
 # CmdManager service
