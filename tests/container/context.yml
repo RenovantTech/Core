@@ -1,6 +1,6 @@
 includes:
   - system
-objects:
+services:
   test.container.Mock1:
     class: test\container\Mock1
     properties:

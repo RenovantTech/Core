@@ -1,6 +1,6 @@
 includes:
   - system
-objects:
+services:
   test.db.orm.StatsRepository:
     class: metadigit\core\db\orm\Repository
     constructor: [ 'test\db\orm\Stats', mysql ]

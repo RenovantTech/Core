@@ -1,4 +1,4 @@
-objects:
+services:
   system.Mock:
     class: test\GlobalMock
     properties:

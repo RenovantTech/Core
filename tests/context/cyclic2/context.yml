@@ -1,6 +1,6 @@
 includes:
   - test.context.cyclic1
-objects:
+services:
   test.context.cyclic2.Mock:
     class: test\context\Mock1
     properties:

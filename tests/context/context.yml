@@ -1,6 +1,6 @@
 includes:
   - system
-objects:
+services:
   test.context.Mock1:
     class: test\context\Mock1
     constructor: [foo]

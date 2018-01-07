@@ -35,9 +35,9 @@ class Context {
 	/** initialized namespaces
 	 * @var array */
 	protected $namespaces = [];
-	/** Array of instantiated objects (to avoid replication)
+	/** Array of instantiated services (to avoid replication)
 	 * @var array */
-	protected $objects = [];
+	protected $services = [];
 
 	/**
 	 * Constructor
@@ -102,11 +102,11 @@ class Context {
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Context->get');
-		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
+		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
 			sys::context()->init(substr($id, 0, strrpos($id, '.')));
 			if($this->has($id, $class)) {
-				return $this->objects[$id] = new CoreProxy($id);
+				return $this->services[$id] = new CoreProxy($id);
 			} elseif($failureMode==self::FAILURE_SILENT) return null;
 			else throw new ContextException(1, [$this->_, $id]);
 		} catch(ContainerException $Ex) {

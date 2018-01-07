@@ -19,18 +19,18 @@ class Container {
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;
 
-	/** Mapping between objects IDs and their parent classes and interfaces.
+	/** Mapping between services IDs and their parent classes and interfaces.
 	 * @var array */
 	protected $id2classMap = [];
-	/** Mapping between classes and objects IDs.
+	/** Mapping between classes and services IDs.
 	 * @var array */
 	protected $class2idMap = [];
 	/** initialized namespaces
 	 * @var array */
 	protected $namespaces = [];
-	/** Array of instantiated objects (to avoid replication)
+	/** Array of instantiated services (to avoid replication)
 	 * @var array */
-	protected $objects = [];
+	protected $services = [];
 
 	/**
 	 * Build an Object using reflection
@@ -78,14 +78,14 @@ class Container {
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
-		if(isset($this->objects[$id]) && (is_null($class) || $this->objects[$id] instanceof $class)) return $this->objects[$id];
+		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
 			$namespace = substr($id, 0, strrpos($id, '.'));
 			if(!in_array($namespace, $this->namespaces)) $this->init($namespace);
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
 			$obj = sys::cache('sys')->get($namespace.'#services')[$id];
-			$this->objects[$id] = $Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
+			$this->services[$id] = $Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
 			sys::cache('sys')->set($id, $Obj);
 			return $Obj;
 		} catch(ContainerException $Ex) {
@@ -95,9 +95,9 @@ class Container {
 	}
 
 	/**
-	 * Get all objects of desired class/interface.
+	 * Get all services of desired class/interface.
 	 * @param string $class desired class/interface
-	 * @return object[] objects (can be empty)
+	 * @return object[] services (can be empty)
 	 * @throws ContainerException
 	 */
 	function getAllByType($class) {
@@ -110,9 +110,9 @@ class Container {
 	}
 
 	/**
-	 * Get list of objects ID of desired class/interface.
+	 * Get list of services ID of desired class/interface.
 	 * @param string $class desired class/interface
-	 * @return array[string] objects IDs (can be empty)
+	 * @return array[string] services IDs (can be empty)
 	 */
 	function getListByType($class) {
 		return $this->class2idMap[$class] ?: [];

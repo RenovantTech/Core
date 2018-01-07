@@ -1,4 +1,4 @@
-objects:
+services:
   # Dispatcher
   test.http.Dispatcher:
     class: metadigit\core\http\Dispatcher

@@ -1,7 +1,7 @@
 foo:
   - foo1
   - foo2
-objects:
+services:
   test.util.yaml.Mock1:
     class: test\context\Mock1
   test.util.yaml.Mock2:

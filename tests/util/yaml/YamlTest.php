@@ -11,7 +11,7 @@ class YamlTest extends \PHPUnit\Framework\TestCase {
 	function testParseFile() {
 		$yaml = Yaml::parseFile(__DIR__.'/context.yml');
 		$this->assertCount(3, $yaml);
-		$this->assertCount(2, $yaml['objects']);
+		$this->assertCount(2, $yaml['services']);
 		$this->assertCount(2, $yaml['events']);
 
 		// test section

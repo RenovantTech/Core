@@ -34,7 +34,7 @@ class ContextYamlParser {
 			if(
 				!is_array($YAML) ||
 				(isset($YAML['includes']) && !is_array($YAML['includes'])) ||
-				(isset($YAML['objects']) && !is_array($YAML['objects'])) ||
+				(isset($YAML['services']) && !is_array($YAML['services'])) ||
 				(isset($YAML['events']) && !is_array($YAML['events']))
 			) throw new ContextException(12, [$yamlPath]);
 			*/
@@ -44,9 +44,9 @@ class ContextYamlParser {
 				$includes = $yaml['includes'];
 
 			// verify Context namespaces
-			if(isset($yaml['objects']) && is_array($yaml['objects'])) {
+			if(isset($yaml['services']) && is_array($yaml['services'])) {
 				$availableNamespaces = implode(', ', array_merge((array)$namespace, $includes));
-				foreach($yaml['objects'] as $id => $objYAML) {
+				foreach($yaml['services'] as $id => $objYAML) {
 					if(strpos($id, $namespace) !== 0) throw new ContextException(14, [__METHOD__, $id, $namespace]);
 					if(isset($objYAML['constructor'])) {
 						foreach($objYAML['constructor'] as $arg) {

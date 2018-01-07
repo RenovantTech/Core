@@ -27,7 +27,7 @@ class ContainerYamlParser {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$id2classMap = $class2idMap = $services = [];
 		try {
-			$yaml = Yaml::parseContext($namespace, 'objects', [
+			$yaml = Yaml::parseContext($namespace, 'services', [
 				'!obj' => function($value) {
 					return '!obj '.$value;
 				}

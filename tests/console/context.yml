@@ -1,4 +1,4 @@
-objects:
+services:
   # Dispatcher
   test.console.Dispatcher:
     class: metadigit\core\console\Dispatcher
