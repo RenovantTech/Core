@@ -5,56 +5,53 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\auth\session\handler;
-use const metadigit\core\trace\T_INFO;
+namespace metadigit\core\http\session\handler;
 use metadigit\core\sys,
 	metadigit\core\http\SessionException;
 /**
- * HTTP Session Handler implementation with a Mysql database.
+ * HTTP Session Handler implementation with an Sqlite database.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Mysql implements \SessionHandlerInterface {
+class Sqlite implements \SessionHandlerInterface {
+	use \metadigit\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
-			id			char(32) not NULL,
-			ip			char(15) not NULL,
-			startTime	integer unsigned,
-			lastTime	integer unsigned,
-			expireTime	integer unsigned,
-			uid			integer unsigned NULL default NULL,
-			locked		tinyint(1) unsigned not NULL default 0,
-			data		text not NULL,
-			PRIMARY KEY (id),
-			KEY k_ip (ip)
+			id			char(32) NOT NULL,
+			ip			char(15) NOT NULL,
+			startTime	integer,
+			lastTime	integer,
+			expireTime	integer,
+			uid			int(10) NULL DEFAULT NULL,
+			locked		tinyint(1) NOT NULL DEFAULT "0",
+			data		text NOT NULL,
+			PRIMARY KEY (id)
 		);
+		CREATE INDEX IF NOT EXISTS k_ip ON `%s` (ip);
 	';
-
 	const SQL_READ = 'SELECT ip, uid, locked, data FROM `%s` WHERE id = :id AND expireTime > :expireTime';
 	const SQL_INSERT = 'INSERT INTO `%s` (id, ip, startTime, lastTime, expireTime, uid, locked, data) VALUES (:id, :ip, :startTime, :lastTime, :expireTime, :uid, :locked, :data)';
 	const SQL_UPDATE = 'UPDATE `%s` SET ip = :ip, lastTime = :lastTime, expireTime = :expireTime, uid = :uid, locked = :locked, data = :data WHERE id = :id';
 	const SQL_DESTROY = 'DELETE FROM `%s` WHERE id = :id';
 	const SQL_GC = 'DELETE FROM `%s` WHERE expireTime < :time';
 
-	/** database table name
-	 * @var string */
-	protected $table;
 	/** PDO instance ID
 	 * @var \PDO */
 	protected $pdo;
+	/** database table name
+	 * @var string */
+	protected $table;
 	/** session ID on read(), to support session_regenerate_id()
 	 * @var string */
 	static protected $id;
 
-	/**
-	 * @param string $pdo PDO instance ID
-	 * @param string $table table name
-	 */
-	function __construct($pdo, $table='sessions') {
-		$this->pdo = $pdo;
-		$this->table = $table;
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize session storage', null, 'sys.auth.session.Mysql->__construct');
-		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
+	function init() {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			sys::pdo($this->pdo)->exec(sprintf(self::SQL_INIT, $this->table, $this->table));
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/**
@@ -72,6 +69,7 @@ class Mysql implements \SessionHandlerInterface {
 
 	/**
 	 * Session close handler
+	 * @return boolean TRUE on success
 	 */
 	function close() {
 		return true;
@@ -84,20 +82,23 @@ class Mysql implements \SessionHandlerInterface {
 	 * @return string session data, EMPTY string if non session data!
 	 */
 	function read($id) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
-			list($ip, $uid, $lock, $data) = $st->fetch(\PDO::FETCH_NUM);
-			if(empty($ip)) @define('SESSION_UID', null);
+			list($ip, $uid, $locked, $data) = $raw = $st->fetch(\PDO::FETCH_NUM);
+			if(empty($ip)) define('SESSION_UID', null);
 			else {
 				self::$id = $id;
 				define('SESSION_UID', $uid);
-				define('SESSION_LOCKED', (boolean) $lock);
+				define('SESSION_LOCKED', (boolean) $locked);
 			}
 			return (string) $data;
 		} catch(\Exception $Ex) {
 			trigger_error($Ex->getMessage());
 			return '';
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -108,6 +109,7 @@ class Mysql implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function write($id, $data) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$uid = (defined('SESSION_NEW_UID')) ? SESSION_NEW_UID : (defined('SESSION_UID') ? SESSION_UID : null);
 			$locked = (defined('SESSION_LOCKED')) ? (int)SESSION_LOCKED : 0;
@@ -129,6 +131,8 @@ class Mysql implements \SessionHandlerInterface {
 		} catch(\Exception $Ex) {
 			trigger_error($Ex->getMessage());
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -138,26 +142,32 @@ class Mysql implements \SessionHandlerInterface {
 	 * @return boolean TRUE on success
 	 */
 	function destroy($id) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DESTROY, $this->table));
 			$st->execute(['id'=>$id]);
 			return (boolean) $st->rowCount();
 		} catch(\Exception $Ex) {
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
 	/**
 	 * garbage collection handler
 	 * @param integer $maxlifetime
-	 * @return boolean
+	 * @return boolean TRUE on success
 	 */
 	function gc($maxlifetime) {
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_GC, $this->table))->execute(['time'=>time()]);
 			return true;
 		} catch(\Exception $Ex) {
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 }

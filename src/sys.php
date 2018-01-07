@@ -242,6 +242,7 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
+		// invoke HTTP Dispatcher
 		$app = $dispatcherID = $namespace = null;
 		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
 			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';

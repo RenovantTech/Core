@@ -126,6 +126,39 @@ trace:
   level:      LOG_DEBUG
   storeFn:    null
 
+# =========================================================
+# EVENTS
+# =========================================================
+events:
+  HTTP:ROUTE:
+    - sys.HttpSession->start
+  HTTP:VIEW:
+    - sys.HttpSession->end
+  HTTP:EXCEPTION:
+    - sys.HttpSession->end
 
+# =========================================================
+# SERVICES
+# =========================================================
+services:
 
-
+  # -------------------------------------------------------
+  # SESSION service
+  # -------------------------------------------------------
+  sys.HttpSession:
+    class: metadigit\core\http\session\Manager
+    constructor:
+      # session cookie parameters
+      cookie:
+        name:     SESSION   # cookie name
+        lifetime: 3600      # lifetime of the session cookie, defined in seconds
+        path:     /         # path on the domain where the cookie will work (use a single slash '/' for all paths on the domain)
+        domain:   null      # cookie domain (to make cookies visible on all sub-domains then the domain must be prefixed with a dot like '.php.net')
+        secure:   true      # if TRUE cookie will only be sent over secure connections
+        httponly: true      #
+      # session handler
+      handler:
+        class: metadigit\core\http\session\handler\Mysql
+        properties:
+          pdo:    mysql
+          table:  sys_auth_sessions

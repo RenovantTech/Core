@@ -66,11 +66,7 @@ class ContainerYamlParser {
 	 * @return array class, constructor args, properties
 	 */
 	static function parseYaml(array $yaml) {
-		$obj = [
-			'class' => \stdClass::class,
-			'constructor' => [],
-			'properties' => []
-		];
+		$obj = Container::YAML_OBJ_SKELETON;
 		// class
 		if($yaml['class']) $obj['class'] = $yaml['class'];
 		// constructor args

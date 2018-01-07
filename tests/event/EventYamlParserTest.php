@@ -11,13 +11,13 @@ class EventYamlParserTest extends \PHPUnit\Framework\TestCase {
 	function testParseNamespace() {
 		$listeners = EventYamlParser::parseNamespace('test.event');
 		$this->assertCount(2, $listeners);
-		$this->assertCount(3, $listeners['test.event1'][1]);
-		$this->assertEquals('substr', $listeners['test.event1'][1][0]);
-		$this->assertEquals('EventTester::test1', $listeners['test.event1'][1][1]);
-		$this->assertEquals('LocalMock->foo', $listeners['test.event1'][1][2]);
-		$this->assertEquals('foo1', $listeners['test.event2'][1][0]);
-		$this->assertEquals('foo2', $listeners['test.event2'][1][1]);
-		$this->assertEquals('bar', $listeners['test.event2'][2][0]);
+		$this->assertCount(3, $listeners['TEST.EVENT1'][1]);
+		$this->assertEquals('substr', $listeners['TEST.EVENT1'][1][0]);
+		$this->assertEquals('EventTester::test1', $listeners['TEST.EVENT1'][1][1]);
+		$this->assertEquals('LocalMock->foo', $listeners['TEST.EVENT1'][1][2]);
+		$this->assertEquals('foo1', $listeners['TEST.EVENT2'][1][0]);
+		$this->assertEquals('foo2', $listeners['TEST.EVENT2'][1][1]);
+		$this->assertEquals('bar', $listeners['TEST.EVENT2'][2][0]);
 	}
 
 	function testParseNamespaceException() {

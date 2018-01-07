@@ -80,11 +80,7 @@ class SysBoot extends sys {
 		];
 		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge($config['cache'], self::$Sys->cnfCache);
 		foreach (self::$Sys->cnfCache as $id => $conf)
-			self::$Sys->cnfCache[$id] = array_merge([
-				'class' => \stdClass::class,
-				'constructor' => [],
-				'properties' => []
-			], $conf);
+			self::$Sys->cnfCache[$id] = array_merge(Container::YAML_OBJ_SKELETON, $conf);
 		$sysCacheConf = self::$Sys->cnfCache['sys'];
 		unset(self::$Sys->cnfCache['sys']);
 
