@@ -93,9 +93,6 @@ class SysBoot extends sys {
 		// Log service
 		if(is_array($config['log'])) self::$Sys->cnfLog = $config['log'];
 
-		// Session service
-		if(is_array($config['session'])) self::$Sys->cnfSession = array_merge(Container::YAML_OBJ_SKELETON, $config['session']);
-
 		// Trace service
 		self::$Sys->cnfTrace = array_replace(self::$Sys->cnfTrace, $config['trace']);
 		if(is_string(self::$Sys->cnfTrace['level'])) self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
