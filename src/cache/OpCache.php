@@ -35,7 +35,6 @@ class OpCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($id, $writeBuffer=false) {
-		$this->_ = 'sys.cache'.strtoupper($id);
 		$this->id = $id;
 		$DIR = CACHE_DIR.'opc-'.$id.'/';
 		$this->writeBuffer = (boolean) $writeBuffer;
