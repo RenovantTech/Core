@@ -49,7 +49,6 @@ class AUTH {
 	function __construct($module='SESSION') {
 		if(!in_array($module, self::MODULES)) throw new AuthException(1, [$module, implode(', ', self::MODULES)]);
 		$this->module = $module;
-		$this->init();
 	}
 
 	function __sleep() {
@@ -59,14 +58,7 @@ class AUTH {
 	/**
 	 * @throws AuthException
 	 */
-	function __wakeup() {
-		$this->init();
-	}
-
-	/**
-	 * @throws AuthException
-	 */
-	protected function init() {
+	function init() {
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize module '.$this->module, null, $this->_.'->init');
 		switch ($this->module) {
 			case 'COOKIE':

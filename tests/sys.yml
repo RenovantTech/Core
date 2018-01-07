@@ -125,9 +125,12 @@ trace:
 events:
   HTTP:ROUTE:
     - sys.HttpSession->start
+    #- sys.AUTH->init
   HTTP:VIEW:
+    #- sys.AUTH->commit
     - sys.HttpSession->end
   HTTP:EXCEPTION:
+    #- sys.AUTH->commit
     - sys.HttpSession->end
 
 # =========================================================
