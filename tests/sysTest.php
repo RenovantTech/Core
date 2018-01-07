@@ -1,7 +1,7 @@
 <?php
 namespace test;
 use metadigit\core\sys,
-	metadigit\core\sysboot,
+	metadigit\core\SysBoot,
 	metadigit\core\console\CmdManager;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
@@ -15,8 +15,15 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \metadigit\core\util\yaml\YamlException
 	 */
 	function testBoot() {
-		list($Sys, $namespaces) = sysBoot::boot();
+		SysBoot::boot();
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'Sys');
+		$ReflProp->setAccessible(true);
+		$Sys = $ReflProp->getValue();
+		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'namespaces');
+		$ReflProp->setAccessible(true);
+		$namespaces = $ReflProp->getValue();
 
+		// namespaces
 		$this->assertArrayHasKey('metadigit\core', $namespaces);
 		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['metadigit\core']);
 		$this->assertArrayHasKey('test', $namespaces);

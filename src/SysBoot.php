@@ -13,11 +13,10 @@ use metadigit\core\util\yaml\Yaml;
  * @author Daniele Sciacchitano <dan@metadigit.it>
  * @internal
  */
-class sysBoot extends sys {
+class SysBoot extends sys {
 
 	/**
 	 * Framework bootstrap on first launch (or cache missing)
-	 * @return array
 	 * @throws util\yaml\YamlException
 	 */
 	static function boot() {
@@ -40,16 +39,15 @@ class sysBoot extends sys {
 		if(!defined(__NAMESPACE__.'\CLI_BOOTSTRAP')) die(SysException::ERR25);
 		if(!defined(__NAMESPACE__.'\CLI_PHP_BIN')) die(SysException::ERR26);
 
-		$Sys = new sys();
+		self::$Sys = new sys();
 
 		$config = Yaml::parseFile(SYS_YAML);
 
 		// APPS HTTP/CLI
-		$Sys->cnfApps['HTTP'] = $config['apps'];
-		$Sys->cnfApps['CLI'] = $config['cli'];
+		self::$Sys->cnfApps['HTTP'] = $config['apps'];
+		self::$Sys->cnfApps['CLI'] = $config['cli'];
 
 		// namespaces
-		$namespaces = self::$namespaces;
 		foreach($config['namespaces'] as $k => $dir) {
 			$dir = rtrim($dir,DIRECTORY_SEPARATOR);
 			if(substr($dir,0,7)=='phar://') {
@@ -59,41 +57,47 @@ class sysBoot extends sys {
 			} else {
 				if($dir[0]!='/') $dir = BASE_DIR.$dir;
 			}
-			$namespaces[$k] = $dir;
+			self::$namespaces[$k] = $dir;
 		}
 
 		// constants
-		if(is_array($config['constants'])) $Sys->cnfConstants = $config['constants'];
+		if(is_array($config['constants'])) self::$Sys->cnfConstants = $config['constants'];
 
 		// settings
-		$Sys->cnfSettings = array_replace($Sys->cnfSettings, $config['settings']);
+		self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['settings']);
 
 		// ACL service
-		if(is_array($config['acl'])) $Sys->cnfAcl = array_merge($Sys->cnfAcl, $config['acl']);
+		if(is_array($config['acl'])) self::$Sys->cnfAcl = array_merge(self::$Sys->cnfAcl, $config['acl']);
 
 		// AUTH service
-		if(is_array($config['auth'])) $Sys->cnfAuth = array_merge($Sys->cnfAuth, $config['auth']);
+		if(is_array($config['auth'])) self::$Sys->cnfAuth = array_merge(self::$Sys->cnfAuth, $config['auth']);
 
 		// Cache service
-		if(is_array($config['cache'])) $Sys->cnfCache = array_merge($config['cache'], $Sys->cnfCache);
+		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge($config['cache'], self::$Sys->cnfCache);
+//		self::$Cache = (new Container())->build('sys.cache.SYS', self::$Sys->cnfCache['sys']['class'], self::$Sys->cnfCache['sys']['constructor'], self::$Sys->cnfCache['sys']['properties']);
 
 		// DB service
-		if(is_array($config['database'])) $Sys->cnfPdo = array_merge($config['database'], $Sys->cnfPdo);
-		foreach ($Sys->cnfPdo as $id => $conf) {
-			$Sys->cnfPdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
+		if(is_array($config['database'])) self::$Sys->cnfPdo = array_merge($config['database'], self::$Sys->cnfPdo);
+		foreach (self::$Sys->cnfPdo as $id => $conf) {
+			self::$Sys->cnfPdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
 		}
 
 		// Log service
-		if(is_array($config['log'])) $Sys->cnfLog = $config['log'];
+		if(is_array($config['log'])) self::$Sys->cnfLog = $config['log'];
 
 		// Trace service
-		$Sys->cnfTrace = array_replace($Sys->cnfTrace, $config['trace']);
-		if(is_string($Sys->cnfTrace['level'])) $Sys->cnfTrace['level'] = constant($Sys->cnfTrace['level']);
+		self::$Sys->cnfTrace = array_replace(self::$Sys->cnfTrace, $config['trace']);
+		if(is_string(self::$Sys->cnfTrace['level'])) self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
 
 		// write into CACHE_DIR
-		file_put_contents(TMP_DIR.'core-sys', '<?php $Sys=unserialize(\''.serialize($Sys).'\'); $namespaces='.var_export($namespaces,true).';', LOCK_EX);
+		$Sys = serialize(self::$Sys);
+		$namespaces = var_export(self::$namespaces,true);
+		$cache = <<<CACHE
+<?php
+self::\$Sys = unserialize('$Sys');
+self::\$namespaces = $namespaces;
+CACHE;
+		file_put_contents(TMP_DIR.'core-sys', $cache, LOCK_EX);
 		rename(TMP_DIR.'core-sys', self::CACHE_FILE);
-
-		return [$Sys, $namespaces];
 	}
 }

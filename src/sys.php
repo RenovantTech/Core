@@ -149,26 +149,22 @@ class sys {
 		ignore_user_abort(1);
 		ini_set('upload_tmp_dir', TMP_DIR);
 
-		$Sys = $namespaces = null;
 		if(file_exists(self::CACHE_FILE)) include self::CACHE_FILE;
-		if(!isset($Sys)) list($Sys, $namespaces) = sysBoot::boot();
-		self::$namespaces = $namespaces;
-		/** @var \metadigit\core\sys Sys */
-		self::$Sys = $Sys;
+		else SysBoot::boot();
 
 		// settings
-		date_default_timezone_set($Sys->cnfSettings['timeZone']);
-		setlocale(LC_ALL, $Sys->cnfSettings['locale']);
-		ini_set('default_charset', $Sys->cnfSettings['charset']);
+		date_default_timezone_set(self::$Sys->cnfSettings['timeZone']);
+		setlocale(LC_ALL, self::$Sys->cnfSettings['locale']);
+		ini_set('default_charset', self::$Sys->cnfSettings['charset']);
 		// constants
-		foreach($Sys->cnfConstants as $k => $v) define($k, $v);
+		foreach(self::$Sys->cnfConstants as $k => $v) define($k, $v);
 		// ACL service
-		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) $Sys->cnfAcl['routes']);
-		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) $Sys->cnfAcl['objects']);
-		define(__NAMESPACE__.'\ACL_ORM', (boolean) $Sys->cnfAcl['orm']);
+		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) self::$Sys->cnfAcl['routes']);
+		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) self::$Sys->cnfAcl['objects']);
+		define(__NAMESPACE__.'\ACL_ORM', (boolean) self::$Sys->cnfAcl['orm']);
 
 		// TRACE service
-		self::$traceLevel = $Sys->cnfTrace['level'];
+		self::$traceLevel = self::$Sys->cnfTrace['level'];
 
 		// initialize
 		self::cache('sys');
