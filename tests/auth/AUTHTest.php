@@ -1,18 +1,27 @@
 <?php
 namespace test\auth;
-use metadigit\core\sys,
-	metadigit\core\auth\AUTH;
+use metadigit\core\auth\AUTH,
+	metadigit\core\auth\AuthException;
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @return AUTH
-	 * @throws \metadigit\core\container\ContainerException
 	 */
 	function testConstruct() {
-		$AUTH = sys::auth();
+		$AUTH = new AUTH;
 		$this->assertInstanceOf(AUTH::class, $AUTH);
 		return $AUTH;
+	}
+
+	function testConstructException() {
+		try {
+			new AUTH('INVALID');
+			$this->fail('Expected Exception not thrown');
+		} catch(AuthException $Ex) {
+			$this->assertEquals(1, $Ex->getCode());
+			$this->assertRegExp('/INVALID/', $Ex->getMessage());
+		}
 	}
 
 	/**

@@ -15,46 +15,52 @@ use metadigit\core\sys;
 class AUTH {
 	use \metadigit\core\CoreTrait;
 
-	/** enable/disable JWT module
-	 * @var boolean */
-	protected $enableJWT = false;
-	/** enable/disable SESSION module
-	 * @var boolean */
-	protected $enableSESSION = false;
+	const MODULES = [
+		'COOKIE',
+		'JWT',
+		'SESSION'
+	];
 
 	/** User custom data
 	 * @var array */
-	protected $data = [];
+	protected $_data = [];
 	/** Group ID
 	 * @var integer|null */
-	protected $GID = null;
+	protected $_GID = null;
 	/** Group name
 	 * @var string|null */
-	protected $GROUP = null;
+	protected $_GROUP = null;
 	/** User name (full-name)
 	 * @var string|null */
-	protected $NAME = null;
+	protected $_NAME = null;
 	/** User ID
 	 * @var integer|null */
-	protected $UID = null;
+	protected $_UID = null;
+
+	/** active module
+	 * @var string */
+	protected $module = 'SESSION';
 
 	function __sleep() {
-		return ['_', 'enableJWT', 'enableSESSION'];
+		return ['_', 'module'];
 	}
 
-	function __construct(bool $enableJWT=false, bool $enableSESSION=false) {
-		$this->enableJWT = $enableJWT;
-		$this->enableSESSION = $enableSESSION;
+	/**
+	 * AUTH constructor.
+	 * @param string $module
+	 * @throws AuthException
+	 */
+	function __construct($module='SESSION') {
+		if(!in_array($module, self::MODULES)) throw new AuthException(1, [$module, implode(', ', self::MODULES)]);
+		$this->module = $module;
 	}
 
 	function init() {
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH module', null, 'sys.AUTH->init');
-		if($this->enableJWT) {
-			// @TODO initialize JWT module
-		}
-		if($this->enableSESSION) {
-			// @TODO initialize SESSION module
-		}
+
+		// @TODO initialize JWT module
+		// @TODO initialize SESSION module
+
 		return $this;
 	}
 
@@ -64,7 +70,7 @@ class AUTH {
 	 * @return array|mixed|null
 	 */
 	function get($key=null) {
-		return (is_null($key)) ? $this->data : ($this->data[$key] ?? null);
+		return (is_null($key)) ? $this->_data : ($this->_data[$key] ?? null);
 	}
 
 	/**
@@ -72,7 +78,7 @@ class AUTH {
 	 * @return integer|null
 	 */
 	function GID() {
-		return $this->GID;
+		return $this->_GID;
 	}
 
 	/**
@@ -80,7 +86,7 @@ class AUTH {
 	 * @return string|null
 	 */
 	function GROUP() {
-		return $this->GROUP;
+		return $this->_GROUP;
 	}
 
 	/**
@@ -88,7 +94,7 @@ class AUTH {
 	 * @return string|null
 	 */
 	function NAME() {
-		return $this->NAME;
+		return $this->_NAME;
 	}
 
 	/**
@@ -99,11 +105,11 @@ class AUTH {
 	 */
 	function set($key, $value) {
 		switch ($key) {
-			case 'GID': $this->GID = (integer) $value; break;
-			case 'GROUP': $this->GROUP = (string) $value; break;
-			case 'NAME': $this->NAME = (string) $value; break;
-			case 'UID': $this->UID = (integer) $value; break;
-			default: $this->data[$key] = $value;
+			case 'GID': $this->_GID = (integer) $value; break;
+			case 'GROUP': $this->_GROUP = (string) $value; break;
+			case 'NAME': $this->_NAME = (string) $value; break;
+			case 'UID': $this->_UID = (integer) $value; break;
+			default: $this->_data[$key] = $value;
 		}
 		return $this;
 	}
@@ -113,6 +119,6 @@ class AUTH {
 	 * @return integer|null
 	 */
 	function UID() {
-		return $this->UID;
+		return $this->_UID;
 	}
 }

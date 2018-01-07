@@ -140,9 +140,8 @@ services:
   # -------------------------------------------------------
   sys.AUTH:
     class: metadigit\core\auth\AUTH
-    properties:
-      enableJWT:      false
-      enableSESSION:  true
+    constructor:
+      module: SESSION
 
   # -------------------------------------------------------
   # SESSION service
