@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\auth\session\handler;
+namespace metadigit\core\http\session\handler;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\SessionException;

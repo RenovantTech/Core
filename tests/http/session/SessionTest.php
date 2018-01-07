@@ -1,12 +1,12 @@
 <?php
-namespace test\auth\session;
-use metadigit\core\auth\session\Session;
+namespace test\http\session;
+use metadigit\core\http\session\Manager;
 
 class SessionTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Session = new Session;
-		$this->assertInstanceOf('metadigit\core\auth\session\Session', $Session);
+		$Session = new Manager;
+		$this->assertInstanceOf(Manager::class, $Session);
 //		$this->assertFileExists(\metadigit\core\DATA_DIR.'sessions.sqlite');
 	}
 }

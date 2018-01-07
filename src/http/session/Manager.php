@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2014 Daniele Sciacchitano <dan@metadigit.it>
  * @license New BSD License
  */
-namespace metadigit\core\auth\session;
+namespace metadigit\core\http\session;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\SessionException;
@@ -13,12 +13,12 @@ use metadigit\core\sys,
  * HTTP Session Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class Session {
+class Manager {
 	use \metadigit\core\CoreTrait;
 	const ACL_SKIP = true;
 
-	const EVENT_START	= 'session.start';
-	const EVENT_END		= 'session.end';
+	const EVENT_START	= 'http.session:start';
+	const EVENT_END		= 'http.session:end';
 
 	/** Cookie config
 	 * @var array */
@@ -33,8 +33,8 @@ class Session {
 	/** Handler config
 	 * @var array */
 	protected $handler = [
-		'class' => 'metadigit\core\session\handler\Sqlite',
-		'params' => [
+		'class' => 'metadigit\core\http\session\handler\Sqlite',
+		'constructor' => [
 			'pdo' => 'master',
 			'table' => 'sys_auth_session'
 		]
@@ -52,7 +52,7 @@ class Session {
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->cookie['name']);
 		session_set_cookie_params($this->cookie['lifetime'], $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
-		$this->Handler = new $this->handler['class'](...array_values((array)$this->handler['params']));
+		$this->Handler = new $this->handler['class'](...array_values((array)$this->handler['constructor']));
 		session_set_save_handler($this->Handler, true);
 		session_start();
 		sys::event(self::EVENT_START);
@@ -62,7 +62,7 @@ class Session {
 	 * Destroys all of the data associated with the current session.
 	 */
 	function destroy() {
-		sys::trace(LOG_DEBUG, T_INFO, null, null, 'sys.auth.Session->destroy');
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->destroy');
 		session_destroy();
 		if (isset($_COOKIE[$this->cookie['name']])) setcookie($this->cookie['name'], false, 315554400 /* 1980-01-01 */, $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
 	}
