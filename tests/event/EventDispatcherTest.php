@@ -79,11 +79,11 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('metadigit\core\event\EventDispatcher', 'listeners');
 		$ReflProp->setAccessible(true);
 		$listeners = $ReflProp->getValue($EventDispatcher);
-		$this->assertEquals('test\event\callback1', $listeners['test.event.add1'][1][0]);
-		$this->assertEquals('test\event\callback2', $listeners['test.event.add1'][1][1]);
-		$this->assertEquals('test\event\callback3', $listeners['test.event.add1'][1][2]);
-		$this->assertEquals('test\event\callback4', $listeners['test.event.add1'][1][3]);
-		$this->assertEquals('test\event\callback0', $listeners['test.event.add1'][2][0]);
+		$this->assertEquals('test\event\callback1', $listeners['TEST.EVENT.ADD1'][1][0]);
+		$this->assertEquals('test\event\callback2', $listeners['TEST.EVENT.ADD1'][1][1]);
+		$this->assertEquals('test\event\callback3', $listeners['TEST.EVENT.ADD1'][1][2]);
+		$this->assertEquals('test\event\callback4', $listeners['TEST.EVENT.ADD1'][1][3]);
+		$this->assertEquals('test\event\callback0', $listeners['TEST.EVENT.ADD1'][2][0]);
 	}
 
 	/**

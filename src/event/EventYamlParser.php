@@ -56,7 +56,7 @@ class EventYamlParser {
 	static function parseYaml(array $yaml) {
 		$listeners = [];
 		foreach($yaml as $eventName => $eventYAML) {
-
+			$eventName = strtoupper($eventName);
 			foreach ($eventYAML as $listenerYAML) {
 				if(is_string($listenerYAML)) {
 					$listeners[$eventName][1][] = $listenerYAML;

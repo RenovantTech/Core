@@ -45,6 +45,7 @@ class EventDispatcher {
 	 * @param int $priority trigger precedence on the listeners chain (higher values execute earliest)
 	 */
 	function listen($eventName, $callback, $priority=1) {
+		$eventName = strtoupper($eventName);
 		$this->listeners[$eventName][(int)$priority][] = $callback;
 		krsort($this->listeners[$eventName], SORT_NUMERIC);
 	}
@@ -56,14 +57,15 @@ class EventDispatcher {
 	 * @return Event the Event object
 	 */
 	function trigger($eventName, $EventOrParams=null): Event {
+		$eventName = strtoupper($eventName);
 		if(!isset($this->listeners[$eventName]))
-			sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName));
+			sys::trace(LOG_DEBUG, T_EVENT, $eventName);
 		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
 		if(!isset($this->listeners[$eventName])) return $Event;
 		foreach($this->listeners[$eventName] as $priority => $listeners) {
 			foreach($listeners as $callback) {
 				if(is_string($callback)) {
-					sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$callback);
+					sys::trace(LOG_DEBUG, T_EVENT, $eventName.' ['.$priority.'] '.$callback);
 					if(strpos($callback,'->')>0) {
 						list($objID, $method) = explode('->', $callback);
 						$callback = [new CoreProxy($objID), $method];
@@ -73,7 +75,7 @@ class EventDispatcher {
 					$RefProp = new \ReflectionProperty($Obj, '_');
 					$RefProp->setAccessible(true);
 					$_ = $RefProp->getValue($Obj);
-					sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$_.'->'.$method);
+					sys::trace(LOG_DEBUG, T_EVENT, $eventName.' ['.$priority.'] '.$_.'->'.$method);
 				}
 				call_user_func($callback, $Event);
 				if($Event->isPropagationStopped()) break;
