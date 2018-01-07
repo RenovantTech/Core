@@ -9,6 +9,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	 * @return AUTH
 	 */
 	function testConstruct() {
+		session_start();
 		$AUTH = new AUTH;
 		$this->assertInstanceOf(AUTH::class, $AUTH);
 		return $AUTH;
@@ -21,6 +22,15 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		} catch(AuthException $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
 			$this->assertRegExp('/INVALID/', $Ex->getMessage());
+		}
+
+		try {
+			session_destroy();
+			new AUTH('SESSION');
+			$this->fail('Expected Exception not thrown');
+		} catch(AuthException $Ex) {
+			$this->assertEquals(13, $Ex->getCode());
+			$this->assertRegExp('/must be already started/', $Ex->getMessage());
 		}
 	}
 
@@ -79,5 +89,15 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	function testUID(AUTH $AUTH) {
 		$AUTH->set('UID', 1);
 		$this->assertEquals(1, $AUTH->UID());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AUTH $AUTH
+	 */
+	function testCommit(AUTH $AUTH) {
+		$AUTH->set('foo', 'bar');
+		$AUTH->commit();
+		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
 	}
 }

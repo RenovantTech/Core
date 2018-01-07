@@ -14,4 +14,6 @@ use metadigit\core\Exception as BaseException;
 class AuthException extends BaseException {
 	// constructor
 	const COD1 = 'AUTH - auth module "%s" invalid, must be one of %s';
+	// init
+	const COD13 = 'AUTH - SESSION must be already started before AUTH->init()';
 }

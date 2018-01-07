@@ -41,10 +41,6 @@ class AUTH {
 	 * @var string */
 	protected $module = 'SESSION';
 
-	function __sleep() {
-		return ['_', 'module'];
-	}
-
 	/**
 	 * AUTH constructor.
 	 * @param string $module
@@ -53,15 +49,56 @@ class AUTH {
 	function __construct($module='SESSION') {
 		if(!in_array($module, self::MODULES)) throw new AuthException(1, [$module, implode(', ', self::MODULES)]);
 		$this->module = $module;
+		$this->init();
 	}
 
-	function init() {
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH module', null, 'sys.AUTH->init');
+	function __sleep() {
+		return ['_', 'module'];
+	}
 
-		// @TODO initialize JWT module
-		// @TODO initialize SESSION module
+	/**
+	 * @throws AuthException
+	 */
+	function __wakeup() {
+		$this->init();
+	}
 
-		return $this;
+	/**
+	 * @throws AuthException
+	 */
+	protected function init() {
+		sys::trace(LOG_DEBUG, T_INFO, 'initialize module '.$this->module, null, $this->_.'->init');
+		switch ($this->module) {
+			case 'COOKIE':
+				// @TODO COOKIE module
+				break;
+			case 'JWT':
+				// @TODO JWT module
+				break;
+			case 'SESSION':
+				if(session_status() != PHP_SESSION_ACTIVE) throw new AuthException(13);
+				if($_SESSION['__AUTH__']) foreach ($_SESSION['__AUTH__'] as $k => $v)
+					$this->set($k, $v);
+		}
+	}
+
+	function commit() {
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->commit');
+		switch ($this->module) {
+			case 'COOKIE':
+				// @TODO COOKIE module
+				break;
+			case 'JWT':
+				// @TODO JWT module
+				break;
+			case 'SESSION':
+				$_SESSION['__AUTH__'] = array_merge([
+					'GID'	=> $this->_GID,
+					'GROUP'	=> $this->_GROUP,
+					'NAME'	=> $this->_NAME,
+					'UID'	=> $this->_UID
+				], $this->_data);
+		}
 	}
 
 	/**
