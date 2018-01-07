@@ -71,6 +71,10 @@ class SqliteCache implements CacheInterface {
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
+	function __sleep() {
+		return ['_', 'pdo', 'table', 'writeBuffer'];
+	}
+
 	function get($id) {
 		if(isset($this->cache[$id])) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
