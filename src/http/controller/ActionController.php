@@ -8,6 +8,8 @@
 namespace metadigit\core\http\controller;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
+	metadigit\core\auth\AUTH,
+	metadigit\core\container\ContainerException,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
@@ -44,6 +46,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
+	 * @throws ContainerException
 	 * @throws Exception
 	 */
 	function handle(Request $Req, Response $Res) {
@@ -60,6 +63,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 					switch ($param['class']) {
 						case Request::class: $args[$i] = $Req; break;
 						case Response::class: $args[$i] = $Res; break;
+						case AUTH::class: $args[$i] = sys::auth(); break;
 						default: $args[$i] = new $param['class']($Req);
 					}
 				} elseif (isset($param['type'])) {
