@@ -162,6 +162,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testCache() {
 		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', sys::cache('sys'));
+		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', sys::cache('main'));
 	}
 
 	/**

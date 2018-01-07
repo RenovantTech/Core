@@ -307,9 +307,10 @@ class sys {
 	static function cache($id='main') {
 		static $_ = [];
 		if($id=='sys') return self::$Cache;
-		if(!isset($_[$id])) {
+		if(!isset($_[$id]) && !$_[$id] = self::cache('sys')->get('sys.cache'.strtoupper($id))) {
 			$cnf = self::$Sys->cnfCache[$id];
-			$_[$id] = $Cache = self::$Container->build('sys.cache'.strtoupper($id), $cnf['class'], $cnf['constructor'], $cnf['properties']);
+			$_[$id] = self::$Container->build('sys.cache'.strtoupper($id), $cnf['class'], $cnf['constructor'], $cnf['properties']);
+			self::cache('sys')->set('sys.cache'.strtoupper($id), $_[$id]);
 		}
 		return $_[$id];
 	}
