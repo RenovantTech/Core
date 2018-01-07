@@ -3,6 +3,7 @@ namespace test;
 use metadigit\core\sys,
 	metadigit\core\SysBoot,
 	metadigit\core\SysException,
+	metadigit\core\auth\AUTH,
 	metadigit\core\console\CmdManager,
 	metadigit\core\context\ContextException,
 	metadigit\core\event\EventDispatcherException;
@@ -147,6 +148,14 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$RefProp->setAccessible(true);
 		$pdo = $RefProp->getValue($ACL);
 		$this->assertEquals('mysql', $pdo);
+	}
+	/**
+	 * @depends testInit
+	 * @throws \metadigit\core\container\ContainerException
+	 */
+	function testAuth() {
+		$AUTH = sys::auth();
+		$this->assertInstanceOf(AUTH::class, $AUTH);
 	}
 
 	/**
