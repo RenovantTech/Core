@@ -5,13 +5,13 @@ use metadigit\core\cache\SqliteCache;
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Cache = new SqliteCache('cache1', 'sqlite', 'cache');
+		$Cache = new SqliteCache('sqlite', 'cache');
 		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $Cache);
 		return $Cache;
 	}
 
 	function testConstructor2() {
-		$CacheWithBuffer = new SqliteCache('cache2', 'sqlite', 'cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
 		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
@@ -134,7 +134,7 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 		$CacheWithBuffer->set('test1', 'HelloWorld');
 		$CacheWithBuffer = null;
 		SqliteCache::shutdown();
-		$CacheWithBuffer = new SqliteCache('cache1', 'sqlite', 'cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
 		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }

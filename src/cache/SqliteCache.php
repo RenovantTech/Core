@@ -33,13 +33,6 @@ class SqliteCache implements CacheInterface {
 	/** Write buffer
 	 * @var array */
 	static protected $buffer = [];
-	/** Write buffer PDOs
-	 * @var array */
-	static protected $bufferPDOs = [];
-
-	/** ID (Cache Identifier)
-	 * @var string */
-	protected $id;
 	/** PDOStatement for DELETE
 	 * @var \PDOStatement */
 	private $_pdo_del;
@@ -66,22 +59,16 @@ class SqliteCache implements CacheInterface {
 	protected $writeBuffer = false;
 
 	/**
-	 * @param string $id cache ID
 	 * @param string $pdo PDO instance ID
 	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
-		$this->_ = 'sys.cache.'.strtoupper($id);
-		$this->id = $id;
+	function __construct($pdo, $table='cache', $writeBuffer=false) {
 		$this->pdo = $pdo;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		// @TODO avoid running INIT on every request, must skip this constructor
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table, null, $this->_);
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
-		if($writeBuffer)
-			self::$bufferPDOs[$this->id] = [ 'pdo'=>$this->pdo, 'table'=> $this->table ];
 	}
 
 	function get($id) {
@@ -112,7 +99,7 @@ class SqliteCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-				self::$buffer[$this->id][] = [$id, serialize($value), $expire, $tags];
+				self::$buffer[$this->pdo.'#'.$this->table][] = [$id, serialize($value), $expire, $tags];
 			} else {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 				if(is_null($this->_pdo_set)) $this->_pdo_set = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
@@ -163,9 +150,9 @@ class SqliteCache implements CacheInterface {
 	 */
 	static function shutdown() {
 		foreach(self::$buffer as $k=>$buffer) {
-			if(!isset(self::$bufferPDOs[$k])) continue;
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
-			$pdoSet = sys::pdo(self::$bufferPDOs[$k]['pdo'])->prepare(sprintf(self::SQL_SET, self::$bufferPDOs[$k]['table']));
+			list($pdo, $table) = explode('#', $k);
+			$pdoSet = sys::pdo($pdo)->prepare(sprintf(self::SQL_SET, $table));
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
