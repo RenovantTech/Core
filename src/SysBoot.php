@@ -44,6 +44,12 @@ class SysBoot extends sys {
 
 		$config = Yaml::parseFile(SYS_YAML);
 
+		$emptyObj = [
+			'class' => \stdClass::class,
+			'constructor' => [],
+			'properties' => []
+		];
+
 		// APPS HTTP/CLI
 		self::$Sys->cnfApps['HTTP'] = $config['apps'];
 		self::$Sys->cnfApps['CLI'] = $config['cli'];
@@ -80,11 +86,7 @@ class SysBoot extends sys {
 		];
 		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge($config['cache'], self::$Sys->cnfCache);
 		foreach (self::$Sys->cnfCache as $id => $conf)
-			self::$Sys->cnfCache[$id] = array_merge([
-				'class' => \stdClass::class,
-				'constructor' => [],
-				'properties' => []
-			], $conf);
+			self::$Sys->cnfCache[$id] = array_merge($emptyObj, $conf);
 		$sysCacheConf = self::$Sys->cnfCache['sys'];
 		unset(self::$Sys->cnfCache['sys']);
 
@@ -96,6 +98,9 @@ class SysBoot extends sys {
 
 		// Log service
 		if(is_array($config['log'])) self::$Sys->cnfLog = $config['log'];
+
+		// Session service
+		if(is_array($config['session'])) self::$Sys->cnfSession = array_merge($emptyObj, $config['session']);
 
 		// Trace service
 		self::$Sys->cnfTrace = array_replace(self::$Sys->cnfTrace, $config['trace']);

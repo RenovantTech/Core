@@ -107,6 +107,9 @@ class sys {
 		'sys-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'sys-cache.sqlite' ],
 		'sys-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'sys-trace.sqlite' ]
 	];
+	/** Session configurations
+	 * @var array|null */
+	protected $cnfSession = null;
 	/** system settings
 	 * @var array */
 	protected $cnfSettings = [
@@ -242,6 +245,16 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
+		// start SESSION
+		if(self::$Sys->cnfSession) {
+			if(!$SessionMgr = self::cache('sys')->get($_ = 'sys.http.Session')) {
+				$cnf = self::$Sys->cnfSession;
+				$SessionMgr = self::$Container->build($_, $cnf['class'], $cnf['constructor'], $cnf['properties']);
+				self::cache('sys')->set($_, $SessionMgr);
+			}
+			$SessionMgr->start();
+		}
+		// invoke HTTP Dispatcher
 		$app = $dispatcherID = $namespace = null;
 		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
 			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
