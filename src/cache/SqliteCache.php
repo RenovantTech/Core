@@ -35,7 +35,7 @@ class SqliteCache implements CacheInterface {
 	static protected $buffer = [];
 	/** Write buffer PDOs
 	 * @var array */
-	static protected $bufferPDO = [];
+	static protected $bufferPDOs = [];
 
 	/** ID (Cache Identifier)
 	 * @var string */
@@ -81,7 +81,7 @@ class SqliteCache implements CacheInterface {
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite pdo: '.$pdo.', table: '.$table, null, $this->_);
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 		if($writeBuffer)
-			self::$bufferPDO[$this->id] = $this->_pdo_set = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table));
+			self::$bufferPDOs[$this->id] = [ 'pdo'=>$this->pdo, 'table'=> $this->table ];
 	}
 
 	function get($id) {
@@ -163,12 +163,13 @@ class SqliteCache implements CacheInterface {
 	 */
 	static function shutdown() {
 		foreach(self::$buffer as $k=>$buffer) {
-			if(!isset(self::$bufferPDO[$k])) continue;
+			if(!isset(self::$bufferPDOs[$k])) continue;
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
+			$pdoSet = sys::pdo(self::$bufferPDOs[$k]['pdo'])->prepare(sprintf(self::SQL_SET, self::$bufferPDOs[$k]['table']));
 			foreach($buffer as $data) {
 				list($id, $value, $expire, $tags) = $data;
 				if(is_array($tags)) $tags = implode('|', $tags);
-				@self::$bufferPDO[$k]->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], false);
+				@$pdoSet->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], false);
 			}
 		}
 	}
