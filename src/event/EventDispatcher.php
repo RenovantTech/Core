@@ -62,10 +62,18 @@ class EventDispatcher {
 		if(!isset($this->listeners[$eventName])) return $Event;
 		foreach($this->listeners[$eventName] as $priority => $listeners) {
 			foreach($listeners as $callback) {
-				sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$callback);
-				if(is_string($callback) && strpos($callback,'->')>0) {
-					list($objID, $method) = explode('->', $callback);
-					$callback = [new CoreProxy($objID), $method];
+				if(is_string($callback)) {
+					sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$callback);
+					if(strpos($callback,'->')>0) {
+						list($objID, $method) = explode('->', $callback);
+						$callback = [new CoreProxy($objID), $method];
+					}
+				} else {
+					list($Obj, $method) = $callback;
+					$RefProp = new \ReflectionProperty($Obj, '_');
+					$RefProp->setAccessible(true);
+					$_ = $RefProp->getValue($Obj);
+					sys::trace(LOG_DEBUG, T_EVENT, strtoupper($eventName).' ['.$priority.'] '.$_.'->'.$method);
 				}
 				call_user_func($callback, $Event);
 				if($Event->isPropagationStopped()) break;
