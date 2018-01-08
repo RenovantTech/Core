@@ -6,8 +6,10 @@
  * @license New BSD License
  */
 namespace metadigit\core\auth;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+use metadigit\core\http\Request;
+use const metadigit\core\trace\{T_ERROR, T_INFO};
+use metadigit\core\sys,
+	metadigit\core\http\Event as HttpEvent;
 /**
  * Authentication Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -41,6 +43,19 @@ class AUTH {
 	 * @var string */
 	protected $module = 'SESSION';
 
+	/** APPs to be skipped by checkAUTH()
+	 * @var array */
+	protected $skipAuthApps = [];
+	/** URLs to be skipped by checkAUTH()
+	 * @var array */
+	protected $skipAuthUrls = [];
+	/** APPs to be skipped by checkXSRF()
+	 * @var array */
+	protected $skipXSRFApps = [];
+	/** URLs to be skipped by checkXSRF()
+	 * @var array */
+	protected $skipXSRFUrls = [];
+
 	/**
 	 * AUTH constructor.
 	 * @param string $module
@@ -52,7 +67,7 @@ class AUTH {
 	}
 
 	function __sleep() {
-		return ['_', 'module'];
+		return ['_', 'module', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
 	}
 
 	/**
@@ -90,6 +105,47 @@ class AUTH {
 					'NAME'	=> $this->_NAME,
 					'UID'	=> $this->_UID
 				], $this->_data);
+		}
+	}
+
+	/**
+	 * Authentication & Security check (with XSRF protection)
+	 * To be invoked before HTTP dispatch to Controller (events HTTP:ROUTE or HTTP:CONTROLLER)
+	 * @param HttpEvent $Event
+	 */
+	function check(HttpEvent $Event) {
+		$Req = $Event->getRequest();
+		$APP = $Req->getAttribute('APP');
+		$URI = $Req->URI();
+		if(!$this->_UID && $URI != '/' && !in_array($APP, $this->skipAuthApps)) $this->checkAUTH($Event, $Req);
+		if($URI != '/' && !in_array($APP, $this->skipXSRFApps)) $this->checkXSRF($Event, $Req);
+	}
+
+	protected function checkAUTH(HttpEvent $Event, Request $Req) {
+		$URI = $Req->URI();
+		foreach ($this->skipAuthUrls as $url)
+			if(preg_match($url, $URI)) return;
+		sys::trace(LOG_ERR, T_ERROR, 'AUTH not valid: BLOCK ACCESS', null, $this->_.'->check');
+		http_response_code(401);
+		$Event->stopPropagation();
+	}
+
+	protected function checkXSRF(HttpEvent $Event, Request $Req) {
+		$URI = $Req->URI();
+		foreach ($this->skipXSRFUrls as $url)
+			if(preg_match($url, $URI)) return;
+		if(isset($_SESSION['XSRF-TOKEN'])) {
+			$token = $Req->getHeader('X-XSRF-TOKEN');
+			if($token != $_SESSION['XSRF-TOKEN']) {
+				sys::trace(LOG_ERR, T_ERROR, 'XSRF-TOKEN not valid: BLOCK ACCESS', null, $this->_.'->check');
+				http_response_code(401);
+				$Event->stopPropagation();
+			}
+		} else {
+			$token = md5(uniqid(rand(1,999)));
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN: '.$token, null, $this->_.'->check');
+			setcookie('XSRF-TOKEN', $token, 0, '/');
+			$_SESSION['XSRF-TOKEN'] = $token;
 		}
 	}
 

@@ -126,6 +126,7 @@ events:
   HTTP:ROUTE:
     - sys.HttpSession->start
     #- sys.AUTH->init
+    #- sys.AUTH->check
   HTTP:VIEW:
     #- sys.AUTH->commit
     - sys.HttpSession->end
