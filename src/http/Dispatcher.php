@@ -55,7 +55,7 @@ class Dispatcher {
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
 			if(!sys::event(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				ACL_ROUTES and sys::acl()->onRoute($Req, defined('SESSION_UID')? SESSION_UID : null);
+				ACL_ROUTES and sys::acl()->onRoute($Req, sys::auth()->UID());
 				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}

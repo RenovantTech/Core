@@ -87,10 +87,8 @@ class Sqlite implements \SessionHandlerInterface {
 			$st = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_READ, $this->table));
 			$st->execute(['id'=>$id, 'expireTime'=>time()]);
 			list($ip, $uid, $locked, $data) = $raw = $st->fetch(\PDO::FETCH_NUM);
-			if(empty($ip)) define('SESSION_UID', null);
-			else {
+			if(!empty($ip)) {
 				self::$id = $id;
-				define('SESSION_UID', $uid);
 				define('SESSION_LOCKED', (boolean) $locked);
 			}
 			return (string) $data;
@@ -111,14 +109,13 @@ class Sqlite implements \SessionHandlerInterface {
 	function write($id, $data) {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			$uid = (defined('SESSION_NEW_UID')) ? SESSION_NEW_UID : (defined('SESSION_UID') ? SESSION_UID : null);
 			$locked = (defined('SESSION_LOCKED')) ? (int)SESSION_LOCKED : 0;
 			$params = [
 				'id'	=> $id,
 				'ip'	=> $_SERVER['REMOTE_ADDR'],
 				'lastTime'=>time(),
 				'expireTime'=>time()+86400,
-				'uid'	=> $uid,
+				'uid'	=> sys::auth()->UID(),
 				'locked'=> $locked,
 				'data'	=> $data
 			];
