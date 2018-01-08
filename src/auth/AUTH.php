@@ -71,6 +71,8 @@ class AUTH {
 	}
 
 	/**
+	 * Initialize AUTH module, activating required resources.
+	 * To be invoked via event listener before HTTP Controller execution (HTTP:ROUTE or HTTP:CONTROLLER).
 	 * @throws AuthException
 	 */
 	function init() {
@@ -89,28 +91,9 @@ class AUTH {
 		}
 	}
 
-	function commit() {
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->commit');
-		switch ($this->module) {
-			case 'COOKIE':
-				// @TODO COOKIE module
-				break;
-			case 'JWT':
-				// @TODO JWT module
-				break;
-			case 'SESSION':
-				$_SESSION['__AUTH__'] = array_merge([
-					'GID'	=> $this->_GID,
-					'GROUP'	=> $this->_GROUP,
-					'NAME'	=> $this->_NAME,
-					'UID'	=> $this->_UID
-				], $this->_data);
-		}
-	}
-
 	/**
-	 * Authentication & Security check (with XSRF protection)
-	 * To be invoked before HTTP dispatch to Controller (events HTTP:ROUTE or HTTP:CONTROLLER)
+	 * Authentication & Security check (with XSRF protection).
+	 * To be invoked via event listener before HTTP Controller execution (HTTP:ROUTE or HTTP:CONTROLLER).
 	 * @param HttpEvent $Event
 	 */
 	function check(HttpEvent $Event) {
@@ -146,6 +129,50 @@ class AUTH {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN: '.$token, null, $this->_.'->check');
 			setcookie('XSRF-TOKEN', $token, 0, '/');
 			$_SESSION['XSRF-TOKEN'] = $token;
+		}
+	}
+
+	/**
+	 * Commit AUTH data to module storage.
+	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
+	 */
+	function commit() {
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->commit');
+		switch ($this->module) {
+			case 'COOKIE':
+				// @TODO COOKIE module
+				break;
+			case 'JWT':
+				// @TODO JWT module
+				break;
+			case 'SESSION':
+				$_SESSION['__AUTH__'] = array_merge([
+					'GID'	=> $this->_GID,
+					'GROUP'	=> $this->_GROUP,
+					'NAME'	=> $this->_NAME,
+					'UID'	=> $this->_UID
+				], $this->_data);
+		}
+	}
+
+	/**
+	 * Erase AUTH data.
+	 * To be invoked on LOGOUT or other required situations.
+	 */
+	function erase() {
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->erase');
+		switch ($this->module) {
+			case 'COOKIE':
+				// @TODO COOKIE module
+				break;
+			case 'JWT':
+				// @TODO JWT module
+				break;
+			case 'SESSION':
+				$token = $_SESSION['XSRF-TOKEN'];
+				session_regenerate_id(true);
+				session_unset();
+				$_SESSION['XSRF-TOKEN'] = $token;
 		}
 	}
 
