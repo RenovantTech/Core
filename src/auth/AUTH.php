@@ -161,6 +161,8 @@ class AUTH {
 	 */
 	function erase() {
 		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->erase');
+		$this->_data = [];
+		$this->_GID = $this->_GROUP = $this->_NAME = $this->_UID = null;
 		switch ($this->module) {
 			case 'COOKIE':
 				// @TODO COOKIE module
