@@ -6,10 +6,12 @@
  * @license New BSD License
  */
 namespace metadigit\core\auth;
-use metadigit\core\http\Request;
+use const metadigit\core\DATA_DIR;
 use const metadigit\core\trace\{T_ERROR, T_INFO};
 use metadigit\core\sys,
-	metadigit\core\http\Event as HttpEvent;
+	metadigit\core\http\Event as HttpEvent,
+	metadigit\core\http\Request,
+	Firebase\JWT\JWT;
 /**
  * Authentication Manager.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -22,6 +24,7 @@ class AUTH {
 		'JWT',
 		'SESSION'
 	];
+	const JWT_KEY = DATA_DIR.'jwt.key';
 
 	/** User custom data
 	 * @var array */
@@ -64,6 +67,12 @@ class AUTH {
 	function __construct($module='SESSION') {
 		if(!in_array($module, self::MODULES)) throw new AuthException(1, [$module, implode(', ', self::MODULES)]);
 		$this->module = $module;
+		switch ($this->module) {
+			case 'JWT':
+				if(!file_exists(self::JWT_KEY))
+					file_put_contents(self::JWT_KEY, base64_encode(openssl_random_pseudo_bytes(64)));
+				break;
+		}
 	}
 
 	function __sleep() {
@@ -82,12 +91,18 @@ class AUTH {
 				// @TODO COOKIE module
 				break;
 			case 'JWT':
-				// @TODO JWT module
+				if(isset($_COOKIE['JWT'])) {
+					$data = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
+					sys::trace(LOG_DEBUG, T_INFO, 'JWT data ', $data, $this->_.'->init');
+					foreach ($data['data'] as $k => $v)
+						$this->set($k, $v);
+				}
 				break;
 			case 'SESSION':
 				if(session_status() != PHP_SESSION_ACTIVE) throw new AuthException(13);
 				if(isset($_SESSION['__AUTH__'])) foreach ($_SESSION['__AUTH__'] as $k => $v)
 					$this->set($k, $v);
+				break;
 		}
 	}
 
@@ -138,20 +153,29 @@ class AUTH {
 	 */
 	function commit() {
 		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->commit');
+		$data = array_merge([
+			'GID'	=> $this->_GID,
+			'GROUP'	=> $this->_GROUP,
+			'NAME'	=> $this->_NAME,
+			'UID'	=> $this->_UID
+		], $this->_data);
 		switch ($this->module) {
 			case 'COOKIE':
 				// @TODO COOKIE module
 				break;
 			case 'JWT':
-				// @TODO JWT module
+				$token = [
+					//'aud' => 'http://example.com',
+					'exp' => time()+3600,
+					'iat' => time()-1,
+					//'iss' => 'http://example.org',
+					'nbf' => time()-1,
+					'data' => $data
+				];
+				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/');
 				break;
 			case 'SESSION':
-				$_SESSION['__AUTH__'] = array_merge([
-					'GID'	=> $this->_GID,
-					'GROUP'	=> $this->_GROUP,
-					'NAME'	=> $this->_NAME,
-					'UID'	=> $this->_UID
-				], $this->_data);
+				$_SESSION['__AUTH__'] = $data;
 		}
 	}
 
