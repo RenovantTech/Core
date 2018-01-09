@@ -172,7 +172,7 @@ class AUTH {
 					'nbf' => time()-1,
 					'data' => $data
 				];
-				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/');
+				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
 				break;
 			case 'SESSION':
 				$_SESSION['__AUTH__'] = $data;
