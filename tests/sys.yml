@@ -146,6 +146,11 @@ services:
     class: metadigit\core\auth\AUTH
     constructor:
       module: SESSION
+    properties:
+      skipAuthApps: [ 'AUTH' ]
+      skipAuthUrls: []
+      skipXSRFApps: [ 'RRD' ]
+      skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
 
   # -------------------------------------------------------
   # SESSION service

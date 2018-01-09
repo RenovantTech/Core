@@ -1,7 +1,12 @@
 <?php
 namespace test\auth;
-use metadigit\core\auth\AUTH,
-	metadigit\core\auth\AuthException;
+use metadigit\core\sys,
+	metadigit\core\auth\AUTH,
+	metadigit\core\auth\AuthException,
+	metadigit\core\auth\Exception,
+	metadigit\core\http\Event,
+	metadigit\core\http\Request,
+	metadigit\core\http\Response;
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
 
@@ -18,7 +23,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		try {
 			new AUTH('INVALID');
 			$this->fail('Expected Exception not thrown');
-		} catch(AuthException $Ex) {
+		} catch(Exception $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
 			$this->assertRegExp('/INVALID/', $Ex->getMessage());
 		}
@@ -26,29 +31,32 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 * @throws AuthException
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
-	function __testInit(AUTH $AUTH) {
-		$AUTH->__construct('SESSION');
+	function testInit() {
+		$AUTH = sys::context()->get('sys.AUTH');
 		session_start();
 		$_SESSION['__AUTH__']['foo'] = 'bar';
-		$AUTH->init();
+		$_SERVER['REQUEST_URI'] = '/';
+		$AUTH->init(new Event(new Request, new Response));
 		$this->assertEquals('bar', $AUTH->get('foo'));
 		session_destroy();
 	}
 
 	/**
 	 * @depends testConstruct
-	 * @param AUTH $AUTH
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
-	function __testInitException(AUTH $AUTH) {
+	function testInitException() {
 		try {
-			$AUTH->__construct('SESSION');
-			$AUTH->init();
+			$AUTH = sys::context()->get('sys.AUTH');
+			$_SERVER['REQUEST_URI'] = '/';
+			$AUTH->init(new Event(new Request, new Response));
 			$this->fail('Expected Exception not thrown');
-		} catch(AuthException $Ex) {
-			$this->assertEquals(13, $Ex->getCode());
+		} catch(Exception $Ex) {
+			$this->assertEquals(23, $Ex->getCode());
 			$this->assertRegExp('/must be already started/', $Ex->getMessage());
 		}
 	}
