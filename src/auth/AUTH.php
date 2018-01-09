@@ -115,7 +115,7 @@ class AUTH {
 							// skip, go on
 						} catch (\Exception $Ex) { // include SignatureInvalidException, UnexpectedValueException
 							sys::trace(LOG_ERR, T_ERROR, 'JWT invalid: BLOCK ACCESS');
-							throw new AuthException(21, $this->module);
+							throw new AuthException(21, [$this->module]);
 						}
 					}
 					break;
@@ -150,7 +150,7 @@ class AUTH {
 			if($XSRFToken && $XSRFToken == $this->_XSRF_TOKEN)
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
 			elseif ($XSRFToken && $XSRFToken != $this->_XSRF_TOKEN)
-				throw new AuthException(50, $this->module);
+				throw new AuthException(50, [$this->module]);
 			elseif($URI != '/' && !in_array($APP, $this->skipXSRFApps))
 				$this->checkXSRF($URI);
 		} finally {
@@ -165,7 +165,7 @@ class AUTH {
 	protected function checkAUTH($URI) {
 		foreach ($this->skipAuthUrls as $url)
 			if(preg_match($url, $URI)) return;
-		throw new AuthException(101, $this->module);
+		throw new AuthException(101, [$this->module]);
 	}
 
 	/**
@@ -175,7 +175,7 @@ class AUTH {
 	protected function checkXSRF($URI) {
 		foreach ($this->skipXSRFUrls as $url)
 			if(preg_match($url, $URI)) return;
-		throw new AuthException(102, $this->module);
+		throw new AuthException(102, [$this->module]);
 	}
 
 	/**
