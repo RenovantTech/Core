@@ -142,7 +142,7 @@ class AUTH {
 		} else {
 			$token = md5(uniqid(rand(1,999)));
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN: '.$token, null, $this->_.'->check');
-			setcookie('XSRF-TOKEN', $token, 0, '/');
+			setcookie('XSRF-TOKEN', $token, 0, '/', null, false, false);
 			$_SESSION['XSRF-TOKEN'] = $token;
 		}
 	}
