@@ -6,14 +6,21 @@
  * @license New BSD License
  */
 namespace metadigit\core\auth;
-use metadigit\core\Exception as BaseException;
+use metadigit\core\Exception;
 /**
- * AUTH Exception
+ * 401 Unauthorized
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class AuthException extends BaseException {
-	// constructor
-	const COD1 = 'AUTH - auth module "%s" invalid, must be one of %s';
-	// init
-	const COD13 = 'AUTH - SESSION must be already started before AUTH->init()';
+class AuthException extends Exception {
+	// COOKIE
+
+	// JWT
+	const COD21 = 'AUTH [JWT] - JWT token INVALID';
+	// SESSION
+
+	// XSRF
+	const COD50 = 'AUTH [%s] - XSRF token INVALID';
+	// common
+	const COD101 = 'AUTH [%s] - AUTH required: Unauthorized';
+	const COD102 = 'AUTH [%s] - XSRF-TOKEN required: Unauthorized';
 }

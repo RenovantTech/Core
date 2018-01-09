@@ -10,6 +10,8 @@ use const metadigit\core\DATA_DIR;
 use const metadigit\core\trace\{T_ERROR, T_INFO};
 use metadigit\core\sys,
 	metadigit\core\http\Event as HttpEvent,
+	Firebase\JWT\BeforeValidException,
+	Firebase\JWT\ExpiredException,
 	Firebase\JWT\JWT;
 /**
  * Authentication Manager.
@@ -64,13 +66,14 @@ class AUTH {
 	/**
 	 * AUTH constructor.
 	 * @param string $module
-	 * @throws AuthException
+	 * @throws Exception
 	 */
 	function __construct($module='SESSION') {
-		if(!in_array($module, self::MODULES)) throw new AuthException(1, [$module, implode(', ', self::MODULES)]);
+		if(!in_array($module, self::MODULES)) throw new Exception(1, [$module, implode(', ', self::MODULES)]);
 		$this->module = $module;
 		switch ($this->module) {
 			case 'JWT':
+				if(!class_exists('Firebase\JWT\JWT')) throw new Exception(12);
 				if(!file_exists(self::JWT_KEY))
 					file_put_contents(self::JWT_KEY, base64_encode(openssl_random_pseudo_bytes(64)));
 				break;
@@ -86,6 +89,7 @@ class AUTH {
 	 * To be invoked via event listener before HTTP Controller execution (HTTP:ROUTE or HTTP:CONTROLLER).
 	 * @param HttpEvent $Event
 	 * @throws AuthException
+	 * @throws Exception
 	 */
 	function init(HttpEvent $Event) {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
@@ -97,17 +101,26 @@ class AUTH {
 					break;
 				case 'JWT':
 					if(isset($_COOKIE['JWT'])) {
-						$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
-						$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
-						if(!empty($token['data'])) {
-							foreach ($token['data'] as $k => $v)
-								$this->set($k, $v);
-							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
+						try {
+							$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
+							$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
+							if(!empty($token['data'])) {
+								foreach ($token['data'] as $k => $v)
+									$this->set($k, $v);
+								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
+							}
+						} catch (BeforeValidException $Ex) {
+							// skip, go on
+						} catch (ExpiredException $Ex) {
+							// skip, go on
+						} catch (\Exception $Ex) { // include SignatureInvalidException, UnexpectedValueException
+							sys::trace(LOG_ERR, T_ERROR, 'JWT invalid: BLOCK ACCESS');
+							throw new AuthException(21);
 						}
 					}
 					break;
 				case 'SESSION':
-					if(session_status() != PHP_SESSION_ACTIVE) throw new AuthException(13);
+					if(session_status() != PHP_SESSION_ACTIVE) throw new Exception(23);
 					if(isset($_SESSION['__AUTH__'])) {
 						$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
 						if(!empty($_SESSION['__AUTH__'])) {
@@ -129,33 +142,40 @@ class AUTH {
 			$Req = $Event->getRequest();
 			$APP = $Req->getAttribute('APP');
 			$URI = $Req->URI();
+			$XSRFToken = $Req->getHeader('X-XSRF-TOKEN');
 
 			if(!$this->_UID && $URI != '/' && !in_array($APP, $this->skipAuthApps))
-				$this->checkAUTH($Event, $URI);
+				$this->checkAUTH($URI);
 
-			if($Req->getHeader('X-XSRF-TOKEN') == $this->_XSRF_TOKEN)
+			if($XSRFToken && $XSRFToken == $this->_XSRF_TOKEN)
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
+			elseif ($XSRFToken && $XSRFToken != $this->_XSRF_TOKEN)
+				throw new AuthException(50);
 			elseif($URI != '/' && !in_array($APP, $this->skipXSRFApps))
-				$this->checkXSRF($Event, $URI);
+				$this->checkXSRF($URI);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
 	}
 
-	protected function checkAUTH(HttpEvent $Event, $URI) {
+	/**
+	 * @param $URI
+	 * @throws AuthException
+	 */
+	protected function checkAUTH($URI) {
 		foreach ($this->skipAuthUrls as $url)
 			if(preg_match($url, $URI)) return;
-		sys::trace(LOG_ERR, T_ERROR, 'required AUTH missing: BLOCK ACCESS');
-		http_response_code(401);
-		$Event->stopPropagation();
+		throw new AuthException(101);
 	}
 
-	protected function checkXSRF(HttpEvent $Event, $URI) {
+	/**
+	 * @param $URI
+	 * @throws AuthException
+	 */
+	protected function checkXSRF($URI) {
 		foreach ($this->skipXSRFUrls as $url)
 			if(preg_match($url, $URI)) return;
-		sys::trace(LOG_ERR, T_ERROR, 'required XSRF-TOKEN missing: BLOCK ACCESS');
-		http_response_code(401);
-		$Event->stopPropagation();
+		throw new AuthException(102);
 	}
 
 	/**
