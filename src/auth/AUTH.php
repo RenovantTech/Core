@@ -41,6 +41,9 @@ class AUTH {
 	/** User ID
 	 * @var integer|null */
 	protected $_UID = null;
+	/** XSRF-TOKEN value
+	 * @var string|null */
+	protected $_XSRF_TOKEN = null;
 
 	/** active module
 	 * @var string */
@@ -92,14 +95,16 @@ class AUTH {
 				break;
 			case 'JWT':
 				if(isset($_COOKIE['JWT'])) {
-					$data = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
-					sys::trace(LOG_DEBUG, T_INFO, 'JWT data ', $data, $this->_.'->init');
-					foreach ($data['data'] as $k => $v)
+					$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
+					sys::trace(LOG_DEBUG, T_INFO, 'JWT data ', $token, $this->_.'->init');
+					$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
+					foreach ($token['data'] as $k => $v)
 						$this->set($k, $v);
 				}
 				break;
 			case 'SESSION':
 				if(session_status() != PHP_SESSION_ACTIVE) throw new AuthException(13);
+				$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
 				if(isset($_SESSION['__AUTH__'])) foreach ($_SESSION['__AUTH__'] as $k => $v)
 					$this->set($k, $v);
 				break;
@@ -132,18 +137,19 @@ class AUTH {
 		$URI = $Req->URI();
 		foreach ($this->skipXSRFUrls as $url)
 			if(preg_match($url, $URI)) return;
-		if(isset($_SESSION['XSRF-TOKEN'])) {
-			$token = $Req->getHeader('X-XSRF-TOKEN');
-			if($token != $_SESSION['XSRF-TOKEN']) {
+		if($this->_XSRF_TOKEN) {
+			if( $Req->getHeader('X-XSRF-TOKEN') == $this->_XSRF_TOKEN)
+				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK', null, $this->_.'->check');
+			else {
 				sys::trace(LOG_ERR, T_ERROR, 'XSRF-TOKEN not valid: BLOCK ACCESS', null, $this->_.'->check');
 				http_response_code(401);
 				$Event->stopPropagation();
 			}
 		} else {
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN', null, $this->_.'->check');
 			$token = md5(uniqid(rand(1,999)));
-			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN: '.$token, null, $this->_.'->check');
 			setcookie('XSRF-TOKEN', $token, 0, '/', null, false, false);
-			$_SESSION['XSRF-TOKEN'] = $token;
+			$this->_XSRF_TOKEN = $token;
 		}
 	}
 
@@ -170,12 +176,14 @@ class AUTH {
 					'iat' => time()-1,
 					//'iss' => 'http://example.org',
 					'nbf' => time()-1,
-					'data' => $data
+					'data' => $data,
+					'XSRF-TOKEN'=>$this->_XSRF_TOKEN
 				];
 				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
 				break;
 			case 'SESSION':
 				$_SESSION['__AUTH__'] = $data;
+				$_SESSION['XSRF-TOKEN'] = $this->_XSRF_TOKEN;
 		}
 	}
 
