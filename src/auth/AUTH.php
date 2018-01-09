@@ -27,6 +27,9 @@ class AUTH {
 	];
 	const JWT_KEY = DATA_DIR.'jwt.key';
 
+	/** Pending commit  flag
+	 * @var bool */
+	protected $_commit = false;
 	/** User custom data
 	 * @var array */
 	protected $_data = [];
@@ -104,9 +107,10 @@ class AUTH {
 						try {
 							$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
 							$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
-							if(!empty($token['data'])) {
+							if(isset($token['data']) && $token['data'] = (array)$token['data']) {
 								foreach ($token['data'] as $k => $v)
 									$this->set($k, $v);
+								$this->_commit = false;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
 							}
 						} catch (BeforeValidException $Ex) {
@@ -121,22 +125,22 @@ class AUTH {
 					break;
 				case 'SESSION':
 					if(session_status() != PHP_SESSION_ACTIVE) throw new Exception(23);
-					if(isset($_SESSION['__AUTH__'])) {
-						$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
-						if(!empty($_SESSION['__AUTH__'])) {
-							foreach ($_SESSION['__AUTH__'] as $k => $v)
-								$this->set($k, $v);
-							sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
-						}
+					$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
+					if(isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
+						foreach ($_SESSION['__AUTH__'] as $k => $v)
+							$this->set($k, $v);
+						$this->_commit = false;
+						sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
 					}
 					break;
 			}
 			// initialize XSRF-TOKEN COOKIE
 			if(!isset($_COOKIE['XSRF-TOKEN'])) {
-				sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
+				sys::trace(LOG_DEBUG, T_INFO, 'set XSRF-TOKEN cookie');
 				$token = md5(uniqid(rand(1,999)));
 				setcookie('XSRF-TOKEN', $token, 0, '/', null, false, false);
 				$this->_XSRF_TOKEN = $token;
+				$this->_commit = true;
 			}
 			// verify required AUTH & XSRF-TOKEN
 			$Req = $Event->getRequest();
@@ -183,32 +187,39 @@ class AUTH {
 	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
 	 */
 	function commit() {
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->commit');
-		$data = array_merge([
-			'GID'	=> $this->_GID,
-			'GROUP'	=> $this->_GROUP,
-			'NAME'	=> $this->_NAME,
-			'UID'	=> $this->_UID
-		], $this->_data);
-		switch ($this->module) {
-			case 'COOKIE':
-				// @TODO COOKIE module
-				break;
-			case 'JWT':
-				$token = [
-					//'aud' => 'http://example.com',
-					'exp' => time()+3600,
-					'iat' => time()-1,
-					//'iss' => 'http://example.org',
-					'nbf' => time()-1,
-					'data' => $this->_UID ? $data : null,
-					'XSRF-TOKEN'=>$this->_XSRF_TOKEN
-				];
-				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
-				break;
-			case 'SESSION':
-				$_SESSION['__AUTH__'] = $this->_UID ? $data : null;
-				$_SESSION['XSRF-TOKEN'] = $this->_XSRF_TOKEN;
+		if(!$this->_commit) return;
+		$prevTraceFn = sys::traceFn($this->_.'->commit');
+		try {
+			$data = array_merge([
+				'GID'	=> $this->_GID,
+				'GROUP'	=> $this->_GROUP,
+				'NAME'	=> $this->_NAME,
+				'UID'	=> $this->_UID
+			], $this->_data);
+			switch ($this->module) {
+				case 'COOKIE':
+					// @TODO COOKIE module
+					break;
+				case 'JWT':
+					sys::trace(LOG_DEBUG, T_INFO, 'set JWT cookie');
+					$token = [
+						//'aud' => 'http://example.com',
+						'exp' => time()+3600,
+						'iat' => time()-1,
+						//'iss' => 'http://example.org',
+						'nbf' => time()-1,
+						'data' => $this->_UID ? $data : null,
+						'XSRF-TOKEN'=>$this->_XSRF_TOKEN
+					];
+					setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
+					break;
+				case 'SESSION':
+					sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
+					$_SESSION['__AUTH__'] = $this->_UID ? $data : null;
+					$_SESSION['XSRF-TOKEN'] = $this->_XSRF_TOKEN;
+			}
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -217,21 +228,37 @@ class AUTH {
 	 * To be invoked on LOGOUT or other required situations.
 	 */
 	function erase() {
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->erase');
-		$this->_data = [];
-		$this->_GID = $this->_GROUP = $this->_NAME = $this->_UID = null;
-		switch ($this->module) {
-			case 'COOKIE':
-				// @TODO COOKIE module
-				break;
-			case 'JWT':
-				// @TODO JWT module
-				break;
-			case 'SESSION':
-				$token = $_SESSION['XSRF-TOKEN'];
-				session_regenerate_id(true);
-				session_unset();
-				$_SESSION['XSRF-TOKEN'] = $token;
+		$prevTraceFn = sys::traceFn($this->_.'->erase');
+		try {
+			$this->_data = [];
+			$this->_GID = $this->_GROUP = $this->_NAME = $this->_UID = null;
+			switch ($this->module) {
+				case 'COOKIE':
+					// @TODO COOKIE module
+					break;
+				case 'JWT':
+					sys::trace(LOG_DEBUG, T_INFO, 'erase JWT cookie data');
+					$token = [
+						//'aud' => 'http://example.com',
+						'exp' => time()+3600,
+						'iat' => time()-1,
+						//'iss' => 'http://example.org',
+						'nbf' => time()-1,
+						'data' => null,
+						'XSRF-TOKEN'=>$this->_XSRF_TOKEN
+					];
+					setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
+
+					break;
+				case 'SESSION':
+					sys::trace(LOG_DEBUG, T_INFO, 'erase SESSION data');
+					//$token = $_SESSION['XSRF-TOKEN'];
+					session_regenerate_id(false);
+					unset($_SESSION['__AUTH__']);
+					//$_SESSION['XSRF-TOKEN'] = $token;
+			}
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
@@ -282,6 +309,7 @@ class AUTH {
 			case 'UID': $this->_UID = (integer) $value; break;
 			default: $this->_data[$key] = $value;
 		}
+		$this->_commit = true;
 		return $this;
 	}
 
