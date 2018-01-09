@@ -28,8 +28,8 @@ class Manager {
 		'lifetime'	=> 3600,
 		'path'		=> '/',
 		'domain'	=> null,
-		'secure'	=> null,
-		'httponly'	=> null
+		'secure'	=> true,
+		'httponly'	=> true
 	];
 	/** Handler config
 	 * @var array */
