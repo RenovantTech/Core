@@ -99,18 +99,22 @@ class AUTH {
 					if(isset($_COOKIE['JWT'])) {
 						$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
 						$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
-						foreach ($token['data'] as $k => $v)
-							$this->set($k, $v);
-						sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
+						if(!empty($token['data'])) {
+							foreach ($token['data'] as $k => $v)
+								$this->set($k, $v);
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
+						}
 					}
 					break;
 				case 'SESSION':
 					if(session_status() != PHP_SESSION_ACTIVE) throw new AuthException(13);
 					if(isset($_SESSION['__AUTH__'])) {
 						$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
-						foreach ($_SESSION['__AUTH__'] as $k => $v)
-							$this->set($k, $v);
-						sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
+						if(!empty($_SESSION['__AUTH__'])) {
+							foreach ($_SESSION['__AUTH__'] as $k => $v)
+								$this->set($k, $v);
+							sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
+						}
 					}
 					break;
 			}
@@ -177,13 +181,13 @@ class AUTH {
 					'iat' => time()-1,
 					//'iss' => 'http://example.org',
 					'nbf' => time()-1,
-					'data' => $data,
+					'data' => $this->_UID ? $data : null,
 					'XSRF-TOKEN'=>$this->_XSRF_TOKEN
 				];
 				setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
 				break;
 			case 'SESSION':
-				$_SESSION['__AUTH__'] = $data;
+				$_SESSION['__AUTH__'] = $this->_UID ? $data : null;
 				$_SESSION['XSRF-TOKEN'] = $this->_XSRF_TOKEN;
 		}
 	}
