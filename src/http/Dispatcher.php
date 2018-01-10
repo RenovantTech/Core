@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\http;
-use const metadigit\core\ACL_ROUTES;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\auth\AuthException,
@@ -60,7 +59,7 @@ class Dispatcher {
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
 			if (!sys::event(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				ACL_ROUTES and sys::acl()->onRoute($Req, sys::auth()->UID());
+				defined('SYS_ACL_ROUTING') and sys::acl()->onRoute($Req, sys::auth()->UID());
 				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
