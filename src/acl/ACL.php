@@ -80,6 +80,7 @@ class ACL {
 	}
 
 	/**
+	 * Apply ACL checks during HTTP routing
 	 * @param Request $Req
 	 * @param integer $userId User ID
 	 * @return bool
@@ -87,10 +88,10 @@ class ACL {
 	 */
 	function onRoute(Request $Req, $userId) {
 		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
-		$target = $Req->URI();
-		$method = $Req->getMethod();
-		$matches = [];
 		try {
+			$target = $Req->URI();
+			$method = $Req->getMethod();
+			$matches = [];
 			$aclArray = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
 				->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
@@ -106,7 +107,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -114,6 +114,7 @@ class ACL {
 	}
 
 	/**
+	 * Apply ACL checks during Services invocation
 	 * @param string $target  object ID
 	 * @param string $method  object method
 	 * @param integer $userId User ID
@@ -121,7 +122,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
@@ -131,7 +132,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -139,6 +139,7 @@ class ACL {
 	}
 
 	/**
+	 * Apply ACL checks during ORM operations
 	 * @param string $target Repository ID
 	 * @param string $method Repository action (CREATE, FETCH .. )
 	 * @param integer $userId User ID
@@ -146,7 +147,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
@@ -156,7 +157,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);
