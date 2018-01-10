@@ -46,21 +46,6 @@ settings:
   timeZone:     Europe/London
 
 # =========================================================
-# ACL service
-# =========================================================
-acl:
-  routes:   true  # enable ACL checks on routing
-  objects:  true  # enable ACL checks on objects methods calls
-  orm:      true  # enable ACL checks on ORM operations
-  config:
-    database: mysql
-    tables:
-      acl:    sys_acl
-      users:  sys_users
-      roles:  sys_roles
-      u2r:    sys_users_2_roles
-
-# =========================================================
 # CACHE service
 # =========================================================
 cache:
@@ -126,7 +111,7 @@ events:
   HTTP:ROUTE:
     - sys.HttpSession->start
     #- sys.AUTH->init
-    #- sys.AUTH->check
+    #- sys.ACL->init
   HTTP:VIEW:
     #- sys.AUTH->commit
     - sys.HttpSession->end
@@ -138,6 +123,21 @@ events:
 # SERVICES
 # =========================================================
 services:
+
+  # -------------------------------------------------------
+  # ACL service
+  # -------------------------------------------------------
+  sys.ACL:
+    class: metadigit\core\acl\ACL
+    constructor:
+      # available modules: ORM, ROUTING, SERVICES
+      modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
+      pdo: mysql
+      tables:
+        acl:    sys_acl
+        users:  sys_users
+        roles:  sys_roles
+        u2r:    sys_users_2_roles
 
   # -------------------------------------------------------
   # AUTH service

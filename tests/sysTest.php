@@ -3,6 +3,7 @@ namespace test;
 use metadigit\core\sys,
 	metadigit\core\SysBoot,
 	metadigit\core\SysException,
+	metadigit\core\acl\ACL,
 	metadigit\core\auth\AUTH,
 	metadigit\core\console\CmdManager,
 	metadigit\core\context\ContextException,
@@ -62,13 +63,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$settings = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('timeZone', $settings);
 		$this->assertEquals('Europe/London', $settings['timeZone']);
-
-		// ACL service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfAcl');
-		$ReflProp->setAccessible(true);
-		$acl = $ReflProp->getValue($Sys);
-		$this->assertArrayHasKey('orm', $acl);
-		$this->assertEquals(true, $acl['orm']);
 
 		// Cache service
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfCache');
@@ -137,13 +131,11 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws \metadigit\core\container\ContainerException
 	 */
 	function testAcl() {
 		$ACL = sys::acl();
-		$this->assertInstanceOf('metadigit\core\acl\ACL', $ACL);
-		$this->assertTrue(\metadigit\core\ACL_ROUTES);
-		$this->assertTrue(\metadigit\core\ACL_OBJECTS);
-		$this->assertTrue(\metadigit\core\ACL_ORM);
+		$this->assertInstanceOf(ACL::class, $ACL);
 		$RefProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
 		$RefProp->setAccessible(true);
 		$pdo = $RefProp->getValue($ACL);

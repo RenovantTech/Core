@@ -7,7 +7,8 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\auth\AUTH,
+use metadigit\core\acl\ACL,
+	metadigit\core\auth\AUTH,
 	metadigit\core\console\CmdManager,
 	metadigit\core\console\Event as ConsoleEvent,
 	metadigit\core\container\Container,
@@ -75,17 +76,6 @@ class sys {
 	 * @var integer */
 	static protected $traceLevel = LOG_DEBUG;
 
-	/** ACL configurations
-	 * @var array */
-	protected $cnfAcl = [
-		'routes' => false,
-		'objects' => false,
-		'orm' => false,
-		'config' => [
-			'database' => 'master',
-			'tables' => null
-		]
-	];
 	/** HTTP/CLI apps routing
 	 * @var array */
 	protected $cnfApps = [];
@@ -153,10 +143,6 @@ class sys {
 		ini_set('default_charset', self::$Sys->cnfSettings['charset']);
 		// constants
 		foreach(self::$Sys->cnfConstants as $k => $v) define($k, $v);
-		// ACL service
-		define(__NAMESPACE__.'\ACL_ROUTES', (boolean) self::$Sys->cnfAcl['routes']);
-		define(__NAMESPACE__.'\ACL_OBJECTS', (boolean) self::$Sys->cnfAcl['objects']);
-		define(__NAMESPACE__.'\ACL_ORM', (boolean) self::$Sys->cnfAcl['orm']);
 
 		// TRACE service
 		self::$traceLevel = self::$Sys->cnfTrace['level'];
@@ -166,7 +152,6 @@ class sys {
 		self::$EventDispatcher = new EventDispatcher;
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
 		self::$Context->init('sys');
-		if(ACL_ROUTES || ACL_OBJECTS || ACL_ORM) self::acl();
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
@@ -277,13 +262,13 @@ class sys {
 
 	/**
 	 * ACL helper
-	 * @return acl\ACL
+	 * @return ACL
+	 * @throws ContainerException
 	 */
 	static function acl() {
 		static $ACL;
-		if(!isset($ACL) && !$ACL = self::cache('sys')->get('sys.ACL')) {
-			$ACL = new acl\ACL(self::$Sys->cnfAcl['config']['database'], self::$Sys->cnfAcl['config']['tables']);
-			self::cache('sys')->set('sys.ACL', $ACL);
+		if(!isset($ACL) && !$ACL = self::cache('sys')->get($_ = 'sys.ACL')) {
+			$ACL = self::$Container->get($_, ACL::class);
 		}
 		return $ACL;
 	}
