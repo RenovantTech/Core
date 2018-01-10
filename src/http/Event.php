@@ -13,6 +13,7 @@ namespace metadigit\core\http;
  */
 class Event extends \metadigit\core\event\Event {
 
+	const EVENT_INIT		= 'http:init';
 	const EVENT_ROUTE		= 'http:route';
 	const EVENT_CONTROLLER	= 'http:controller';
 	const EVENT_VIEW		= 'http:view';

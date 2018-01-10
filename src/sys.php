@@ -9,6 +9,7 @@ namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\auth\AUTH,
 	metadigit\core\console\CmdManager,
+	metadigit\core\console\Event as ConsoleEvent,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException,
 	metadigit\core\context\Context,
@@ -16,6 +17,7 @@ use metadigit\core\auth\AUTH,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
+	metadigit\core\http\Event as HttpEvent,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -222,6 +224,8 @@ class sys {
 			self::$Req->setAttribute('APP', $app);
 			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
+			self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 		} finally {
 			unlink($pidLock);
@@ -253,6 +257,8 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
+		self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
 		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
