@@ -7,7 +7,9 @@
  */
 namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\console\CmdManager,
+use metadigit\core\auth\AUTH,
+	metadigit\core\console\CmdManager,
+	metadigit\core\console\Event as ConsoleEvent,
 	metadigit\core\container\Container,
 	metadigit\core\container\ContainerException,
 	metadigit\core\context\Context,
@@ -15,6 +17,7 @@ use metadigit\core\console\CmdManager,
 	metadigit\core\event\Event,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
+	metadigit\core\http\Event as HttpEvent,
 	metadigit\core\log\Logger;
 /**
  * System Kernel
@@ -82,12 +85,6 @@ class sys {
 			'database' => 'master',
 			'tables' => null
 		]
-	];
-	/** AUTH configurations
-	 * @var array */
-	protected $cnfAuth = [
-		'enableJWT' => false,
-		'enableSESSION' => true
 	];
 	/** HTTP/CLI apps routing
 	 * @var array */
@@ -227,6 +224,8 @@ class sys {
 			self::$Req->setAttribute('APP', $app);
 			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
+			self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 		} finally {
 			unlink($pidLock);
@@ -258,6 +257,8 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
+		self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
 		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
 
@@ -289,13 +290,13 @@ class sys {
 
 	/**
 	 * AUTH helper
-	 * @return auth\AUTH
+	 * @return AUTH
+	 * @throws ContainerException
 	 */
 	static function auth() {
 		static $AUTH;
-		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get('sys.AUTH')) {
- 			$AUTH = new auth\AUTH(self::$Sys->cnfAuth['enableJWT'], self::$Sys->cnfAuth['enableSESSION']);
-			self::cache('sys')->set('sys.AUTH', $AUTH);
+		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get($_ = 'sys.AUTH')) {
+			$AUTH = self::$Container->get($_, AUTH::class);
 		}
 		return $AUTH;
 	}

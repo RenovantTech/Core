@@ -13,7 +13,8 @@
 	},
 	"require": {
 		"php": ">=7.0",
-		"phpunit/phpunit": "6.*"
+		"phpunit/phpunit": "6.*",
+		"firebase/php-jwt": "v5.0.0"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",

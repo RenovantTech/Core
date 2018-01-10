@@ -13,6 +13,7 @@ namespace metadigit\core\console;
  */
 class Event extends \metadigit\core\event\Event {
 
+	const EVENT_INIT		= 'console:init';
 	const EVENT_ROUTE		= 'console:route';
 	const EVENT_CONTROLLER	= 'console:controller';
 	const EVENT_VIEW		= 'console:view';

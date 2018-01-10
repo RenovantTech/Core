@@ -61,13 +61,6 @@ acl:
       u2r:    sys_users_2_roles
 
 # =========================================================
-# AUTH service
-# =========================================================
-auth:
-  enableJWT:      false
-  enableSESSION:  true
-
-# =========================================================
 # CACHE service
 # =========================================================
 cache:
@@ -132,15 +125,32 @@ trace:
 events:
   HTTP:ROUTE:
     - sys.HttpSession->start
+    #- sys.AUTH->init
+    #- sys.AUTH->check
   HTTP:VIEW:
+    #- sys.AUTH->commit
     - sys.HttpSession->end
   HTTP:EXCEPTION:
+    #- sys.AUTH->commit
     - sys.HttpSession->end
 
 # =========================================================
 # SERVICES
 # =========================================================
 services:
+
+  # -------------------------------------------------------
+  # AUTH service
+  # -------------------------------------------------------
+  sys.AUTH:
+    class: metadigit\core\auth\AUTH
+    constructor:
+      module: SESSION
+    properties:
+      skipAuthApps: [ 'AUTH' ]
+      skipAuthUrls: []
+      skipXSRFApps: [ 'RRD' ]
+      skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
 
   # -------------------------------------------------------
   # SESSION service
