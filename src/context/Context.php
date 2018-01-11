@@ -104,7 +104,7 @@ class Context {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Context->get');
 		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
-			sys::context()->init(substr($id, 0, strrpos($id, '.')));
+			$this->init(substr($id, 0, strrpos($id, '.')));
 			if($this->has($id, $class)) {
 				return $this->services[$id] = new CoreProxy($id);
 			} elseif($failureMode==self::FAILURE_SILENT) return null;

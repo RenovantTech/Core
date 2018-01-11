@@ -48,7 +48,7 @@ class CoreProxy {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache('sys')->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
 			}
-			ACL_OBJECTS and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, sys::auth()->UID());
+			defined('SYS_ACL_SERVICES') and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, sys::auth()->UID());
 			sys::trace(LOG_DEBUG, T_INFO);
 			return call_user_func_array([$this->Obj, $method], $args);
 		} finally {

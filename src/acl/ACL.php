@@ -11,6 +11,11 @@ use metadigit\core\sys,
 	metadigit\core\http\Request;
 
 class ACL {
+	use \metadigit\core\CoreTrait;
+
+	const MOD_ORM		= 'ORM';
+	const MOD_ROUTING	= 'ROUTING';
+	const MOD_SERVICES	= 'SERVICES';
 
 	const SQL_CHECK_ROUTE	= 'SELECT * FROM %s WHERE type = "URL" AND ( method IS NULL OR method = :method ) ORDER BY CHAR_LENGTH(target) DESC';
 	const SQL_CHECK_OBJECT	= 'SELECT * FROM %s WHERE type = "OBJECT" AND target = :target AND ( method IS NULL OR method = :method )';
@@ -25,7 +30,9 @@ class ACL {
 	const SQL_FETCH_FILTER_CODE = 'SELECT code FROM %s_filters WHERE id = %u';
 	const SQL_FETCH_QUERY = 'SELECT query FROM %s_filters_sql WHERE id = %u';
 
-
+	/** ACL modules to activate
+	 * @var array */
+	protected $modules = [];
 	/** PDO instance ID
 	 * @var string */
 	protected $pdo;
@@ -39,12 +46,14 @@ class ACL {
 	];
 
 	/**
+	 * @param array $modules ACL modules to activate
 	 * @param string $pdo PDO instance ID, default to "master"
 	 * @param array|null $tables
 	 */
-	function __construct($pdo='master', array $tables=null) {
+	function __construct(array $modules, $pdo='master', array $tables=null) {
 		$prevTraceFn = sys::traceFn('sys.ACL');
 		try {
+			$this->modules = $modules;
 			if ($pdo) $this->pdo = $pdo;
 			if ($tables) $this->tables = array_merge($this->tables, $tables);
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
@@ -61,17 +70,28 @@ class ACL {
 	}
 
 	/**
+	 * Initialize ACL modules.
+	 * To be invoked via event listener before HTTP Routing execution (HTTP:INIT or HTTP:ROUTE).
+	 */
+	function init() {
+		sys::trace(LOG_DEBUG, T_INFO, 'activating modules '.implode(', ', $this->modules), null, $this->_.'->init');
+		foreach ($this->modules as $mod)
+			define('SYS_ACL_'.strtoupper($mod), true);
+	}
+
+	/**
+	 * Apply ACL checks during HTTP routing
 	 * @param Request $Req
 	 * @param integer $userId User ID
 	 * @return bool
 	 * @throws \Exception
 	 */
 	function onRoute(Request $Req, $userId) {
-		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
-		$target = $Req->URI();
-		$method = $Req->getMethod();
-		$matches = [];
+		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
+			$target = $Req->URI();
+			$method = $Req->getMethod();
+			$matches = [];
 			$aclArray = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
 				->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
@@ -87,7 +107,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -95,6 +114,7 @@ class ACL {
 	}
 
 	/**
+	 * Apply ACL checks during Services invocation
 	 * @param string $target  object ID
 	 * @param string $method  object method
 	 * @param integer $userId User ID
@@ -102,7 +122,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onObject($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_OBJECT, $this->tables['acl']))
@@ -112,7 +132,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -120,6 +139,7 @@ class ACL {
 	}
 
 	/**
+	 * Apply ACL checks during ORM operations
 	 * @param string $target Repository ID
 	 * @param string $method Repository action (CREATE, FETCH .. )
 	 * @param integer $userId User ID
@@ -127,7 +147,7 @@ class ACL {
 	 * @throws \Exception
 	 */
 	function onOrm($target, $method, $userId) {
-		$prevTraceFn = sys::traceFn('sys.ACL->'.__FUNCTION__);
+		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
 			$matches = sys::pdo($this->pdo)
 				->prepare(sprintf(self::SQL_CHECK_ORM, $this->tables['acl']))
@@ -137,7 +157,6 @@ class ACL {
 				if($acl && !empty($acl['action'])) $this->checkAction($acl, $userId);
 				if($acl && !empty($acl['filter'])) $this->checkFilter($acl, $userId);
 			}
-			sys::traceFn($prevTraceFn);
 			return true;
 		} finally {
 			sys::traceFn($prevTraceFn);

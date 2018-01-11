@@ -23,10 +23,26 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstruct() {
-		$ACL = new ACL( 'mysql');
-		$this->assertInstanceOf('metadigit\core\acl\ACL', $ACL);
+		$ACL = new ACL( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
+			'acl'	=> 'sys_acl',
+			'users'	=> 'sys_users',
+			'roles'	=> 'sys_roles',
+			'u2r'	=> 'sys_users_2_roles'
+		]);
+		$this->assertInstanceOf(ACL::class, $ACL);
 		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/init.sql'));
 		return $ACL;
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param ACL $ACL
+	 */
+	function testInit(ACL $ACL) {
+		$ACL->init();
+		$this->assertTrue(constant('SYS_ACL_ORM'));
+		$this->assertTrue(constant('SYS_ACL_ROUTING'));
+		$this->assertTrue(constant('SYS_ACL_SERVICES'));
 	}
 
 	/**
