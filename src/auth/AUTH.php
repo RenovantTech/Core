@@ -7,7 +7,7 @@
  */
 namespace metadigit\core\auth;
 use const metadigit\core\DATA_DIR;
-use const metadigit\core\trace\{T_ERROR, T_INFO};
+use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\http\Event as HttpEvent,
 	Firebase\JWT\BeforeValidException,
@@ -25,7 +25,7 @@ class AUTH {
 		'JWT',
 		'SESSION'
 	];
-	const JWT_KEY = DATA_DIR.'jwt.key';
+	const JWT_KEY = DATA_DIR.'JWT.key';
 
 	/** Pending commit  flag
 	 * @var bool */
@@ -89,7 +89,7 @@ class AUTH {
 
 	/**
 	 * Initialize AUTH module, perform Authentication & Security checks
-	 * To be invoked via event listener before HTTP Controller execution (HTTP:ROUTE or HTTP:CONTROLLER).
+	 * To be invoked via event listener before HTTP Controller execution (HTTP:INIT, HTTP:ROUTE or HTTP:CONTROLLER).
 	 * @param HttpEvent $Event
 	 * @throws AuthException
 	 * @throws Exception
@@ -97,36 +97,39 @@ class AUTH {
 	function init(HttpEvent $Event) {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
 		try {
-			sys::trace(LOG_DEBUG, T_INFO, 'initialize '.$this->module.' module');
+			$Req = $Event->getRequest();
+			$APP = $Req->getAttribute('APP');
+			$URI = $Req->URI();
+
+			// AUTH & backend XSRF-TOKEN
 			switch ($this->module) {
 				case 'COOKIE':
 					// @TODO COOKIE module
 					break;
 				case 'JWT':
-					if(isset($_COOKIE['JWT'])) {
+					if (isset($_COOKIE['JWT'])) {
 						try {
-							$token = (array) JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
+							$token = (array)JWT::decode($_COOKIE['JWT'], file_get_contents(self::JWT_KEY), ['HS512']);
 							$this->_XSRF_TOKEN = $token['XSRF-TOKEN'] ?? null;
-							if(isset($token['data']) && $token['data'] = (array)$token['data']) {
+							if (isset($token['data']) && $token['data'] = (array)$token['data']) {
 								foreach ($token['data'] as $k => $v)
 									$this->set($k, $v);
 								$this->_commit = false;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
 							}
-						} catch (BeforeValidException $Ex) {
-							// skip, go on
 						} catch (ExpiredException $Ex) {
-							// skip, go on
+							throw new AuthException(23);
+						} catch (BeforeValidException $Ex) {
+							throw new AuthException(22);
 						} catch (\Exception $Ex) { // include SignatureInvalidException, UnexpectedValueException
-							sys::trace(LOG_ERR, T_ERROR, 'JWT invalid: BLOCK ACCESS');
-							throw new AuthException(21, [$this->module]);
+							throw new AuthException(21);
 						}
 					}
 					break;
 				case 'SESSION':
-					if(session_status() != PHP_SESSION_ACTIVE) throw new Exception(23);
+					if (session_status() != PHP_SESSION_ACTIVE) throw new Exception(23);
 					$this->_XSRF_TOKEN = $_SESSION['XSRF-TOKEN'] ?? null;
-					if(isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
+					if (isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
 						foreach ($_SESSION['__AUTH__'] as $k => $v)
 							$this->set($k, $v);
 						$this->_commit = false;
@@ -134,62 +137,63 @@ class AUTH {
 					}
 					break;
 			}
-			// initialize XSRF-TOKEN COOKIE
-			if(!isset($_COOKIE['XSRF-TOKEN'])) {
-				sys::trace(LOG_DEBUG, T_INFO, 'set XSRF-TOKEN cookie');
-				$token = md5(uniqid(rand(1,999)));
-				setcookie('XSRF-TOKEN', $token, 0, '/', null, false, false);
-				$this->_XSRF_TOKEN = $token;
+			if (!$this->_UID && $URI != '/' && !in_array($APP, $this->skipAuthApps) && !$this->checkAUTH($URI))
+				throw new AuthException(101, [$this->module]);
+
+			// XSRF-TOKEN
+			if (!$this->_XSRF_TOKEN)
 				$this->_commit = true;
-			}
-			// verify required AUTH & XSRF-TOKEN
-			$Req = $Event->getRequest();
-			$APP = $Req->getAttribute('APP');
-			$URI = $Req->URI();
 			$XSRFToken = $Req->getHeader('X-XSRF-TOKEN');
-
-			if(!$this->_UID && $URI != '/' && !in_array($APP, $this->skipAuthApps))
-				$this->checkAUTH($URI);
-
-			if($XSRFToken && $XSRFToken == $this->_XSRF_TOKEN)
+			if ($XSRFToken && $XSRFToken === $this->_XSRF_TOKEN)
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
 			elseif ($XSRFToken && $XSRFToken != $this->_XSRF_TOKEN)
 				throw new AuthException(50, [$this->module]);
-			elseif($URI != '/' && !in_array($APP, $this->skipXSRFApps))
-				$this->checkXSRF($URI);
+			elseif ($URI != '/' && !in_array($APP, $this->skipXSRFApps) && !$this->checkXSRF($URI))
+				throw new AuthException(102, [$this->module]);
+
+		} catch (AuthException $Ex) {
+			$this->_commit = true;
+			throw $Ex;
 		} finally {
+			$this->commit(); // need on Exception to regenerate JWT/SESSION & XSRF-TOKEN
 			sys::traceFn($prevTraceFn);
 		}
 	}
 
 	/**
 	 * @param $URI
-	 * @throws AuthException
+	 * @return boolean
 	 */
 	protected function checkAUTH($URI) {
 		foreach ($this->skipAuthUrls as $url)
-			if(preg_match($url, $URI)) return;
-		throw new AuthException(101, [$this->module]);
+			if(preg_match($url, $URI)) return true;
+		return false;
 	}
 
 	/**
 	 * @param $URI
-	 * @throws AuthException
+	 * @return boolean
 	 */
 	protected function checkXSRF($URI) {
 		foreach ($this->skipXSRFUrls as $url)
-			if(preg_match($url, $URI)) return;
-		throw new AuthException(102, [$this->module]);
+			if(preg_match($url, $URI)) return true;
+		return false;
 	}
 
 	/**
-	 * Commit AUTH data to module storage.
+	 * Commit AUTH data & XSRF-TOKEN to module storage.
 	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
 	 */
 	function commit() {
 		if(!$this->_commit) return;
 		$prevTraceFn = sys::traceFn($this->_.'->commit');
 		try {
+			if(!$this->_XSRF_TOKEN) {
+				sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
+				$this->_XSRF_TOKEN = md5(uniqid(rand(1,999)));
+			}
+			sys::trace(LOG_DEBUG, T_INFO, 'set XSRF-TOKEN cookie');
+			setcookie('XSRF-TOKEN', $this->_XSRF_TOKEN, 0, '/', null, false, false);
 			$data = array_merge([
 				'GID'	=> $this->_GID,
 				'GROUP'	=> $this->_GROUP,
@@ -204,7 +208,7 @@ class AUTH {
 					sys::trace(LOG_DEBUG, T_INFO, 'set JWT cookie');
 					$token = [
 						//'aud' => 'http://example.com',
-						'exp' => time()+3600,
+						'exp' => time()+30,
 						'iat' => time()-1,
 						//'iss' => 'http://example.org',
 						'nbf' => time()-1,
@@ -219,6 +223,7 @@ class AUTH {
 					$_SESSION['XSRF-TOKEN'] = $this->_XSRF_TOKEN;
 			}
 		} finally {
+			$this->_commit = false; // avoid double invocation on init() Exception
 			sys::traceFn($prevTraceFn);
 		}
 	}
