@@ -56,4 +56,8 @@ class CoreProxy {
 			pcntl_signal_dispatch();
 		}
 	}
+
+	static function __set_state($data) {
+		return new CoreProxy($data['id']);
+	}
 }
