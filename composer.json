@@ -14,6 +14,7 @@
 	"require": {
 		"php": ">=7.0",
 		"phpunit/phpunit": "6.*",
+		"defuse/php-encryption": ">=2.1",
 		"firebase/php-jwt": "v5.0.0"
 	},
 	"require-dev": {
