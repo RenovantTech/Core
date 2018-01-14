@@ -113,12 +113,22 @@ class PdoProvider implements ProviderInterface {
 	}
 
 	function checkRefreshToken($userId, $token): bool {
-		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tableAuth))
-			->execute(['id'=>$userId, 'token'=>$token])->fetchColumn();
+		$prevTraceFn = sys::traceFn($this->_.'->checkRefreshToken');
+		try {
+			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tableAuth))
+				->execute(['id'=>$userId, 'token'=>$token])->fetchColumn();
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	function setRefreshToken($userId, $token, $expireTime) {
-		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tableAuth))
-			->execute(['id'=>$userId, 'token'=>$token, 'expire'=>strftime('%F %T', $expireTime)]);
+		$prevTraceFn = sys::traceFn($this->_.'->setRefreshToken');
+		try {
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tableAuth))
+				->execute(['id'=>$userId, 'token'=>$token, 'expire'=>strftime('%F %T', $expireTime)]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 }

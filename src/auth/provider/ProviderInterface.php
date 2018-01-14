@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace metadigit\core\auth\provider;
-use metadigit\core\auth\AUTH;
 /**
  * Authentication Provider interface.
  * @author Daniele Sciacchitano <dan@metadigit.it>
