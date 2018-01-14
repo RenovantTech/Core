@@ -47,14 +47,13 @@ class OpCache implements CacheInterface {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
 			return $this->cache[$id];
 		} else {
-			@include($this->_file($this->id, $id));
-			$value = (isset($data) && isset($expire) && ($expire==0 || $expire>time())) ? $data: false;
-			if($value===false) {
+			if(file_exists($file = $this->_file($this->id, $id))) include($file);
+			if(!isset($data) || (isset($expire) && ($expire!=0 && $expire<time()))) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
 				return false;
 			}
 			sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
-			return $this->cache[$id] = $value;
+			return $this->cache[$id] = $data;
 		}
 	}
 
@@ -111,7 +110,7 @@ class OpCache implements CacheInterface {
 	}
 
 	static protected function _write($cache, $id, $value, $expire) {
-		$data = var_export($value, true);
+		$data = (is_object($value)) ? 'unserialize(\''.serialize($value).'\')' : var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
 		$file = substr(chunk_split(md5($id),8,'/'),0,-1);
 		$f = explode('/', $file);
@@ -146,3 +145,4 @@ class OpCache implements CacheInterface {
 		}
 	}
 }
+register_shutdown_function(__NAMESPACE__.'\OpCache::shutdown');
