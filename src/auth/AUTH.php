@@ -20,6 +20,10 @@ use metadigit\core\sys,
 class AUTH {
 	use \metadigit\core\CoreTrait;
 
+	const LOGIN_UNKNOWN			= -1;
+	const LOGIN_DISABLED		= -2;
+	const LOGIN_PWD_MISMATCH	= -3;
+	const LOGIN_EXCEPTION		= -4;
 	const MODULES = [
 		'COOKIE',
 		'JWT',

@@ -154,6 +154,13 @@ services:
       skipXSRFApps: [ 'RRD' ]
       skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
 
+  sys.AuthProvider:
+    class: metadigit\core\auth\provider\PdoProvider
+    constructor:
+      pdo:        mysql
+      tableAuth:  sys_auth
+      tableUsers: users
+
   # -------------------------------------------------------
   # SESSION service
   # -------------------------------------------------------
