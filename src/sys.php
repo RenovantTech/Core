@@ -269,26 +269,26 @@ class sys {
 	/**
 	 * ACL helper
 	 * @return ACL
-	 * @throws ContainerException
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	static function acl() {
 		static $ACL;
-		if(!isset($ACL) && !$ACL = self::cache('sys')->get($_ = 'sys.ACL')) {
-			$ACL = self::$Container->get($_, ACL::class);
-		}
+		/** @var ACL $ACL */
+		if(!$ACL) $ACL = self::$Context->get('sys.ACL', ACL::class);
 		return $ACL;
 	}
 
 	/**
 	 * AUTH helper
 	 * @return AUTH
-	 * @throws ContainerException
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	static function auth() {
 		static $AUTH;
-		if(!isset($AUTH) && !$AUTH = self::cache('sys')->get($_ = 'sys.AUTH')) {
-			$AUTH = self::$Container->get($_, AUTH::class);
-		}
+		/** @var AUTH $AUTH */
+		if(!$AUTH) $AUTH = self::$Context->get('sys.AUTH', AUTH::class);
 		return $AUTH;
 	}
 
@@ -331,9 +331,11 @@ class sys {
 
 	/**
 	 * EventDispatcher helper
-	 * @param string $eventName	the name of the event
-	 * @param \metadigit\core\event\Event|array|null $EventOrParams custom Event object or params array
-	 * @return \metadigit\core\event\Event the Event object
+	 * @param string $eventName the name of the event
+	 * @param Event|array|null $EventOrParams custom Event object or params array
+	 * @return Event the Event object
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	static function event($eventName, $EventOrParams=null): Event {
 		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
