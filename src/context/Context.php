@@ -106,6 +106,7 @@ class Context {
 		try {
 			$this->init(substr($id, 0, strrpos($id, '.')));
 			if($this->has($id, $class)) {
+				if(substr($id, 0, 4)=='sys.') return $this->services[$id] = $this->Container->get($id, $class, $failureMode);
 				return $this->services[$id] = new CoreProxy($id);
 			} elseif($failureMode==self::FAILURE_SILENT) return null;
 			else throw new ContextException(1, [$this->_, $id]);
