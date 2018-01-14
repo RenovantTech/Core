@@ -39,7 +39,8 @@ class OpCache implements CacheInterface {
 		$DIR = CACHE_DIR.'opc-'.$id.'/';
 		$this->writeBuffer = (boolean) $writeBuffer;
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$DIR, null, $this->_);
-		mkdir($DIR, 0755, true);
+		if(!file_exists($DIR))
+			mkdir($DIR, 0755, true);
 	}
 
 	function get($id) {
@@ -112,13 +113,11 @@ class OpCache implements CacheInterface {
 	static protected function _write($cache, $id, $value, $expire) {
 		$data = (is_object($value)) ? 'unserialize(\''.serialize($value).'\')' : var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
-		$file = substr(chunk_split(md5($id),8,'/'),0,-1);
-		$f = explode('/', $file);
-		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0]);
-		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1]);
-		mkdir(CACHE_DIR.'opc-'.$cache.'/'.$f[0].'/'.$f[1].'/'.$f[2]);
+		$file = CACHE_DIR.'opc-'.$cache.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
+		if(!file_exists($dir = substr($file, 0, -9)))
+			mkdir($dir, 0755, true);
 		file_put_contents($tmp, '<?php $expire='.(int)$expire.'; $data='.$data.';', LOCK_EX);
-		rename($tmp, CACHE_DIR.'opc-'.$cache.'/'.$file);
+		rename($tmp, $file);
 	}
 
 	/**
