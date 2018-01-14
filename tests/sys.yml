@@ -147,7 +147,7 @@ services:
     constructor:
       module: SESSION
     properties:
-      accessTTL:    300   # 5 min
+      authTTL:      300   # 5 min
       refreshTTL:   86400 # 1 day
       skipAuthApps: [ 'AUTH' ]
       skipAuthUrls: []
