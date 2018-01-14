@@ -72,6 +72,17 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
+	 */
+	function testAuthenticate(PdoProvider $PdoProvider) {
+		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->authenticate('jack.green', '123456'));
+		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->authenticate('matt.brown', '123456'));
+		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->authenticate('john.red', '123456'));
+		$this->assertEquals(1, $PdoProvider->authenticate('john.red', 'ABC123'));
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param PdoProvider $PdoProvider
 	 * @return PdoProvider
 	 */
 	function testSetRefreshToken(PdoProvider $PdoProvider) {

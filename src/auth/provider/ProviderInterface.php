@@ -14,12 +14,19 @@ use metadigit\core\auth\AUTH;
 interface ProviderInterface {
 
 	/**
+	 * Authenticate User by credentials
+	 * @param string $login
+	 * @param string $password
+	 * @return int 1 on SUCCESS, negative code on ERROR
+	 */
+	function authenticate($login, $password): int;
+
+	/**
 	 * Authenticate User by ID
 	 * @param int $id User ID
-	 * @param AUTH $AUTH
 	 * @return bool
 	 */
-	function authenticateById($id, AUTH $AUTH): bool;
+	function authenticateById($id): bool;
 
 	/**
 	 * Perform login

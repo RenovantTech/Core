@@ -71,21 +71,33 @@ class PdoProvider implements ProviderInterface {
 		sys::pdo($pdo)->exec(str_replace(['{auth}', '{users}'], [$tableAuth, $tableUsers], self::SQL_INIT));
 	}
 
-	function authenticateById($id, AUTH $AUTH): bool {
+	function authenticate($login, $password): int {
+		$id = $this->checkCredentials($login, $password);
+		if($id > 0) {
+			return (int) $this->authenticateById($id);
+		} else return $id;
+	}
+
+	function authenticateById($id): bool {
+		$prevTraceFn = sys::traceFn($this->_.'->authenticateById');
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tableUsers))
 				->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
 			if(!is_array($data)) return false;
+			$AUTH = sys::auth();
 			foreach ($data as $k=>$v)
 				$AUTH->set($k, $v);
 			$AUTH->set('UID', $id);
 			return true;
 		} catch (\Exception $Ex) {
 			return false;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
 	function checkCredentials($login, $password): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkCredentials');
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tableAuth))
 				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
@@ -95,6 +107,8 @@ class PdoProvider implements ProviderInterface {
 			return $data['id'];
 		} catch (\Exception $Ex) {
 			return AUTH::LOGIN_EXCEPTION;
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 
