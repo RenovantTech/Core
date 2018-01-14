@@ -71,6 +71,9 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		// Test GET on included Contexts via ObjectProxy
 		$Mock = $Context->get('test.context.Mock1');
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
+
+		// sys service, no proxy
+		$this->assertInstanceOf('metadigit\core\acl\ACL', $Context->get('sys.ACL'));
 	}
 
 	/**

@@ -15,12 +15,14 @@ class AuthException extends Exception {
 	// COOKIE
 
 	// JWT
-	const COD21 = 'AUTH [JWT] - JWT token INVALID';
+	const COD21 = 'JWT token INVALID';
+	const COD22 = 'JWT token BEFORE-VALID';
+	const COD23 = 'JWT token EXPIRED';
 	// SESSION
 
 	// XSRF
-	const COD50 = 'AUTH [%s] - XSRF token INVALID';
+	const COD50 = 'XSRF token INVALID';
 	// common
-	const COD101 = 'AUTH [%s] - AUTH required: Unauthorized';
-	const COD102 = 'AUTH [%s] - XSRF-TOKEN required: Unauthorized';
+	const COD101 = 'AUTH required: Unauthorized';
+	const COD102 = 'XSRF-TOKEN required: Unauthorized';
 }

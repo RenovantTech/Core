@@ -9,6 +9,7 @@ namespace metadigit\core;
 use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use metadigit\core\acl\ACL,
 	metadigit\core\auth\AUTH,
+	metadigit\core\auth\AuthException,
 	metadigit\core\console\CmdManager,
 	metadigit\core\console\Event as ConsoleEvent,
 	metadigit\core\container\Container,
@@ -226,7 +227,6 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
-		// invoke HTTP Dispatcher
 		$app = $dispatcherID = $namespace = null;
 		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
 			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
@@ -242,9 +242,15 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
-		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
-		self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
-		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		try {
+			$HttpEvent = new HttpEvent(self::$Req, self::$Res);
+			self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
+			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
+		} catch (AuthException $Ex) {
+			http_response_code(401);
+			$HttpEvent->setException($Ex);
+			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+		}
 	}
 
 	/**

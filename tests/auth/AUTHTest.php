@@ -1,14 +1,37 @@
 <?php
 namespace test\auth;
+use metadigit\core\auth\provider\ProviderInterface;
 use metadigit\core\sys,
 	metadigit\core\auth\AUTH,
-	metadigit\core\auth\AuthException,
 	metadigit\core\auth\Exception,
 	metadigit\core\http\Event,
 	metadigit\core\http\Request,
-	metadigit\core\http\Response;
+	metadigit\core\http\Response,
+	test\auth\provider\PdoProviderTest;
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
+
+	static function setUpBeforeClass() {
+		sys::pdo('mysql')->exec('
+			DROP TABLE IF EXISTS `sys_auth`;
+			DROP TABLE IF EXISTS `users`;
+			CREATE TABLE IF NOT EXISTS `users` (
+				id			INT UNSIGNED NOT NULL AUTO_INCREMENT,
+				type		VARCHAR(20),
+				name		VARCHAR(20),
+				surname		VARCHAR(20),
+				email		VARCHAR(30) NULL DEFAULT NULL,
+				PRIMARY KEY(id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+		');
+	}
+
+	static function tearDownAfterClass() {
+		sys::pdo('mysql')->exec('
+			DROP TABLE IF EXISTS `sys_auth`;
+			DROP TABLE IF EXISTS `users`;
+		');
+	}
 
 	/**
 	 * @return AUTH
@@ -126,5 +149,14 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		$AUTH->set('foo', 'bar');
 		$AUTH->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AUTH $AUTH
+	 */
+	function testProvider(AUTH $AUTH) {
+		PdoProviderTest::setUpBeforeClass();
+		$this->assertInstanceOf(ProviderInterface::class, $AUTH->provider());
 	}
 }
