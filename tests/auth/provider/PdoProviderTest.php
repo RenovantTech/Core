@@ -23,8 +23,8 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 
 	static function tearDownAfterClass() {
 		sys::pdo('mysql')->exec('
---			DROP TABLE IF EXISTS `sys_auth`;
---			DROP TABLE IF EXISTS `users`;
+			DROP TABLE IF EXISTS `sys_auth`;
+			DROP TABLE IF EXISTS `users`;
 		');
 	}
 
