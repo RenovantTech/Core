@@ -41,7 +41,7 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
 	 */
-	function testLogin(PdoProvider $PdoProvider) {
+	function testCheckCredentials(PdoProvider $PdoProvider) {
 		sys::pdo('mysql')->exec('
 			INSERT INTO users (type, name, surname, email) VALUES ("admin", "John", "Red", "john.red@gmail.com");
 			INSERT INTO users (type, name, surname, email) VALUES ("user", "Matt", "Brown", "matt.brown@gmail.com");
