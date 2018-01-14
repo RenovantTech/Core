@@ -13,7 +13,7 @@ use metadigit\core\sys,
  * Authentication Provider via PDO.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
-class PdoProvider {
+class PdoProvider implements ProviderInterface {
 	use \metadigit\core\CoreTrait;
 
 	const SQL_INIT = '
@@ -73,7 +73,7 @@ class PdoProvider {
 	 * @param string $password
 	 * @return integer user ID on success, negative code on ERROR
 	 */
-	function login($login, $password) {
+	function login($login, $password): int {
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tableAuth))->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
 			if(!$data) return AUTH::LOGIN_UNKNOWN;
