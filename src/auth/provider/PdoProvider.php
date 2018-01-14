@@ -39,8 +39,9 @@ class PdoProvider implements ProviderInterface {
 			END;
 	';
 
-
+	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE id = :id AND refreshToken = :token AND refreshExpire >= NOW()';
 	const SQL_LOGIN = 'SELECT id, active, password FROM `%s` WHERE login = :login';
+	const SQL_SET_REFRESH_TOKEN = 'UPDATE `%s` SET refreshToken = :token, refreshExpire = :expire WHERE id = :id';
 
 	/** PDO instance ID
 	 * @var string */
@@ -67,15 +68,15 @@ class PdoProvider implements ProviderInterface {
 		sys::pdo($pdo)->exec(str_replace(['{auth}', '{users}'], [$tableAuth, $tableUsers], self::SQL_INIT));
 	}
 
-	/**
-	 * Perform login
-	 * @param string $login
-	 * @param string $password
-	 * @return integer user ID on success, negative code on ERROR
-	 */
+	function checkRefreshToken($userId, $token): bool {
+		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tableAuth))
+			->execute(['id'=>$userId, 'token'=>$token])->fetchColumn();
+	}
+
 	function login($login, $password): int {
 		try {
-			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tableAuth))->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
+			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tableAuth))
+				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
 			if(!$data) return AUTH::LOGIN_UNKNOWN;
 			if((int)$data['active'] != 1) return AUTH::LOGIN_DISABLED;
 			if(!password_verify($password, $data['password'])) return AUTH::LOGIN_PWD_MISMATCH;
@@ -83,5 +84,10 @@ class PdoProvider implements ProviderInterface {
 		} catch (\Exception $Ex) {
 			return AUTH::LOGIN_EXCEPTION;
 		}
+	}
+
+	function setRefreshToken($userId, $token, $expireTime) {
+		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tableAuth))
+			->execute(['id'=>$userId, 'token'=>$token, 'expire'=>strftime('%F %T', $expireTime)]);
 	}
 }

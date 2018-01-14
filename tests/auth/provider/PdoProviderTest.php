@@ -23,8 +23,8 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 
 	static function tearDownAfterClass() {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `users`;
+--			DROP TABLE IF EXISTS `sys_auth`;
+--			DROP TABLE IF EXISTS `users`;
 		');
 	}
 
@@ -52,5 +52,26 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->login('matt.brown', '123456'));
 		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->login('john.red', '123456'));
 		$this->assertEquals(1, $PdoProvider->login('john.red', 'ABC123'));
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param PdoProvider $PdoProvider
+	 * @return PdoProvider
+	 */
+	function testSetRefreshToken(PdoProvider $PdoProvider) {
+		$this->assertNull($PdoProvider->setRefreshToken(1, 'ABC123XYZ', time()+3600));
+		$this->assertNull($PdoProvider->setRefreshToken(2, 'ABC123XYZ', time()-3600));
+		return $PdoProvider;
+	}
+
+	/**
+	 * @depends testSetRefreshToken
+	 * @param PdoProvider $PdoProvider
+	 */
+	function testCheckRefreshToken(PdoProvider $PdoProvider) {
+		$this->assertTrue($PdoProvider->checkRefreshToken(1, 'ABC123XYZ'));
+		$this->assertFalse($PdoProvider->checkRefreshToken(1, '___123XYZ'));
+		$this->assertFalse($PdoProvider->checkRefreshToken(2, 'ABC123XYZ'));
 	}
 }
