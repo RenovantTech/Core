@@ -8,7 +8,7 @@
 namespace metadigit\core\event;
 use const metadigit\core\trace\T_EVENT;
 use metadigit\core\sys,
-	metadigit\core\CoreProxy;
+	metadigit\core\context\ContextException;
 /**
  * The EventDispatcher is the core of the framework event system.
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -52,9 +52,11 @@ class EventDispatcher {
 
 	/**
 	 * Trigger an Event, calling attached listeners
-	 * @param string $eventName	the name of the event
+	 * @param string $eventName the name of the event
 	 * @param Event|array|null $EventOrParams custom Event object or params array
 	 * @return Event the Event object
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 */
 	function trigger($eventName, $EventOrParams=null): Event {
 		$eventName = strtoupper($eventName);
@@ -62,13 +64,14 @@ class EventDispatcher {
 			sys::trace(LOG_DEBUG, T_EVENT, $eventName);
 		$Event = (is_object($EventOrParams)) ? $EventOrParams : new Event($EventOrParams);
 		if(!isset($this->listeners[$eventName])) return $Event;
+		$Context = sys::context();
 		foreach($this->listeners[$eventName] as $priority => $listeners) {
 			foreach($listeners as $callback) {
 				if(is_string($callback)) {
 					sys::trace(LOG_DEBUG, T_EVENT, $eventName.' ['.$priority.'] '.$callback);
 					if(strpos($callback,'->')>0) {
 						list($objID, $method) = explode('->', $callback);
-						$callback = [new CoreProxy($objID), $method];
+						$callback = [$Context->get($objID), $method];
 					}
 				} else {
 					list($Obj, $method) = $callback;
