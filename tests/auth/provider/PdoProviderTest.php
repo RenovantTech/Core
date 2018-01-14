@@ -51,11 +51,11 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	function testAuthenticateById(PdoProvider $PdoProvider) {
 		$AUTH = sys::auth();
 
-		$this->assertTrue($PdoProvider->authenticateById(1, $AUTH));
+		$this->assertTrue($PdoProvider->authenticateById(1));
 		$this->assertEquals(1, $AUTH->UID());
 		$this->assertEquals('john.red@gmail.com', $AUTH->get('email'));
 
-		$this->assertFalse($PdoProvider->authenticateById(5, $AUTH));
+		$this->assertFalse($PdoProvider->authenticateById(5));
 	}
 
 	/**
