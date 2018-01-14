@@ -72,7 +72,7 @@ class SysBoot extends sys {
 			'class' => 'metadigit\core\cache\SqliteCache',
 			'constructor' => ['sys-cache', 'cache', true]
 		];
-		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge($config['cache'], self::$Sys->cnfCache);
+		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['cache']);
 		foreach (self::$Sys->cnfCache as $id => $conf)
 			self::$Sys->cnfCache[$id] = array_merge(Container::YAML_OBJ_SKELETON, $conf);
 		$sysCacheConf = self::$Sys->cnfCache['sys'];

@@ -49,9 +49,9 @@ settings:
 # CACHE service
 # =========================================================
 cache:
-  #sys:         ### System cache, override with CAUTION
-  #  class:    metadigit\core\cache\SqliteCache
-  #  constructor:   ['sys-cache', 'cache', true]
+  #sys:           ### System cache, override with CAUTION
+    #class:       metadigit\core\cache\SqliteCache
+    #constructor: ['sys-cache', 'cache', true]
   main:
     class:        metadigit\core\cache\SqliteCache
     constructor:  [ 'sqlite', 'cache', false ]
