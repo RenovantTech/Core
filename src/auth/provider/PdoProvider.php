@@ -88,6 +88,7 @@ class PdoProvider implements ProviderInterface {
 			foreach ($data as $k=>$v)
 				$AUTH->set($k, $v);
 			$AUTH->set('UID', $id);
+			$AUTH->set('NAME', ($data['name']??'').' '.($data['surname']??''));
 			return true;
 		} catch (\Exception $Ex) {
 			return false;
@@ -125,8 +126,9 @@ class PdoProvider implements ProviderInterface {
 	function setRefreshToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRefreshToken');
 		try {
+			$expire = $expireTime ? strftime('%F %T', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tableAuth))
-				->execute(['id'=>$userId, 'token'=>$token, 'expire'=>strftime('%F %T', $expireTime)]);
+				->execute(['id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
