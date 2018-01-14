@@ -12,7 +12,7 @@ class CryptoCookieTest extends \PHPUnit\Framework\TestCase {
 		$Cookie = new CryptoCookie('CRYPTO-COOKIE');
 		$this->assertInstanceOf(CryptoCookie::class, $Cookie);
 
-		$RefProp = new \ReflectionProperty(CryptoCookie::class, 'key');
+		$RefProp = new \ReflectionProperty(CryptoCookie::class, '_key');
 		$RefProp->setAccessible(true);
 		$key = $RefProp->getValue($Cookie);
 		$this->assertEquals(32, strlen($key));

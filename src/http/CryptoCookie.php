@@ -16,20 +16,49 @@ class CryptoCookie {
 
 	const KEY_FILE = DATA_DIR.'cookie.key';
 
-	/**
+	/** Encryption KEY
 	 * @var string|null */
-	protected $key = null;
+	protected $_key = null;
+	/** Cookie domain
+	 * @var string */
+	protected $domain;
+	/** Cookie expire time
+	 * @var int */
+	protected $expire;
+	/** Cookie HTTP flag
+	 * @var string */
+	protected $httpOnly;
 	/** Cookie name
 	 * @var string */
 	protected $name;
+	/** Cookie path
+	 * @var string */
+	protected $path;
+	/** Cookie secure flag
+	 * @var string */
+	protected $secure;
 
-	function __construct($name) {
-		$this->name = $name;
-		if(file_exists(self::KEY_FILE)) {
-			$this->key = file_get_contents(self::KEY_FILE);
-		} else {
-			$this->key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
-			file_put_contents(self::KEY_FILE, $this->key);
+	/**
+	 * CryptoCookie constructor.
+	 * @param $name
+	 * @param $expire
+	 * @param $path
+	 * @param $domain
+	 * @param $secure
+	 * @param $httpOnly
+	 */
+	function __construct($name, $expire=0, $path='', $domain='', $secure=false, $httpOnly=false) {
+		$this->name = (string) $name;
+		$this->expire = (int) $expire;
+		$this->path = (string) $path;
+		$this->domain = (string) $domain;
+		$this->secure = (bool) $secure;
+		$this->httpOnly = (bool) $httpOnly;
+		if(file_exists(self::KEY_FILE))
+			$this->_key = file_get_contents(self::KEY_FILE);
+		else {
+			$this->_key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+			file_put_contents(self::KEY_FILE, $this->_key);
 		}
 	}
 
@@ -74,7 +103,7 @@ class CryptoCookie {
 		sodium_memzero($authKey);
 		$cryptData = sodium_bin2hex($mac.$nonce.$cipherText);
 		$_COOKIE[$this->name] = $cryptData;
-		return setcookie($this->name, $cryptData);
+		return setcookie($this->name, $cryptData, $this->expire, $this->path, $this->domain, $this->secure, $this->httpOnly);
 	}
 
 	/**
@@ -85,12 +114,12 @@ class CryptoCookie {
 	private function splitKeys() {
 		$encKey = sodium_crypto_generichash(
 			sodium_crypto_generichash('encryption', str_pad($this->name, 16, '_')),
-			$this->key,
+			$this->_key,
 			SODIUM_CRYPTO_STREAM_KEYBYTES
 		);
 		$authKey = sodium_crypto_generichash(
 			sodium_crypto_generichash('authentication', str_pad($this->name, 16, '_')),
-			$this->key,
+			$this->_key,
 			SODIUM_CRYPTO_AUTH_KEYBYTES
 		);
 		return [$encKey, $authKey];
