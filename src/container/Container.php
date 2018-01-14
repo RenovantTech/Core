@@ -89,10 +89,12 @@ class Container {
 			if(!in_array($namespace, $this->namespaces)) $this->init($namespace);
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
-			$obj = sys::cache('sys')->get($namespace.'#services')[$id];
-			$this->services[$id] = $Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
-			sys::cache('sys')->set($id, $Obj);
-			return $Obj;
+			if(!$Obj = sys::cache('sys')->get($id)) {
+				$obj = sys::cache('sys')->get($namespace.'#services')[$id];
+				$Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
+				sys::cache('sys')->set($id, $Obj);
+			}
+			return $this->services[$id] = $Obj;
 		} catch(ContainerException $Ex) {
 			if($failureMode==self::FAILURE_SILENT) return null;
 			throw $Ex;
