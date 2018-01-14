@@ -48,10 +48,10 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE id = 1;
 			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE id = 2;
 		');
-		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->login('jack.green', '123456'));
-		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->login('matt.brown', '123456'));
-		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->login('john.red', '123456'));
-		$this->assertEquals(1, $PdoProvider->login('john.red', 'ABC123'));
+		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
+		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
+		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
+		$this->assertEquals(1, $PdoProvider->checkCredentials('john.red', 'ABC123'));
 	}
 
 	/**

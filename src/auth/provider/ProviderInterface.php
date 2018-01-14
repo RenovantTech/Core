@@ -18,15 +18,7 @@ interface ProviderInterface {
 	 * @param string $password
 	 * @return integer user ID on success, negative code on ERROR
 	 */
-	function login($login, $password): int;
-
-	/**
-	 * Store new Refresh Token value
-	 * @param int $userId User ID
-	 * @param string $token
-	 * @param int $expireTime expiration time (unix timestamp)
-	 */
-	function setRefreshToken($userId, $token, $expireTime);
+	function checkCredentials($login, $password): int;
 
 	/**
 	 * Check Refresh Token validity
@@ -35,4 +27,12 @@ interface ProviderInterface {
 	 * @return bool TRUE if valid
 	 */
 	function checkRefreshToken($userId, $token): bool;
+
+	/**
+	 * Store new Refresh Token value
+	 * @param int $userId User ID
+	 * @param string $token
+	 * @param int $expireTime expiration time (unix timestamp)
+	 */
+	function setRefreshToken($userId, $token, $expireTime);
 }

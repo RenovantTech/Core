@@ -68,12 +68,7 @@ class PdoProvider implements ProviderInterface {
 		sys::pdo($pdo)->exec(str_replace(['{auth}', '{users}'], [$tableAuth, $tableUsers], self::SQL_INIT));
 	}
 
-	function checkRefreshToken($userId, $token): bool {
-		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tableAuth))
-			->execute(['id'=>$userId, 'token'=>$token])->fetchColumn();
-	}
-
-	function login($login, $password): int {
+	function checkCredentials($login, $password): int {
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tableAuth))
 				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
@@ -84,6 +79,11 @@ class PdoProvider implements ProviderInterface {
 		} catch (\Exception $Ex) {
 			return AUTH::LOGIN_EXCEPTION;
 		}
+	}
+
+	function checkRefreshToken($userId, $token): bool {
+		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tableAuth))
+			->execute(['id'=>$userId, 'token'=>$token])->fetchColumn();
 	}
 
 	function setRefreshToken($userId, $token, $expireTime) {
