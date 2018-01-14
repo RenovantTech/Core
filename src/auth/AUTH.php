@@ -26,6 +26,8 @@ class AUTH {
 		'SESSION'
 	];
 	const JWT_KEY = DATA_DIR.'JWT.key';
+	const TTL_ACCESS	= 300;
+	const TTL_REFRESH	= 86400;
 
 	/** Pending commit  flag
 	 * @var bool */
@@ -49,9 +51,15 @@ class AUTH {
 	 * @var string|null */
 	protected $_XSRF_TOKEN = null;
 
-	/** active module
+	/** Access Token TTL
+	 * @var int */
+	protected $accessTTL = self::TTL_ACCESS;
+	/** Active module
 	 * @var string */
 	protected $module = 'SESSION';
+	/** Refresh Token TTL
+	 * @var int */
+	protected $refreshTTL = self::TTL_REFRESH;
 
 	/** APPs to be skipped by checkAUTH()
 	 * @var array */
@@ -84,7 +92,7 @@ class AUTH {
 	}
 
 	function __sleep() {
-		return ['_', 'module', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
+		return ['_', 'accessTTL', 'module', 'refreshTTL', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
 	}
 
 	/**
@@ -118,6 +126,7 @@ class AUTH {
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH OK', $token['data']);
 							}
 						} catch (ExpiredException $Ex) {
+							// @TODO check REFRESH TOKEN
 							throw new AuthException(23);
 						} catch (BeforeValidException $Ex) {
 							throw new AuthException(22);
@@ -193,7 +202,7 @@ class AUTH {
 				$this->_XSRF_TOKEN = md5(uniqid(rand(1,999)));
 			}
 			sys::trace(LOG_DEBUG, T_INFO, 'set XSRF-TOKEN cookie');
-			setcookie('XSRF-TOKEN', $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			setcookie('XSRF-TOKEN', $this->_XSRF_TOKEN, time()+$this->refreshTTL, '/', null, false, false);
 			$data = array_merge([
 				'GID'	=> $this->_GID,
 				'GROUP'	=> $this->_GROUP,
@@ -205,17 +214,17 @@ class AUTH {
 					// @TODO COOKIE module
 					break;
 				case 'JWT':
-					sys::trace(LOG_DEBUG, T_INFO, 'set JWT cookie');
-					$token = [
+					sys::trace(LOG_DEBUG, T_INFO, 'set JWT cookies');
+					$accessToken = [
 						//'aud' => 'http://example.com',
-						'exp' => time()+30,
-						'iat' => time()-1,
-						//'iss' => 'http://example.org',
-						'nbf' => time()-1,
+						'exp' => time()+$this->accessTTL, // Expiry
+						'iat' => time()-1, // Issued At
+						//'iss' => 'http://example.org', // Issuer
+						'nbf' => time()-1, // Not Before
 						'data' => $this->_UID ? $data : null,
 						'XSRF-TOKEN'=>$this->_XSRF_TOKEN
 					];
-					setcookie('JWT', JWT::encode($token, file_get_contents(self::JWT_KEY), 'HS512'), 0, '/', '', true, true);
+					setcookie('JWT', JWT::encode($accessToken, file_get_contents(self::JWT_KEY), 'HS512'), time()+$this->refreshTTL, '/', '', true, true);
 					break;
 				case 'SESSION':
 					sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
