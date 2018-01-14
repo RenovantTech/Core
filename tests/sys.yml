@@ -160,6 +160,8 @@ services:
       pdo:        mysql
       tableAuth:  sys_auth
       tableUsers: users
+    properties:
+      fields:     '*'
 
   # -------------------------------------------------------
   # SESSION service

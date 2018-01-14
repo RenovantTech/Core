@@ -6,11 +6,20 @@
  * @license New BSD License
  */
 namespace metadigit\core\auth\provider;
+use metadigit\core\auth\AUTH;
 /**
  * Authentication Provider interface.
  * @author Daniele Sciacchitano <dan@metadigit.it>
  */
 interface ProviderInterface {
+
+	/**
+	 * Authenticate User by ID
+	 * @param int $id User ID
+	 * @param AUTH $AUTH
+	 * @return bool
+	 */
+	function authenticateById($id, AUTH $AUTH): bool;
 
 	/**
 	 * Perform login

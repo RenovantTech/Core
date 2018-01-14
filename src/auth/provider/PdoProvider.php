@@ -39,10 +39,14 @@ class PdoProvider implements ProviderInterface {
 			END;
 	';
 
+	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE id = :id AND refreshToken = :token AND refreshExpire >= NOW()';
 	const SQL_LOGIN = 'SELECT id, active, password FROM `%s` WHERE login = :login';
 	const SQL_SET_REFRESH_TOKEN = 'UPDATE `%s` SET refreshToken = :token, refreshExpire = :expire WHERE id = :id';
 
+	/** User table fields to load into AUTH data on login
+	 * @var string */
+	protected $fields = '*';
 	/** PDO instance ID
 	 * @var string */
 	protected $pdo = 'master';
@@ -52,7 +56,6 @@ class PdoProvider implements ProviderInterface {
 	/** Users SQL table
 	 * @var string */
 	protected $tableUsers = 'users';
-
 
 	/**
 	 * PdoProvider constructor.
@@ -66,6 +69,20 @@ class PdoProvider implements ProviderInterface {
 		$this->tableUsers = $tableUsers;
 		sys::trace(LOG_DEBUG, T_INFO, '[INIT] pdo: '.$pdo.', table: '.$tableAuth);
 		sys::pdo($pdo)->exec(str_replace(['{auth}', '{users}'], [$tableAuth, $tableUsers], self::SQL_INIT));
+	}
+
+	function authenticateById($id, AUTH $AUTH): bool {
+		try {
+			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tableUsers))
+				->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
+			if(!is_array($data)) return false;
+			foreach ($data as $k=>$v)
+				$AUTH->set($k, $v);
+			$AUTH->set('UID', $id);
+			return true;
+		} catch (\Exception $Ex) {
+			return false;
+		}
 	}
 
 	function checkCredentials($login, $password): int {

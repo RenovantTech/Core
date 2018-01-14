@@ -34,7 +34,28 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	function testConstructor() {
 		$PdoProvider = new PdoProvider('mysql', 'sys_auth');
 		$this->assertInstanceOf(PdoProvider::class, $PdoProvider);
+		sys::pdo('mysql')->exec('
+			INSERT INTO users (type, name, surname, email) VALUES ("admin", "John", "Red", "john.red@gmail.com");
+			INSERT INTO users (type, name, surname, email) VALUES ("user", "Matt", "Brown", "matt.brown@gmail.com");
+			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE id = 1;
+			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE id = 2;
+		');
 		return $PdoProvider;
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param PdoProvider $PdoProvider
+	 * @throws \metadigit\core\container\ContainerException
+	 */
+	function testAuthenticateById(PdoProvider $PdoProvider) {
+		$AUTH = sys::auth();
+
+		$this->assertTrue($PdoProvider->authenticateById(1, $AUTH));
+		$this->assertEquals(1, $AUTH->UID());
+		$this->assertEquals('john.red@gmail.com', $AUTH->get('email'));
+
+		$this->assertFalse($PdoProvider->authenticateById(5, $AUTH));
 	}
 
 	/**
@@ -42,12 +63,6 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @param PdoProvider $PdoProvider
 	 */
 	function testCheckCredentials(PdoProvider $PdoProvider) {
-		sys::pdo('mysql')->exec('
-			INSERT INTO users (type, name, surname, email) VALUES ("admin", "John", "Red", "john.red@gmail.com");
-			INSERT INTO users (type, name, surname, email) VALUES ("user", "Matt", "Brown", "matt.brown@gmail.com");
-			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE id = 1;
-			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE id = 2;
-		');
 		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
 		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
 		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
