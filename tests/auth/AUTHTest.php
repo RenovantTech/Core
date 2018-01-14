@@ -1,12 +1,13 @@
 <?php
 namespace test\auth;
+use metadigit\core\auth\provider\ProviderInterface;
 use metadigit\core\sys,
 	metadigit\core\auth\AUTH,
-	metadigit\core\auth\AuthException,
 	metadigit\core\auth\Exception,
 	metadigit\core\http\Event,
 	metadigit\core\http\Request,
-	metadigit\core\http\Response;
+	metadigit\core\http\Response,
+	test\auth\provider\PdoProviderTest;
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
 
@@ -126,5 +127,16 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		$AUTH->set('foo', 'bar');
 		$AUTH->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AUTH $AUTH
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
+	 */
+	function testProvider(AUTH $AUTH) {
+		PdoProviderTest::setUpBeforeClass();
+		$this->assertInstanceOf(ProviderInterface::class, $AUTH->provider());
 	}
 }

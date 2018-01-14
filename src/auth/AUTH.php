@@ -9,6 +9,9 @@ namespace metadigit\core\auth;
 use const metadigit\core\DATA_DIR;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
+	metadigit\core\auth\provider\PdoProvider,
+	metadigit\core\auth\provider\ProviderInterface,
+	metadigit\core\context\Context,
 	metadigit\core\http\Event as HttpEvent,
 	Firebase\JWT\BeforeValidException,
 	Firebase\JWT\ExpiredException,
@@ -337,5 +340,18 @@ class AUTH {
 	 */
 	function UID() {
 		return $this->_UID;
+	}
+
+	/**
+	 * @return ProviderInterface
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
+	 */
+	function provider() {
+		static $Provider;
+		if(!$Provider &&
+			!$Provider = sys::context()->get('sys.AuthProvider', ProviderInterface::class, Context::FAILURE_SILENT))
+				$Provider = new PdoProvider;
+		return $Provider;
 	}
 }
