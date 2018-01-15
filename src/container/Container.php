@@ -48,12 +48,13 @@ class Container {
 	 */
 	function build($id, $class, array $args=null, array $properties=[]) {
 		$RClass = new \ReflectionClass($class);
-		$Obj = (empty($args)) ? $RClass->newInstance() : $RClass->newInstanceArgs($args);
-		$RObject = new \ReflectionObject($Obj);
-		self::setProperty('_', $id, $Obj, $RObject);
-		foreach ($properties as $k=>$v) {
-			self::setProperty($k, $v, $Obj, $RObject);
-		}
+		$Obj = $RClass->newInstanceWithoutConstructor();
+		$RObj = new \ReflectionObject($Obj);
+		self::setProperty('_', $id, $Obj, $RObj);
+		foreach ($properties as $k=>$v)
+			self::setProperty($k, $v, $Obj, $RObj);
+		if($RConstructor = $RClass->getConstructor())
+			$RConstructor->invokeArgs($Obj, $args);
 		return $Obj;
 	}
 
