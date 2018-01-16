@@ -153,15 +153,19 @@ class SqliteCache implements CacheInterface {
 	 * Commit write buffer to SqLite on shutdown
 	 */
 	static function shutdown() {
-		foreach(self::$buffer as $k=>$buffer) {
-			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
-			list($pdo, $table) = explode('#', $k);
-			$pdoSet = sys::pdo($pdo)->prepare(sprintf(self::SQL_SET, $table));
-			foreach($buffer as $data) {
-				list($id, $value, $expire, $tags) = $data;
-				if(is_array($tags)) $tags = implode('|', $tags);
-				@$pdoSet->execute(['id'=>$id, 'data'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], false);
+		try {
+			foreach (self::$buffer as $k => $buffer) {
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: ' . count($buffer) . ' items on ' . $k, null, __METHOD__);
+				list($pdo, $table) = explode('#', $k);
+				$pdoSet = sys::pdo($pdo)->prepare(sprintf(self::SQL_SET, $table));
+				foreach ($buffer as $data) {
+					list($id, $value, $expire, $tags) = $data;
+					if (is_array($tags)) $tags = implode('|', $tags);
+					@$pdoSet->execute(['id' => $id, 'data' => $value, 'tags' => $tags, 'expireAt' => $expire, 'updateAt' => time()], false);
+				}
 			}
+		} finally {
+			self::$buffer = [];
 		}
 	}
 }

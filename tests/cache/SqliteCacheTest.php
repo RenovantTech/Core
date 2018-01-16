@@ -1,17 +1,33 @@
 <?php
 namespace test\cache;
-use metadigit\core\cache\SqliteCache;
+use metadigit\core\sys,
+	metadigit\core\cache\SqliteCache;
 
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
+	static function setUpBeforeClass() {
+		sys::pdo('sqlite')->exec('
+			DROP TABLE IF EXISTS `sqlite-cache`;
+			DROP TABLE IF EXISTS `sqlite-cache-buffered`;
+		');
+	}
+
+	static function tearDownAfterClass() {
+		SqliteCache::shutdown();
+//		sys::pdo('sqlite')->exec('
+//--			DROP TABLE IF EXISTS `sqlite-cache`;
+//--			DROP TABLE IF EXISTS `sqlite-cache-buffered`;
+//		');
+	}
+
 	function testConstructor() {
-		$Cache = new SqliteCache('sqlite', 'cache');
+		$Cache = new SqliteCache('sqlite', 'sqlite-cache');
 		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $Cache);
 		return $Cache;
 	}
 
 	function testConstructor2() {
-		$CacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite', 'sqlite-cache-buffered', true);
 		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
@@ -134,7 +150,7 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 		$CacheWithBuffer->set('test1', 'HelloWorld');
 		$CacheWithBuffer = null;
 		SqliteCache::shutdown();
-		$CacheWithBuffer = new SqliteCache('sqlite', 'cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite', 'sqlite-cache-buffered', true);
 		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }
