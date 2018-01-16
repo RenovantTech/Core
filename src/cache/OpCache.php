@@ -155,7 +155,10 @@ class OpCache implements CacheInterface {
 	static protected function _clean($dir) {
 		$files = glob($dir .'/*');
 		foreach ($files as $file) {
-			is_dir($file) ? self::_clean($file) : unlink($file);
+			if(is_dir($file)) {
+				self::_clean($file);
+				rmdir($file);
+			} else unlink($file);
 		}
 	}
 

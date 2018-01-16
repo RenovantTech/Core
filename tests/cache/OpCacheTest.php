@@ -145,6 +145,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($Cache->get('test1'));
 		$this->assertFalse($Cache->get('test2'));
 		$this->assertFalse($Cache->get('test3'));
+		$this->assertEmpty(glob(CACHE_DIR.'opc-cache1/*'));
 	}
 
 	/**
