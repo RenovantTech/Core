@@ -135,14 +135,14 @@ class OpCache implements CacheInterface {
 	}
 
 	static protected function _file($cacheId, $id) {
-		return CACHE_DIR.'opc-'.$cacheId.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
+		return CACHE_DIR.'opc-'.$cacheId.'/'.substr_replace(substr_replace(md5($id), '/', 3,0), '/', 7,0);
 	}
 
 	static protected function _write($cacheId, $id, $value, $expire) {
 		$data = (is_object($value)) ? 'unserialize(base64_decode(\''.base64_encode(serialize($value)).'\'))' : var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
 		$file = self::_file($cacheId, $id);
-		if(!file_exists($dir = substr($file, 0, -9)))
+		if(!file_exists($dir = substr($file, 0, -26)))
 			mkdir($dir, 0755, true);
 		file_put_contents($tmp, '<?php $expire='.(int)$expire.'; $data='.$data.';', LOCK_EX);
 		rename($tmp, $file);

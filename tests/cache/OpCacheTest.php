@@ -32,19 +32,29 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		return $CacheWithBuffer;
 	}
 
+	function testFile() {
+		$RefMethod = new \ReflectionMethod(OpCache::class, '_file');
+		$RefMethod->setAccessible(true);
+		$id='abcdefghilmnopqrstuvz'; // MD5 = 47a357c2ecb7a46f806fa9b793a74083
+		$this->assertEquals(CACHE_DIR.'opc-cache/'.'47a/357/c2ecb7a46f806fa9b793a74083', $RefMethod->invoke(null, 'cache', $id));
+	}
+
 	/**
 	 * @depends testConstructor
 	 * @param OpCache $Cache
 	 * @return OpCache
 	 */
 	function testSet(OpCache $Cache) {
+		$RefMethod = new \ReflectionMethod(OpCache::class, '_file');
+		$RefMethod->setAccessible(true);
+
 		$this->assertTrue($Cache->set('test1', 'HelloWorld'));
 		$this->assertEquals('<?php $expire=0; $data=\'HelloWorld\';',
-			file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+			file_get_contents($RefMethod->invoke(null, 'cache1', 'test1')));
 		$expire = time()-60;
 		$this->assertTrue($Cache->set('test2', 'HelloWorld2', $expire));
 		$this->assertEquals('<?php $expire='.$expire.'; $data=\'HelloWorld2\';',
-			file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test2'),8,'/'),0,-1)));
+			file_get_contents($RefMethod->invoke(null, 'cache1', 'test2')));
 
 		$this->assertTrue($Cache->set('special-chars', 'abcàèìòù#!"£$%&/()=?^\''));
 		return $Cache;
@@ -56,8 +66,11 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @return OpCache
 	 */
 	function testSet2(OpCache $CacheWithBuffer) {
+		$RefMethod = new \ReflectionMethod(OpCache::class, '_file');
+		$RefMethod->setAccessible(true);
+
 		$this->assertTrue($CacheWithBuffer->set('test1', 'HelloWorld'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$this->assertFalse(file_exists($RefMethod->invoke(null, 'cache2', 'test1')));
 		return $CacheWithBuffer;
 	}
 
@@ -113,10 +126,13 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @param OpCache $Cache
 	 */
 	function testDelete(OpCache $Cache) {
+		$RefMethod = new \ReflectionMethod(OpCache::class, '_file');
+		$RefMethod->setAccessible(true);
+
 		$this->assertTrue($Cache->delete('test1'));
 		$this->assertFalse($Cache->has('test1'));
 		$this->assertFalse($Cache->get('test1'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$this->assertFalse(file_exists($RefMethod->invoke(null, 'cache1', 'test1')));
 	}
 
 	/**
@@ -124,10 +140,13 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @param OpCache $CacheWithBuffer
 	 */
 	function testDelete2(OpCache $CacheWithBuffer) {
+		$RefMethod = new \ReflectionMethod(OpCache::class, '_file');
+		$RefMethod->setAccessible(true);
+
 		$this->assertTrue($CacheWithBuffer->delete('test1'));
 		$this->assertFalse($CacheWithBuffer->has('test1'));
 		$this->assertFalse($CacheWithBuffer->get('test1'));
-		$this->assertFalse(file_exists(CACHE_DIR.'opc-cache2/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$this->assertFalse(file_exists($RefMethod->invoke(null, 'cache2', 'test1')));
 	}
 
 	/**
