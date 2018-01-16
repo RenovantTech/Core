@@ -7,6 +7,7 @@
  */
 namespace metadigit\core\cache;
 use const metadigit\core\{CACHE_DIR, TMP_DIR};
+use metadigit\core\db\PDO;
 use const metadigit\core\trace\T_CACHE;
 use metadigit\core\sys;
 /**
@@ -16,31 +17,53 @@ use metadigit\core\sys;
 class OpCache implements CacheInterface {
 	use \metadigit\core\CoreTrait;
 
+	const SQL_INIT = '
+		CREATE TABLE IF NOT EXISTS `%s` (
+			id VARCHAR NOT NULL,
+			tags TEXT NULL default NULL,
+			expireAt INTEGER NULL default NULL,
+			updateAt INTEGER NOT NULL,
+			PRIMARY KEY (id)
+		);
+	';
+	const SQL_SET = 'INSERT OR REPLACE INTO `%s` (id, tags, expireAt, updateAt) VALUES (:id, :tags, :expireAt, :updateAt)';
+	const SQL_DELETE = 'DELETE FROM `%s` WHERE id = :id';
+
 	/** Write buffer
 	 * @var array */
 	static protected $buffer = [];
-
 	/** ID (Cache Identifier)
 	 * @var string */
 	protected $id;
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
+	/** PDO instance ID
+	 * @var string */
+	protected $pdo;
+	/** PDO table name
+	 * @var string */
+	protected $table;
 	/** Write buffer
 	 * @var boolean */
 	protected $writeBuffer = false;
 
 	/**
 	 * @param string $id cache ID
+	 * @param string $pdo PDO instance ID
+	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($id, $writeBuffer=false) {
+	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
 		$this->id = $id;
 		$DIR = CACHE_DIR.'opc-'.$id.'/';
+		$this->pdo = $pdo;
+		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] OpCache directory: '.$DIR, null, $this->_);
 		if(!file_exists($DIR))
 			mkdir($DIR, 0755, true);
+		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
 	function get($id) {
@@ -66,10 +89,13 @@ class OpCache implements CacheInterface {
 	function set($id, $value, $expire=null, $tags=null) {
 		if($this->writeBuffer) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-			self::$buffer[$this->id][] = [$id, $value, $expire, $tags];
+			self::$buffer[$this->id.'#'.$this->pdo.'#'.$this->table][] = [$id, $value, $expire, $tags];
 		} else {
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 			$this->_write($this->id, $id, $value, $expire);
+			if(is_array($tags)) $tags = implode('|', $tags);
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET, $this->table))
+				->execute(['id'=>$id, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], false);
 		}
 		$this->cache[$id] = $value;
 		return true;
@@ -80,15 +106,19 @@ class OpCache implements CacheInterface {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 		if(isset($this->cache[$id])) unset($this->cache[$id]);
 		$file = $this->_file($this->id, $id);
-		return file_exists($file) ? unlink($file) : true;
+		if(file_exists($file)) unlink($file);
+		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table))
+			->execute(['id'=>$id], false);
+		return true;
 	}
 
 	function clean($mode=self::CLEAN_ALL, $tags=null) {
 		$this->cache = [];
-		unset(self::$buffer[$this->id]);
+		unset(self::$buffer[$this->id.'#'.$this->pdo.'#'.$this->table]);
 		switch($mode) {
 			case self::CLEAN_ALL:
 				self::_clean(CACHE_DIR.'opc-'.$this->id);
+				sys::pdo($this->pdo)->exec(sprintf('DELETE FROM `%s`',$this->table), false);
 				break;
 			case self::CLEAN_OLD:
 				//@TODO
@@ -135,12 +165,20 @@ class OpCache implements CacheInterface {
 	 * Commit write buffer to directory on shutdown
 	 */
 	static function shutdown() {
-		foreach(self::$buffer as $k=>$buffer) {
-			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
-			foreach($buffer as $data) {
-				list($id, $value, $expire, $tags) = $data;
-				self::_write($k, $id, $value, $expire);
+		try {
+			foreach(self::$buffer as $k=>$buffer) {
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
+				list($cacheId, $pdo, $table) = explode('#', $k);
+				$pdoSet = sys::pdo($pdo)->prepare(sprintf(self::SQL_SET, $table));
+				foreach($buffer as $data) {
+					list($id, $value, $expire, $tags) = $data;
+					if (is_array($tags)) $tags = implode('|', $tags);
+					self::_write($cacheId, $id, $value, $expire);
+					@$pdoSet->execute(['id' => $id, 'tags' => $tags, 'expireAt' => $expire, 'updateAt' => time()], false);
+				}
 			}
+		} finally {
+			self::$buffer = [];
 		}
 	}
 }

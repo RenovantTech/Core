@@ -1,19 +1,34 @@
 <?php
 namespace test\cache;
 use const metadigit\core\CACHE_DIR;
-use metadigit\core\cache\OpCache;
+use metadigit\core\sys,
+	metadigit\core\cache\OpCache;
 
 class OpCacheTest extends \PHPUnit\Framework\TestCase {
 
+	static function setUpBeforeClass() {
+		sys::pdo('sqlite')->exec('
+			DROP TABLE IF EXISTS `opcache1`;
+			DROP TABLE IF EXISTS `opcache2`;
+		');
+	}
+
+	static function tearDownAfterClass() {
+		sys::pdo('sqlite')->exec('
+			DROP TABLE IF EXISTS `opcache1`;
+			DROP TABLE IF EXISTS `opcache2`;
+		');
+	}
+
 	function testConstructor() {
-		$Cache = new OpCache('cache1');
-		$this->assertInstanceOf('metadigit\core\cache\OpCache', $Cache);
+		$Cache = new OpCache('cache1', 'sqlite', 'opcache1');
+		$this->assertInstanceOf(OpCache::class, $Cache);
 		return $Cache;
 	}
 
 	function testConstructor2() {
-		$CacheWithBuffer = new OpCache('cache2', true);
-		$this->assertInstanceOf('metadigit\core\cache\OpCache', $CacheWithBuffer);
+		$CacheWithBuffer = new OpCache('cache2', 'sqlite', 'opcache2', true);
+		$this->assertInstanceOf(OpCache::class, $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
 
@@ -24,11 +39,12 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSet(OpCache $Cache) {
 		$this->assertTrue($Cache->set('test1', 'HelloWorld'));
-		$this->assertEquals('<?php $expire=0; $data=\'HelloWorld\';', file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
-		$time = time()-60;
-		$this->assertTrue($Cache->set('test2', 'HelloWorld2', $time));
-		$raw = '<?php $expire='.$time.'; $data=\'HelloWorld2\';';
-		$this->assertEquals($raw, file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test2'),8,'/'),0,-1)));
+		$this->assertEquals('<?php $expire=0; $data=\'HelloWorld\';',
+			file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test1'),8,'/'),0,-1)));
+		$expire = time()-60;
+		$this->assertTrue($Cache->set('test2', 'HelloWorld2', $expire));
+		$this->assertEquals('<?php $expire='.$expire.'; $data=\'HelloWorld2\';',
+			file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test2'),8,'/'),0,-1)));
 		return $Cache;
 	}
 
@@ -66,8 +82,9 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @param OpCache $Cache
 	 */
 	function testGetExpired(OpCache $Cache) {
-		$Cache = new OpCache('cache1');
-		$this->assertFalse($Cache->get('test2'));
+		$Cache->set('expired', 'ExpiredWorld', time()-60);
+		$FreshCache = new OpCache('cache1', 'sqlite', 'opcache1');
+		$this->assertFalse($FreshCache->get('expired'));
 	}
 
 	/**
@@ -85,7 +102,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testHas2(OpCache $CacheWithBuffer) {
 		$this->assertTrue($CacheWithBuffer->has('test1'));
-		$this->assertFalse($CacheWithBuffer->has('test2'));
+		$this->assertFalse($CacheWithBuffer->has('testX'));
 	}
 
 	/**
@@ -152,7 +169,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		$CacheWithBuffer->set('testbuffer', 'HelloBuffer');
 		$CacheWithBuffer = null;
 		OpCache::shutdown();
-		$CacheWithBuffer = new OpCache('cache2', true);
+		$CacheWithBuffer = new OpCache('cache2', 'sqlite', 'opcache2', true);
 		$this->assertEquals('HelloBuffer', $CacheWithBuffer->get('testbuffer'));
 	}
 }
