@@ -71,7 +71,7 @@ class OpCache implements CacheInterface {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
 			return $this->cache[$id];
 		} else {
-			if(file_exists($file = $this->_file($this->id, $id))) include($file);
+			if(file_exists($file = self::_file($this->id, $id))) include($file);
 			if(!isset($data) || (isset($expire) && ($expire!=0 && $expire<time()))) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
 				return false;
@@ -83,7 +83,7 @@ class OpCache implements CacheInterface {
 
 	function has($id) {
 		if(isset($this->cache[$id])) return true;
-		return file_exists($this->_file($this->id, $id));
+		return file_exists(self::_file($this->id, $id));
 	}
 
 	function set($id, $value, $expire=null, $tags=null) {
@@ -105,10 +105,8 @@ class OpCache implements CacheInterface {
 	function delete($id) {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 		if(isset($this->cache[$id])) unset($this->cache[$id]);
-		$file = $this->_file($this->id, $id);
-		if(file_exists($file)) unlink($file);
-		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table))
-			->execute(['id'=>$id], false);
+		if(file_exists($file = self::_file($this->id, $id))) unlink($file);
+		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table))->execute(['id'=>$id], false);
 		return true;
 	}
 
@@ -136,14 +134,14 @@ class OpCache implements CacheInterface {
 		return true;
 	}
 
-	static protected function _file($cache, $id) {
-		return CACHE_DIR.'opc-'.$cache.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
+	static protected function _file($cacheId, $id) {
+		return CACHE_DIR.'opc-'.$cacheId.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
 	}
 
-	static protected function _write($cache, $id, $value, $expire) {
+	static protected function _write($cacheId, $id, $value, $expire) {
 		$data = (is_object($value)) ? 'unserialize(\''.serialize($value).'\')' : var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
-		$file = CACHE_DIR.'opc-'.$cache.'/'.substr(chunk_split(md5($id),8,'/'),0,-1);
+		$file = self::_file($cacheId, $id);
 		if(!file_exists($dir = substr($file, 0, -9)))
 			mkdir($dir, 0755, true);
 		file_put_contents($tmp, '<?php $expire='.(int)$expire.'; $data='.$data.';', LOCK_EX);
@@ -167,8 +165,8 @@ class OpCache implements CacheInterface {
 	static function shutdown() {
 		try {
 			foreach(self::$buffer as $k=>$buffer) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
 				list($cacheId, $pdo, $table) = explode('#', $k);
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$cacheId, null, __METHOD__);
 				$pdoSet = sys::pdo($pdo)->prepare(sprintf(self::SQL_SET, $table));
 				foreach($buffer as $data) {
 					list($id, $value, $expire, $tags) = $data;

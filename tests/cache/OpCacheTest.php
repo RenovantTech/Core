@@ -45,6 +45,8 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($Cache->set('test2', 'HelloWorld2', $expire));
 		$this->assertEquals('<?php $expire='.$expire.'; $data=\'HelloWorld2\';',
 			file_get_contents(CACHE_DIR.'opc-cache1/'.substr(chunk_split(md5('test2'),8,'/'),0,-1)));
+
+		$this->assertTrue($Cache->set('special-chars', 'abcàèìòù#!"£$%&/()=?^\''));
 		return $Cache;
 	}
 
@@ -65,6 +67,7 @@ class OpCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testGet(OpCache $Cache) {
 		$this->assertEquals('HelloWorld', $Cache->get('test1'));
+		$this->assertEquals('abcàèìòù#!"£$%&/()=?^\'', $Cache->get('special-chars'));
 		$this->assertFalse($Cache->get('testX'));
 	}
 
