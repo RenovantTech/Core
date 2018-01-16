@@ -104,7 +104,10 @@ class OpCache implements CacheInterface {
 
 	function delete($id) {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
-		if(isset($this->cache[$id])) unset($this->cache[$id]);
+		if(isset($this->cache[$id])) {
+			$this->cache[$id] = null;
+			unset($this->cache[$id]);
+		}
 		if(file_exists($file = self::_file($this->id, $id))) unlink($file);
 		sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table))->execute(['id'=>$id], false);
 		return true;

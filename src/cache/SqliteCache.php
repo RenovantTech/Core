@@ -120,7 +120,10 @@ class SqliteCache implements CacheInterface {
 
 	function delete($id) {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
-		if(isset($this->cache[$id])) unset($this->cache[$id]);
+		if(isset($this->cache[$id])) {
+			$this->cache[$id] = null;
+			unset($this->cache[$id]);
+		}
 		if(is_null($this->_pdo_del)) $this->_pdo_del = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE, $this->table));
 		$this->_pdo_del->execute(['id'=>$id], false);
 		return true;
