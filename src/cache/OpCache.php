@@ -139,7 +139,7 @@ class OpCache implements CacheInterface {
 	}
 
 	static protected function _write($cacheId, $id, $value, $expire) {
-		$data = (is_object($value)) ? 'unserialize(\''.serialize($value).'\')' : var_export($value, true);
+		$data = (is_object($value)) ? 'unserialize(base64_decode(\''.base64_encode(serialize($value)).'\'))' : var_export($value, true);
 		$tmp = TMP_DIR.'/opc-'. md5($id);
 		$file = self::_file($cacheId, $id);
 		if(!file_exists($dir = substr($file, 0, -9)))
