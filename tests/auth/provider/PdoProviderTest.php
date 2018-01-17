@@ -37,8 +37,10 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 		sys::pdo('mysql')->exec('
 			INSERT INTO users (type, name, surname, email) VALUES ("admin", "John", "Red", "john.red@gmail.com");
 			INSERT INTO users (type, name, surname, email) VALUES ("user", "Matt", "Brown", "matt.brown@gmail.com");
+			INSERT INTO users (type, name, surname, email) VALUES ("user", "Dick", "Dastardly", "dick.dastardly@gmail.com");
 			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE id = 1;
 			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE id = 2;
+			UPDATE sys_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE id = 3;
 		');
 		return $PdoProvider;
 	}
@@ -78,6 +80,7 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->authenticate('matt.brown', '123456'));
 		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->authenticate('john.red', '123456'));
 		$this->assertEquals(1, $PdoProvider->authenticate('john.red', 'ABC123'));
+		$this->assertEquals(1, $PdoProvider->authenticate('dick.dastardly', 'GHI789'));
 	}
 
 	/**
