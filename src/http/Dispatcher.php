@@ -90,7 +90,7 @@ class Dispatcher {
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
 		} finally {
-			PHP_OUTPUT_HANDLER_CLEANABLE && ob_end_clean();
+			if(!empty(ob_get_status())) ob_end_clean();
 		}
 	}
 
