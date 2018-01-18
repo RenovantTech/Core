@@ -85,11 +85,11 @@ class HtmlWriter {
 			extract(self::$data, EXTR_REFS);
 			include(self::$template);
 			$html = ob_get_contents();
-			ob_end_clean();
 			return $html;
 		} catch (\Exception $Ex) {
-			ob_end_clean();
 			throw new HtmlException(2, $Ex->getMessage());
+		} finally {
+			ob_end_clean();
 		}
 	}
 }
