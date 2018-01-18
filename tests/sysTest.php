@@ -38,17 +38,17 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfApps');
 		$ReflProp->setAccessible(true);
 		$apps = $ReflProp->getValue($Sys);
-		$this->assertArrayHasKey('webconsole', $apps['HTTP']);
-		$this->assertEquals(8080,					$apps['HTTP']['webconsole']['httpPort']);
-		$this->assertEquals('/',					$apps['HTTP']['webconsole']['baseUrl']);
-		$this->assertEquals('metadigit.webconsole',	$apps['HTTP']['webconsole']['namespace']);
-		$this->assertArrayHasKey('CP', $apps['HTTP']);
-		$this->assertEquals(80,					$apps['HTTP']['CP']['httpPort']);
-		$this->assertEquals('/ControlPanel/',	$apps['HTTP']['CP']['baseUrl']);
-		$this->assertEquals('project.cp',		$apps['HTTP']['CP']['namespace']);
+		$this->assertArrayHasKey('MNGR', 		$apps['HTTP']);
+		$this->assertEquals(8080,			$apps['HTTP']['MNGR']['port']);
+		$this->assertEquals('/',			$apps['HTTP']['MNGR']['url']);
+		$this->assertEquals('mngr',		$apps['HTTP']['MNGR']['namespace']);
+		$this->assertArrayHasKey('API_FOO',	$apps['HTTP']);
+		$this->assertNull(							$apps['HTTP']['API_FOO']['port']);
+		$this->assertEquals('/api/foo/',	$apps['HTTP']['API_FOO']['url']);
+		$this->assertEquals('api.foo',		$apps['HTTP']['API_FOO']['namespace']);
 		$this->assertCount(1, $apps['CLI']);
-//@TODO		$this->assertEquals('metadigit.webconsole',	$apps['CLI']['webconsole']);
-		$this->assertEquals('test.console',			$apps['CLI']['console']);
+
+		$this->assertEquals('test.console',		$apps['CLI']['console']);
 
 		// constants
 		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfConstants');
@@ -131,7 +131,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws EventDispatcherException
+	 * @throws ContextException
 	 */
 	function testAcl() {
 		$ACL = sys::acl();
@@ -143,7 +144,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 	/**
 	 * @depends testInit
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws EventDispatcherException
+	 * @throws ContextException
 	 */
 	function testAuth() {
 		$AUTH = sys::auth();
@@ -216,14 +218,59 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
-	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws SysException
+	 * @throws ContextException
 	 */
-	function _testDispatchHTTP() {
-		$_SERVER['REQUEST_URI'] = '/';
-		$_SERVER['SERVER_PORT'] = '80';
-		sys::dispatch('http');
-		//$this->assertEquals('Europe/London', $r);
+	function testDispatchHTTP() {
+		try {
+			$_SERVER['SERVER_ADDR'] = 'example.com';
+			$_SERVER['SERVER_PORT'] = 8080;
+			$_SERVER['REQUEST_URI'] = '/';
+			sys::dispatch('http');
+		} catch (ContextException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/namespace mngr/', $Ex->getMessage());
+		}
+
+		try {
+			$_SERVER['SERVER_ADDR'] = 'example.com';
+			$_SERVER['SERVER_PORT'] = null;
+			$_SERVER['REQUEST_URI'] = '/api/foo/123/456';
+			sys::dispatch('http');
+		} catch (ContextException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/namespace api.foo/', $Ex->getMessage());
+		}
+
+		try {
+			$_SERVER['SERVER_ADDR'] = 'example.com';
+			$_SERVER['SERVER_PORT'] = 80;
+			$_SERVER['REQUEST_URI'] = '/api/bar/';
+			sys::dispatch('http');
+		} catch (ContextException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/namespace api.bar/', $Ex->getMessage());
+		}
+
+		try {
+			$_SERVER['SERVER_ADDR'] = 'example.com';
+			$_SERVER['SERVER_PORT'] = 80;
+			$_SERVER['REQUEST_URI'] = '/dashboard';
+			sys::dispatch('http');
+		} catch (ContextException $Ex) {
+			$this->assertEquals(11, $Ex->getCode());
+			$this->assertRegExp('/namespace ui/', $Ex->getMessage());
+		}
+
+		try {
+			$_SERVER['SERVER_ADDR'] = 'bad-example.com';
+			$_SERVER['SERVER_PORT'] = 8080;
+			$_SERVER['REQUEST_URI'] = '/';
+			sys::dispatch('http');
+		} catch (SysException $Ex) {
+			$this->assertEquals(1, $Ex->getCode());
+			$this->assertRegExp('/bad-example.com:8080/', $Ex->getMessage());
+		}
 	}
 }

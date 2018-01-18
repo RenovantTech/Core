@@ -32,5 +32,5 @@ class SysException extends Exception {
 	const ERR12 = 'Autoloading class {1}: not defined in file {2}';
 
 	// Dispatcher
-	const COD1 = 'Unable to dispatch %s Request with URI: %s';
+	const COD1 = 'Unable to dispatch %s Request: %s:%s%s';
 }

@@ -229,8 +229,11 @@ class sys {
 		self::$Res = new http\Response;
 		$app = $dispatcherID = $namespace = null;
 		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
-			$urlPattern = '/^'.preg_quote($conf['baseUrl'],'/').'/';
-			if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) && $_SERVER['SERVER_PORT']==$conf['httpPort']) {
+			$urlPattern = '/^'.preg_quote($conf['url'],'/').'/';
+			if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) &&
+				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR']==$conf['domain']) &&
+				(!isset($conf['port']) || $_SERVER['SERVER_PORT']==$conf['port']))
+			{
 				$app = $id;
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
@@ -238,7 +241,7 @@ class sys {
 				break;
 			}
 		}
-		if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->URI()]);
+		if(is_null($app)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');

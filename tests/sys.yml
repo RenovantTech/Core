@@ -2,18 +2,21 @@
 # APPs definitions
 # =========================================================
 apps:
-  webconsole:
-    httpPort:   8080
-    baseUrl:    /
-    namespace:  metadigit.webconsole
-  CP:
-    httpPort:   80
-    baseUrl:    /ControlPanel/
-    namespace:  project.cp
-  Web:
-    httpPort:   80
-    baseUrl:    /
-    namespace:  web
+  MNGR:
+    domain:     example.com
+    port:       8080
+    url:        /
+    namespace:  mngr
+  API_FOO:
+    url:        /api/foo/
+    namespace:  api.foo
+  API_BAR:
+    url:        /api/bar/
+    namespace:  api.bar
+  UI:
+    port:       80
+    url:        /
+    namespace:  ui
 
 # =========================================================
 # CLI definitions
