@@ -15,8 +15,10 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param CsvView $CsvView
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testRender(CsvView $CsvView) {
+		ob_start();
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -26,7 +28,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		]);
 		$CsvView->render($Req, $Res, '/http/templates/csv-test');
-		$output = $Res->getContent();
+		$output = ob_get_clean();
 		$this->assertRegExp('/"Surname","Age"/', $output);
 		$this->assertRegExp('/"GREEN","24"/', $output);
 	}

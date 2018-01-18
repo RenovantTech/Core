@@ -15,8 +15,10 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param ExcelView $ExcelView
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testRender(ExcelView $ExcelView) {
+		ob_start();
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -26,7 +28,7 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		]);
 		$ExcelView->render($Req, $Res, '/http/templates/excel-test');
-		$output = preg_replace('/\s+/', '', $Res->getContent());
+		$output = preg_replace('/\s+/', '', ob_get_clean());
 		$this->assertRegExp('/<thnowrap>Surname<\/th><thnowrap>Age<\/th>/', $output);
 		$this->assertRegExp('/<tdnowrap>GREEN<\/td><tdnowrap>24<\/td>/', $output);
 	}

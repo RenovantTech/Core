@@ -15,13 +15,15 @@ class FileViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param FileView $FileView
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testRender(FileView $FileView) {
-		$this->expectOutputRegex('/Hello America/');
+		ob_start();
 		$Req = new Request;
 		$Res = new Response;
 		$FileView->render($Req, $Res, TEST_DIR.'/http/templates/test.txt');
-		$Res->send();
+		$output = ob_get_clean();
+		$this->assertRegExp('/Hello America/', $output);
 	}
 
 	/**

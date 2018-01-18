@@ -53,8 +53,11 @@ class Dispatcher {
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
 	function dispatch(Request $Req, Response $Res) {
+		ob_start();
 		$Controller = null;
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
@@ -86,6 +89,8 @@ class Dispatcher {
 			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
+		} finally {
+			ob_end_clean();
 		}
 	}
 

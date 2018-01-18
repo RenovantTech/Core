@@ -15,12 +15,15 @@ class PhpTALViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PhpTALView $PhpTALView
+	 * @throws \metadigit\core\http\Exception
+	 * @throws \PHPTAL_ConfigurationException
 	 */
 	function testRender(PhpTALView $PhpTALView) {
-		$this->expectOutputRegex('/<title>index<\/title>/');
+		ob_start();
 		$Req = new Request;
 		$Res = new Response;
 		$PhpTALView->render($Req, $Res, TEST_DIR.'/http/templates/index');
-		$Res->send();
+		$output = ob_get_clean();
+		$this->assertRegExp('/<title>index<\/title>/', $output);
 	}
 }

@@ -35,14 +35,6 @@ class Response {
 	 * @var array|null */
 	private $viewOptions = null;
 
-	function __construct() {
-		ob_start();
-	}
-
-	function __destruct() {
-		ob_end_clean();
-	}
-
 	// === getter & setter ========================================================================
 
 	/**
@@ -96,7 +88,7 @@ class Response {
 
 	/**
 	 * Get View, options and engine
-	 * @return ViewInterface|null|string
+	 * @return array ViewInterface|null|string
 	 */
 	function getView() {
 		return [$this->view, $this->viewOptions, $this->viewEngine];

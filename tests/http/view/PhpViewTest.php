@@ -15,12 +15,14 @@ class PhpViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PhpView $PhpView
+	 * @throws \metadigit\core\http\Exception
 	 */
 	function testRender(PhpView $PhpView) {
-		$this->expectOutputRegex('/<title>index<\/title>/');
+		ob_start();
 		$Req = new Request;
 		$Res = new Response;
 		$PhpView->render($Req, $Res, TEST_DIR.'/http/templates/index');
-		$Res->send();
+		$output = ob_get_clean();
+		$this->assertRegExp('/<title>index<\/title>/', $output);
 	}
 }
