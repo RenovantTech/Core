@@ -153,7 +153,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 */
 	function testDispatch() {
-		$this->expectOutputRegex('/<title>index<\/title>/');
+		ob_start();
 		sys::cache('sys')->delete('test.http.Dispatcher');
 		$Dispatcher = sys::context()->container()->get('test.http.Dispatcher');
 		$_SERVER['REQUEST_URI'] = '/';
@@ -163,5 +163,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', '/home');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$this->assertNull($Dispatcher->dispatch($Req, $Res));
+		$output = ob_get_clean();
+		$this->assertRegExp('/<title>index<\/title>/', $output);
 	}
 }

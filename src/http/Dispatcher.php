@@ -57,7 +57,7 @@ class Dispatcher {
 	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
 	function dispatch(Request $Req, Response $Res) {
-		ob_start();
+		ob_start(null, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 		$Controller = null;
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
@@ -90,7 +90,7 @@ class Dispatcher {
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
 		} finally {
-			ob_end_clean();
+			PHP_OUTPUT_HANDLER_CLEANABLE && ob_end_clean();
 		}
 	}
 
