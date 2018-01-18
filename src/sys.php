@@ -237,7 +237,7 @@ class sys {
 				$app = $id;
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
-				self::$Req->setAttribute('APP_URI', str_replace($conf['baseUrl'], '/', self::$Req->URI()));
+				self::$Req->setAttribute('APP_URI', str_replace($conf['url'], '/', self::$Req->URI()));
 				break;
 			}
 		}
