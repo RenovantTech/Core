@@ -17,6 +17,8 @@ class YamlTest extends \PHPUnit\Framework\TestCase {
 		// test section
 		$yaml = Yaml::parseFile(__DIR__.'/context.yml', 'foo');
 		$this->assertCount(2, $yaml);
+		$this->assertEquals('foo1', $yaml[0]);
+		$this->assertEquals('foo2-override', $yaml[1]);
 
 		// test not-existing section
 		$yaml = Yaml::parseFile(__DIR__.'/context.yml', 'xxxxxx');

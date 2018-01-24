@@ -48,15 +48,14 @@ class Yaml {
 	static function parseFile($file, $section=null, array $callbacks=[]) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
 		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
-		if(file_exists($fileEnv)) $file = $fileEnv;
-		elseif(!file_exists($file)) throw new YamlException(1, [__METHOD__, $file]);
-		if(strpos($file, 'phar://')!==false) {
-			$tmp = tempnam(TMP_DIR, 'yaml-');
-			file_put_contents($tmp, file_get_contents($file));
-			$yaml = yaml_parse_file($tmp, 0, $n, $callbacks);
-			unlink($tmp);
-		} else $yaml = yaml_parse_file($file, 0, $n, $callbacks);
-		if($yaml==false) throw new YamlException(2, [__METHOD__, $file]);
+		if(!file_exists($file) && !file_exists($fileEnv)) throw new YamlException(1, [__METHOD__, $file]);
+
+		$yaml = $yamlEnv = [];
+		if(file_exists($file)) $yaml = self::_parseFile($file, $callbacks);
+		if(file_exists($fileEnv)) $yamlEnv = self::_parseFile($fileEnv, $callbacks);
+		$yaml = array_merge($yaml, $yamlEnv);
+
+		if(empty($yaml)) throw new YamlException(2, [__METHOD__, $file]);
 		return $section ? isset($yaml[$section]) ? $yaml[$section] : null : $yaml;
 	}
 
@@ -84,5 +83,21 @@ class Yaml {
 		elseif(substr($yamlNode, 0, 4) == '!obj') return new CoreProxy(substr($yamlNode, 5));
 		// STRING
 		else return (string) $yamlNode;
+	}
+
+	/**
+	 * Add support for YAML inside PHAR
+	 * @param string $file YAML file path
+	 * @param array $callbacks content handlers for YAML nodes
+	 * @return array parsed YAML
+	 */
+	static protected function _parseFile($file, array $callbacks=[]) {
+		if(strpos($file, 'phar://')!==false) {
+			$tmp = tempnam(TMP_DIR, 'yaml-');
+			file_put_contents($tmp, file_get_contents($file));
+			$yaml = yaml_parse_file($tmp, 0, $n, $callbacks);
+			unlink($tmp);
+		} else $yaml = yaml_parse_file($file, 0, $n, $callbacks);
+		return $yaml;
 	}
 }
