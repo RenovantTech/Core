@@ -55,7 +55,7 @@ class PdoProvider implements ProviderInterface {
 	protected $tableAuth = 'sys_auth';
 	/** Users SQL table
 	 * @var string */
-	protected $tableUsers = 'users';
+	protected $tableUsers = 'sys_users';
 
 	/**
 	 * PdoProvider constructor.
