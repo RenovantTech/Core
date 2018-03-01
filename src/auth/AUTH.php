@@ -12,6 +12,7 @@ use metadigit\core\sys,
 	metadigit\core\auth\provider\PdoProvider,
 	metadigit\core\auth\provider\ProviderInterface,
 	metadigit\core\http\CryptoCookie,
+	metadigit\core\http\Exception as HttpException,
 	metadigit\core\http\Event as HttpEvent,
 	Firebase\JWT\BeforeValidException,
 	Firebase\JWT\ExpiredException,
@@ -111,7 +112,6 @@ class AUTH {
 	 * @param HttpEvent $Event
 	 * @throws AuthException
 	 * @throws Exception
-	 * @throws \metadigit\core\http\Exception
 	 */
 	function init(HttpEvent $Event) {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
@@ -134,19 +134,26 @@ class AUTH {
 									$this->set($k, $v);
 								$this->_commit = false;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN OK', $token['data']);
+								break;
 							}
 						} catch (ExpiredException $Ex) {
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN exception: EXPIRED');
+						} catch (BeforeValidException $Ex) {
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN exception: BEFORE-VALID');
+						} catch (\Exception $Ex) { // include SignatureInvalidException, UnexpectedValueException
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN exception: INVALID');
+						}
+					}
+					if (isset($_COOKIE[self::COOKIE_REFRESH])) {
+						try {
 							$refreshToken = (new CryptoCookie(self::COOKIE_REFRESH))->read();
 							if($this->provider()->checkRefreshToken($refreshToken['UID'], $refreshToken['TOKEN'])) {
 								$this->provider()->authenticateById($refreshToken['UID']);
 								$this->_commit = true;
-								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN OK (by REFRESH-TOKEN)');
-							} else
-								throw new AuthException(23);
-						} catch (BeforeValidException $Ex) {
-							throw new AuthException(22);
-						} catch (\Exception $Ex) { // include SignatureInvalidException, UnexpectedValueException
-							throw new AuthException(21);
+								sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN OK');
+							}
+						} catch (HttpException $Ex) { // CryptoCookie Exception
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN exception: INVALID');
 						}
 					}
 					break;
@@ -226,7 +233,7 @@ class AUTH {
 						// @TODO COOKIE module
 						break;
 					case 'JWT':
-						sys::trace(LOG_DEBUG, T_INFO, 'set JWT AUTH-TOKEN');
+						sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-TOKEN');
 						$authToken = [
 							//'aud' => 'http://example.com',
 							'exp' => time() + $this->authTTL, // Expiry
@@ -235,7 +242,7 @@ class AUTH {
 							'nbf' => time() - 1, // Not Before
 							'data' => $data
 						];
-						setcookie(self::COOKIE_AUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->refreshTTL, '/', null, true, true);
+						setcookie(self::COOKIE_AUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->authTTL, '/', null, true, true);
 						break;
 					case 'SESSION':
 						sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
@@ -255,11 +262,9 @@ class AUTH {
 			}
 
 			// XSRF-TOKEN
-			if(!$this->_XSRF_TOKEN) {
-				sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
-				$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
-				setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, time()+$this->refreshTTL, '/', null, false, false);
-			}
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
+			$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
+			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, time()+$this->authTTL+$this->refreshTTL, '/', null, false, false);
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
 			sys::traceFn($prevTraceFn);
