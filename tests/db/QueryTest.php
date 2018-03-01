@@ -260,15 +260,28 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		// !NULL
 		$this->assertEquals(8, (new Query('mysql'))->on('people')->criteriaExp('score,!NULL')->execCount());
 
-		// LIKE
-		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('name,LIKE,%ra%')->execCount());
+		// LIKE, LIKEHAS, LIKESTART, LIKEEND
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteriaExp('name,LIKE,Don')->execCount());
+		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('name,LIKEHAS,ra')->execCount());
+		$this->assertEquals(4, (new Query('mysql'))->on('people')->criteriaExp('surname,LIKESTART,gr')->execCount());
+		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteriaExp('surname,LIKEEND,ed')->execCount());
+		// !LIKE, !LIKEHAS, !LIKESTART, !LIKEEND
+		$this->assertEquals(7, (new Query('mysql'))->on('people')->criteriaExp('surname,!LIKE,Brown')->execCount());
+		$this->assertEquals(6, (new Query('mysql'))->on('people')->criteriaExp('name,!LIKEHAS,ra')->execCount());
+		$this->assertEquals(6, (new Query('mysql'))->on('people')->criteriaExp('surname,!LIKESTART,re')->execCount());
+		$this->assertEquals(7, (new Query('mysql'))->on('people')->criteriaExp('surname,!LIKEEND,wn')->execCount());
 
 		// BTW
 		$this->assertEquals(4, (new Query('mysql'))->on('people')->criteriaExp('age,BTW,22,28')->execCount());
 		$this->assertEquals(4, (new Query('mysql'))->on('people')->criteriaExp('age,BTW,:min,:max')->execCount(['min'=>22, 'max'=>28]));
+		// !BTW
+		$this->assertEquals(5, (new Query('mysql'))->on('people')->criteriaExp('age,!BTW,22,27')->execCount());
+		$this->assertEquals(5, (new Query('mysql'))->on('people')->criteriaExp('age,!BTW,:min,:max')->execCount(['min'=>22, 'max'=>27]));
 
 		// IN
 		$this->assertEquals(3, (new Query('mysql'))->on('people')->criteriaExp('age,IN,21,22,23')->execCount());
+		// !IN
+		$this->assertEquals(5, (new Query('mysql'))->on('people')->criteriaExp('age,!IN,21,22,23')->execCount());
 	}
 
 	function testSetCriteriaDictionary() {
