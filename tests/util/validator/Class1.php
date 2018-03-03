@@ -25,6 +25,8 @@ class Class1 {
 	protected $date2;
 	/** @validate(datetime) */
 	protected $datetime;
+	/** @validate(time) */
+	protected $time;
 
 	function __set($k, $v) {
 		$this->$k = $v;
