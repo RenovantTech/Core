@@ -6,7 +6,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	function testValidate() {
 		$Object = new \test\util\validator\Class1;
-		$this->assertCount(7, Validator::validate($Object));
+		$this->assertCount(8, Validator::validate($Object));
 
 		// min & max
 		$Object->id = 3;
@@ -78,6 +78,16 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertArrayHasKey('datetime', Validator::validate($Object));
 		$Object->datetime = '2015-03-31 12:34:25';
 		$this->assertArrayNotHasKey('datetime', Validator::validate($Object));
+
+		// time
+		$Object->time = '2015';
+		$this->assertArrayHasKey('time', Validator::validate($Object));
+		$Object->time = '';
+		$this->assertArrayHasKey('time', Validator::validate($Object));
+		$Object->time = null;
+		$this->assertArrayHasKey('time', Validator::validate($Object));
+		$Object->time = '12:34:25';
+		$this->assertArrayNotHasKey('time', Validator::validate($Object));
 
 		// VALID
 		$this->assertCount(0, Validator::validate($Object));
