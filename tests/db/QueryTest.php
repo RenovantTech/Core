@@ -200,6 +200,21 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertCount(2, $Query->execSelect(['score'=>20])->fetchAll(\PDO::FETCH_ASSOC));
 		$this->assertCount(1, $Query->execSelect(['score'=>30])->fetchAll(\PDO::FETCH_ASSOC));
 
+		// LIMIT & OFFSET, PAGE & PAGE SIZE
+		$Query = (new Query('mysql'))->on('people')->criteriaExp('surname,EQ,Green');
+		$data = $Query->limit(2)->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(2, $data);
+		$this->assertEquals(3, $data[0]['id']);
+		$data = $Query->limit(2)->offset(1)->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(2, $data);
+		$this->assertEquals(4, $data[0]['id']);
+		$data = $Query->page(2, 2)->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(2, $data);
+		$this->assertEquals(6, $data[0]['id']);
+		$data = $Query->page(2, 3)->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$this->assertCount(1, $data);
+		$this->assertEquals(7, $data[0]['id']);
+
 		// GROUP BY
 		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertCount(6, $data);

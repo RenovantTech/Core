@@ -265,6 +265,19 @@ class Query {
 	}
 
 	/**
+	 * Set LIMIT & OFFSET
+	 * @param integer $page
+	 * @param integer $pageSize
+	 * @return $this
+	 */
+	function page($page, $pageSize) {
+		$this->PDOStatement = null;
+		$this->limit = (int)$pageSize;
+		$this->offset = (int) ($pageSize * $page - $pageSize);
+		return $this;
+	}
+
+	/**
 	 * Set OFFSET
 	 * @param integer $offset
 	 * @return $this
