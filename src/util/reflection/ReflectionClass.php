@@ -19,6 +19,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionMethod instances.
 	 * @param integer $filter A filter mask
 	 * @return ReflectionMethod[] Method reflection objects of the methods in this class
+	 * @throws \ReflectionException
 	 */
 	function getMethods($filter = NULL) {
 		$extendedMethods = [];
@@ -35,6 +36,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionMethod instances.
 	 * @param string $name
 	 * @return ReflectionMethod Method reflection object of the named method
+	 * @throws \ReflectionException
 	 */
 	function getMethod($name) {
 		$parentMethod = parent::getMethod($name);
@@ -47,6 +49,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionProperty instances.
 	 * @param integer $filter A filter mask
 	 * @return ReflectionProperty[] Property reflection objects of the properties in this class
+	 * @throws \ReflectionException
 	 */
 	function getProperties($filter = NULL) {
 		$extendedProperties = [];
@@ -88,6 +91,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * Returns the values of the specified tag
 	 * @param string $tagName Tag name to check for
 	 * @return array Values of the given tag
+	 * @throws \Exception
 	 */
 	function getTagValues($tagName) {
 		return $this->getDocComment()->getTagValues($tagName);

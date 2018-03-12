@@ -16,6 +16,7 @@ class ReflectionParameter extends \ReflectionParameter {
 	/**
 	 * Return Parameter type as defined in DocComment @param, if available
 	 * @return mixed Parameter type (boolean, string, array, object), FALSE if unavailable
+	 * @throws \ReflectionException
 	 */
 	function getType() {
 		if($tag = $this->getDocComment()->getTag('param', $this->getPosition())) {
@@ -28,6 +29,7 @@ class ReflectionParameter extends \ReflectionParameter {
 	/**
 	 * Returns an instance of the DocComment
 	 * @return DocComment
+	 * @throws \ReflectionException
 	 */
 	function getDocComment() {
 		if (!is_object($this->DocComment)) {

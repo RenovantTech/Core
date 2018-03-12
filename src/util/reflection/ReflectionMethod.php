@@ -18,6 +18,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * that org\metadigit\util\reflection\ReflectionParameter objects are returned instead of the
 	 * original ReflectionParameter instances.
 	 * @return ReflectionParameter[] Parameter reflection objects of the parameters of this method
+	 * @throws \ReflectionException
 	 */
 	function getParameters() {
 		$extendedParameters = [];
@@ -48,6 +49,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * Returns the values of the specified tag
 	 * @param string $tagName Tag name to check for
 	 * @return array Values of the given tag
+	 * @throws \Exception
 	 */
 	function getTagValues($tagName) {
 		return $this->getDocComment()->getTagValues($tagName);

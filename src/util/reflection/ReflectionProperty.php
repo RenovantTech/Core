@@ -34,6 +34,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * Returns the values of the specified tag
 	 * @param string $tagName Tag name to check for
 	 * @return array Values of the given tag
+	 * @throws \Exception
 	 */
 	function getTagValues($tagName) {
 		return $this->getDocComment()->getTagValues($tagName);
