@@ -44,12 +44,12 @@ class ActionControllerReflection {
 						$pattern = str_replace('/', '\/', $tag['pattern']);
 						$pattern = preg_replace('/<(\w+)>/', '(?<$1>[^\/]+)', $pattern);
 						$pattern = preg_replace('/<(\w+):([^>]+)>/', '(?<$1>$2)', $pattern);
-						$config[$action]['pattern'] = '/'.$pattern.'$/';
-					} else $config[$action]['pattern'] = '/'.$action.'$/';
+						$config[$action]['pattern'] = '/'.$pattern.'/';
+					} else $config[$action]['pattern'] = '/'.$action.'/';
 				} else {
 					$config[$action]['method'] = '*';
-					if($action == constant(get_class($Controller).'::DEFAULT_ACTION')) $config[$action]['pattern'] = '/\/$/';
-					else $config[$action]['pattern'] = '/'.$action.'$/';
+					if($action == constant(get_class($Controller).'::DEFAULT_ACTION')) $config[$action]['pattern'] = '/^$/';
+					else $config[$action]['pattern'] = '/^'.$action.'$/';
 				}
 				// parameters
 				foreach($RefMethod->getParameters() as $i => $RefParam) {

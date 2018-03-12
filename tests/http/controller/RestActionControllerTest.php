@@ -37,26 +37,31 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_URI'] = '/book';
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$Req = new Request;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book');
 		$this->assertEquals('create', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/14');
 		$this->assertEquals('read', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book';
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book');
 		$this->assertEquals('readAll', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'PUT';
 		$Req = new Request;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/14');
 		$this->assertEquals('update', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/book/14';
 		$_SERVER['REQUEST_METHOD'] = 'DELETE';
 		$Req = new Request;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/14');
 		$this->assertEquals('destroy', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
@@ -88,6 +93,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_POST = ['id'=>53];
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['create', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
@@ -98,6 +104,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/32');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['read', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
@@ -107,6 +114,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['readAll', null, null], $Res->getView());
 		$this->assertEquals('book', $Res->get('class'));
@@ -115,6 +123,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'PUT';
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/78');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['update', null, null], $Res->getView());
 		$this->assertSame('book', $Res->get('class'));
@@ -124,6 +133,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_METHOD'] = 'DELETE';
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'book/41');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['destroy', null, null], $Res->getView());
 		$this->assertSame('book', $Res->get('class'));

@@ -48,9 +48,9 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame('test.http.SimpleController', $RefMethod->invoke($Dispatcher, $Req));
 		$this->assertSame('', $Req->getAttribute('APP_CONTROLLER_URI'));
 
-		$_SERVER['REQUEST_URI'] = '/mod1/foo';
+		$_SERVER['REQUEST_URI'] = '/action/foo';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/mod1/foo');
+		$Req->setAttribute('APP_URI', '/action/foo');
 		$this->assertSame('test.http.ActionController', $RefMethod->invoke($Dispatcher, $Req));
 		$this->assertSame('foo', $Req->getAttribute('APP_CONTROLLER_URI'));
 
@@ -109,32 +109,32 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 
-		$_SERVER['REQUEST_URI'] = '/app/mod1/';
+		$_SERVER['REQUEST_URI'] = '/app/action/';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/mod1/');
+		$Req->setAttribute('APP_URI', '/action/');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
-		$this->assertSame('/mod1/index', $resource);
-		$Res = (new Response)->setView('/mod1/index', null, ENGINE_PHP);
+		$this->assertSame('/action/index', $resource);
+		$Res = (new Response)->setView('/action/index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
-		$this->assertSame('/mod1/index', $resource);
+		$this->assertSame('/action/index', $resource);
 
 
-		$_SERVER['REQUEST_URI'] = '/app/mod1/foo1';
+		$_SERVER['REQUEST_URI'] = '/app/action/foo1';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/mod1/foo1');
+		$Req->setAttribute('APP_URI', '/action/foo1');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('foo1', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
-		$this->assertSame('/mod1/foo1', $resource);
-		$Res = (new Response)->setView('/mod1/foo1', null, ENGINE_PHP);
+		$this->assertSame('/action/foo1', $resource);
+		$Res = (new Response)->setView('/action/foo1', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
-		$this->assertSame('/mod1/foo1', $resource);
+		$this->assertSame('/action/foo1', $resource);
 	}
 
 	/**

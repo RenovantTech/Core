@@ -119,7 +119,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 			if(
 				($params['method'] == '*' || $params['method'] == $_SERVER['REQUEST_METHOD'])
 				&&
-				preg_match($params['pattern'], $Req->URI(), $matches)
+				preg_match($params['pattern'], $Req->getAttribute('APP_CONTROLLER_URI'), $matches)
 			) {
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
