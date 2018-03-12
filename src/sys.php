@@ -229,15 +229,14 @@ class sys {
 		self::$Res = new http\Response;
 		$app = $dispatcherID = $namespace = null;
 		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
-			$urlPattern = '/^'.preg_quote($conf['url'],'/').'/';
-			if(preg_match($urlPattern, $_SERVER['REQUEST_URI']) &&
+			if(strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
 				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR']==$conf['domain']) &&
 				(!isset($conf['port']) || $_SERVER['SERVER_PORT']==$conf['port']))
 			{
 				$app = $id;
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
-				self::$Req->setAttribute('APP_URI', str_replace($conf['url'], '/', self::$Req->URI()));
+				self::$Req->setAttribute('APP_URI', '/'.substr(self::$Req->URI(), strlen($conf['url'])));
 				break;
 			}
 		}

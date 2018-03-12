@@ -4,9 +4,9 @@ services:
     class: metadigit\core\http\Dispatcher
     properties:
       routes:
-        /catalog/*: test.http.AbstractController
-        /mod1/*:    test.http.ActionController
-        /rest/*:    test.http.RestActionController
+        /catalog/:  test.http.AbstractController
+        /mod1/:     test.http.ActionController
+        /rest/:     test.http.RestActionController
         /home:      test.http.SimpleController
       resourcesDir: templates/
   # controllers

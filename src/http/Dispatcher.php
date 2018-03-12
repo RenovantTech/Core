@@ -102,9 +102,10 @@ class Dispatcher {
 	 */
 	protected function doRoute(Request $Req) {
 		foreach($this->routes as $url => $controllerID) {
-			if(fnmatch($url, $Req->getAttribute('APP_URI'))) {
+			if(strpos($Req->getAttribute('APP_URI'), $url) === 0)	 {
 				sys::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$url.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
+				$Req->setAttribute('APP_CONTROLLER_URI', substr($Req->getAttribute('APP_URI'), strlen($url)));
 				return $controllerID;
 			}
 		}
