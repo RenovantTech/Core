@@ -120,6 +120,7 @@ class sys {
 	 * @throws EventDispatcherException
 	 * @throws ContainerException
 	 * @throws util\yaml\YamlException
+	 * @throws \ReflectionException
 	 */
 	static function init() {
 		self::$traceFn = __METHOD__;
@@ -156,6 +157,11 @@ class sys {
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
+	/**
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
+	 */
 	static function shutdown() {
 		ini_set('precision', 16);
 		defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
@@ -180,6 +186,7 @@ class sys {
 	 * @throws SysException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	static function dispatch($api=PHP_SAPI) {
 		($api=='cli') ? self::dispatchCLI() : self::dispatchHTTP();
@@ -189,6 +196,7 @@ class sys {
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws SysException
+	 * @throws \ReflectionException
 	 */
 	static protected function dispatchCLI() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
@@ -222,6 +230,7 @@ class sys {
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws SysException
+	 * @throws \ReflectionException
 	 */
 	static protected function dispatchHTTP() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
@@ -244,8 +253,8 @@ class sys {
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 		try {
-			$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 			self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 		} catch (AuthException $Ex) {
@@ -338,6 +347,7 @@ class sys {
 	 * @return Event the Event object
 	 * @throws ContextException
 	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	static function event($eventName, $EventOrParams=null): Event {
 		return self::$EventDispatcher->trigger($eventName, $EventOrParams);

@@ -9,7 +9,6 @@ namespace metadigit\core\http\controller;
 use const metadigit\core\trace\T_INFO;
 use metadigit\core\sys,
 	metadigit\core\auth\AUTH,
-	metadigit\core\container\ContainerException,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Exception;
@@ -38,6 +37,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	/**
 	 * ActionController constructor.
 	 * @throws Exception
+	 * @throws \ReflectionException
 	 */
 	function __construct() {
 		$this->_config = ActionControllerReflection::analyzeActions($this);
@@ -46,8 +46,9 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @throws ContainerException
 	 * @throws Exception
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);

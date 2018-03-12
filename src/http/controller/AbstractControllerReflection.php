@@ -18,8 +18,9 @@ class AbstractControllerReflection {
 	/**
 	 * Return Controller's actions metadata
 	 * @param AbstractController $Controller
-	 * @throws \metadigit\core\http\Exception
 	 * @return array
+	 * @throws \ReflectionException
+	 * @throws \metadigit\core\http\Exception
 	 */
 	static function analyzeHandle(AbstractController $Controller) {
 		$config = [];

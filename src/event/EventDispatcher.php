@@ -57,6 +57,7 @@ class EventDispatcher {
 	 * @return Event the Event object
 	 * @throws ContextException
 	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	function trigger($eventName, $EventOrParams=null): Event {
 		$eventName = strtoupper($eventName);

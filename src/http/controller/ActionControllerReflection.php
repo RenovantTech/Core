@@ -20,6 +20,7 @@ class ActionControllerReflection {
 	 * @param ActionController $Controller
 	 * @return array
 	 * @throws Exception
+	 * @throws \ReflectionException
 	 */
 	static function analyzeActions(ActionController $Controller) {
 		$config = [];
