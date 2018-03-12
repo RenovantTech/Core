@@ -52,7 +52,7 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 		}
 		// inject URL params into Request
 		if(isset($this->_config['route'])) {
-			if(preg_match($this->_config['route'], $Req->URI(), $matches)) {
+			if(preg_match($this->_config['route'], $Req->getAttribute('APP_CONTROLLER_URI'), $matches)) {
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
 				}

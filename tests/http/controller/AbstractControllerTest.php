@@ -5,6 +5,11 @@ use metadigit\core\http\Request,
 
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
+	/**
+	 * @return AbstractController
+	 * @throws \ReflectionException
+	 * @throws \metadigit\core\http\Exception
+	 */
 	function testConstructor() {
 		$AbstractController = new AbstractController;
 		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $AbstractController);
@@ -31,12 +36,15 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param \test\http\controller\AbstractController $AbstractController
+	 * @throws \metadigit\core\context\ContextException
+	 * @throws \metadigit\core\event\EventDispatcherException
 	 */
 	function testHandle(AbstractController $AbstractController) {
-		$_SERVER['REQUEST_URI'] = '/books/history+math/32';
+		$_SERVER['REQUEST_URI'] = '/catalog/books/history+math/32';
 		$_GET['name'] = 'Jack';
 		$Req = new Request;
 		$Res = new Response;
+		$Req->setAttribute('APP_CONTROLLER_URI', 'books/history+math/32');
 		$AbstractController->handle($Req, $Res);
 		$this->assertEquals(['view',null,null], $Res->getView());
 		$this->assertEquals('books', $Res->get('categ'));
