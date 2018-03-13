@@ -1,0 +1,16 @@
+services:
+  # Dispatcher
+  test.api.Dispatcher:
+    class: metadigit\core\api\Dispatcher
+    properties:
+      routes:
+        /rest/:     test.api.RestOrmController
+      viewEngine: JSON
+
+  # controllers
+  test.api.RestOrmController:
+    class: test\api\RestOrmController
+    properties:
+      routes:
+        users:    test.db.orm.UserRepository
+        stats:    test.db.orm.StatsRepository
