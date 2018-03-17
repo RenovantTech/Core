@@ -118,7 +118,7 @@ abstract class ActionController implements \metadigit\core\http\ControllerInterf
 		$action = null;
 		foreach($this->_config as $actionName=>$params) {
 			if(
-				($params['method'] == '*' || $params['method'] == $_SERVER['REQUEST_METHOD'])
+				($params['method'] == '*' || $params['method'] == $Req->getMethod())
 				&&
 				preg_match($params['pattern'], $Req->getAttribute('APP_CONTROLLER_URI'), $matches)
 			) {
