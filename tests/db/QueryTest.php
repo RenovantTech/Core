@@ -305,9 +305,11 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 			'scoreXY' => 'score,BTW,?1,?2',
 			'scoreXYbis' => 'score >= ?1 AND score <= ?2',
 			'age2scoreSQL' => 'age = ?1 AND score = ?2',
-			'age2scoreEXP' => 'age,EQ,?1|score,EQ,?2'
+			'age2scoreEXP' => 'age,EQ,?1|score,EQ,?2',
+			'fullnameSQL' => '( name LIKE ?1 OR surname LIKE ?1 )'
 		];
 		// Dictionary SQL
+		$this->assertEquals(4, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('fullnameSQL,%ee%')->execCount());
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('age2scoreSQL,17,25')->execCount());
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('age2scoreSQL,17,25|name,EQ,Don')->execCount());
 		$this->assertEquals(0, (new Query('mysql'))->on('people')->setCriteriaDictionary($dictionary)->criteriaExp('age2scoreSQL,17,25|name,EQ,###')->execCount());

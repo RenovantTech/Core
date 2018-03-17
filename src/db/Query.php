@@ -406,13 +406,12 @@ class Query {
 					}
 					$transExp[] = str_replace($search, $replace, $newExp);
 				} else {
-					for($j=1; $j<=$n; $j++) {
+					preg_match_all('/\?(\d+)/', $newExp, $matches);
+					foreach ($matches[1] as $idx => $match) {
 						$i++;
-						$addParam('_', $expValues[$j-1]);
-						$search[] = '?'.$j;
-						$replace[] = ':__'.$i;
+						$addParam('_', $expValues[$match-1]);
+						$newExp = preg_replace('/\?'.$match.'/', ':__'.$i, $newExp, 1);
 					}
-					$newExp = str_replace($search, $replace, $newExp);
 					$sql[] = $newExp;
 				}
 			}
