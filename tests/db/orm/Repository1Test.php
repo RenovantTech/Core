@@ -431,13 +431,21 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 		$this->assertTrue($UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, false));
 
+		$User = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_OBJ);
+		$this->assertInstanceOf('test\db\orm\User', $User);
+		$this->assertSame(24, $User->id);
+		$this->assertSame('Chao', $User->name);
+		$this->assertSame('2012-03-18 14:25:36', $User->lastTime->format('Y-m-d H:i:s'));
+
 		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_ARRAY);
 		$this->assertInternalType('array', $data);
+		$this->assertSame(25, $data['id']);
 		$this->assertSame('Chao', $data['name']);
 		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
 		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_JSON);
 		$this->assertInternalType('array', $data);
+		$this->assertSame(26, $data['id']);
 		$this->assertSame('Chao', $data['name']);
 		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
 	}
