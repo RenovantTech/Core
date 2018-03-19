@@ -256,17 +256,16 @@ class Repository {
 		try {
 			sys::event(OrmEvent::EVENT_PRE_DELETE, $OrmEvent);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
-			if(QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp())) {
-				$this->_onDelete->invoke($Entity);
-				sys::event(OrmEvent::EVENT_POST_DELETE, $OrmEvent);
-				switch($fetchMode) {
-					case self::FETCH_OBJ: return $Entity; break;
-					case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset); break;
-					case self::FETCH_JSON: return DataMapper::object2json($Entity, $fetchSubset); break;
-					case false: return true;
-				}
+			if(!QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp()))
+				return false;
+			$this->_onDelete->invoke($Entity);
+			sys::event(OrmEvent::EVENT_POST_DELETE, $OrmEvent);
+			switch($fetchMode) {
+				case self::FETCH_OBJ: return $Entity; break;
+				case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset); break;
+				case self::FETCH_JSON: return DataMapper::object2json($Entity, $fetchSubset); break;
+				default: return true;
 			}
-			return false;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -370,15 +369,16 @@ class Repository {
 			$this->_onSave->invoke($Entity);
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
-			// run INSERT
-			if(QueryRunner::insert($this->pdo, $Entity)) {
-				if($fetchMode) {
-					$criteriaExp = $Metadata->pkCriteria($Entity);
-					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
-				} else $response = true;
-				sys::event(OrmEvent::EVENT_POST_INSERT, $OrmEvent);
-				return $response;
-			} else return false;
+			// run INSERT & build response
+			if(!QueryRunner::insert($this->pdo, $Entity))
+				$response = false;
+			elseif($fetchMode) {
+				$criteriaExp = $Metadata->pkCriteria($Entity);
+				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+			} else
+				$response = true;
+			sys::event(OrmEvent::EVENT_POST_INSERT, $OrmEvent);
+			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(100, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -430,14 +430,15 @@ class Repository {
 			}
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
-			// run UPDATE
-			if(QueryRunner::update($this->pdo, $Entity, $changes)) {
-				if($fetchMode) {
-					$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
-				} else $response = true;
-				sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);
-				return $response;
-			} else return false;
+			// run UPDATE & build response
+			if(!QueryRunner::update($this->pdo, $Entity, $changes))
+				$response = false;
+			elseif($fetchMode)
+				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+			else
+				$response = true;
+			sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);
+			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(300, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
