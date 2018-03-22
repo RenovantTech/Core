@@ -63,8 +63,9 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 					$Res->set($this->responseErrors, $Ex->getData());
 					sys::trace(LOG_ERR, T_INFO, 'validation error', $Ex->getData());
 					break;
+				default:
+					throw $Ex;
 			}
-			throw $Ex;
 		}
 	}
 
@@ -177,6 +178,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 					$Res->set($this->responseErrors, $Ex->getData());
 					sys::trace(LOG_DEBUG, T_ERROR, 'validation error', print_r($Ex->getData(),true));
 					break;
+				default:
+					throw $Ex;
 			}
 		}
 	}
