@@ -115,7 +115,13 @@ class Query {
 	 * @return integer count result
 	 */
 	function execCount(array $params=[]) {
-		$sql = sprintf('SELECT COUNT(*) FROM `%s` %s', $this->target, $this->parseCriteria());
+		$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
+		if(!empty($this->groupBy)) {
+			$sql .= ' GROUP BY '.$this->groupBy;
+			if($this->withRollup) $sql .= ' WITH ROLLUP ';
+		}
+		if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
+		if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
 		return (int) $this->doExec($sql, $params)->fetchColumn();
 	}
 

@@ -111,6 +111,18 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		$Query = (new Query('mysql'))->on('people')->criteriaExp('age,GTE,20|score,GT,:score');
 		$this->assertEquals(2, $Query->execCount(['score'=>20]));
 		$this->assertEquals(1, $Query->execCount(['score'=>30]));
+
+		// GROUP BY
+		$Query = (new Query('mysql'))->on('people')->groupBy('age')->orderBy('id ASC');
+		$this->assertEquals(2, $Query->execCount()); // 2 people of age 21
+
+		// GROUP BY HAVING
+		$Query = (new Query('mysql'))->on('people')->groupBy('age')->having('age > 23');
+		$this->assertEquals(2, $Query->execCount()); // 2 people of age 25
+
+		// GROUP BY WITH ROLLUP
+		$Query = (new Query('mysql'))->on('people')->groupBy('age')->withRollup();
+		$this->assertEquals(1, $Query->execCount());
 	}
 
 	function testExecDelete() {
@@ -229,7 +241,6 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->withRollup()->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertCount(7, $data);
 		$this->assertEquals(['age'=>'', 'n'=>8], $data[6]);
-
 	}
 
 	function testExecUpdate() {
