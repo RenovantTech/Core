@@ -264,7 +264,7 @@ class AUTH {
 			// XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
-			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, time()+$this->authTTL+$this->refreshTTL, '/', null, false, false);
+			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
 			sys::traceFn($prevTraceFn);
@@ -301,7 +301,7 @@ class AUTH {
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
-			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, time()+$this->refreshTTL, '/', null, false, false);
+			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
 			// erase data
 			$this->_data = [];
