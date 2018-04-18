@@ -234,7 +234,7 @@ class Kernel {
 			$pdo->setAttribute(\PDO::ATTR_ERRMODE,\PDO::ERRMODE_EXCEPTION);
 			if('sqlite'==$pdo->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
 				if(file_exists(TMP_DIR.$id.'.vacuum')) unlink(TMP_DIR.$id.'.vacuum') && $pdo->exec('VACUUM');
-				$pdo->exec('PRAGMA journal_mode = WAL');
+//				$pdo->exec('PRAGMA journal_mode = WAL');
 				$pdo->exec('PRAGMA temp_store = MEMORY');
 				$pdo->exec('PRAGMA synchronous = OFF');
 				$pdo->exec('PRAGMA foreign_keys = ON');
