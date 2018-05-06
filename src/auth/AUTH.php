@@ -26,6 +26,7 @@ class AUTH {
 
 	const COOKIE_AUTH		= 'AUTH-TOKEN';
 	const COOKIE_REFRESH	= 'REFRESH-TOKEN';
+	const COOKIE_REMEMBER	= 'REMEMBER-TOKEN';
 	const COOKIE_XSRF		= 'XSRF-TOKEN';
 	const LOGIN_UNKNOWN			= -1;
 	const LOGIN_DISABLED		= -2;
@@ -39,6 +40,7 @@ class AUTH {
 	const JWT_KEY = DATA_DIR.'JWT.key';
 	const TTL_ACCESS	= 300;
 	const TTL_REFRESH	= 86400;
+	const TTL_REMEMBER	= 2592000;
 
 	/** Pending commit  flag
 	 * @var bool */
@@ -71,7 +73,13 @@ class AUTH {
 	/** Refresh Token TTL
 	 * @var int */
 	protected $refreshTTL = self::TTL_REFRESH;
+	/** Remember Token TTL
+	 * @var int */
+	protected $rememberTTL = self::TTL_REMEMBER;
 
+	/** REMEMBER-TOKEN flag
+	 * @var boolean */
+	protected $setRememberToken = false;
 	/** APPs to be skipped by checkAUTH()
 	 * @var array */
 	protected $skipAuthApps = [];
@@ -103,7 +111,7 @@ class AUTH {
 	}
 
 	function __sleep() {
-		return ['_', 'authTTL', 'module', 'refreshTTL', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
+		return ['_', 'authTTL', 'module', 'refreshTTL', 'rememberTTL', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
 	}
 
 	/**
@@ -151,9 +159,23 @@ class AUTH {
 								$this->provider()->authenticateById($refreshToken['UID']);
 								$this->_commit = true;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN OK');
+								break;
 							}
 						} catch (HttpException $Ex) { // CryptoCookie Exception
 							sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN exception: INVALID');
+						}
+					}
+					if (isset($_COOKIE[self::COOKIE_REMEMBER])) {
+						try {
+							$rememberToken = (new CryptoCookie(self::COOKIE_REMEMBER))->read();
+							if($this->provider()->checkRememberToken($rememberToken['UID'], $rememberToken['TOKEN'])) {
+								$this->provider()->authenticateById($rememberToken['UID']);
+								$this->_commit = true;
+								sys::trace(LOG_DEBUG, T_INFO, 'JWT REMEMBER-TOKEN OK');
+								break;
+							}
+						} catch (HttpException $Ex) { // CryptoCookie Exception
+							sys::trace(LOG_DEBUG, T_INFO, 'JWT REMEMBER-TOKEN exception: INVALID');
 						}
 					}
 					break;
@@ -258,7 +280,18 @@ class AUTH {
 					'TOKEN'	=> substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64)
 				];
 				$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->refreshTTL);
-				(new CryptoCookie(self::COOKIE_REFRESH, time()+$this->refreshTTL, '/', null, false, true))->write($refreshToken);
+				(new CryptoCookie(self::COOKIE_REFRESH, 0, '/', null, false, true))->write($refreshToken);
+			}
+
+			// REMEMBER-TOKEN
+			if($this->setRememberToken && !isset($_COOKIE[self::COOKIE_REMEMBER])) {
+				sys::trace(LOG_DEBUG, T_INFO, 'initialize REMEMBER-TOKEN');
+				$rememberToken = [
+					'UID'	=> $this->_UID,
+					'TOKEN'	=> substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64)
+				];
+				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->rememberTTL);
+				(new CryptoCookie(self::COOKIE_REMEMBER, time()+$this->rememberTTL, '/', null, false, true))->write($rememberToken);
 			}
 
 			// XSRF-TOKEN
@@ -269,6 +302,14 @@ class AUTH {
 			$this->_commit = false; // avoid double invocation on init() Exception
 			sys::traceFn($prevTraceFn);
 		}
+	}
+
+	/**
+	 * Enable REMEMBER-TOKEN
+	 */
+	function enableRememberToken() {
+		$this->_commit = true;
+		$this->setRememberToken = true;
 	}
 
 	/**
@@ -294,9 +335,24 @@ class AUTH {
 			}
 
 			// delete REFRESH-TOKEN
-			sys::trace(LOG_DEBUG, T_INFO, 'erase REFRESH-TOKEN');
-			$this->provider()->setRefreshToken($this->UID(), null, null);
-			setcookie(self::COOKIE_REFRESH, '', time()-86400, '/', null, false, true);
+			if (isset($_COOKIE[self::COOKIE_REFRESH])) {
+				sys::trace(LOG_DEBUG, T_INFO, 'erase REFRESH-TOKEN');
+				try {
+					$refreshToken = (new CryptoCookie(self::COOKIE_REFRESH))->read();
+					$this->provider()->deleteRefreshToken($this->UID(), $refreshToken['TOKEN']);
+				} catch (HttpException $Ex) {} // CryptoCookie Exception
+				setcookie(self::COOKIE_REFRESH, '', time() - 86400, '/', null, false, true);
+			}
+
+			// delete REMEMBER-TOKEN
+			if (isset($_COOKIE[self::COOKIE_REMEMBER])) {
+				sys::trace(LOG_DEBUG, T_INFO, 'erase REMEMBER-TOKEN');
+				try {
+					$rememberToken = (new CryptoCookie(self::COOKIE_REMEMBER))->read();
+					$this->provider()->deleteRememberToken($this->UID(), $rememberToken['TOKEN']);
+				} catch (HttpException $Ex) {} // CryptoCookie Exception
+				setcookie(self::COOKIE_REMEMBER, '', time()-86400, '/', null, false, true);
+			}
 
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
