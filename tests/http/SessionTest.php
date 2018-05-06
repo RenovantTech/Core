@@ -1,8 +1,21 @@
 <?php
 namespace test\http;
-use metadigit\core\http\Session;
+use metadigit\core\sys,
+	metadigit\core\http\Session;
 
 class SessionTest extends \PHPUnit\Framework\TestCase {
+
+	static function setUpBeforeClass() {
+		sys::pdo('mysql')->exec('
+			DROP TABLE IF EXISTS sys_sessions;
+		');
+	}
+
+	static function tearDownAfterClass() {
+		sys::pdo('mysql')->exec('
+			DROP TABLE IF EXISTS sys_sessions;
+		');
+	}
 
 	function testConstruct() {
 		session_start();
