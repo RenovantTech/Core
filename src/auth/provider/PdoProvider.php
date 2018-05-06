@@ -48,8 +48,8 @@ class PdoProvider implements ProviderInterface {
 		$prevTraceFn = sys::traceFn('sys.AuthProvider');
 		if ($pdo) $this->pdo = $pdo;
 		if ($tables) $this->tables = array_merge($this->tables, $tables);
-//		try {
-		sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH storage');
+		try {
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH storage');
 			$PDO = sys::pdo($this->pdo);
 			$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 			$PDO->exec(str_replace(
@@ -57,9 +57,9 @@ class PdoProvider implements ProviderInterface {
 				[$this->tables['auth'], $this->tables['tokens'], $this->tables['users']],
 				file_get_contents(__DIR__ . '/sql/init-' . $driver . '.sql')
 			));
-//		} finally {
-//			sys::traceFn($prevTraceFn);
-//		}
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	function authenticate($login, $password): int {
