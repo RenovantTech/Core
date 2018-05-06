@@ -105,7 +105,7 @@ class AUTH {
 			case 'JWT':
 				if(!class_exists('Firebase\JWT\JWT')) throw new Exception(12);
 				if(!file_exists(self::JWT_KEY))
-					file_put_contents(self::JWT_KEY, base64_encode(openssl_random_pseudo_bytes(64)));
+					file_put_contents(self::JWT_KEY, base64_encode(random_bytes(64)));
 				break;
 		}
 	}
@@ -277,7 +277,7 @@ class AUTH {
 				sys::trace(LOG_DEBUG, T_INFO, 'initialize REFRESH-TOKEN');
 				$refreshToken = [
 					'UID'	=> $this->_UID,
-					'TOKEN'	=> substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64)
+					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 				];
 				$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->refreshTTL);
 				(new CryptoCookie(self::COOKIE_REFRESH, 0, '/', null, false, true))->write($refreshToken);
@@ -288,7 +288,7 @@ class AUTH {
 				sys::trace(LOG_DEBUG, T_INFO, 'initialize REMEMBER-TOKEN');
 				$rememberToken = [
 					'UID'	=> $this->_UID,
-					'TOKEN'	=> substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64)
+					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 				];
 				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->rememberTTL);
 				(new CryptoCookie(self::COOKIE_REMEMBER, time()+$this->rememberTTL, '/', null, false, true))->write($rememberToken);
@@ -296,7 +296,7 @@ class AUTH {
 
 			// XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
+			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
 			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
@@ -356,7 +356,7 @@ class AUTH {
 
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = substr(base64_encode(openssl_random_pseudo_bytes(64)), 0, 64);
+			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
 			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
 			// erase data
