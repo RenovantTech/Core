@@ -1,8 +1,10 @@
 <?php
 namespace test\db\orm;
 use metadigit\core\sys,
+	metadigit\core\acl\ACL,
 	metadigit\core\context\Context,
-	metadigit\core\db\orm\Repository;
+	metadigit\core\db\orm\Repository,
+	test\acl\ACLTest;
 
 class Repository2Test extends \PHPUnit\Framework\TestCase {
 
@@ -18,12 +20,15 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 				PRIMARY KEY(code, year)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		');
+		ACLTest::setUpBeforeClass();
+		new ACL(['ORM'], 'mysql');
 	}
 
 	static function tearDownAfterClass() {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
+		ACLTest::tearDownAfterClass();
 	}
 
 	protected function setUp() {

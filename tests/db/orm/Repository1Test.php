@@ -1,10 +1,12 @@
 <?php
 namespace test\db\orm;
 use metadigit\core\sys,
+	metadigit\core\acl\ACL,
 	metadigit\core\context\Context,
 	metadigit\core\db\orm\Exception,
 	metadigit\core\db\orm\Repository,
-	metadigit\core\util\DateTime;
+	metadigit\core\util\DateTime,
+	test\acl\ACLTest;
 
 class Repository1Test extends \PHPUnit\Framework\TestCase {
 
@@ -63,6 +65,8 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 				DELETE FROM users WHERE id = p_id;
 			END;
 		');
+		ACLTest::setUpBeforeClass();
+		new ACL(['ORM'], 'mysql');
 	}
 
 	static function tearDownAfterClass() {
@@ -72,6 +76,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 			DROP PROCEDURE IF EXISTS sp_users_update;
 			DROP PROCEDURE IF EXISTS sp_users_delete;
 		');
+		ACLTest::tearDownAfterClass();
 	}
 
 	protected function setUp() {
