@@ -22,6 +22,22 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
+	static function tearDownAfterClass() {
+		sys::pdo('mysql')->exec('
+			DROP TABLE IF EXISTS sys_acl_filters_2_users;
+			DROP TABLE IF EXISTS sys_acl_filters_2_roles;
+			DROP TABLE IF EXISTS sys_acl_actions_2_users;
+			DROP TABLE IF EXISTS sys_acl_actions_2_roles;
+			DROP TABLE IF EXISTS sys_acl;
+			DROP TABLE IF EXISTS sys_acl_actions;
+			DROP TABLE IF EXISTS sys_acl_filters;
+			DROP TABLE IF EXISTS sys_acl_filters_sql;
+			DROP TABLE IF EXISTS sys_users_2_roles;
+			DROP TABLE IF EXISTS sys_users;
+			DROP TABLE IF EXISTS sys_roles;
+		');
+	}
+
 	function testConstruct() {
 		$ACL = new ACL( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
 			'acl'	=> 'sys_acl',
