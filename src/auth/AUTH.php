@@ -242,49 +242,52 @@ class AUTH {
 		if(!$this->_commit) return;
 		$prevTraceFn = sys::traceFn($this->_.'->commit');
 		try {
+			// XSRF-TOKEN
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
+			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
+			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+
+			if (is_null($this->_UID)) return;
+
 			// AUTH-TOKEN
-			if($this->_UID) {
-				$data = array_merge([
-					'GID' => $this->_GID,
-					'GROUP' => $this->_GROUP,
-					'NAME' => $this->_NAME,
-					'UID' => $this->_UID
-				], $this->_data);
-				switch ($this->module) {
-					case 'COOKIE':
-						// @TODO COOKIE module
-						break;
-					case 'JWT':
-						sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-TOKEN');
-						$authToken = [
-							//'aud' => 'http://example.com',
-							'exp' => time() + $this->authTTL, // Expiry
-							'iat' => time() - 1, // Issued At
-							//'iss' => 'http://example.org', // Issuer
-							'nbf' => time() - 1, // Not Before
-							'data' => $data
-						];
-						setcookie(self::COOKIE_AUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->authTTL, '/', null, true, true);
-						break;
-					case 'SESSION':
-						sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
-						$_SESSION['__AUTH__'] = $data;
-				}
+			$data = array_merge([
+				'GID' => $this->_GID,
+				'GROUP' => $this->_GROUP,
+				'NAME' => $this->_NAME,
+				'UID' => $this->_UID
+			], $this->_data);
+			switch ($this->module) {
+				case 'COOKIE':
+					// @TODO COOKIE module
+					break;
+				case 'JWT':
+					sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-TOKEN');
+					$authToken = [
+						//'aud' => 'http://example.com',
+						'exp' => time() + $this->authTTL, // Expiry
+						'iat' => time() - 1, // Issued At
+						//'iss' => 'http://example.org', // Issuer
+						'nbf' => time() - 1, // Not Before
+						'data' => $data
+					];
+					setcookie(self::COOKIE_AUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->authTTL, '/', null, true, true);
+					break;
+				case 'SESSION':
+					sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
+					$_SESSION['__AUTH__'] = $data;
 			}
 
 			// REFRESH-TOKEN
-			if($this->_UID && !isset($_COOKIE[self::COOKIE_REFRESH])) {
-				sys::trace(LOG_DEBUG, T_INFO, 'initialize REFRESH-TOKEN');
-				$refreshToken = [
-					'UID'	=> $this->_UID,
-					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
-				];
-				$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->refreshTTL);
-				(new CryptoCookie(self::COOKIE_REFRESH, 0, '/', null, false, true))->write($refreshToken);
-			}
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize REFRESH-TOKEN');
+			$refreshToken = [
+				'UID'	=> $this->_UID,
+				'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
+			];
+			$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->refreshTTL);
+			(new CryptoCookie(self::COOKIE_REFRESH, 0, '/', null, false, true))->write($refreshToken);
 
 			// REMEMBER-TOKEN
-			if($this->setRememberToken && !isset($_COOKIE[self::COOKIE_REMEMBER])) {
+			if($this->setRememberToken) {
 				sys::trace(LOG_DEBUG, T_INFO, 'initialize REMEMBER-TOKEN');
 				$rememberToken = [
 					'UID'	=> $this->_UID,
@@ -293,11 +296,6 @@ class AUTH {
 				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->rememberTTL);
 				(new CryptoCookie(self::COOKIE_REMEMBER, time()+$this->rememberTTL, '/', null, false, true))->write($rememberToken);
 			}
-
-			// XSRF-TOKEN
-			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
-			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
 			sys::traceFn($prevTraceFn);
