@@ -12,6 +12,10 @@
 		<testsuite name="acl">
 			<directory>acl</directory>
 		</testsuite>
+		<testsuite name="auth">
+			<directory>auth/provider</directory>
+			<directory>auth</directory>
+		</testsuite>
 		<testsuite name="container">
 			<directory>container</directory>
 		</testsuite>

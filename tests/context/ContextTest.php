@@ -5,7 +5,8 @@ use metadigit\core\container\Container,
 	metadigit\core\context\Context,
 	metadigit\core\context\ContextException,
 	metadigit\core\event\EventDispatcher,
-	metadigit\core\event\EventDispatcherException;
+	metadigit\core\event\EventDispatcherException,
+	test\acl\ACLTest;
 
 class ContextTest extends \PHPUnit\Framework\TestCase {
 
@@ -74,6 +75,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 
 		// sys service, no proxy
 		$this->assertInstanceOf('metadigit\core\acl\ACL', $Context->get('sys.ACL'));
+		ACLTest::tearDownAfterClass();
 	}
 
 	/**

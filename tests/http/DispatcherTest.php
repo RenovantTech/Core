@@ -2,13 +2,23 @@
 namespace test\http;
 use const metadigit\core\http\ENGINE_PHP;
 use metadigit\core\sys,
+	metadigit\core\acl\ACL,
 	metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\http\Dispatcher,
-	metadigit\core\http\Event;
+	metadigit\core\http\Event,
+	test\acl\ACLTest;
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
+	static function setUpBeforeClass() {
+		ACLTest::setUpBeforeClass();
+		new ACL(['ORM'], 'mysql');
+	}
+
+	static function tearDownAfterClass() {
+		ACLTest::tearDownAfterClass();
+	}
 	/**
 	 * @return Dispatcher
 	 * @throws \metadigit\core\container\ContainerException

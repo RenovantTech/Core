@@ -67,6 +67,7 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `people`;
 			DROP PROCEDURE IF EXISTS sp_people;
+			DROP TABLE IF EXISTS `sales`;
 		');
 	}
 

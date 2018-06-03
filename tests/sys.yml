@@ -150,8 +150,9 @@ services:
     constructor:
       module: SESSION
     properties:
-      authTTL:      300   # 5 min
-      refreshTTL:   86400 # 1 day
+      authTTL:      300     # 5 min
+      refreshTTL:   86400   # 1 day
+      rememberTTL:  2592000 # 1 month
       skipAuthApps: [ 'AUTH' ]
       skipAuthUrls: []
       skipXSRFApps: [ 'RRD' ]
@@ -161,8 +162,10 @@ services:
     class: metadigit\core\auth\provider\PdoProvider
     constructor:
       pdo:        mysql
-      tableAuth:  sys_auth
-      tableUsers: users
+      tables:
+        auth:     sys_auth
+        tokens:   sys_tokens
+        users:    sys_users
     properties:
       fields:     '*'
 

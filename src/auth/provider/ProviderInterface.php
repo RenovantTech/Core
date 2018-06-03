@@ -36,7 +36,7 @@ interface ProviderInterface {
 	function checkCredentials($login, $password): int;
 
 	/**
-	 * Check Refresh Token validity
+	 * Check REFRESH-TOKEN validity
 	 * @param $userId
 	 * @param $token
 	 * @return bool TRUE if valid
@@ -44,10 +44,39 @@ interface ProviderInterface {
 	function checkRefreshToken($userId, $token): bool;
 
 	/**
-	 * Store new Refresh Token value
+	 * Check REMEMBER-TOKEN validity
+	 * @param $userId
+	 * @param $token
+	 * @return bool TRUE if valid
+	 */
+	function checkRememberToken($userId, $token): bool;
+	/**
+	 * Delete REFRESH-TOKEN
+	 * @param int $userId User ID
+	 * @param string $token
+	 */
+	function deleteRefreshToken($userId, $token);
+
+	/**
+	 * Delete REMEMBER-TOKEN
+	 * @param int $userId User ID
+	 * @param string $token
+	 */
+	function deleteRememberToken($userId, $token);
+
+	/**
+	 * Store new REFRESH-TOKEN value
 	 * @param int $userId User ID
 	 * @param string $token
 	 * @param int $expireTime expiration time (unix timestamp)
 	 */
 	function setRefreshToken($userId, $token, $expireTime);
+
+	/**
+	 * Store new REMEMBER-TOKEN value
+	 * @param int $userId User ID
+	 * @param string $token
+	 * @param int $expireTime expiration time (unix timestamp)
+	 */
+	function setRememberToken($userId, $token, $expireTime);
 }

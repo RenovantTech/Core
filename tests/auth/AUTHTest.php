@@ -14,22 +14,16 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	static function setUpBeforeClass() {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `users`;
-			CREATE TABLE IF NOT EXISTS `users` (
-				id			INT UNSIGNED NOT NULL AUTO_INCREMENT,
-				type		VARCHAR(20),
-				name		VARCHAR(20),
-				surname		VARCHAR(20),
-				email		VARCHAR(30) NULL DEFAULT NULL,
-				PRIMARY KEY(id)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
 
 	static function tearDownAfterClass() {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `users`;
+			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
 
@@ -50,6 +44,19 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals(1, $Ex->getCode());
 			$this->assertRegExp('/INVALID/', $Ex->getMessage());
 		}
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AUTH $AUTH
+	 */
+	function testProvider(AUTH $AUTH) {
+		PdoProviderTest::setUpBeforeClass();
+		$this->assertInstanceOf(ProviderInterface::class, $AUTH->provider());
+		sys::pdo('mysql')->exec('
+			INSERT INTO sys_users (name, surname, email) VALUES ("John", "Red", "john.red@gmail.com");
+			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
+		');
 	}
 
 	/**
@@ -149,14 +156,5 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		$AUTH->set('foo', 'bar');
 		$AUTH->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testProvider(AUTH $AUTH) {
-		PdoProviderTest::setUpBeforeClass();
-		$this->assertInstanceOf(ProviderInterface::class, $AUTH->provider());
 	}
 }
