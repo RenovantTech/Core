@@ -53,6 +53,7 @@ class Dispatcher {
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
+	 * @throws \ReflectionException
 	 * @throws \metadigit\core\context\ContextException
 	 * @throws \metadigit\core\event\EventDispatcherException
 	 */

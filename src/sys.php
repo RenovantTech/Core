@@ -237,19 +237,19 @@ class sys {
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
 		$app = $dispatcherID = $namespace = null;
-		foreach(self::$Sys->cnfApps['HTTP'] as $id => $conf) {
+		foreach(self::$Sys->cnfApps['HTTP'] as $app => $conf) {
 			if(strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
 				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR']==$conf['domain']) &&
 				(!isset($conf['port']) || $_SERVER['SERVER_PORT']==$conf['port']))
 			{
-				$app = $id;
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
-				self::$Req->setAttribute('APP_URI', '/'.substr(self::$Req->URI(), strlen($conf['url'])));
+				self::$Req->setAttribute('APP_URI', '/'.ltrim('/'.substr(self::$Req->URI(), strlen($conf['url'])), '/'));
+				self::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$conf['url'].' => APP namespace: '.$namespace, null, __FUNCTION__);
 				break;
 			}
 		}
-		if(is_null($app)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
+		if(is_null($namespace)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
 		self::$Req->setAttribute('APP', $app);
 		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
