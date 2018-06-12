@@ -57,7 +57,8 @@ class PDO extends \PDO {
 		// SqLite specific settings
 		if('sqlite'==$this->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
 			// @TODO if(file_exists(TMP_DIR.$id.'.vacuum')) unlink(TMP_DIR.$id.'.vacuum') && $this->exec('VACUUM');
-			$this->exec('PRAGMA journal_mode = WAL; PRAGMA temp_store = MEMORY; PRAGMA synchronous = OFF; PRAGMA foreign_keys = ON');
+			// @FIXME "PRAGMA journal_mode = WAL" causing random corruption
+			$this->exec('PRAGMA temp_store = MEMORY; PRAGMA synchronous = OFF; PRAGMA foreign_keys = ON');
 		}
 	}
 
