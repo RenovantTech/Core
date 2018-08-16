@@ -50,6 +50,10 @@ class Dispatcher {
 		ENGINE_X_SEND_FILE	=> XSendFileView::class
 	];
 
+	function __construct() {
+		include __DIR__.'/Dispatcher.constructor.inc';
+	}
+
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
@@ -102,11 +106,16 @@ class Dispatcher {
 	 * @throws Exception
 	 */
 	protected function doRoute(Request $Req) {
-		foreach($this->routes as $url => $controllerID) {
-			if(strpos($Req->getAttribute('APP_URI'), $url) === 0)	 {
-				sys::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$url.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
+		$url = $Req->getAttribute('APP_URI');
+		foreach($this->routes as $pattern => $controllerID) {
+			if(preg_match($pattern, $url, $matches))	 {
+				sys::trace(LOG_DEBUG, T_INFO, 'URL: '.$url.' matching pattern '.$pattern.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
 				$Req->setAttribute('APP_CONTROLLER', $controllerID);
-				$Req->setAttribute('APP_CONTROLLER_URI', substr($Req->getAttribute('APP_URI'), strlen($url)));
+				$Req->setAttribute('APP_CONTROLLER_URI', substr($Req->getAttribute('APP_URI'), strlen($matches[0])));
+				// inject URL params into Request
+				foreach($matches as $k=>$v) {
+					if(is_string($k)) $Req->set($k, $v);
+				}
 				return $controllerID;
 			}
 		}

@@ -35,9 +35,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$RefProp = new \ReflectionProperty(Dispatcher::class, 'routes');
 		$RefProp->setAccessible(true);
 		$routes = $RefProp->getValue($Dispatcher);
-		$this->assertCount(4, $routes);
-		$this->assertArrayHasKey('/catalog/', $routes);
-		$this->assertEquals('test.http.AbstractController', $routes['/catalog/']);
+		$this->assertCount(5, $routes);
+		$this->assertArrayHasKey('/\/blog\/(?<category>[^\/]+)\//', $routes);
+		$this->assertEquals('test.http.ActionController', $routes['/\/blog\/(?<category>[^\/]+)\//']);
+		$this->assertArrayHasKey('/\/catalog\//', $routes);
+		$this->assertEquals('test.http.AbstractController', $routes['/\/catalog\//']);
 
 		return $Dispatcher;
 	}
@@ -76,6 +78,13 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', '/catalog/books/science/13');
 		$this->assertSame('test.http.AbstractController', $RefMethod->invoke($Dispatcher, $Req));
 		$this->assertSame('books/science/13', $Req->getAttribute('APP_CONTROLLER_URI'));
+
+		$_SERVER['REQUEST_URI'] = '/blog/science/13-foobar';
+		$Req = new Request;
+		$Req->setAttribute('APP_URI', '/blog/science/13-foobar');
+		$this->assertSame('test.http.ActionController', $RefMethod->invoke($Dispatcher, $Req));
+		$this->assertSame('13-foobar', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('science', $Req->get('category'));
 
 		return $Dispatcher;
 	}

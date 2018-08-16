@@ -4,6 +4,7 @@ services:
     class: metadigit\core\http\Dispatcher
     properties:
       routes:
+        /blog/<category>/: test.http.ActionController
         /catalog/:  test.http.AbstractController
         /action/:   test.http.ActionController
         /rest/:     test.http.RestActionController
