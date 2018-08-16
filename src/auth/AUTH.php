@@ -28,6 +28,7 @@ class AUTH {
 	const COOKIE_REFRESH	= 'REFRESH-TOKEN';
 	const COOKIE_REMEMBER	= 'REMEMBER-TOKEN';
 	const COOKIE_XSRF		= 'XSRF-TOKEN';
+	const HEADER_XSRF		= 'X-XSRF-TOKEN';
 	const LOGIN_UNKNOWN			= -1;
 	const LOGIN_DISABLED		= -2;
 	const LOGIN_PWD_MISMATCH	= -3;
@@ -197,7 +198,7 @@ class AUTH {
 				$this->_commit = true;
 			else
 				$this->_XSRF_TOKEN = $_COOKIE[self::COOKIE_XSRF];
-			$XSRFToken = $Req->getHeader('X-XSRF-TOKEN');
+			$XSRFToken = $Req->getHeader(self::HEADER_XSRF);
 			if ($XSRFToken && $XSRFToken === $this->_XSRF_TOKEN)
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
 			elseif ($XSRFToken && $XSRFToken != $this->_XSRF_TOKEN)
@@ -242,10 +243,11 @@ class AUTH {
 		if(!$this->_commit) return;
 		$prevTraceFn = sys::traceFn($this->_.'->commit');
 		try {
-			// XSRF-TOKEN
+			// XSRF-TOKEN (cookie + header)
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
 			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
 
 			if (is_null($this->_UID)) return;
 
