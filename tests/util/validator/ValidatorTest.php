@@ -2,7 +2,7 @@
 namespace test\util\validator;
 use metadigit\core\util\validator\Validator;
 
-class ValidatorTest extends \PHPUnit_Framework_TestCase {
+class ValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	function testValidate() {
 		$Object = new \mock\util\validator\Class1;

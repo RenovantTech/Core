@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\view\PhpView;
 
-class PhpViewTest extends \PHPUnit_Framework_TestCase {
+class PhpViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$PhpView = new PhpView;

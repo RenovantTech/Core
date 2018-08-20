@@ -4,7 +4,7 @@ use metadigit\core\http\Request,
 	metadigit\core\http\Response,
 	metadigit\core\web\view\CsvView;
 
-class CsvViewTest extends \PHPUnit_Framework_TestCase {
+class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$CsvView = new CsvView;

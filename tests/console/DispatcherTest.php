@@ -6,7 +6,7 @@ use metadigit\core\Kernel,
 	metadigit\core\cli\Request,
 	metadigit\core\cli\Response;
 
-class DispatcherTest extends \PHPUnit_Framework_TestCase {
+class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';

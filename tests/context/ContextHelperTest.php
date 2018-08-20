@@ -2,7 +2,7 @@
 namespace test\context;
 use metadigit\core\context\ContextHelper;
 
-class ContextHelperTest extends \PHPUnit_Framework_TestCase {
+class ContextHelperTest extends \PHPUnit\Framework\TestCase {
 
 	function testGetAllContexts() {
 		$contexts = ContextHelper::getAllContexts();

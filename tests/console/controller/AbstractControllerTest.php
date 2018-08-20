@@ -4,7 +4,7 @@ use metadigit\core\cli\Request,
 	metadigit\core\cli\Response,
 	metadigit\core\console\controller\AbstractController;
 
-class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
+class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$AbstractController = new \mock\console\controller\AbstractController;

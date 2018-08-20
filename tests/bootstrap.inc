@@ -12,6 +12,8 @@ define('metadigit\core\TMP_DIR',	'/tmp/metadigit-core/tmp/');
 define('metadigit\core\UPLOAD_DIR',	'/tmp/metadigit-core/upload/');
 
 define('MOCK_DIR', __DIR__.'/_mock');
+define('XSENDFILE_PATH', __DIR__.'/_mock/web/templates/');
+define('XSENDFILE_URL', '/web/templates/');
 
 require __DIR__.'/../src/Kernel.php';
 require __DIR__.'/../vendor/autoload.php';

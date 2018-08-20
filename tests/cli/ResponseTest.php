@@ -2,7 +2,7 @@
 namespace test\cli;
 use metadigit\core\cli\Response;
 
-class ResponseTest extends \PHPUnit_Framework_TestCase {
+class ResponseTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Response = new Response;

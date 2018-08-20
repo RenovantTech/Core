@@ -30,4 +30,6 @@ class Exception extends \metadigit\core\Exception {
 	const COD254 = 'JSON View Exception - Syntax error, malformed JSON';
 	const COD255 = 'JSON View Exception - Malformed UTF-8 characters, possibly incorrectly encoded';
 	const COD256 = 'JSON View Exception - Unknown error';
+	const COD261 = 'X-SendFile View Exception: constant XSENDFILE_PATH not defined';
+	const COD262 = 'X-SendFile View Exception: constant XSENDFILE_URL not defined';
 }
