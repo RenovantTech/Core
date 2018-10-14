@@ -59,7 +59,7 @@ class Queue {
 	 */
 	function ack($id) {
 		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_ACK, $this->table))
-			->execute(['id'=>$id])->rowCount();
+			->execute(['id'=>$id], false)->rowCount();
 	}
 
 	/** Check whether the job is waiting for execution
@@ -101,10 +101,9 @@ class Queue {
 	function push($job, $priority=100, $queue=self::DEFAULT_QUEUE, $delay=0, $ttr=null) {
 		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
-			$job = serialize($job);
 			sys::trace(LOG_DEBUG, T_INFO, '[PUSH] PRI: '.$priority.' QUEUE: '.$queue, $job);
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_PUSH, $this->table))
-				->execute(['queue'=>$queue, 'priority'=>$priority, 'delay'=>$delay, 'ttr'=>$ttr, 'job'=>$job]);
+				->execute(['queue'=>$queue, 'priority'=>$priority, 'delay'=>$delay, 'ttr'=>$ttr, 'job'=>serialize($job)], false);
 			return (int)sys::pdo($this->pdo)->lastInsertId();
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -118,7 +117,7 @@ class Queue {
 	 */
 	function release($id) {
 		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_RELEASE, $this->table))
-			->execute(['id'=>$id])->rowCount();
+			->execute(['id'=>$id], false)->rowCount();
 	}
 
 	/**
@@ -129,18 +128,18 @@ class Queue {
 	function reserve($queue=null) {
 		$params = $queue ? ['queue'=>$queue] : null;
 		$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_RESERVE, $this->table, $queue?' AND queue = :queue ':null))
-			->execute($params)->fetch(\PDO::FETCH_ASSOC);
+			->execute($params, false)->fetch(\PDO::FETCH_ASSOC);
 		if($data) {
 			$params = ['id'=>$data['id'], 'status'=>'RUNNING'];
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table, ' status = :status, timeRUN = CURRENT_TIMESTAMP '))
-				->execute($params);
+				->execute($params, false);
 		}
 		return [$data['id'], unserialize($data['job'])];
 	}
 
 	function stats($id) {
 		return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_STATS, $this->table))
-			->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
+			->execute(['id'=>$id], false)->fetch(\PDO::FETCH_ASSOC);
 	}
 
 }
