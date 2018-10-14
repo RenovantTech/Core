@@ -15,7 +15,8 @@
 		"php": ">=7.0",
 		"phpunit/phpunit": "6.*",
 		"defuse/php-encryption": ">=2.1",
-		"firebase/php-jwt": "v5.0.0"
+		"firebase/php-jwt": "v5.0.0",
+		"ext-pdo": "*"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",

@@ -20,7 +20,8 @@ use metadigit\core\acl\ACL,
 	metadigit\core\event\EventDispatcher,
 	metadigit\core\event\EventDispatcherException,
 	metadigit\core\http\Event as HttpEvent,
-	metadigit\core\log\Logger;
+	metadigit\core\log\Logger,
+	metadigit\core\queue\Queue;
 /**
  * System Kernel
  * @author Daniele Sciacchitano <dan@metadigit.it>
@@ -395,6 +396,19 @@ class sys {
 	static function log($message, $level=LOG_INFO, $facility=null) {
 		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
+	}
+
+	/**
+	 * QUEUE helper
+	 * @return Queue
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 */
+	static function queue() {
+		static $Queue;
+		/** @var Queue $Queue */
+		if(!$Queue) $Queue = self::$Context->get('sys.Queue', Queue::class);
+		return $Queue;
 	}
 
 	/**
