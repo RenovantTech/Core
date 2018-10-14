@@ -189,3 +189,14 @@ services:
         properties:
           pdo:    mysql
           table:  sys_sessions
+
+  # -------------------------------------------------------
+  # QUEUE service
+  # -------------------------------------------------------
+  sys.Queue:
+    class: metadigit\core\queue\Queue
+    constructor:
+      pdo:        mysql
+      table:      sys_queue
+    properties:
+      fields:     '*'
