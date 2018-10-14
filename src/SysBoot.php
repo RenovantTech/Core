@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\container\Container,
-	metadigit\core\util\yaml\Yaml;
+namespace renovant\core;
+use const renovant\core\trace\T_INFO;
+use renovant\core\container\Container,
+	renovant\core\util\yaml\Yaml;
 /**
  * System bootstrap helper
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  * @internal
  */
 class SysBoot extends sys {
@@ -69,7 +69,7 @@ class SysBoot extends sys {
 
 		// Cache service
 		self::$Sys->cnfCache['sys'] = [
-			'class' => 'metadigit\core\cache\SqliteCache',
+			'class' => 'renovant\core\cache\SqliteCache',
 			'constructor' => ['sys-cache', 'cache', true]
 		];
 		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['cache']);

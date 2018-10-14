@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log\writer;
-use metadigit\core\log\Logger;
+namespace renovant\core\log\writer;
+use renovant\core\log\Logger;
 /**
  * Writes logs to file tree
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class FileTreeWriter implements \metadigit\core\log\LogWriterInterface {
+class FileTreeWriter implements \renovant\core\log\LogWriterInterface {
 
 	const DEFAULT_FILENAME = 'system.log';
 	/** tree base directory
@@ -26,9 +26,9 @@ class FileTreeWriter implements \metadigit\core\log\LogWriterInterface {
 
 	/**
 	 * @param string $filename
-	 * @param string $directory tree root directory, default to metadigit\core\LOG_DIR
+	 * @param string $directory tree root directory, default to renovant\core\LOG_DIR
 	 */
-	function __construct($filename=self::DEFAULT_FILENAME, $directory=\metadigit\core\LOG_DIR) {
+	function __construct($filename=self::DEFAULT_FILENAME, $directory=\renovant\core\LOG_DIR) {
 		$directory = rtrim($directory,'/');
 		if(!file_exists($directory)) mkdir($directory, 0770, true);
 		$this->directory = $directory;

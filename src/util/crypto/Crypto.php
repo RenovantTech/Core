@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\crypto;
-use const metadigit\core\DATA_DIR;
+namespace renovant\core\util\crypto;
+use const renovant\core\DATA_DIR;
 use Defuse\Crypto\Crypto as DefuseCrypto,
 	Defuse\Crypto\Key;
 
 /**
  * Encryption utility using defuse/php-encryption library
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Crypto {
 

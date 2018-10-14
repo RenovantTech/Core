@@ -1,8 +1,8 @@
 <?php
 namespace test\http\view;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\view\CsvView;
+use renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\view\CsvView;
 
 class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
@@ -15,7 +15,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param CsvView $CsvView
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testRender(CsvView $CsvView) {
 		ob_start();
@@ -35,7 +35,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 201
 	 * @param CsvView $CsvView
 	 */
@@ -48,7 +48,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 202
 	 * @param CsvView $CsvView
 	 */
@@ -61,7 +61,7 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 203
 	 * @param CsvView $CsvView
 	 */

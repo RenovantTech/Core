@@ -1,9 +1,9 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\ControllerInterface,
-	metadigit\core\console\controller\ActionController,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response;
+use renovant\core\console\ControllerInterface,
+	renovant\core\console\controller\ActionController,
+	renovant\core\console\Request,
+	renovant\core\console\Response;
 
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
@@ -63,7 +63,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @expectedException \metadigit\core\console\Exception
+	 * @expectedException \renovant\core\console\Exception
 	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
@@ -79,7 +79,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\console\controller\ActionController $ActionController
-	 * @throws \metadigit\core\console\Exception
+	 * @throws \renovant\core\console\Exception
 	 */
 	function testHandle(\test\console\controller\ActionController $ActionController) {
 		$_SERVER['argv'] = ['sys','mod1','action2','--id=7'];

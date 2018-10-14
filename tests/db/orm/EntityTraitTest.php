@@ -1,6 +1,6 @@
 <?php
 namespace test\db\orm;
-use metadigit\core\util\DateTime,
+use renovant\core\util\DateTime,
 	test\db\orm\User,
 	test\db\orm\Stats;
 

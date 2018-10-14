@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
+namespace renovant\core\http;
 /**
  * MVC Dispatch Event
  * Main event passed throughout MVC flow.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Event extends \metadigit\core\event\Event {
+class Event extends \renovant\core\event\Event {
 
 	const EVENT_INIT		= 'http:init';
 	const EVENT_ROUTE		= 'http:route';
@@ -21,10 +21,10 @@ class Event extends \metadigit\core\event\Event {
 	const EVENT_EXCEPTION	= 'http:exception';
 
 	/** HTTP Request
-	 * @var \metadigit\core\http\Request */
+	 * @var \renovant\core\http\Request */
 	protected $Request;
 	/** HTTP Response
-	 * @var \metadigit\core\http\Response */
+	 * @var \renovant\core\http\Response */
 	protected $Response;
 	/** Controller, if any
 	 * @var ControllerInterface */
@@ -43,7 +43,7 @@ class Event extends \metadigit\core\event\Event {
 
 	/**
 	 * Get current HTTP Request
-	 * @return \metadigit\core\http\Request
+	 * @return \renovant\core\http\Request
 	 */
 	function getRequest() {
 		return $this->Request;
@@ -51,7 +51,7 @@ class Event extends \metadigit\core\event\Event {
 
 	/**
 	 * Get current HTTP Response
-	 * @return \metadigit\core\http\Response
+	 * @return \renovant\core\http\Response
 	 */
 	function getResponse() {
 		return $this->Response;

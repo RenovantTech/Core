@@ -5,16 +5,16 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\auth\provider;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\auth\AUTH;
+namespace renovant\core\auth\provider;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\auth\AUTH;
 /**
  * Authentication Provider via PDO.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class PdoProvider implements ProviderInterface {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';

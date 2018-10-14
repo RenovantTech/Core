@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db\orm\util;
-use metadigit\core\sys,
-	metadigit\core\db\Query,
-	metadigit\core\db\orm\Metadata,
-	metadigit\core\db\orm\Repository;
+namespace renovant\core\db\orm\util;
+use renovant\core\sys,
+	renovant\core\db\Query,
+	renovant\core\db\orm\Metadata,
+	renovant\core\db\orm\Repository;
 /**
  * ORM QueryRunner
  * Helper class that build & execute queries
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class QueryRunner {
 

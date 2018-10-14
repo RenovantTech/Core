@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\queue;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\queue;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 
 class Queue {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const DEFAULT_QUEUE = 'default';
 	const SQL_ACK		= 'UPDATE %s SET status = "OK", timeOK = NOW() WHERE id = :id AND status = "RUNNING"';

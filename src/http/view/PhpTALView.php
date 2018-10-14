@@ -5,17 +5,17 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\view;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\Exception,
-	metadigit\core\http\ViewInterface;
+namespace renovant\core\http\view;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\Exception,
+	renovant\core\http\ViewInterface;
 /**
  * PhpTAL View
  * View engine that use the PhpTAL template engine.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class PhpTALView implements ViewInterface {
 
@@ -67,8 +67,8 @@ class PhpTALView implements ViewInterface {
 		$PhpTAL = new \PHPTAL($template);
 		$PhpTAL->setEncoding('UTF-8');
 		$PhpTAL->setOutputMode(\PHPTAL::HTML5);
-		if(!file_exists(\metadigit\core\CACHE_DIR.'phptal')) mkdir(\metadigit\core\CACHE_DIR.'phptal', 0750);
-		$PhpTAL->setPhpCodeDestination(\metadigit\core\CACHE_DIR.'phptal');
+		if(!file_exists(\renovant\core\CACHE_DIR.'phptal')) mkdir(\renovant\core\CACHE_DIR.'phptal', 0750);
+		$PhpTAL->setPhpCodeDestination(\renovant\core\CACHE_DIR.'phptal');
 		if(!is_null($class = $this->preFilterClass)) {
 			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class, null, 'sys.http.PhpTALView->execTemplate');
 			$PhpTAL->addPreFilter(new $class);

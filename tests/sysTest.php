@@ -1,41 +1,41 @@
 <?php
 namespace test;
-use metadigit\core\sys,
-	metadigit\core\SysBoot,
-	metadigit\core\SysException,
-	metadigit\core\acl\ACL,
-	metadigit\core\auth\AUTH,
-	metadigit\core\console\CmdManager,
-	metadigit\core\context\ContextException,
-	metadigit\core\event\EventDispatcherException;
+use renovant\core\sys,
+	renovant\core\SysBoot,
+	renovant\core\SysException,
+	renovant\core\acl\ACL,
+	renovant\core\auth\AUTH,
+	renovant\core\console\CmdManager,
+	renovant\core\context\ContextException,
+	renovant\core\event\EventDispatcherException;
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstants() {
-		$this->assertEquals('3.0.0', \metadigit\core\VERSION);
-		$this->assertEquals(realpath(__DIR__.'/../src/'), \metadigit\core\DIR);
+		$this->assertEquals('3.0.0', \renovant\core\VERSION);
+		$this->assertEquals(realpath(__DIR__.'/../src/'), \renovant\core\DIR);
 	}
 
 	/**
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testBoot() {
 		SysBoot::boot();
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'Sys');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'Sys');
 		$ReflProp->setAccessible(true);
 		$Sys = $ReflProp->getValue();
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'namespaces');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'namespaces');
 		$ReflProp->setAccessible(true);
 		$namespaces = $ReflProp->getValue();
 
 		// namespaces
-		$this->assertArrayHasKey('metadigit\core', $namespaces);
-		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['metadigit\core']);
+		$this->assertArrayHasKey('renovant\core', $namespaces);
+		$this->assertEquals(realpath(__DIR__.'/../src'), $namespaces['renovant\core']);
 		$this->assertArrayHasKey('test', $namespaces);
 		$this->assertEquals(__DIR__, realpath($namespaces['test']));
 
 		// APPS HTTP/CLI
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfApps');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfApps');
 		$ReflProp->setAccessible(true);
 		$apps = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('MNGR', 		$apps['HTTP']);
@@ -51,35 +51,35 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('test.console',		$apps['CLI']['console']);
 
 		// constants
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfConstants');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfConstants');
 		$ReflProp->setAccessible(true);
 		$constants = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('ASSETS_DIR', $constants);
 		$this->assertEquals('/var/www/devel.com/data/assets/', $constants['ASSETS_DIR']);
 
 		// settings
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfSettings');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfSettings');
 		$ReflProp->setAccessible(true);
 		$settings = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('timeZone', $settings);
 		$this->assertEquals('Europe/London', $settings['timeZone']);
 
 		// Cache service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfCache');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfCache');
 		$ReflProp->setAccessible(true);
 		$caches = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('main', $caches);
-		$this->assertEquals('metadigit\core\cache\SqliteCache', $caches['main']['class']);
+		$this->assertEquals('renovant\core\cache\SqliteCache', $caches['main']['class']);
 
 		// DB service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfPdo');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfPdo');
 		$ReflProp->setAccessible(true);
 		$pdo = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('sys-cache', $pdo);
-		$this->assertEquals('sqlite:/tmp/metadigit-core/cache/sys-cache.sqlite', $pdo['sys-cache']['dns']);
+		$this->assertEquals('sqlite:/tmp/renovant-core/cache/sys-cache.sqlite', $pdo['sys-cache']['dns']);
 
 		// LOG service
-		$ReflProp = new \ReflectionProperty('metadigit\core\sys', 'cnfLog');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfLog');
 		$ReflProp->setAccessible(true);
 		$log = $ReflProp->getValue($Sys);
 		$this->assertArrayHasKey('kernel', $log);
@@ -88,10 +88,10 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testBoot
-	 * @throws \metadigit\core\container\ContainerException
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testInit() {
 		sys::init();
@@ -100,13 +100,13 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	function testInfo() {
 		// test PHP namespaces
-		$this->assertEquals('metadigit\core\http', sys::info('metadigit\core\http\Dispatcher', sys::INFO_NAMESPACE));
-		$this->assertEquals('Dispatcher', sys::info('metadigit\core\http\Dispatcher', sys::INFO_CLASS));
-		$this->assertEquals(realpath(__DIR__.'/../src/http').'/Dispatcher', sys::info('metadigit\core\http\Dispatcher', sys::INFO_PATH));
-		$this->assertEquals(realpath(__DIR__.'/../src/http'), sys::info('metadigit\core\http\Dispatcher', sys::INFO_PATH_DIR));
-		$this->assertEquals('Dispatcher', sys::info('metadigit\core\http\Dispatcher', sys::INFO_PATH_FILE));
-		list($namespace, $className, $dir, $file) = sys::info('metadigit\core\http\Dispatcher');
-		$this->assertEquals('metadigit\core\http', $namespace);
+		$this->assertEquals('renovant\core\http', sys::info('renovant\core\http\Dispatcher', sys::INFO_NAMESPACE));
+		$this->assertEquals('Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_CLASS));
+		$this->assertEquals(realpath(__DIR__.'/../src/http').'/Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH));
+		$this->assertEquals(realpath(__DIR__.'/../src/http'), sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH_DIR));
+		$this->assertEquals('Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH_FILE));
+		list($namespace, $className, $dir, $file) = sys::info('renovant\core\http\Dispatcher');
+		$this->assertEquals('renovant\core\http', $namespace);
 		$this->assertEquals('Dispatcher', $className);
 		$this->assertEquals(realpath(__DIR__.'/../src/http'), $dir);
 		$this->assertEquals('Dispatcher', $file);
@@ -137,7 +137,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	function testAcl() {
 		$ACL = sys::acl();
 		$this->assertInstanceOf(ACL::class, $ACL);
-		$RefProp = new \ReflectionProperty('metadigit\core\acl\ACL', 'pdo');
+		$RefProp = new \ReflectionProperty('renovant\core\acl\ACL', 'pdo');
 		$RefProp->setAccessible(true);
 		$pdo = $RefProp->getValue($ACL);
 		$this->assertEquals('mysql', $pdo);
@@ -156,16 +156,16 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testInfo
 	 */
 	function testAutoload() {
-		sys::autoload('metadigit\core\util\Date');
-		$this->assertTrue(class_exists('metadigit\core\util\Date', false));
+		sys::autoload('renovant\core\util\Date');
+		$this->assertTrue(class_exists('renovant\core\util\Date', false));
 	}
 
 	/**
 	 * @depends testInit
 	 */
 	function testCache() {
-		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', sys::cache('sys'));
-		$this->assertInstanceOf('metadigit\core\cache\CacheInterface', sys::cache('main'));
+		$this->assertInstanceOf('renovant\core\cache\CacheInterface', sys::cache('sys'));
+		$this->assertInstanceOf('renovant\core\cache\CacheInterface', sys::cache('main'));
 	}
 
 	/**
@@ -180,8 +180,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testInit
 	 */
 	function testPdo() {
-		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('sys-cache'));
-		$this->assertInstanceOf('metadigit\core\db\PDO', sys::pdo('mysql'));
+		$this->assertInstanceOf('renovant\core\db\PDO', sys::pdo('sys-cache'));
+		$this->assertInstanceOf('renovant\core\db\PDO', sys::pdo('mysql'));
 	}
 
 	/**
@@ -202,7 +202,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function _testDispatchCLI() {
 		$_SERVER['argv'] = [
-			0 => \metadigit\core\CLI_BOOTSTRAP,
+			0 => \renovant\core\CLI_BOOTSTRAP,
 			1 => 'console',
 			2 => 'mod1',
 			3 => 'foo',

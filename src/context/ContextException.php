@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\context;
+namespace renovant\core\context;
 /**
  * ContextException
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class ContextException extends \metadigit\core\Exception {
+class ContextException extends \renovant\core\Exception {
 	// runtime Container
 	const COD1 = '%s: object OID "%s" is NOT defined';
 	const COD2 = '%1$s: object OID "%2$s" NOT implementing required class/interface %2$s';

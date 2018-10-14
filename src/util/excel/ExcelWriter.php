@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\excel;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\util\excel;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * Excel Writer
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ExcelWriter {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const ITERATE_ARRAY = 1;
 	const ITERATE_OBJECT = 2;

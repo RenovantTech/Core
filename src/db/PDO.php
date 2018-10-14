@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db;
-// @TODO use const metadigit\core\TMP_DIR;
-use const metadigit\core\trace\T_DB;
-use metadigit\core\sys;
+namespace renovant\core\db;
+// @TODO use const renovant\core\TMP_DIR;
+use const renovant\core\trace\T_DB;
+use renovant\core\sys;
 /**
  * PDO wrapper
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class PDO extends \PDO {
 
@@ -51,7 +51,7 @@ class PDO extends \PDO {
 		$this->_id =$id;
 		$options = (array) $options + [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_STATEMENT_CLASS => ['metadigit\core\db\PDOStatement', [ $id ]]
+			\PDO::ATTR_STATEMENT_CLASS => ['renovant\core\db\PDOStatement', [ $id ]]
 		];
 		parent::__construct($dsn, $username, $password, $options);
 		// SqLite specific settings

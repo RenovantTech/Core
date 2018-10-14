@@ -1,15 +1,15 @@
 {
-	"name": "metadigit/core",
+	"name": "renovant/core",
 	"description": "Renovant Technology Core PHP Frameowrk",
 	"license": "BSD-3-Clause",
 	"authors": [
 		{
 			"name": "Daniele Sciacchitano",
-			"email": "dan@metadigit.it"
+			"email": "dan@renovant.tech"
 		}
 	],
 	"autoload": {
-		"psr-0": { "metadigit\\core\\": "src/" }
+		"psr-0": { "renovant\\core\\": "src/" }
 	},
 	"require": {
 		"php": ">=7.0",

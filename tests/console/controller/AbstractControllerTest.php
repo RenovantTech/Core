@@ -1,9 +1,9 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\ControllerInterface,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response,
-	metadigit\core\console\controller\AbstractController;
+use renovant\core\console\ControllerInterface,
+	renovant\core\console\Request,
+	renovant\core\console\Response,
+	renovant\core\console\controller\AbstractController;
 
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 

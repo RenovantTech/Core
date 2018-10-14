@@ -1,7 +1,7 @@
 services:
   # Dispatcher
   test.api.Dispatcher:
-    class: metadigit\core\api\Dispatcher
+    class: renovant\core\api\Dispatcher
     properties:
       routes:
         /rest/:     test.api.RestOrmController

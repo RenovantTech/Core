@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\xml;
+namespace renovant\core\util\xml;
 
 libxml_use_internal_errors(true);
 abstract class XMLValidator {

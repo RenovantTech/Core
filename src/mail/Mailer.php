@@ -5,9 +5,9 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\mail;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
+namespace renovant\core\mail;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
 	Swift_Message;
 /**
  * Wrapper for Swift_Mailer 4.3.0
@@ -16,11 +16,11 @@ use metadigit\core\sys,
  * {@example mail/Mailer.php 2}
  * Configuration file example: project/services/context.xml
  * {@example mail/Mailer.xml}
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  * @link http://swiftmailer.org/
  */
 class Mailer {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	/** default transport type to be used */
 	const DEFAULT_TRANSPORT = 'smtp';
@@ -88,7 +88,7 @@ class Mailer {
 		\Swift_Preferences::getInstance()->setCharset('utf-8');
 		// Without these lines the default caching mechanism is "array" but this uses a lot of memory.
 		// If possible, use a disk cache to enable attaching large attachments etc
-		\Swift_Preferences::getInstance()->setTempDir(\metadigit\core\TMP_DIR)->setCacheType('disk');
+		\Swift_Preferences::getInstance()->setTempDir(\renovant\core\TMP_DIR)->setCacheType('disk');
 		\Swift_Preferences::getInstance()->setQPDotEscape(false);
 		//Create the Transport
 		switch($this->transportType) {

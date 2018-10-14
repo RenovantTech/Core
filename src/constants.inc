@@ -6,13 +6,13 @@
  * @license New BSD License
  */
 
-namespace metadigit\core {
+namespace renovant\core {
 	define('EOL', "\r\n");
 	const VERSION = '3.0.0';
 	define(__NAMESPACE__.'\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
 }
 
-namespace metadigit\core\http {
+namespace renovant\core\http {
 	const ENGINE_FILE			= 'FILE';
 	const ENGINE_FILE_CSV		= 'FILE_CSV';
 	const ENGINE_FILE_EXCEL		= 'FILE_EXCEL';
@@ -24,7 +24,7 @@ namespace metadigit\core\http {
 	const ENGINE_X_SEND_FILE	= 'X_SEND_FILE';
 }
 
-namespace metadigit\core\trace {
+namespace renovant\core\trace {
 	const T_ERROR		= 0;
 	const T_INFO		= 1;
 	const T_AUTOLOAD	= 2;

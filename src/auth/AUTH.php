@@ -5,24 +5,24 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\auth;
-use const metadigit\core\DATA_DIR;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\auth\provider\PdoProvider,
-	metadigit\core\auth\provider\ProviderInterface,
-	metadigit\core\http\CryptoCookie,
-	metadigit\core\http\Exception as HttpException,
-	metadigit\core\http\Event as HttpEvent,
+namespace renovant\core\auth;
+use const renovant\core\DATA_DIR;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\auth\provider\PdoProvider,
+	renovant\core\auth\provider\ProviderInterface,
+	renovant\core\http\CryptoCookie,
+	renovant\core\http\Exception as HttpException,
+	renovant\core\http\Event as HttpEvent,
 	Firebase\JWT\BeforeValidException,
 	Firebase\JWT\ExpiredException,
 	Firebase\JWT\JWT;
 /**
  * Authentication Manager.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class AUTH {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const COOKIE_AUTH		= 'AUTH-TOKEN';
 	const COOKIE_REFRESH	= 'REFRESH-TOKEN';

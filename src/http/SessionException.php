@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
+namespace renovant\core\http;
 /**
  * HTTP Session Exception.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class SessionException extends \metadigit\core\Exception {
+class SessionException extends \renovant\core\Exception {
 	// Session configuration
 	const COD1 = 'PHP configuration ERROR - please set session.auto_start 0 in your php.ini';
 	const COD2 = 'Session config ERROR - "class" invalid value: <b>%s</b> - must be an existing class implementing one of the following: default, db, filesystem, sqlite';

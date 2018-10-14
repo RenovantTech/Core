@@ -1,7 +1,7 @@
 <?php
 namespace test\event;
-use metadigit\core\event\EventDispatcherException,
-	metadigit\core\event\EventYamlParser;
+use renovant\core\event\EventDispatcherException,
+	renovant\core\event\EventYamlParser;
 
 class EventYamlParserTest extends \PHPUnit\Framework\TestCase {
 

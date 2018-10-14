@@ -1,12 +1,12 @@
 <?php
 namespace test;
-use metadigit\core\Exception;
+use renovant\core\Exception;
 
 class ExceptionTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstruct() {
 		$Ex = new Exception(100, 'Custom message');
-		$this->assertInstanceOf('metadigit\core\Exception', $Ex);
+		$this->assertInstanceOf('renovant\core\Exception', $Ex);
 		$this->assertEquals(100, $Ex->getCode());
 		$this->assertEquals('Custom message', $Ex->getMessage());
 	}

@@ -1,7 +1,7 @@
 <?php
 namespace test\queue;
-use metadigit\core\sys,
-	metadigit\core\queue\Queue;
+use renovant\core\sys,
+	renovant\core\queue\Queue;
 
 class QueueTest extends \PHPUnit\Framework\TestCase {
 

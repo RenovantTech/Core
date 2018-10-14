@@ -12,7 +12,7 @@ namespace test\db\orm;
  * @orm-subset(large="id, active, name, age, score")
  */
 class User2 {
-	use \metadigit\core\db\orm\EntityTrait;
+	use \renovant\core\db\orm\EntityTrait;
 
 	/** @orm(type="integer", primarykey, autoincrement) */
 	protected $id;

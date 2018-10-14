@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\validator;
-use const metadigit\core\trace\T_ERROR;
-use metadigit\core\sys;
+namespace renovant\core\util\validator;
+use const renovant\core\trace\T_ERROR;
+use renovant\core\sys;
 /**
  * Validator
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Validator {
 

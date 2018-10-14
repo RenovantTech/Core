@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console;
+namespace renovant\core\console;
 /**
  * MVC Dispatch Event
  * Main event passed throughout MVC flow.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Event extends \metadigit\core\event\Event {
+class Event extends \renovant\core\event\Event {
 
 	const EVENT_INIT		= 'console:init';
 	const EVENT_ROUTE		= 'console:route';

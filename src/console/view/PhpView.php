@@ -5,18 +5,18 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console\view;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response,
-	metadigit\core\console\Exception;
+namespace renovant\core\console\view;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\console\Request,
+	renovant\core\console\Response,
+	renovant\core\console\Exception;
 /**
  * Php template View.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class PhpView implements \metadigit\core\console\ViewInterface {
-	use \metadigit\core\CoreTrait;
+class PhpView implements \renovant\core\console\ViewInterface {
+	use \renovant\core\CoreTrait;
 
 	/** template suffix */
 	const TEMPLATE_SUFFIX = '.phtml';

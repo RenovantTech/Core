@@ -5,8 +5,8 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-use metadigit\core\db\orm\Exception,
-	metadigit\core\util\reflection\ReflectionClass;
+use renovant\core\db\orm\Exception,
+	renovant\core\util\reflection\ReflectionClass;
 
 $RefClass = new ReflectionClass($entityClass);
 

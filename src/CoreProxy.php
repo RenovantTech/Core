@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\container\Container,
-	metadigit\core\container\ContainerException;
+namespace renovant\core;
+use const renovant\core\trace\T_INFO;
+use renovant\core\container\Container,
+	renovant\core\container\ContainerException;
 /**
  * Proxy for injected objects.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class CoreProxy {
 

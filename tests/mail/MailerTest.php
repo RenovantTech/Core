@@ -1,6 +1,6 @@
 <?php
 namespace test\mail;
-use metadigit\core\mail\Mailer;
+use renovant\core\mail\Mailer;
 
 class MailerTest extends \PHPUnit\Framework\TestCase {
 
@@ -12,7 +12,7 @@ class MailerTest extends \PHPUnit\Framework\TestCase {
 			'user'		=> '',
 			'password'	=> ''
 		]);
-		$this->assertInstanceOf('metadigit\core\mail\Mailer', $Mailer);
+		$this->assertInstanceOf('renovant\core\mail\Mailer', $Mailer);
 		return $Mailer;
 	}
 
@@ -31,7 +31,7 @@ class MailerTest extends \PHPUnit\Framework\TestCase {
 	function __testSend(Mailer $Mailer) {
 		$Message = $Mailer->newMessage();
 		$Message->setSubject('Message 4 you')
-			->setFrom('dan@metadigit.it')
+			->setFrom('dan@renovant.tech')
 			->setTo('daniele.sciacchitano@gmail.com')
 			->setBody('message content')
 		;

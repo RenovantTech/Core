@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\reflection;
+namespace renovant\core\util\reflection;
 
 class ReflectionProperty extends \ReflectionProperty {
 

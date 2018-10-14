@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
+namespace renovant\core\http;
 /**
  * HTTP Digest Authentication.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class DigestAuth {
 

@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db;
-use metadigit\core\sys;
+namespace renovant\core\db;
+use renovant\core\sys;
 /**
  * Query
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Query {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const EXP_DELIMITER = '|';
 	/** SQL criteria

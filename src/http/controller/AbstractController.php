@@ -5,21 +5,21 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\controller;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\auth\AUTH,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\Exception;
+namespace renovant\core\http\controller;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\auth\AUTH,
+	renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\Exception;
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
  * Implementation classes must implement a doHandle() method.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-abstract class AbstractController implements \metadigit\core\http\ControllerInterface {
-	use \metadigit\core\CoreTrait;
+abstract class AbstractController implements \renovant\core\http\ControllerInterface {
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	/** Controller handle method metadata (routing, params)
@@ -41,8 +41,8 @@ abstract class AbstractController implements \metadigit\core\http\ControllerInte
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);

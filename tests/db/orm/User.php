@@ -11,7 +11,7 @@ namespace test\db\orm;
  * @orm-validate-subset(extra="age, score, email")
  */
 class User {
-	use \metadigit\core\db\orm\EntityTrait;
+	use \renovant\core\db\orm\EntityTrait;
 
 	/** @orm(type="integer", primarykey, autoincrement) */
 	protected $id;

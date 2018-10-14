@@ -1,12 +1,12 @@
 <?php
 namespace test\util\reflection;
-use metadigit\core\util\reflection;
+use renovant\core\util\reflection;
 
 class DocCommentTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
-		$this->assertInstanceOf('metadigit\core\util\reflection\DocComment', $DocComment);
+		$this->assertInstanceOf('renovant\core\util\reflection\DocComment', $DocComment);
 	}
 
 	/**
@@ -14,7 +14,7 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testGetDescription() {
 		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
-		$this->assertEquals('MockClass used for testing metadigit\core\util\reflection\*', $DocComment->getDescription());
+		$this->assertEquals('MockClass used for testing renovant\core\util\reflection\*', $DocComment->getDescription());
 
 		$DocComment = (new reflection\ReflectionProperty('test\util\reflection\Mock', 'var1'))->getDocComment();
 		$this->assertEquals("Var 1\n var 1 description", $DocComment->getDescription());
@@ -66,7 +66,7 @@ class DocCommentTest extends \PHPUnit\Framework\TestCase {
 	function testGetTagValues() {
 		$DocComment = (new reflection\ReflectionClass('test\util\reflection\Mock'))->getDocComment();
 		$this->assertCount(1, $DocComment->getTagValues('author'));
-		$this->assertEquals('Daniele Sciacchitano <dan@metadigit.it>', $DocComment->getTagValues('author')[0]);
+		$this->assertEquals('Daniele Sciacchitano <dan@renovant.tech>', $DocComment->getTagValues('author')[0]);
 
 		$DocComment = (new reflection\ReflectionMethod('test\util\reflection\Mock', 'method1'))->getDocComment();
 		$this->assertCount(2, $DocComment->getTagValues('param'));

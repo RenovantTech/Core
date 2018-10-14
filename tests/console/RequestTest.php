@@ -1,6 +1,6 @@
 <?php
 namespace test\console;
-use metadigit\core\console\Request;
+use renovant\core\console\Request;
 
 class RequestTest extends \PHPUnit\Framework\TestCase {
 

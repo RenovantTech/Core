@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\context;
-use const metadigit\core\trace\T_DEPINJ;
-use metadigit\core\sys,
-	metadigit\core\util\yaml\Yaml,
-	metadigit\core\util\yaml\YamlException;
+namespace renovant\core\context;
+use const renovant\core\trace\T_DEPINJ;
+use renovant\core\sys,
+	renovant\core\util\yaml\Yaml,
+	renovant\core\util\yaml\YamlException;
 /**
  * ContextParser
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  * @internal
  */
 class ContextYamlParser {

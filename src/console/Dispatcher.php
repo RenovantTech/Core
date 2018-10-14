@@ -5,18 +5,18 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console;
-use const metadigit\core\ENVIRONMENT;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\console\view\PhpView,
-	metadigit\core\trace\Tracer;
+namespace renovant\core\console;
+use const renovant\core\ENVIRONMENT;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\console\view\PhpView,
+	renovant\core\trace\Tracer;
 /**
  * High speed implementation of CLI Dispatcher based on plain args.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Dispatcher {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 	const SIGNALS = [
 		SIGHUP => 'SIGHUP',
@@ -36,9 +36,9 @@ class Dispatcher {
 	/** Array of routes between Request URLs and Controllers names.
 	 * @var array */
 	protected $routes = [];
-	/** customizable templates dir path, default to \metadigit\core\PUBLIC_DIR
+	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR
 	 * @var string */
-	protected $resourcesDir = \metadigit\core\PUBLIC_DIR;
+	protected $resourcesDir = \renovant\core\PUBLIC_DIR;
 	/** View engines mapping
 	 * @var array */
 	protected $viewEngines = [

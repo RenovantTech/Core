@@ -5,28 +5,28 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\context;
-use metadigit\core\sys;
+namespace renovant\core\context;
+use renovant\core\sys;
 /**
  * ContextHelper
  * @internal
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ContextHelper extends sys {
 
 	/**
 	 * Get all contexts namespaces
 	 * @return array
-	 * @throws \metadigit\core\container\ContainerException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws ContextException
 	 */
 	static function getAllContexts() {
 		$namespaces = [];
 		// scan global namespaces
-		$files = scandir(\metadigit\core\BASE_DIR);
+		$files = scandir(\renovant\core\BASE_DIR);
 		foreach($files as $file) {
-			if(is_file(\metadigit\core\BASE_DIR.$file) && substr($file,-12)=='-context.yml') {
+			if(is_file(\renovant\core\BASE_DIR.$file) && substr($file,-12)=='-context.yml') {
 				$namespace = substr($file, 0, -12);
 				$namespaces[] = $namespace;
 				sys::context()->init($namespace);
@@ -44,8 +44,8 @@ class ContextHelper extends sys {
 	 * @param $dir
 	 * @param $namespaces
 	 * @throws ContextException
-	 * @throws \metadigit\core\container\ContainerException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	static private function scanNamespaceDir($namespace, $dir, &$namespaces) {
 		$files = scandir($dir);

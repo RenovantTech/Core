@@ -1,20 +1,20 @@
 <?php
 namespace test\console;
-use metadigit\core\sys,
-	metadigit\core\console\Dispatcher,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response;
+use renovant\core\sys,
+	renovant\core\console\Dispatcher,
+	renovant\core\console\Request,
+	renovant\core\console\Response;
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @return Dispatcher
-	 * @throws \metadigit\core\container\ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
-		define('metadigit\core\APP_URI', '/');
+		define('renovant\core\APP_URI', '/');
 		new Request;
 		new Response;
 		/** @var Dispatcher $Dispatcher */
@@ -67,10 +67,10 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', 'mod1 index');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'index', $Req, $Res);
-		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, '/mod1/index', $Req, $Res);
-		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
 
 		$_SERVER['argv'] = ['sys','mod1','foo1'];
@@ -79,16 +79,16 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_URI', 'mod1 foo1');
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
-		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, '/mod1/foo1', $Req, $Res);
-		$this->assertInstanceOf('metadigit\core\console\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
 	}
 
 	/**
 	 * @depends testConstruct
-	 * @expectedException \metadigit\core\console\Exception
+	 * @expectedException \renovant\core\console\Exception
 	 * @expectedExceptionCode 12
 	 * @param Dispatcher $Dispatcher
 	 */
@@ -106,8 +106,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \metadigit\core\container\ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');

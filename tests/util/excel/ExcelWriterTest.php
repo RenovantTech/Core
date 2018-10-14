@@ -1,12 +1,12 @@
 <?php
 namespace test\util\excel;
-use metadigit\core\util\excel\ExcelWriter;
+use renovant\core\util\excel\ExcelWriter;
 
 class ExcelWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ExcelWriter = new ExcelWriter();
-		$this->assertInstanceOf('metadigit\core\util\excel\ExcelWriter', $ExcelWriter);
+		$this->assertInstanceOf('renovant\core\util\excel\ExcelWriter', $ExcelWriter);
 	}
 
 	/**
@@ -21,11 +21,11 @@ class ExcelWriterTest extends \PHPUnit\Framework\TestCase {
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		];
 		$ExcelWriter->setData($data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', '_data');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', '_data');
 		$ReflProp->setAccessible(true);
 		$_data = $ReflProp->getValue($ExcelWriter);
 		$this->assertCount(3, $_data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', 'iteratorMode');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', 'iteratorMode');
 		$ReflProp->setAccessible(true);
 		$iteratorMode = $ReflProp->getValue($ExcelWriter);
 		$this->assertSame(ExcelWriter::ITERATE_ARRAY, $iteratorMode);
@@ -36,11 +36,11 @@ class ExcelWriterTest extends \PHPUnit\Framework\TestCase {
 			new \ArrayObject(['name'=>'Alistar', 'surname'=>'Green', 'age'=>24])
 		];
 		$ExcelWriter->setData($data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', '_data');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', '_data');
 		$ReflProp->setAccessible(true);
 		$_data = $ReflProp->getValue($ExcelWriter);
 		$this->assertCount(3, $_data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', 'iteratorMode');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', 'iteratorMode');
 		$ReflProp->setAccessible(true);
 		$iteratorMode = $ReflProp->getValue($ExcelWriter);
 		$this->assertSame(ExcelWriter::ITERATE_OBJECT, $iteratorMode);
@@ -54,19 +54,19 @@ class ExcelWriterTest extends \PHPUnit\Framework\TestCase {
 		$ExcelWriter->addColumn('Name', 'name', 'strtoupper')
 			->addColumn('Surname', 'surnam', 'strtoupper');
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', '_labels');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', '_labels');
 		$ReflProp->setAccessible(true);
 		$_labels = $ReflProp->getValue($ExcelWriter);
 		$this->assertCount(2, $_labels);
 		$this->assertSame('Surname', $_labels[1]);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', '_indexes');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', '_indexes');
 		$ReflProp->setAccessible(true);
 		$_indexes = $ReflProp->getValue($ExcelWriter);
 		$this->assertCount(2, $_indexes);
 		$this->assertSame('surnam', $_indexes[1]);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\excel\ExcelWriter', '_callbacks');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\excel\ExcelWriter', '_callbacks');
 		$ReflProp->setAccessible(true);
 		$_callbacks = $ReflProp->getValue($ExcelWriter);
 		$this->assertCount(2, $_callbacks);

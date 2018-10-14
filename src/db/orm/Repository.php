@@ -5,18 +5,18 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db\orm;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\db\orm\util\DataMapper,
-	metadigit\core\db\orm\util\QueryRunner,
-	metadigit\core\util\validator\Validator;
+namespace renovant\core\db\orm;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\db\orm\util\DataMapper,
+	renovant\core\db\orm\util\QueryRunner,
+	renovant\core\util\validator\Validator;
 /**
  * ORM Repository
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Repository {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	/** FETCH MODE as objects */
@@ -459,5 +459,5 @@ class Repository {
 		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 	}
 }
-class_exists('metadigit\core\db\orm\util\DataMapper');
-class_exists('metadigit\core\db\orm\util\QueryRunner');
+class_exists('renovant\core\db\orm\util\DataMapper');
+class_exists('renovant\core\db\orm\util\QueryRunner');

@@ -5,18 +5,18 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\api;
-use const metadigit\core\http\ENGINE_JSON;
-use const metadigit\core\trace\{T_ERROR, T_INFO};
-use metadigit\core\sys,
-	metadigit\core\db\orm\Exception,
-	metadigit\core\db\orm\Repository,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response;
+namespace renovant\core\api;
+use const renovant\core\http\ENGINE_JSON;
+use const renovant\core\trace\{T_ERROR, T_INFO};
+use renovant\core\sys,
+	renovant\core\db\orm\Exception,
+	renovant\core\db\orm\Repository,
+	renovant\core\http\Request,
+	renovant\core\http\Response;
 /**
  * REST ActionController proxy for ORM Repositories
  */
-class RestOrmController extends \metadigit\core\http\controller\ActionController {
+class RestOrmController extends \renovant\core\http\controller\ActionController {
 
 	/** JSON data param
 	 * @var string */
@@ -41,8 +41,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 	 * @param Response $Res
 	 * @param string $resource
 	 * @param string|null $subset
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
 	function createAction(Request $Req, Response $Res, $resource, $subset=null) {
@@ -76,8 +76,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 	 * @param string $resource
 	 * @param mixed $id
 	 * @param string|null $subset
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
 	function deleteAction(Response $Res, $resource, $id, $subset=null) {
@@ -105,8 +105,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 	 * @param integer $page
 	 * @param integer $pageSize
 	 * @param string|null $subset
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
 	function readAllAction(Response $Res, $resource, $criteriaExp=null, $orderExp=null, $page, $pageSize, $subset=null) {
@@ -130,8 +130,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 	 * @param string $resource
 	 * @param mixed $id Entity id
 	 * @param string|null $subset
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
 	function readAction(Response $Res, $resource, $id, $subset=null) {
@@ -155,8 +155,8 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 	 * @param string $resource
 	 * @param mixed $id Entity id
 	 * @param string|null $subset
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
 	function updateAction(Request $Req, Response $Res, $resource, $id, $subset=null) {
@@ -186,14 +186,14 @@ class RestOrmController extends \metadigit\core\http\controller\ActionController
 
 	/**
 	 * @param string $resource mapped URL
-	 * @return \metadigit\core\db\orm\Repository
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @return \renovant\core\db\orm\Repository
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	private function getRepository($resource) {
 		$repositoryID = $this->routes[$resource];
 		sys::trace(LOG_DEBUG, T_INFO, 'ORM Repository: '.$repositoryID);
-		/** @var \metadigit\core\db\orm\Repository $Repository */
+		/** @var \renovant\core\db\orm\Repository $Repository */
 		$Repository = sys::context()->get($repositoryID);
 		return $Repository;
 	}

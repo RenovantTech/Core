@@ -1,9 +1,9 @@
 <?php
 namespace test\api\controller;
-use metadigit\core\sys,
-	metadigit\core\api\RestOrmController,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response;
+use renovant\core\sys,
+	renovant\core\api\RestOrmController,
+	renovant\core\http\Request,
+	renovant\core\http\Response;
 
 class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 
@@ -21,12 +21,12 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @return \test\api\RestOrmController
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \renovant\core\container\ContainerException
 	 */
 	function testConstructor() {
 		/** @var \test\api\RestOrmController $RestOrmController */
 		$RestOrmController = sys::context()->container()->get('test.api.RestOrmController');
-		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $RestOrmController);
+		$this->assertInstanceOf('renovant\core\http\ControllerInterface', $RestOrmController);
 		$this->assertInstanceOf(RestOrmController::class, $RestOrmController);
 		return $RestOrmController;
 	}
@@ -34,9 +34,9 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param RestOrmController $RestOrmController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testCreateAction(RestOrmController $RestOrmController) {
 		$Req = new Request('/users', 'POST', null, ['HTTP_CONTENT_TYPE'=>'application/json'], json_encode(['name'=>'John', 'surname'=>'Brown']));
@@ -50,9 +50,9 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param RestOrmController $RestOrmController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testDeleteAction(RestOrmController $RestOrmController) {
 		$Req = new Request('/users/1', 'DELETE', null, ['HTTP_CONTENT_TYPE'=>'application/json']);
@@ -65,9 +65,9 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param RestOrmController $RestOrmController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testReadAllAction(RestOrmController $RestOrmController) {
 		$Req = new Request('/users', 'GET', null, ['HTTP_CONTENT_TYPE'=>'application/json']);
@@ -89,9 +89,9 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param RestOrmController $RestOrmController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testReadAction(RestOrmController $RestOrmController) {
 		$Req = new Request('/users/1', 'GET', null, ['HTTP_CONTENT_TYPE'=>'application/json']);
@@ -110,9 +110,9 @@ class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param RestOrmController $RestOrmController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testUpdateAction(RestOrmController $RestOrmController) {
 		$Req = new Request('/users/1', 'PUT', null, ['HTTP_CONTENT_TYPE'=>'application/json'], json_encode(['name'=>'John', 'surname'=>'Brown']));

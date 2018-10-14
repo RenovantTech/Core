@@ -1,8 +1,8 @@
 <?php
 namespace test\auth\provider;
-use metadigit\core\sys,
-	metadigit\core\auth\AUTH,
-	metadigit\core\auth\provider\PdoProvider;
+use renovant\core\sys,
+	renovant\core\auth\AUTH,
+	renovant\core\auth\provider\PdoProvider;
 
 class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 
@@ -39,7 +39,7 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \renovant\core\container\ContainerException
 	 */
 	function testAuthenticateById(PdoProvider $PdoProvider) {
 		$AUTH = sys::auth();

@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\session\handler;
-use metadigit\core\sys,
-	metadigit\core\http\SessionException;
+namespace renovant\core\http\session\handler;
+use renovant\core\sys,
+	renovant\core\http\SessionException;
 /**
  * HTTP Session Handler implementation with a Mysql database.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Mysql implements \SessionHandlerInterface {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
@@ -60,7 +60,7 @@ class Mysql implements \SessionHandlerInterface {
 	 * Is first function called by PHP when a session is started
 	 * @param string $p save path
 	 * @param string $n session name
-	 * @throws \metadigit\core\http\SessionException
+	 * @throws \renovant\core\http\SessionException
 	 * @return boolean TRUE on success
 	 */
 	function open($p, $n) {

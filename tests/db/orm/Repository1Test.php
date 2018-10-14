@@ -1,11 +1,11 @@
 <?php
 namespace test\db\orm;
-use metadigit\core\sys,
-	metadigit\core\acl\ACL,
-	metadigit\core\context\Context,
-	metadigit\core\db\orm\Exception,
-	metadigit\core\db\orm\Repository,
-	metadigit\core\util\DateTime,
+use renovant\core\sys,
+	renovant\core\acl\ACL,
+	renovant\core\context\Context,
+	renovant\core\db\orm\Exception,
+	renovant\core\db\orm\Repository,
+	renovant\core\util\DateTime,
 	test\acl\ACLTest;
 
 class Repository1Test extends \PHPUnit\Framework\TestCase {
@@ -95,7 +95,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$UsersRepository = sys::context()->container()->get('test.db.orm.UserRepository');
-		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $UsersRepository);
+		$this->assertInstanceOf('renovant\core\db\orm\Repository', $UsersRepository);
 		return $UsersRepository;
 	}
 

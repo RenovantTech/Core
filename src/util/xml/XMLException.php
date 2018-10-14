@@ -5,9 +5,9 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\xml;
+namespace renovant\core\util\xml;
 
-class XMLException extends \metadigit\core\Exception {
+class XMLException extends \renovant\core\Exception {
 	const COD1 = 'Validation with DTD Schema failed';
 	const COD2 = 'Validation with XML Schema failed.';
 	const COD3 = 'Validation with RelaxNG Schema failed';

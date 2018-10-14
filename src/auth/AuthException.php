@@ -5,11 +5,11 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\auth;
-use metadigit\core\Exception;
+namespace renovant\core\auth;
+use renovant\core\Exception;
 /**
  * 401 Unauthorized
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class AuthException extends Exception {
 	// COOKIE

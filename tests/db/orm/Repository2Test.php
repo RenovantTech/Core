@@ -1,9 +1,9 @@
 <?php
 namespace test\db\orm;
-use metadigit\core\sys,
-	metadigit\core\acl\ACL,
-	metadigit\core\context\Context,
-	metadigit\core\db\orm\Repository,
+use renovant\core\sys,
+	renovant\core\acl\ACL,
+	renovant\core\context\Context,
+	renovant\core\db\orm\Repository,
 	test\acl\ACLTest;
 
 class Repository2Test extends \PHPUnit\Framework\TestCase {
@@ -47,7 +47,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$StatsRepository = sys::context()->container()->get('test.db.orm.StatsRepository');
-		$this->assertInstanceOf('metadigit\core\db\orm\Repository', $StatsRepository);
+		$this->assertInstanceOf('renovant\core\db\orm\Repository', $StatsRepository);
 		return $StatsRepository;
 	}
 

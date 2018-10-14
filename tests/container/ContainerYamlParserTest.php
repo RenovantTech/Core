@@ -1,8 +1,8 @@
 <?php
 namespace test\container;
-use metadigit\core\container\ContainerException,
-	metadigit\core\container\ContainerYamlParser;
-use metadigit\core\CoreProxy;
+use renovant\core\container\ContainerException,
+	renovant\core\container\ContainerYamlParser;
+use renovant\core\CoreProxy;
 
 class ContainerYamlParserTest extends \PHPUnit\Framework\TestCase {
 

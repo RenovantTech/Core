@@ -1,7 +1,7 @@
 <?php
 namespace test\util\yaml;
-use metadigit\core\util\yaml\Yaml,
-	metadigit\core\util\yaml\YamlException;
+use renovant\core\util\yaml\Yaml,
+	renovant\core\util\yaml\YamlException;
 
 class YamlTest extends \PHPUnit\Framework\TestCase {
 

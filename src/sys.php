@@ -5,26 +5,26 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core;
-use const metadigit\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use metadigit\core\acl\ACL,
-	metadigit\core\auth\AUTH,
-	metadigit\core\auth\AuthException,
-	metadigit\core\console\CmdManager,
-	metadigit\core\console\Event as ConsoleEvent,
-	metadigit\core\container\Container,
-	metadigit\core\container\ContainerException,
-	metadigit\core\context\Context,
-	metadigit\core\context\ContextException,
-	metadigit\core\event\Event,
-	metadigit\core\event\EventDispatcher,
-	metadigit\core\event\EventDispatcherException,
-	metadigit\core\http\Event as HttpEvent,
-	metadigit\core\log\Logger,
-	metadigit\core\queue\Queue;
+namespace renovant\core;
+use const renovant\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
+use renovant\core\acl\ACL,
+	renovant\core\auth\AUTH,
+	renovant\core\auth\AuthException,
+	renovant\core\console\CmdManager,
+	renovant\core\console\Event as ConsoleEvent,
+	renovant\core\container\Container,
+	renovant\core\container\ContainerException,
+	renovant\core\context\Context,
+	renovant\core\context\ContextException,
+	renovant\core\event\Event,
+	renovant\core\event\EventDispatcher,
+	renovant\core\event\EventDispatcherException,
+	renovant\core\http\Event as HttpEvent,
+	renovant\core\log\Logger,
+	renovant\core\queue\Queue;
 /**
  * System Kernel
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class sys {
 
@@ -42,19 +42,19 @@ class sys {
 		__NAMESPACE__ => __DIR__
 	];
 	/** System Cache
-	 * @var \metadigit\core\cache\CacheInterface */
+	 * @var \renovant\core\cache\CacheInterface */
 	static protected $Cache;
 	/** System Container
-	 * @var \metadigit\core\container\Container */
+	 * @var \renovant\core\container\Container */
 	static protected $Container;
 	/** System Context
-	 * @var \metadigit\core\context\Context */
+	 * @var \renovant\core\context\Context */
 	static protected $Context;
 	/** System EventDispatcher
-	 * @var \metadigit\core\event\EventDispatcher */
+	 * @var \renovant\core\event\EventDispatcher */
 	static protected $EventDispatcher;
 	/** Logger
-	 * @var \metadigit\core\log\Logger */
+	 * @var \renovant\core\log\Logger */
 	static protected $Logger;
 	/** Log buffer
 	 * @var array */
@@ -440,7 +440,7 @@ class sys {
 	 */
 	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
 		if($level > self::$traceLevel) return;
-		$fn = str_replace('metadigit\core', '\\', $function?:self::$traceFn);
+		$fn = str_replace('renovant\core', '\\', $function?:self::$traceFn);
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
 	}
 

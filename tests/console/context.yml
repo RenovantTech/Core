@@ -1,7 +1,7 @@
 services:
   # Dispatcher
   test.console.Dispatcher:
-    class: metadigit\core\console\Dispatcher
+    class: renovant\core\console\Dispatcher
     properties:
       routes:
         db: test.console.AbstractController

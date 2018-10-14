@@ -1,7 +1,7 @@
 <?php
 namespace test\container;
-use metadigit\core\container\Container,
-	metadigit\core\container\ContainerException;
+use renovant\core\container\Container,
+	renovant\core\container\ContainerException;
 
 class ContainerTest extends \PHPUnit\Framework\TestCase {
 
@@ -39,7 +39,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Container $Container
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testGet(Container $Container) {
 		// only ID
@@ -80,14 +80,14 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 		$Mock2 = $Container->get('test.container.Mock2');
 		$this->assertInstanceOf('test\container\Mock2', $Mock2);
 		$this->assertEquals('Mock2', $Mock2->name());
-		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock2->getChild());
+		$this->assertInstanceOf('renovant\core\CoreProxy', $Mock2->getChild());
 		$this->assertEquals('SystemMock', $Mock2->getChild()->name());
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param Container $Container
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testGetException(Container $Container) {
 		try {
@@ -125,7 +125,7 @@ class ContainerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Container $Container
 	 * @throws ContainerException
-	 * @throws \metadigit\core\util\yaml\YamlException
+	 * @throws \renovant\core\util\yaml\YamlException
 	 */
 	function testGetAllByType(Container $Container) {
 		$objs = $Container->getAllByType('test\container\Mock1');

@@ -1,9 +1,9 @@
 <?php
 namespace test\http\controller;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response;
+use renovant\core\http\Request,
+	renovant\core\http\Response;
 
-class RestActionController extends \metadigit\core\http\controller\ActionController {
+class RestActionController extends \renovant\core\http\controller\ActionController {
 
 	/**
 	 * @routing(method="POST", pattern="<class>")
@@ -59,8 +59,8 @@ class RestActionController extends \metadigit\core\http\controller\ActionControl
 
 	/**
 	 * @routing(method="DELETE", pattern="<class>/<id>")
-	 * @param \metadigit\core\http\Request $Req
-	 * @param \metadigit\core\http\Response $Res
+	 * @param \renovant\core\http\Request $Req
+	 * @param \renovant\core\http\Response $Res
 	 * @param string $class
 	 * @param integer $id
 	 */

@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\html;
-use metadigit\core\sys;
+namespace renovant\core\util\html;
+use renovant\core\sys;
 /**
  * HTML Writer
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class HtmlWriter {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const ITERATE_ARRAY = 1;
 	const ITERATE_OBJECT = 2;

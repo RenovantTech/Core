@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log\writer;
-use metadigit\core\log\Logger;
+namespace renovant\core\log\writer;
+use renovant\core\log\Logger;
 /**
  * Writes logs to file
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class FileWriter implements \metadigit\core\log\LogWriterInterface {
+class FileWriter implements \renovant\core\log\LogWriterInterface {
 
 	const DEFAULT_FILENAME = 'system.log';
 	/** log file path
@@ -26,7 +26,7 @@ class FileWriter implements \metadigit\core\log\LogWriterInterface {
 	 */
 	function __construct($filename=self::DEFAULT_FILENAME) {
 		$this->filename = $filename;
-		if('/'!=$this->filename[0]) $this->filename = \metadigit\core\LOG_DIR.$this->filename;
+		if('/'!=$this->filename[0]) $this->filename = \renovant\core\LOG_DIR.$this->filename;
 		if(!file_exists(dirname($this->filename))) mkdir(dirname($this->filename), 0700, true);
 		if(!file_exists($this->filename)) touch($this->filename);
 	}

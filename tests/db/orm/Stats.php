@@ -5,7 +5,7 @@ namespace test\db\orm;
  * @orm(source="stats")
  */
 class Stats {
-	use \metadigit\core\db\orm\EntityTrait;
+	use \renovant\core\db\orm\EntityTrait;
 
 	/** @orm(type="string", primarykey) */
 	protected $code;

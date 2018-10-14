@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util;
+namespace renovant\core\util;
 /**
  * Date: extends base php DataTime class.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Date extends \DateTime {
 

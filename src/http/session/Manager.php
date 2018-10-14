@@ -5,17 +5,17 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\session;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\container\Container,
-	metadigit\core\http\SessionException;
+namespace renovant\core\http\session;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\container\Container,
+	renovant\core\http\SessionException;
 /**
  * HTTP Session Manager.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Manager {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	const EVENT_START	= 'http.session:start';
@@ -34,7 +34,7 @@ class Manager {
 	/** Handler config
 	 * @var array */
 	protected $handlerCnf = [
-		'class' => 'metadigit\core\http\session\handler\Mysql',
+		'class' => 'renovant\core\http\session\handler\Mysql',
 		'constructor' => null,
 		'properties' => [
 			'pdo' => 'master',

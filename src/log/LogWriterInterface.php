@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log;
+namespace renovant\core\log;
 /**
  * General interface for LogWriters used by Logger to store log messages.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 interface LogWriterInterface {
 

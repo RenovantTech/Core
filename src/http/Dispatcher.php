@@ -5,34 +5,34 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\auth\AuthException,
-	metadigit\core\http\view\FileView,
-	metadigit\core\http\view\CsvView,
-	metadigit\core\http\view\ExcelView,
-	metadigit\core\http\view\JsonView,
-	metadigit\core\http\view\PhpView,
-	metadigit\core\http\view\PhpTALView,
-//	metadigit\core\http\view\SmartyView,
-//	metadigit\core\http\view\TwigView,
-	metadigit\core\http\view\XSendFileView,
-	metadigit\core\trace\Tracer;
+namespace renovant\core\http;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\auth\AuthException,
+	renovant\core\http\view\FileView,
+	renovant\core\http\view\CsvView,
+	renovant\core\http\view\ExcelView,
+	renovant\core\http\view\JsonView,
+	renovant\core\http\view\PhpView,
+	renovant\core\http\view\PhpTALView,
+//	renovant\core\http\view\SmartyView,
+//	renovant\core\http\view\TwigView,
+	renovant\core\http\view\XSendFileView,
+	renovant\core\trace\Tracer;
 /**
  * High speed implementation of HTTP Dispatcher based on URLs.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Dispatcher {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	/** Array of routes between Request URLs and Controllers names.
 	 * @var array */
 	protected $routes = [];
-	/** customizable templates dir path, default to \metadigit\core\PUBLIC_DIR
+	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR
 	 * @var string */
-	protected $resourcesDir = \metadigit\core\PUBLIC_DIR;
+	protected $resourcesDir = \renovant\core\PUBLIC_DIR;
 	/** default View engine
 	 * @var string */
 	protected $viewEngine = null;
@@ -58,8 +58,8 @@ class Dispatcher {
 	 * @param Request $Req
 	 * @param Response $Res
 	 * @throws \ReflectionException
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function dispatch(Request $Req, Response $Res) {
 		ob_start(null, 0, PHP_OUTPUT_HANDLER_STDFLAGS);

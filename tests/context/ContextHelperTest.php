@@ -1,6 +1,6 @@
 <?php
 namespace test\context;
-use metadigit\core\context\ContextHelper;
+use renovant\core\context\ContextHelper;
 
 class ContextHelperTest extends \PHPUnit\Framework\TestCase {
 

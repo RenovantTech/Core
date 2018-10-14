@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\cache;
-use const metadigit\core\trace\T_CACHE;
-use metadigit\core\sys;
+namespace renovant\core\cache;
+use const renovant\core\trace\T_CACHE;
+use renovant\core\sys;
 /**
  * Sqlite implementation of CacheInterface
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class SqliteCache implements CacheInterface {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
@@ -148,7 +148,7 @@ class SqliteCache implements CacheInterface {
 				//@TODO
 				break;
 		}
-		file_put_contents(\metadigit\core\TMP_DIR.$this->pdo.'.vacuum','');
+		file_put_contents(\renovant\core\TMP_DIR.$this->pdo.'.vacuum','');
 		return true;
 	}
 

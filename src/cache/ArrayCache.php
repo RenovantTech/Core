@@ -5,16 +5,16 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\cache;
-use const metadigit\core\trace\T_CACHE;
-use metadigit\core\sys;
+namespace renovant\core\cache;
+use const renovant\core\trace\T_CACHE;
+use renovant\core\sys;
 /**
  * Array implementation of CacheInterface, useful for testing.
  * ATTENTION: it's volatile, only in the current Request.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ArrayCache implements CacheInterface {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	/** Cache store
 	 * @var array */

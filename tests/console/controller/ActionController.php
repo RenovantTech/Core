@@ -1,9 +1,9 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\Request,
-	metadigit\core\console\Response;
+use renovant\core\console\Request,
+	renovant\core\console\Response;
 
-class ActionController extends \metadigit\core\console\controller\ActionController {
+class ActionController extends \renovant\core\console\controller\ActionController {
 
 	const FALLBACK_ACTION = 'fallback';
 

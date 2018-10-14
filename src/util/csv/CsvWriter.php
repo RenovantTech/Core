@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\csv;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\util\csv;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * CSV Writer
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class CsvWriter {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const ITERATE_ARRAY = 1;
 	const ITERATE_OBJECT = 2;

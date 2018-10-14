@@ -5,8 +5,8 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\trace;
-use metadigit\core\sys;
+namespace renovant\core\trace;
+use renovant\core\sys;
 
 const LABELS = [
 		E_ERROR=>'E_ERROR',

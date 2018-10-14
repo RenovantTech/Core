@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\console;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * CLI Response.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Response {
 
@@ -193,7 +193,7 @@ class Response {
 		sys::trace(LOG_DEBUG, T_INFO, null, null. 'sys.console.Response->send');
 		if($this->outputBuffer) ob_flush();
 		ini_set('precision', 16);
-		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));
+		define('renovant\core\trace\TRACE_END_TIME', microtime(1));
 		ini_restore('precision');
 	}
 

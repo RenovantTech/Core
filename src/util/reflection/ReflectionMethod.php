@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\reflection;
+namespace renovant\core\util\reflection;
 
 class ReflectionMethod extends \ReflectionMethod {
 
@@ -15,7 +15,7 @@ class ReflectionMethod extends \ReflectionMethod {
 
 	/**
 	 * Replacement for the original getParameters() method which makes sure
-	 * that org\metadigit\util\reflection\ReflectionParameter objects are returned instead of the
+	 * that org\renovant\util\reflection\ReflectionParameter objects are returned instead of the
 	 * original ReflectionParameter instances.
 	 * @return ReflectionParameter[] Parameter reflection objects of the parameters of this method
 	 * @throws \ReflectionException

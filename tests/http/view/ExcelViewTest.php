@@ -1,21 +1,21 @@
 <?php
 namespace test\http\view;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\view\ExcelView;
+use renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\view\ExcelView;
 
 class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ExcelView = new ExcelView;
-		$this->assertInstanceOf('metadigit\core\http\view\ExcelView', $ExcelView);
+		$this->assertInstanceOf('renovant\core\http\view\ExcelView', $ExcelView);
 		return $ExcelView;
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param ExcelView $ExcelView
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testRender(ExcelView $ExcelView) {
 		ob_start();
@@ -35,7 +35,7 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 201
 	 * @param ExcelView $ExcelView
 	 */
@@ -48,7 +48,7 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 202
 	 * @param ExcelView $ExcelView
 	 */
@@ -61,7 +61,7 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 203
 	 * @param ExcelView $ExcelView
 	 */

@@ -1,8 +1,8 @@
 <?php
 namespace test\event;
-use metadigit\core\event\Event,
-	metadigit\core\event\EventDispatcher,
-	metadigit\core\event\EventDispatcherException;
+use renovant\core\event\Event,
+	renovant\core\event\EventDispatcher,
+	renovant\core\event\EventDispatcherException;
 
 $p1 = 'Hello';
 $p2 = 'Byebye';
@@ -38,7 +38,7 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$EventDispatcher = new EventDispatcher;
-		$this->assertInstanceOf('metadigit\core\event\EventDispatcher', $EventDispatcher);
+		$this->assertInstanceOf('renovant\core\event\EventDispatcher', $EventDispatcher);
 		return $EventDispatcher;
 	}
 
@@ -76,7 +76,7 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback0', 2);
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback3');
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback4');
-		$ReflProp = new \ReflectionProperty('metadigit\core\event\EventDispatcher', 'listeners');
+		$ReflProp = new \ReflectionProperty('renovant\core\event\EventDispatcher', 'listeners');
 		$ReflProp->setAccessible(true);
 		$listeners = $ReflProp->getValue($EventDispatcher);
 		$this->assertEquals('test\event\callback1', $listeners['TEST.EVENT.ADD1'][1][0]);
@@ -95,7 +95,7 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('Hello', $p1);
 		$this->assertEquals('Byebye', $p2);
 		$Event = $EventDispatcher->trigger('test.event.add1', ['p1'=>'hello', 'p2'=>'world']);
-		$this->assertInstanceOf('metadigit\core\event\Event', $Event);
+		$this->assertInstanceOf('renovant\core\event\Event', $Event);
 		$this->assertEquals('Hello Big World 1', $p1);
 		$this->assertEquals('Byebye World 3', $p2);
 		$this->assertTrue($Event->isPropagationStopped());

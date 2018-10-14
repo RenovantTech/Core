@@ -1,21 +1,21 @@
 <?php
 namespace test\http\controller;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response;
+use renovant\core\http\Request,
+	renovant\core\http\Response;
 
 class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @return AbstractController
 	 * @throws \ReflectionException
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testConstructor() {
 		$AbstractController = new AbstractController;
-		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $AbstractController);
-		$this->assertInstanceOf('metadigit\core\http\controller\AbstractController', $AbstractController);
+		$this->assertInstanceOf('renovant\core\http\ControllerInterface', $AbstractController);
+		$this->assertInstanceOf('renovant\core\http\controller\AbstractController', $AbstractController);
 
-		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\AbstractController', '_config');
+		$RefProp = new \ReflectionProperty('renovant\core\http\controller\AbstractController', '_config');
 		$RefProp->setAccessible(true);
 		$_config = $RefProp->getValue($AbstractController);
 
@@ -36,8 +36,8 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param \test\http\controller\AbstractController $AbstractController
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testHandle(AbstractController $AbstractController) {
 		$_SERVER['REQUEST_URI'] = '/catalog/books/history+math/32';

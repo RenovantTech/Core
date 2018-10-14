@@ -53,17 +53,17 @@ settings:
 # =========================================================
 cache:
   #sys:           ### System cache, override with CAUTION
-    #class:       metadigit\core\cache\SqliteCache
+    #class:       renovant\core\cache\SqliteCache
     #constructor: ['sys-cache', 'cache', true]
   main:
-    class:        metadigit\core\cache\SqliteCache
+    class:        renovant\core\cache\SqliteCache
     constructor:  [ 'sqlite', 'cache', false ]
 
 # =========================================================
 # CmdManager service
 # =========================================================
 sys.CmdManager:
-  # class: metadigit\core\console\CmdManager
+  # class: renovant\core\console\CmdManager
   constructor:
     pdo:    sqlite
     table:  sys_cmd
@@ -77,7 +77,7 @@ database:
   #sys-trace:  ### System trace DB, override with CAUTION
   #  dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
   sqlite:
-    dns:      sqlite:/tmp/metadigit-core/db.sqlite
+    dns:      sqlite:/tmp/renovant-core/db.sqlite
   mysql:
     dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
     user:     phpunit
@@ -90,13 +90,13 @@ log:
   kernel:
     level:    LOG_INFO
     facility: kernel
-    class:    metadigit\core\log\writer\FileWriter
+    class:    renovant\core\log\writer\FileWriter
     param1:   kernel.log
     param2:   null
   system:
     level:    LOG_DEBUG
     facility: null
-    class:    metadigit\core\log\writer\FileWriter
+    class:    renovant\core\log\writer\FileWriter
     param1:   system.log
     param2:   null
 
@@ -131,7 +131,7 @@ services:
   # ACL service
   # -------------------------------------------------------
   sys.ACL:
-    class: metadigit\core\acl\ACL
+    class: renovant\core\acl\ACL
     constructor:
       # available modules: ORM, ROUTING, SERVICES
       modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
@@ -146,7 +146,7 @@ services:
   # AUTH service
   # -------------------------------------------------------
   sys.AUTH:
-    class: metadigit\core\auth\AUTH
+    class: renovant\core\auth\AUTH
     constructor:
       module: SESSION
     properties:
@@ -159,7 +159,7 @@ services:
       skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
 
   sys.AuthProvider:
-    class: metadigit\core\auth\provider\PdoProvider
+    class: renovant\core\auth\provider\PdoProvider
     constructor:
       pdo:        mysql
       tables:
@@ -173,7 +173,7 @@ services:
   # SESSION service
   # -------------------------------------------------------
   sys.HttpSession:
-    class: metadigit\core\http\session\Manager
+    class: renovant\core\http\session\Manager
     constructor:
       # session cookie parameters
       cookie:
@@ -185,7 +185,7 @@ services:
         httponly: true      #
       # session handler
       handler:
-        class: metadigit\core\http\session\handler\Mysql
+        class: renovant\core\http\session\handler\Mysql
         properties:
           pdo:    mysql
           table:  sys_sessions
@@ -194,7 +194,7 @@ services:
   # QUEUE service
   # -------------------------------------------------------
   sys.Queue:
-    class: metadigit\core\queue\Queue
+    class: renovant\core\queue\Queue
     constructor:
       pdo:        mysql
       table:      sys_queue

@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db\orm;
-use metadigit\core\db\Query;
+namespace renovant\core\db\orm;
+use renovant\core\db\Query;
 /**
  * ORM Event
  * Main event passed throughout ORM flow.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class OrmEvent extends \metadigit\core\event\Event {
+class OrmEvent extends \renovant\core\event\Event {
 
 	const EVENT_PRE_COUNT		= 'orm:pre-count';
 	const EVENT_PRE_DELETE		= 'orm:pre-delete';

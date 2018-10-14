@@ -1,9 +1,9 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\Request,
-	metadigit\core\console\Response;
+use renovant\core\console\Request,
+	renovant\core\console\Response;
 
-class AbstractController extends \metadigit\core\console\controller\AbstractController {
+class AbstractController extends \renovant\core\console\controller\AbstractController {
 
 	/**
 	 * @param Request $Req

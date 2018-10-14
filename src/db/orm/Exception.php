@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db\orm;
+namespace renovant\core\db\orm;
 /**
  * ORM Exception
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Exception extends \metadigit\core\Exception {
+class Exception extends \renovant\core\Exception {
 	// C (create)
 	const COD100 = 'INSERT %s - PDOException: %s - %s';
 	// R (read)

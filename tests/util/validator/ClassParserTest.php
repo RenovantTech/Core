@@ -1,6 +1,6 @@
 <?php
 namespace test\util\validator;
-use metadigit\core\util\validator\ClassParser;
+use renovant\core\util\validator\ClassParser;
 
 class ClassParserTest extends \PHPUnit\Framework\TestCase {
 

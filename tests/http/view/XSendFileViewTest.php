@@ -1,14 +1,14 @@
 <?php
 namespace test\http\view;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\view\XSendFileView;
+use renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\view\XSendFileView;
 
 class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$XSendFileView = new XSendFileView;
-		$this->assertInstanceOf('metadigit\core\http\view\XSendFileView', $XSendFileView);
+		$this->assertInstanceOf('renovant\core\http\view\XSendFileView', $XSendFileView);
 		return $XSendFileView;
 	}
 
@@ -30,7 +30,7 @@ class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 201
 	 * @param XSendFileView $XSendFileView
 	 */

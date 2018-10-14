@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\event;
-use const metadigit\core\trace\T_EVENT;
-use metadigit\core\sys,
-	metadigit\core\context\ContextException;
+namespace renovant\core\event;
+use const renovant\core\trace\T_EVENT;
+use renovant\core\sys,
+	renovant\core\context\ContextException;
 /**
  * The EventDispatcher is the core of the framework event system.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class EventDispatcher {
 

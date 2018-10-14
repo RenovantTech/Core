@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\acl;
+namespace renovant\core\acl;
 /**
  * ACL Exception
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Exception extends \metadigit\core\Exception {
+class Exception extends \renovant\core\Exception {
 	// ACTIONS
 	const COD100 = '[ACTION] "%s" DENIED';
 	// FILTERS

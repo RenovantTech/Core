@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\http;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * HTTP Response.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Response {
 
@@ -199,7 +199,7 @@ class Response {
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
 		ini_set('precision', 16);
-		define('metadigit\core\trace\TRACE_END_TIME', microtime(1));
+		define('renovant\core\trace\TRACE_END_TIME', microtime(1));
 		ini_restore('precision');
 	}
 
@@ -220,7 +220,7 @@ class Response {
 	 * Set the View name to be rendered with Response data
 	 * @param string $view View name
 	 * @param array|null $options View options
-	 * @param \metadigit\core\http\ViewInterface|string|integer|null $engine View Engine to be used
+	 * @param \renovant\core\http\ViewInterface|string|integer|null $engine View Engine to be used
 	 * @return Response
 	 */
 	function setView($view, array $options=null, $engine=null): Response {

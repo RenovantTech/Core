@@ -1,8 +1,8 @@
 <?php
 namespace test\console;
-use const metadigit\core\TMP_DIR;
-use metadigit\core\console\Exception,
-	metadigit\core\console\Response;
+use const renovant\core\TMP_DIR;
+use renovant\core\console\Exception,
+	renovant\core\console\Response;
 
 class ResponseTest extends \PHPUnit\Framework\TestCase {
 
@@ -30,7 +30,7 @@ class ResponseTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Response $Response
 	 * @return Response
-	 * @throws \metadigit\core\console\Exception
+	 * @throws \renovant\core\console\Exception
 	 */
 	function testSetOutput(Response $Response) {
 		$output = fopen(TMP_DIR.'console.response.out', 'w');

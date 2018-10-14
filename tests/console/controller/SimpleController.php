@@ -1,9 +1,9 @@
 <?php
 namespace test\console\controller;
-use metadigit\core\console\Request,
-	metadigit\core\console\Response;
+use renovant\core\console\Request,
+	renovant\core\console\Response;
 
-class SimpleController implements \metadigit\core\console\ControllerInterface {
+class SimpleController implements \renovant\core\console\ControllerInterface {
 
 	function handle(Request $Req, Response $Res) {
 		$Res->setView('index');

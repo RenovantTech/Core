@@ -5,16 +5,16 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console;
-use const metadigit\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR};
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\console;
+use const renovant\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR};
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * CmdManager
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class CmdManager {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	/**
 	 * CLI command start

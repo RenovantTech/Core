@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\acl;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\http\Request;
+namespace renovant\core\acl;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\http\Request;
 
 class ACL {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 
 	const MOD_ORM		= 'ORM';
 	const MOD_ROUTING	= 'ROUTING';

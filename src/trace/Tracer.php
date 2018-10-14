@@ -5,11 +5,11 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\trace;
-use metadigit\core\sys;
+namespace renovant\core\trace;
+use renovant\core\sys;
 /**
  * Tracer
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Tracer extends sys {
 
@@ -46,7 +46,7 @@ class Tracer extends sys {
 	 * @param \Throwable $Ex the Error/Exception raised
 	 */
 	static function onException(\Throwable $Ex) {
-		$level = ($Ex instanceof \metadigit\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
+		$level = ($Ex instanceof \renovant\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
 		switch($level) {
 			case E_USER_NOTICE: if(self::$errorLevel < self::E_NOTICE) self::$errorLevel = self::E_NOTICE; break;
 			case E_USER_WARNING: if(self::$errorLevel < self::E_WARNING) self::$errorLevel = self::E_WARNING; break;

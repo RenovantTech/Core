@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\yaml;
-use const metadigit\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
-use const metadigit\core\trace\T_DEPINJ;
-use metadigit\core\sys,
-	metadigit\core\CoreProxy;
+namespace renovant\core\util\yaml;
+use const renovant\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
+use const renovant\core\trace\T_DEPINJ;
+use renovant\core\sys,
+	renovant\core\CoreProxy;
 /**
  * YAML Parser
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Yaml {
 

@@ -1,7 +1,7 @@
 services:
   # Dispatcher
   test.http.Dispatcher:
-    class: metadigit\core\http\Dispatcher
+    class: renovant\core\http\Dispatcher
     properties:
       routes:
         /blog/<category>/: test.http.ActionController

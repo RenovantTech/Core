@@ -1,6 +1,6 @@
 <?php
 namespace test\console;
-use metadigit\core\console\CmdManager;
+use renovant\core\console\CmdManager;
 
 class CmdManagerTest extends \PHPUnit\Framework\TestCase {
 

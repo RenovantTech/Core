@@ -1,11 +1,11 @@
 <?php
 namespace test\context;
-use metadigit\core\container\Container,
-	metadigit\core\container\ContainerException,
-	metadigit\core\context\Context,
-	metadigit\core\context\ContextException,
-	metadigit\core\event\EventDispatcher,
-	metadigit\core\event\EventDispatcherException,
+use renovant\core\container\Container,
+	renovant\core\container\ContainerException,
+	renovant\core\context\Context,
+	renovant\core\context\ContextException,
+	renovant\core\event\EventDispatcher,
+	renovant\core\event\EventDispatcherException,
 	test\acl\ACLTest;
 
 class ContextTest extends \PHPUnit\Framework\TestCase {
@@ -66,7 +66,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$Mock = $Context->get('test.context.Mock1');
 		$this->assertEquals('foo', $Mock->getProp1());
 		$this->assertEquals('bar', $Mock->getProp2());
-		$this->assertInstanceOf('metadigit\core\CoreProxy', $Mock->getChild());
+		$this->assertInstanceOf('renovant\core\CoreProxy', $Mock->getChild());
 		$this->assertEquals('SystemMock', $Mock->getChild()->name());
 
 		// Test GET on included Contexts via ObjectProxy
@@ -74,7 +74,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
 
 		// sys service, no proxy
-		$this->assertInstanceOf('metadigit\core\acl\ACL', $Context->get('sys.ACL'));
+		$this->assertInstanceOf('renovant\core\acl\ACL', $Context->get('sys.ACL'));
 		ACLTest::tearDownAfterClass();
 	}
 

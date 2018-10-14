@@ -1,6 +1,6 @@
 <?php
 namespace test\http;
-use metadigit\core\http\Request;
+use renovant\core\http\Request;
 
 class RequestTest extends \PHPUnit\Framework\TestCase {
 

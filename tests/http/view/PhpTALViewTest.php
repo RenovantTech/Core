@@ -1,21 +1,21 @@
 <?php
 namespace test\http\view;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\view\PhpTALView;
+use renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\view\PhpTALView;
 
 class PhpTALViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$PhpTALView = new PhpTALView;
-		$this->assertInstanceOf('metadigit\core\http\view\PhpTALView', $PhpTALView);
+		$this->assertInstanceOf('renovant\core\http\view\PhpTALView', $PhpTALView);
 		return $PhpTALView;
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param PhpTALView $PhpTALView
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 * @throws \PHPTAL_ConfigurationException
 	 */
 	function testRender(PhpTALView $PhpTALView) {

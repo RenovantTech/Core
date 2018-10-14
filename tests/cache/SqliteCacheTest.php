@@ -1,7 +1,7 @@
 <?php
 namespace test\cache;
-use metadigit\core\sys,
-	metadigit\core\cache\SqliteCache;
+use renovant\core\sys,
+	renovant\core\cache\SqliteCache;
 
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
@@ -22,13 +22,13 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Cache = new SqliteCache('sqlite', 'sqlite-cache');
-		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $Cache);
+		$this->assertInstanceOf('renovant\core\cache\SqliteCache', $Cache);
 		return $Cache;
 	}
 
 	function testConstructor2() {
 		$CacheWithBuffer = new SqliteCache('sqlite', 'sqlite-cache-buffered', true);
-		$this->assertInstanceOf('metadigit\core\cache\SqliteCache', $CacheWithBuffer);
+		$this->assertInstanceOf('renovant\core\cache\SqliteCache', $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
 

@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\xml;
+namespace renovant\core\util\xml;
 /**
  * XMLHelper
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class XMLHelper {
 	/**

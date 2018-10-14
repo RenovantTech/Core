@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\util\validator;
-use metadigit\core\util\reflection\ReflectionClass;
+namespace renovant\core\util\validator;
+use renovant\core\util\reflection\ReflectionClass;
 /**
  * ClassParser
  * Helper class that analyzes Entity class, parsing @validate tags.
  * @internal
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ClassParser {
 

@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http;
+namespace renovant\core\http;
 /**
  * MVC Exception
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Exception extends \metadigit\core\Exception {
+class Exception extends \renovant\core\Exception {
 	/* Dispatcher */
 	const COD11 = 'Dispatcher Exception - impossible to detect controller for this URL: %s';
 	const COD12 = 'Dispatcher Exception - View Engine "%s" not valid, must be resolved to a class implementing ViewInterface';

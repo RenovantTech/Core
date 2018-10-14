@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\container;
-use const metadigit\core\trace\T_DEPINJ;
-use metadigit\core\sys;
+namespace renovant\core\container;
+use const renovant\core\trace\T_DEPINJ;
+use renovant\core\sys;
 /**
  * Dependency Injection Container
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Container {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;

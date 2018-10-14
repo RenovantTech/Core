@@ -1,6 +1,6 @@
 <?php
 namespace test\util\crypto;
-use metadigit\core\util\crypto\Crypto;
+use renovant\core\util\crypto\Crypto;
 
 class CryptoTest extends \PHPUnit\Framework\TestCase {
 

@@ -5,11 +5,11 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\auth;
-use metadigit\core\Exception as CoreException;
+namespace renovant\core\auth;
+use renovant\core\Exception as CoreException;
 /**
  * AUTH module Exception
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Exception extends CoreException {
 	// constructor

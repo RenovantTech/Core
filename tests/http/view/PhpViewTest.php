@@ -1,21 +1,21 @@
 <?php
 namespace test\http\view;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\view\PhpView;
+use renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\view\PhpView;
 
 class PhpViewTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$PhpView = new PhpView;
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $PhpView);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $PhpView);
 		return $PhpView;
 	}
 
 	/**
 	 * @depends testConstructor
 	 * @param PhpView $PhpView
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testRender(PhpView $PhpView) {
 		ob_start();

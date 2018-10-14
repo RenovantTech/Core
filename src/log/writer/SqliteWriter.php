@@ -5,16 +5,16 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log\writer;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\log\Logger;
+namespace renovant\core\log\writer;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\log\Logger;
 /**
  * Writes logs to sqlite database
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class SqliteWriter implements \metadigit\core\log\LogWriterInterface {
-	use \metadigit\core\CoreTrait;
+class SqliteWriter implements \renovant\core\log\LogWriterInterface {
+	use \renovant\core\CoreTrait;
 
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (

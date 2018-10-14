@@ -1,7 +1,7 @@
 <?php
 namespace test\db;
-use metadigit\core\sys,
-	metadigit\core\db\Query;
+use renovant\core\sys,
+	renovant\core\db\Query;
 
 class QueryTest extends \PHPUnit\Framework\TestCase {
 

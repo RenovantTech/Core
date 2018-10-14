@@ -5,10 +5,10 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core;
+namespace renovant\core;
 /**
  * SysException
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class SysException extends Exception {
 	// bootstrap

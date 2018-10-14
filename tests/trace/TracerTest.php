@@ -1,8 +1,8 @@
 <?php
 namespace test\tracer;
-use const metadigit\core\trace\{T_ERROR, T_INFO};
-use metadigit\core\sys,
-	metadigit\core\trace\Tracer;
+use const renovant\core\trace\{T_ERROR, T_INFO};
+use renovant\core\sys,
+	renovant\core\trace\Tracer;
 
 class TracerTest extends \PHPUnit\Framework\TestCase {
 

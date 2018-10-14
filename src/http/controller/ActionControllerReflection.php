@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\controller;
-use metadigit\core\http\Exception,
-	metadigit\core\util\reflection\ReflectionClass;
+namespace renovant\core\http\controller;
+use renovant\core\http\Exception,
+	renovant\core\util\reflection\ReflectionClass;
 /**
  * Utility class for ActionController
  * @internal
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ActionControllerReflection {
 

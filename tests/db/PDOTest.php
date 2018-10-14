@@ -1,15 +1,15 @@
 <?php
 namespace test\db;
-use metadigit\core\db\PDO;
+use renovant\core\db\PDO;
 
 class PDOTest extends \PHPUnit\Framework\TestCase {
 
 	/**
-	 * @return \metadigit\core\db\PDO
+	 * @return \renovant\core\db\PDO
 	 */
 	function testConstruct() {
 		$PDO = new PDO('mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit', 'phpunit', 'phpunit');
-		$this->assertInstanceOf('metadigit\core\db\PDO', $PDO);
+		$this->assertInstanceOf('renovant\core\db\PDO', $PDO);
 		return $PDO;
 	}
 
@@ -33,7 +33,7 @@ class PDOTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param \metadigit\core\db\PDO $PDO
+	 * @param \renovant\core\db\PDO $PDO
 	 */
 	function testExec($PDO) {
 		$this->assertEquals(0, $PDO->exec('SELECT 1'));

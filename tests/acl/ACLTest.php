@@ -1,8 +1,8 @@
 <?php
 namespace test\acl;
-use metadigit\core\sys,
-	metadigit\core\acl\ACL,
-	metadigit\core\http\Request;
+use renovant\core\sys,
+	renovant\core\acl\ACL,
+	renovant\core\http\Request;
 
 class ACLTest extends \PHPUnit\Framework\TestCase {
 
@@ -78,7 +78,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 */
 	function testOnRouteException(ACL $ACL) {
-		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "api.users.insert" DENIED');
 		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
@@ -98,7 +98,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 */
 	function testOnObjectException(ACL $ACL) {
-		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "service.Foo" DENIED');
 		$this->assertTrue($ACL->onObject('service.Foo', 'index', 2));
@@ -118,7 +118,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 */
 	function testOnOrmException(ACL $ACL) {
-		$this->expectException('metadigit\core\acl\Exception');
+		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(200);
 		$this->expectExceptionMessage('[FILTER] "data.UserRepository" value MISSING');
 		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 2));

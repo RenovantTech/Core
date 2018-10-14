@@ -1,8 +1,8 @@
 <?php
 namespace test\util\reflection;
 /**
- * MockClass used for testing metadigit\core\util\reflection\*
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * MockClass used for testing renovant\core\util\reflection\*
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Mock {
 

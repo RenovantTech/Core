@@ -5,18 +5,18 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\http\view;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\Exception,
-	metadigit\core\http\ViewInterface,
-	metadigit\core\util\excel\ExcelWriter;
+namespace renovant\core\http\view;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\Exception,
+	renovant\core\http\ViewInterface,
+	renovant\core\util\excel\ExcelWriter;
 /**
  * Excel View
  * It outputs a XLS file to the client.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class ExcelView implements ViewInterface {
 
@@ -56,7 +56,7 @@ class ExcelView implements ViewInterface {
 	/**
 	 * Push templates variables into scope
 	 * and include php template
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 * @return array
 	 */
 	static private function execTemplate() {

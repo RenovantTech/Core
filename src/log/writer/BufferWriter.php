@@ -5,13 +5,13 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log\writer;
-use metadigit\core\log\Logger;
+namespace renovant\core\log\writer;
+use renovant\core\log\Logger;
 /**
  * Writes logs to a buffer
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class BufferWriter implements \metadigit\core\log\LogWriterInterface {
+class BufferWriter implements \renovant\core\log\LogWriterInterface {
 
 	protected $buffer = [];
 

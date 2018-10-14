@@ -5,20 +5,20 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console\controller;
-use metadigit\core\console\Exception,
-	metadigit\core\util\reflection\ReflectionClass;
+namespace renovant\core\console\controller;
+use renovant\core\console\Exception,
+	renovant\core\util\reflection\ReflectionClass;
 /**
  * Utility class for AbstractController
  * @internal
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class AbstractControllerReflection {
 
 	/**
 	 * Return Controller's actions metadata
 	 * @param AbstractController $Controller
-	 * @throws \metadigit\core\console\Exception
+	 * @throws \renovant\core\console\Exception
 	 * @return array
 	 */
 	static function analyzeHandle(AbstractController $Controller) {
@@ -29,7 +29,7 @@ class AbstractControllerReflection {
 			$methodName = $RefMethod->getName();
 			$methodClass = $RefMethod->getDeclaringClass()->getName();
 			// skip framework methods
-			if(fnmatch('metadigit\core\*', $methodClass, FNM_NOESCAPE)) continue;
+			if(fnmatch('renovant\core\*', $methodClass, FNM_NOESCAPE)) continue;
 			// check signature of preHandle & postHandle hooks
 			if(in_array($methodName,['preHandle','postHandle'])) {
 				if(!$RefMethod->isProtected()) throw new Exception(101, [$methodClass, $methodName]);

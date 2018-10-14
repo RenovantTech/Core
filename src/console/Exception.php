@@ -5,12 +5,12 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console;
+namespace renovant\core\console;
 /**
  * MVC Exception
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class Exception extends \metadigit\core\Exception {
+class Exception extends \renovant\core\Exception {
 	/* Dispatcher */
 	const COD11 = 'Dispatcher Exception - impossible to detect controller for this CMD: %s';
 	const COD12 = 'Dispatcher Exception - could not resolve view with name: %s, resource: %s';

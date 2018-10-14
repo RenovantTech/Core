@@ -1,12 +1,12 @@
 <?php
 namespace test\http;
-use const metadigit\core\http\ENGINE_PHP;
-use metadigit\core\sys,
-	metadigit\core\acl\ACL,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
-	metadigit\core\http\Dispatcher,
-	metadigit\core\http\Event,
+use const renovant\core\http\ENGINE_PHP;
+use renovant\core\sys,
+	renovant\core\acl\ACL,
+	renovant\core\http\Request,
+	renovant\core\http\Response,
+	renovant\core\http\Dispatcher,
+	renovant\core\http\Event,
 	test\acl\ACLTest;
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
@@ -21,12 +21,12 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	}
 	/**
 	 * @return Dispatcher
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \renovant\core\container\ContainerException
 	 * @throws \ReflectionException
 	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
-		define('metadigit\core\APP_URI', '/');
+		define('renovant\core\APP_URI', '/');
 		new Request;
 		new Response;
 		/** @var Dispatcher $Dispatcher */
@@ -91,7 +91,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 11
 	 * @param Dispatcher $Dispatcher
 	 * @throws \ReflectionException
@@ -121,11 +121,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 		$Res = (new Response)->setView('/index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/index', $resource);
 
 		$_SERVER['REQUEST_URI'] = '/app/action/';
@@ -134,11 +134,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/action/index', $resource);
 		$Res = (new Response)->setView('/action/index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/action/index', $resource);
 
 
@@ -148,17 +148,17 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('foo1', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/action/foo1', $resource);
 		$Res = (new Response)->setView('/action/foo1', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
-		$this->assertInstanceOf('metadigit\core\http\view\PhpView', $View);
+		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
 		$this->assertSame('/action/foo1', $resource);
 	}
 
 	/**
 	 * @depends               testConstruct
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 12
 	 * @param Dispatcher $Dispatcher
 	 * @throws \ReflectionException
@@ -178,7 +178,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \metadigit\core\container\ContainerException
+	 * @throws \renovant\core\container\ContainerException
 	 */
 	function testDispatch() {
 		ob_start();

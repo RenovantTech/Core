@@ -5,21 +5,21 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\console\controller;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys,
-	metadigit\core\console\Request,
-	metadigit\core\console\Response,
-	metadigit\core\console\Exception;
+namespace renovant\core\console\controller;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys,
+	renovant\core\console\Request,
+	renovant\core\console\Response,
+	renovant\core\console\Exception;
 
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
  * Implementation classes must implement a doHandle() method.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-abstract class AbstractController implements \metadigit\core\console\ControllerInterface {
-	use \metadigit\core\CoreTrait;
+abstract class AbstractController implements \renovant\core\console\ControllerInterface {
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	/** Controller handle method configuration
@@ -37,7 +37,7 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @return \metadigit\core\console\ViewInterface|mixed|null|string
+	 * @return \renovant\core\console\ViewInterface|mixed|null|string
 	 */
 	function handle(Request $Req, Response $Res) {
 		if(true!==$this->preHandle($Req, $Res)) {
@@ -89,7 +89,7 @@ abstract class AbstractController implements \metadigit\core\console\ControllerI
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param \metadigit\core\http\ViewInterface|string $View the View or view name
+	 * @param \renovant\core\http\ViewInterface|string $View the View or view name
 	 */
 	protected function postHandle(Request $Req, Response $Res, $View=null) {
 	}

@@ -1,8 +1,8 @@
 <?php
 namespace test\cache;
-use const metadigit\core\CACHE_DIR;
-use metadigit\core\sys,
-	metadigit\core\cache\OpCache;
+use const renovant\core\CACHE_DIR;
+use renovant\core\sys,
+	renovant\core\cache\OpCache;
 
 class OpCacheTest extends \PHPUnit\Framework\TestCase {
 

@@ -1,12 +1,12 @@
 <?php
 namespace test\util\csv;
-use metadigit\core\util\csv\CsvWriter;
+use renovant\core\util\csv\CsvWriter;
 
 class CsvWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$CsvWriter = new CsvWriter();
-		$this->assertInstanceOf('metadigit\core\util\csv\CsvWriter', $CsvWriter);
+		$this->assertInstanceOf('renovant\core\util\csv\CsvWriter', $CsvWriter);
 	}
 
 	/**
@@ -21,11 +21,11 @@ class CsvWriterTest extends \PHPUnit\Framework\TestCase {
 			['name'=>'Alistar', 'surname'=>'Green', 'age'=>24]
 		];
 		$CsvWriter->setData($data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', '_data');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', '_data');
 		$ReflProp->setAccessible(true);
 		$_data = $ReflProp->getValue($CsvWriter);
 		$this->assertCount(3, $_data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', 'iteratorMode');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', 'iteratorMode');
 		$ReflProp->setAccessible(true);
 		$iteratorMode = $ReflProp->getValue($CsvWriter);
 		$this->assertSame(CsvWriter::ITERATE_ARRAY, $iteratorMode);
@@ -36,11 +36,11 @@ class CsvWriterTest extends \PHPUnit\Framework\TestCase {
 			new \ArrayObject(['name'=>'Alistar', 'surname'=>'Green', 'age'=>24])
 		];
 		$CsvWriter->setData($data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', '_data');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', '_data');
 		$ReflProp->setAccessible(true);
 		$_data = $ReflProp->getValue($CsvWriter);
 		$this->assertCount(3, $_data);
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', 'iteratorMode');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', 'iteratorMode');
 		$ReflProp->setAccessible(true);
 		$iteratorMode = $ReflProp->getValue($CsvWriter);
 		$this->assertSame(CsvWriter::ITERATE_OBJECT, $iteratorMode);
@@ -54,19 +54,19 @@ class CsvWriterTest extends \PHPUnit\Framework\TestCase {
 		$CsvWriter->addColumn('Name', 'name', 'strtoupper')
 			->addColumn('Surname', 'surnam', 'strtoupper');
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', '_labels');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', '_labels');
 		$ReflProp->setAccessible(true);
 		$_labels = $ReflProp->getValue($CsvWriter);
 		$this->assertCount(2, $_labels);
 		$this->assertSame('Surname', $_labels[1]);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', '_indexes');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', '_indexes');
 		$ReflProp->setAccessible(true);
 		$_indexes = $ReflProp->getValue($CsvWriter);
 		$this->assertCount(2, $_indexes);
 		$this->assertSame('surnam', $_indexes[1]);
 
-		$ReflProp = new \ReflectionProperty('metadigit\core\util\csv\CsvWriter', '_callbacks');
+		$ReflProp = new \ReflectionProperty('renovant\core\util\csv\CsvWriter', '_callbacks');
 		$ReflProp->setAccessible(true);
 		$_callbacks = $ReflProp->getValue($CsvWriter);
 		$this->assertCount(2, $_callbacks);

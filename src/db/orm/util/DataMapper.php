@@ -5,14 +5,14 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\db\orm\util;
-use metadigit\core\db\orm\Metadata,
-	metadigit\core\util\Date,
-	metadigit\core\util\DateTime;
+namespace renovant\core\db\orm\util;
+use renovant\core\db\orm\Metadata,
+	renovant\core\util\Date,
+	renovant\core\util\DateTime;
 /**
  * ORM data hydrate helper
  * Helper class that hydrate/dehydrate Entity data.
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class DataMapper {
 

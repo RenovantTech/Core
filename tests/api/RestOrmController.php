@@ -1,9 +1,9 @@
 <?php
 namespace test\api;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response;
+use renovant\core\http\Request,
+	renovant\core\http\Response;
 
-class RestOrmController extends \metadigit\core\api\RestOrmController {
+class RestOrmController extends \renovant\core\api\RestOrmController {
 
 
 }

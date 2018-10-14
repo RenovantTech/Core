@@ -1,13 +1,13 @@
 <?php
 namespace test\log\writer;
-use metadigit\core\sys,
-	metadigit\core\log\writer\SqliteWriter;
+use renovant\core\sys,
+	renovant\core\log\writer\SqliteWriter;
 
 class SqliteWriterTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$Writer = new SqliteWriter('sqlite','log');
-		$this->assertInstanceOf('metadigit\core\log\writer\SqliteWriter', $Writer);
+		$this->assertInstanceOf('renovant\core\log\writer\SqliteWriter', $Writer);
 		return $Writer;
 	}
 

@@ -5,22 +5,22 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\context;
-use const metadigit\core\trace\{T_DEPINJ};
-use metadigit\core\sys,
-	metadigit\core\CoreProxy,
-	metadigit\core\container\Container,
-	metadigit\core\container\ContainerException,
-	metadigit\core\container\ContainerYamlParser,
-	metadigit\core\event\EventDispatcher,
-	metadigit\core\event\EventDispatcherException,
-	metadigit\core\event\EventYamlParser;
+namespace renovant\core\context;
+use const renovant\core\trace\{T_DEPINJ};
+use renovant\core\sys,
+	renovant\core\CoreProxy,
+	renovant\core\container\Container,
+	renovant\core\container\ContainerException,
+	renovant\core\container\ContainerYamlParser,
+	renovant\core\event\EventDispatcher,
+	renovant\core\event\EventDispatcherException,
+	renovant\core\event\EventYamlParser;
 /**
  * Context
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Context {
-	use \metadigit\core\CoreTrait;
+	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;

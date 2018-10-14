@@ -5,15 +5,15 @@
  * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
  * @license New BSD License
  */
-namespace metadigit\core\log;
-use const metadigit\core\trace\T_INFO;
-use metadigit\core\sys;
+namespace renovant\core\log;
+use const renovant\core\trace\T_INFO;
+use renovant\core\sys;
 /**
  * Versatile Logger who supports different LogWriters back-ends.
  * The following writers are ready to be used:
  * * LogWriterFile
  * * LogWriterFileTree
- * @author Daniele Sciacchitano <dan@metadigit.it>
+ * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class Logger extends sys {
 

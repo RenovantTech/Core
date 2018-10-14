@@ -1,16 +1,16 @@
 <?php
 namespace test\http\controller;
-use metadigit\core\http\Request,
-	metadigit\core\http\Response;
+use renovant\core\http\Request,
+	renovant\core\http\Response;
 
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
 		$ActionController = new \test\http\controller\ActionController;
-		$this->assertInstanceOf('metadigit\core\http\ControllerInterface', $ActionController);
-		$this->assertInstanceOf('metadigit\core\http\controller\ActionController', $ActionController);
+		$this->assertInstanceOf('renovant\core\http\ControllerInterface', $ActionController);
+		$this->assertInstanceOf('renovant\core\http\controller\ActionController', $ActionController);
 
-		$RefProp = new \ReflectionProperty('metadigit\core\http\controller\ActionController', '_config');
+		$RefProp = new \ReflectionProperty('renovant\core\http\controller\ActionController', '_config');
 		$RefProp->setAccessible(true);
 		$_config = $RefProp->getValue($ActionController);
 		$this->assertCount(7, $_config);
@@ -50,7 +50,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @return \test\http\controller\ActionController
 	 */
 	function testResolveActionMethod(\test\http\controller\ActionController $ActionController) {
-		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/action/';
@@ -73,12 +73,12 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @expectedException \metadigit\core\http\Exception
+	 * @expectedException \renovant\core\http\Exception
 	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
 		$ActionController2 = new \test\http\controller\ActionController;
-		$RefMethod = new \ReflectionMethod('metadigit\core\http\controller\ActionController', 'resolveActionMethod');
+		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
 
 		$_SERVER['REQUEST_URI'] = '/action/not-exists';
@@ -90,7 +90,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\ActionController $ActionController
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\ActionController $ActionController) {
 		$_SERVER['REQUEST_URI'] = '/action/action2';

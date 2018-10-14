@@ -1,12 +1,12 @@
 <?php
 namespace test\auth;
-use metadigit\core\auth\provider\ProviderInterface;
-use metadigit\core\sys,
-	metadigit\core\auth\AUTH,
-	metadigit\core\auth\Exception,
-	metadigit\core\http\Event,
-	metadigit\core\http\Request,
-	metadigit\core\http\Response,
+use renovant\core\auth\provider\ProviderInterface;
+use renovant\core\sys,
+	renovant\core\auth\AUTH,
+	renovant\core\auth\Exception,
+	renovant\core\http\Event,
+	renovant\core\http\Request,
+	renovant\core\http\Response,
 	test\auth\provider\PdoProviderTest;
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
@@ -61,8 +61,8 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testInit() {
 		$AUTH = sys::context()->get('sys.AUTH');
@@ -76,8 +76,8 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \metadigit\core\context\ContextException
-	 * @throws \metadigit\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testInitException() {
 		try {

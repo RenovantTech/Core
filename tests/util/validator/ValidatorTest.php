@@ -1,6 +1,6 @@
 <?php
 namespace test\util\validator;
-use metadigit\core\util\validator\Validator;
+use renovant\core\util\validator\Validator;
 
 class ValidatorTest extends \PHPUnit\Framework\TestCase {
 

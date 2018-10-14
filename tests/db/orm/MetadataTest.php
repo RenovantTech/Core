@@ -1,6 +1,6 @@
 <?php
 namespace test\db\orm;
-use metadigit\core\db\orm\Metadata;
+use renovant\core\db\orm\Metadata;
 
 class MetadataTest extends \PHPUnit\Framework\TestCase {
 

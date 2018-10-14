@@ -1,7 +1,7 @@
 <?php
 namespace test\http;
-use metadigit\core\CoreProxy;
-use metadigit\core\http\CryptoCookie;
+use renovant\core\CoreProxy;
+use renovant\core\http\CryptoCookie;
 
 class CryptoCookieTest extends \PHPUnit\Framework\TestCase {
 
@@ -23,7 +23,7 @@ class CryptoCookieTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param CryptoCookie $Cookie
-	 * @throws \metadigit\core\http\Exception
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testReadAndWrite(CryptoCookie $Cookie) {
 		$data ='ASHFERUFFKJFSKJFDSF';
