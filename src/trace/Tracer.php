@@ -32,13 +32,11 @@ class Tracer extends sys {
 	 */
 	static function onError($n, $str, $file, $line, $context) {
 //		if(error_reporting()===0) return;
-		if(self::$errorLevel < self::E_NOTICE && in_array($n, [E_NOTICE,E_USER_NOTICE,E_STRICT])) self::$errorLevel = self::E_NOTICE;
-		elseif(self::$errorLevel < self::E_WARNING && in_array($n, [E_WARNING,E_USER_WARNING])) self::$errorLevel = self::E_WARNING;
-		else self::$errorLevel = self::E_ERROR;
 		// get trace array, w/o first 2 elements (this function call)
 		require_once __DIR__.'/functions.inc';
 		traceError($n, $str, $file, $line);
 		// @TODO call toDB() toLog() toEmail()
+		self::setErrorLevel($n);
 	}
 
 	/**
@@ -47,15 +45,28 @@ class Tracer extends sys {
 	 */
 	static function onException(\Throwable $Ex) {
 		$level = ($Ex instanceof \renovant\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
-		switch($level) {
-			case E_USER_NOTICE: if(self::$errorLevel < self::E_NOTICE) self::$errorLevel = self::E_NOTICE; break;
-			case E_USER_WARNING: if(self::$errorLevel < self::E_WARNING) self::$errorLevel = self::E_WARNING; break;
-			default: self::$errorLevel = self::E_ERROR;
-		}
 		require_once __DIR__.'/functions.inc';
 		traceException($Ex);
 		// @TODO call toDB() toLog() toEmail()
+		self::setErrorLevel($level);
+	}
 
+	/**
+	 * Set TRACE ERROR level
+	 * @param integer $level E_* constant
+	 */
+	static function setErrorLevel($level) {
+		switch($level) {
+			case E_NOTICE:
+			case E_USER_NOTICE:
+			case E_STRICT:
+				if(self::$errorLevel < self::E_NOTICE) self::$errorLevel = self::E_NOTICE; break;
+			case E_WARNING:
+			case E_USER_WARNING:
+				if(self::$errorLevel < self::E_WARNING) self::$errorLevel = self::E_WARNING; break;
+			default:
+				self::$errorLevel = self::E_ERROR;
+		}
 	}
 
 	/**
