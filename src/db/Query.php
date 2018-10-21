@@ -84,21 +84,24 @@ class Query {
 	 * @param array $params
 	 * @return array|true|null output params if any
 	 */
-	function execCall(array $params) {
+	function execCall(array $params=[]) {
 		$sql = '';
 		$outputParams = [];
-		$fields = explode(',',str_replace(' ','',$this->fields));
-		foreach($fields as $k=>$v){
-			$k++;
-			if($v[0]!='@') {
-				$sql .= ', :'.$v.'_'.$k;
-				$this->params[$v.'_'.$k] = ':'.$v;
-			} else {
-				$sql .= ', '.$v;
-				$outputParams[] = $v;
+		if(!empty($this->fields)) {
+			$fields = explode(',',str_replace(' ','',$this->fields));
+			foreach($fields as $k=>$v){
+				$k++;
+				if($v[0]!='@') {
+					$sql .= ', :'.$v.'_'.$k;
+					$this->params[$v.'_'.$k] = ':'.$v;
+				} else {
+					$sql .= ', '.$v;
+					$outputParams[] = $v;
+				}
 			}
+			$sql = substr($sql,2);
 		}
-		$sql = sprintf('CALL %s(%s)', $this->target, substr($sql,2));
+		$sql = sprintf('CALL %s(%s)', $this->target, $sql);
 		$this->doExec($sql, $params)->rowCount();
 		if(empty($outputParams)) return true;
 		else {
