@@ -1,25 +1,25 @@
 <?php
 namespace test\mail;
-use renovant\core\mail\Mailer;
+use renovant\core\mail\SwiftMailer;
 
-class MailerTest extends \PHPUnit\Framework\TestCase {
+class SwiftMailerTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstructor() {
-		$Mailer = new Mailer(SWIFT_DIR, 'smtp', [
+		$Mailer = new SwiftMailer(SWIFT_DIR, 'smtp', [
 			'server'	=> 'localhost',
 			'port'		=> 25,
 			'encryption'=> '',
 			'user'		=> '',
 			'password'	=> ''
 		]);
-		$this->assertInstanceOf('renovant\core\mail\Mailer', $Mailer);
+		$this->assertInstanceOf('renovant\core\mail\SwiftMailer', $Mailer);
 		return $Mailer;
 	}
 
 	/**
 	 * @depends testConstructor
 	 */
-	function __testNewMessage(Mailer $Mailer) {
+	function __testNewMessage(SwiftMailer $Mailer) {
 		$Message = $Mailer->newMessage();
 		$this->assertInstanceOf('Swift_Message', $Message);
 		return $Mailer;
@@ -28,7 +28,7 @@ class MailerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testNewMessage
 	 */
-	function __testSend(Mailer $Mailer) {
+	function __testSend(SwiftMailer $Mailer) {
 		$Message = $Mailer->newMessage();
 		$Message->setSubject('Message 4 you')
 			->setFrom('dan@renovant.tech')

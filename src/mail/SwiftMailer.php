@@ -19,7 +19,7 @@ use renovant\core\sys,
  * @author Daniele Sciacchitano <dan@renovant.tech>
  * @link http://swiftmailer.org/
  */
-class Mailer {
+class SwiftMailer {
 	use \renovant\core\CoreTrait;
 
 	/** default transport type to be used */
