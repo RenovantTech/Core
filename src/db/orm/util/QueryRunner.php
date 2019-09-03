@@ -216,7 +216,7 @@ class QueryRunner {
 			$Query = (new Query($pdo))
 				->on($Metadata->sql('target'), $fields)
 				->criteriaExp($Metadata->pkCriteria($Entity));
-			return ($Query->execUpdate($data)==1 && $Query->errorCode()=='000000') ? true:false;
+			return (in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000') ? true:false;
 		}
 	}
 }

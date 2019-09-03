@@ -406,18 +406,6 @@ class Repository {
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			sys::event(OrmEvent::EVENT_PRE_UPDATE, $OrmEvent);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
-			// detect changes
-			$newData = DataMapper::object2sql($Entity);
-			$changes = [];
-			$props = $Metadata->properties();
-			foreach($newData as $k=>$v) {
-				if($dbData[$k] != $v && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
-					$changes[$k] = $newData[$k];
-			}
-			if(!count($changes)) {
-				sys::trace(LOG_DEBUG, T_INFO, 'SKIP update, Entity not modified');
-				return true;
-			}
 			// onSave callback
 			$this->_onSave->invoke($Entity);
 			// re-check changes after onSave()
@@ -425,7 +413,7 @@ class Repository {
 			$changes = [];
 			$props = $Metadata->properties();
 			foreach($newData as $k=>$v) {
-				if($dbData[$k] != $v && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
+				if(!isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
 					$changes[$k] = $newData[$k];
 			}
 			// validate

@@ -510,13 +510,8 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame('Yellow2', $User2->surname);
 		$this->assertSame(8.1, $User2->score);
 
-		// test without re-fetch
-		$User5 = $UsersRepository->fetch(5);
-		$User5->surname = 'Johnson2';
-		$User5->score = 4.2;
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update(5, $User5), ['fetch'=>false]);
-		$this->assertSame('Johnson2', $User5->surname);
-		$this->assertSame(4.2, $User5->score);
+		// 3 - skipped update (same values)
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update(2, ['surname'=>'Yellow2']));
 
 		// test FETCH MODES
 
