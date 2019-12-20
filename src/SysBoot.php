@@ -42,14 +42,14 @@ class SysBoot extends sys {
 
 		self::$Sys = new sys();
 
-		$config = Yaml::parseFile(SYS_YAML);
+		$config = Yaml::parseFile(BASE_DIR.SYS_YAML);
 
 		// APPS HTTP/CLI
-		self::$Sys->cnfApps['HTTP'] = $config['apps'];
-		self::$Sys->cnfApps['CLI'] = $config['cli'];
+		self::$Sys->cnfApps['HTTP'] = $config['sys']['apps'];
+		self::$Sys->cnfApps['CLI'] = $config['sys']['cli'];
 
 		// namespaces
-		foreach($config['namespaces'] as $k => $dir) {
+		foreach($config['sys']['namespaces'] as $k => $dir) {
 			$dir = rtrim($dir,DIRECTORY_SEPARATOR);
 			if(substr($dir,0,7)=='phar://') {
 				if($dir[7]!='/') $dir = 'phar://'.BASE_DIR.substr($dir,7);
@@ -62,39 +62,47 @@ class SysBoot extends sys {
 		}
 
 		// constants
-		if(is_array($config['constants'])) self::$Sys->cnfConstants = $config['constants'];
+		if(is_array($config['sys']['constants']))
+			self::$Sys->cnfConstants = $config['sys']['constants'];
 
 		// settings
-		self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['settings']);
+		if(is_array($config['sys']['constants']))
+			self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['sys']['settings']);
 
 		// Cache service
 		self::$Sys->cnfCache['sys'] = [
 			'class' => 'renovant\core\cache\SqliteCache',
 			'constructor' => ['sys-cache', 'cache', true]
 		];
-		if(is_array($config['cache'])) self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['cache']);
+		if(is_array($config['sys']['cache']))
+			self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['sys']['cache']);
 		foreach (self::$Sys->cnfCache as $id => $conf)
 			self::$Sys->cnfCache[$id] = array_merge(Container::YAML_OBJ_SKELETON, $conf);
 		$sysCacheConf = self::$Sys->cnfCache['sys'];
 		unset(self::$Sys->cnfCache['sys']);
 
 		// DB service
-		if(is_array($config['database'])) self::$Sys->cnfPdo = array_merge($config['database'], self::$Sys->cnfPdo);
-		foreach (self::$Sys->cnfPdo as $id => $conf) {
+		if(is_array($config['sys']['database']))
+			self::$Sys->cnfPdo = array_merge($config['sys']['database'], self::$Sys->cnfPdo);
+		foreach (self::$Sys->cnfPdo as $id => $conf)
 			self::$Sys->cnfPdo[$id] = array_merge(['user'=>null, 'pwd'=>null, 'options'=>[]], $conf);
-		}
 
 		// Log service
-		if(is_array($config['log'])) self::$Sys->cnfLog = $config['log'];
+		if(is_array($config['sys']['log'])) self::$Sys->cnfLog = $config['sys']['log'];
 
 		// Trace service
-		self::$Sys->cnfTrace = array_replace(self::$Sys->cnfTrace, $config['trace']);
-		if(is_string(self::$Sys->cnfTrace['level'])) self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
+		self::$Sys->cnfTrace = array_merge(self::$Sys->cnfTrace, $config['sys']['trace']);
+		if(is_string(self::$Sys->cnfTrace['level']))
+			self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
+
+		// sys services override
+		if(isset($config['sys']['services']))
+			self::$Sys->cnfServices = array_merge(self::$Sys->cnfServices, $config['sys']['services']);
 
 		// initialize
 		self::$Cache = (new Container())->build('sys.cache.SYS', $sysCacheConf['class'], $sysCacheConf['constructor'], $sysCacheConf['properties']);
 
-		// write into CACHE_FILE
+		// write into SYS_YAML_CACHE file
 		$Sys = serialize(self::$Sys);
 		$namespaces = var_export(self::$namespaces,true);
 		$Cache = serialize(self::$Cache);
@@ -105,6 +113,6 @@ self::\$namespaces = $namespaces;
 self::\$Cache = unserialize('$Cache');
 CACHE;
 		file_put_contents(TMP_DIR.'core-sys', $cache, LOCK_EX);
-		rename(TMP_DIR.'core-sys', self::CACHE_FILE);
+		rename(TMP_DIR.'core-sys', self::SYS_YAML_CACHE);
 	}
 }

@@ -67,14 +67,14 @@ class Context {
 		if(in_array($namespace, $this->namespaces)) return;
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
 		$this->namespaces[] = $namespace;
-		if(!$context = sys::cache('sys')->get($namespace.'#context')) {
+		if(!$context = sys::cache('sys')->get($namespace.'.$context')) {
 			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
 			$context['events'] = EventYamlParser::parseNamespace($namespace);
 			$services = $context['container']['services'];
 			unset($context['container']['services']);
-			sys::cache('sys')->set($namespace.'#context', $context);
-			sys::cache('sys')->set($namespace.'#services', $services);
+			sys::cache('sys')->set($namespace.'.$context', $context);
+			sys::cache('sys')->set($namespace.'.$services', $services);
 		}
 		$this->Container->init($namespace, $context['container']);
 		$this->EventDispatcher->init($namespace, $context['events']);

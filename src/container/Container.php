@@ -71,7 +71,7 @@ class Container {
 		$maps = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
 		$this->id2classMap = array_merge($this->id2classMap, $maps['id2class']);
 		$this->class2idMap = array_merge($this->class2idMap, $maps['class2id']);
-		if(!$containerMaps) sys::cache('sys')->set($namespace.'#services', $maps['services']);
+		if(!$containerMaps) sys::cache('sys')->set($namespace.'.$services', $maps['services']);
 	}
 
 	/**
@@ -91,7 +91,7 @@ class Container {
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
 			if(!$Obj = sys::cache('sys')->get($id)) {
-				$obj = sys::cache('sys')->get($namespace.'#services')[$id];
+				$obj = sys::cache('sys')->get($namespace.'.$services')[$id];
 				$Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
 				sys::cache('sys')->set($id, $Obj);
 			}

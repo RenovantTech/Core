@@ -27,11 +27,11 @@ class Yaml {
 	static function parseContext($namespace, $section=null, array $callbacks=[]) {
 		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
 		if($namespace == 'sys')
-			$yamlPath = SYS_YAML;
-		elseif (empty($dirName))
-			$yamlPath = BASE_DIR . $namespace . '-context.yml';
+			$yamlPath = BASE_DIR.SYS_YAML;
+		elseif(empty($dirName))
+			$yamlPath = BASE_DIR . $namespace . '.yml';
 		else
-			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
+			$yamlPath = $dirName.DIRECTORY_SEPARATOR.'context.yml';
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		if(!file_exists($yamlPath)) throw new YamlException(1, [__METHOD__, $yamlPath]);
 		return Yaml::parseFile($yamlPath, $section, $callbacks);
