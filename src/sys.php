@@ -28,7 +28,7 @@ use renovant\core\acl\ACL,
  */
 class sys {
 
-	const CACHE_FILE		= CACHE_DIR.'sys.php';
+	const SYS_YAML_CACHE	= CACHE_DIR.SYS_YAML.'.php';
 	const EVENT_INIT		= 'sys:init';
 	const EVENT_SHUTDOWN	= 'sys:shutdown';
 	const INFO_NAMESPACE	= 1;
@@ -109,6 +109,13 @@ class sys {
 		'level'			=> LOG_DEBUG,
 		'storeFn'		=> null
 	];
+	/** sys services
+	 * @var array */
+	protected $cnfServices = [
+		'acl'			=> 'sys.ACL',
+		'auth'			=> 'sys.AUTH',
+		'cmd'			=> 'sys.CmdManager'
+	];
 
 	/**
 	 * System Kernel bootstrap.
@@ -117,13 +124,14 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
+	 * @param string $namespace the system namespace to initialize
+	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
-	 * @throws ContainerException
-	 * @throws util\yaml\YamlException
 	 * @throws \ReflectionException
+	 * @throws util\yaml\YamlException
 	 */
-	static function init() {
+	static function init($namespace='sys') {
 		self::$traceFn = __METHOD__;
 		self::trace(LOG_DEBUG, T_INFO);
 		set_exception_handler(__NAMESPACE__.'\trace\Tracer::onException');
@@ -137,7 +145,7 @@ class sys {
 		ignore_user_abort(1);
 		ini_set('upload_tmp_dir', TMP_DIR);
 
-		if(file_exists(self::CACHE_FILE)) include self::CACHE_FILE;
+		if(file_exists(self::SYS_YAML_CACHE)) include self::SYS_YAML_CACHE;
 		else SysBoot::boot();
 
 		// settings
@@ -154,7 +162,7 @@ class sys {
 		self::$Container = new Container;
 		self::$EventDispatcher = new EventDispatcher;
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
-		self::$Context->init('sys');
+		self::$Context->init($namespace);
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
@@ -213,7 +221,7 @@ class sys {
 					$dispatcherID = $namespace.'.Dispatcher';
 					self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
 					break;
-				};
+				}
 			}
 			if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
 			self::$Req->setAttribute('APP', $app);
@@ -285,9 +293,9 @@ class sys {
 	 * @throws EventDispatcherException
 	 */
 	static function acl() {
-		static $ACL;
 		/** @var ACL $ACL */
-		if(!$ACL) $ACL = self::$Context->get('sys.ACL', ACL::class);
+		static $ACL;
+		if(!$ACL) $ACL = self::$Context->get(self::$Sys->cnfServices['acl'], ACL::class);
 		return $ACL;
 	}
 
@@ -298,9 +306,9 @@ class sys {
 	 * @throws EventDispatcherException
 	 */
 	static function auth() {
-		static $AUTH;
 		/** @var AUTH $AUTH */
-		if(!$AUTH) $AUTH = self::$Context->get('sys.AUTH', AUTH::class);
+		static $AUTH;
+		if(!$AUTH) $AUTH = self::$Context->get(self::$Sys->cnfServices['auth'], AUTH::class);
 		return $AUTH;
 	}
 
@@ -326,9 +334,9 @@ class sys {
 	 */
 	static function cmd() {
 		static $CmdManager;
-		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get('sys.CmdManager')) {
-			$CmdManager = self::$Container->build('sys.CmdManager', CmdManager::class);
-			self::cache('sys')->set('sys.CmdManager', $CmdManager);
+		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get(self::$Sys->cnfServices['cmd'])) {
+			$CmdManager = self::$Container->build(self::$Sys->cnfServices['cmd'], CmdManager::class);
+			self::cache('sys')->set(self::$Sys->cnfServices['cmd'], $CmdManager);
 		}
 		return $CmdManager;
 	}
