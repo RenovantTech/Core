@@ -39,7 +39,7 @@ class AUTH {
 		'SESSION'
 	];
 	const JWT_KEY = DATA_DIR.'JWT.key';
-	const TTL_ACCESS	= 300;
+	const TTL_AUTH		= 300;
 	const TTL_REFRESH	= 86400;
 	const TTL_REMEMBER	= 2592000;
 
@@ -65,19 +65,35 @@ class AUTH {
 	 * @var string|null */
 	protected $_XSRF_TOKEN = null;
 
+	/** Cookie AUTH-TOKEN
+	 * @var int */
+	protected $cookieAUTH = self::COOKIE_AUTH;
+	/** Cookie REFRESH-TOKEN
+	 * @var int */
+	protected $cookieREFRESH = self::COOKIE_REFRESH;
+	/** Cookie REMEMBER-TOKEN
+	 * @var int */
+	protected $cookieREMEMBER = self::COOKIE_REMEMBER;
+	/** Cookie XSRF-TOKEN
+	 * @var int */
+	protected $cookieXSRF = self::COOKIE_XSRF;
+
 	/** Auth Token TTL
 	 * @var int */
-	protected $authTTL = self::TTL_ACCESS;
+	protected $ttlAUTH = self::TTL_AUTH;
+	/** Refresh Token TTL
+	 * @var int */
+	protected $ttlREFRESH = self::TTL_REFRESH;
+	/** Remember Token TTL
+	 * @var int */
+	protected $ttlREMEMBER = self::TTL_REMEMBER;
+
 	/** Active module
 	 * @var string */
 	protected $module = 'SESSION';
-	/** Refresh Token TTL
-	 * @var int */
-	protected $refreshTTL = self::TTL_REFRESH;
-	/** Remember Token TTL
-	 * @var int */
-	protected $rememberTTL = self::TTL_REMEMBER;
-
+	/** Auth Provider ID
+	 * @var string */
+	protected $provider = 'sys.AuthProvider';
 	/** REMEMBER-TOKEN flag
 	 * @var boolean */
 	protected $setRememberToken = false;
@@ -98,6 +114,7 @@ class AUTH {
 	 * AUTH constructor.
 	 * @param string $module
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function __construct($module='SESSION') {
 		if(!in_array($module, self::MODULES)) throw new Exception(1, [$module, implode(', ', self::MODULES)]);
@@ -112,7 +129,7 @@ class AUTH {
 	}
 
 	function __sleep() {
-		return ['_', 'authTTL', 'module', 'refreshTTL', 'rememberTTL', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
+		return ['_', 'cookieAUTH', 'cookieREFRESH', 'cookieREMEMBER', 'cookieXSRF', 'module', 'provider', 'ttlAUTH', 'ttlREFRESH', 'ttlREMEMBER', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
 	}
 
 	/**
@@ -121,6 +138,7 @@ class AUTH {
 	 * @param HttpEvent $Event
 	 * @throws AuthException
 	 * @throws Exception
+	 * @throws \Exception
 	 */
 	function init(HttpEvent $Event) {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
@@ -135,9 +153,9 @@ class AUTH {
 					// @TODO COOKIE module
 					break;
 				case 'JWT':
-					if (isset($_COOKIE[self::COOKIE_AUTH])) {
+					if (isset($_COOKIE[$this->cookieAUTH])) {
 						try {
-							$token = (array)JWT::decode($_COOKIE[self::COOKIE_AUTH], file_get_contents(self::JWT_KEY), ['HS512']);
+							$token = (array)JWT::decode($_COOKIE[$this->cookieAUTH], file_get_contents(self::JWT_KEY), ['HS512']);
 							if (isset($token['data']) && $token['data'] = (array)$token['data']) {
 								foreach ($token['data'] as $k => $v)
 									$this->set($k, $v);
@@ -153,9 +171,9 @@ class AUTH {
 							sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN exception: INVALID');
 						}
 					}
-					if (isset($_COOKIE[self::COOKIE_REFRESH])) {
+					if (isset($_COOKIE[$this->cookieREFRESH])) {
 						try {
-							$refreshToken = (new CryptoCookie(self::COOKIE_REFRESH))->read();
+							$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
 							if($this->provider()->checkRefreshToken($refreshToken['UID'], $refreshToken['TOKEN'])) {
 								$this->provider()->authenticateById($refreshToken['UID']);
 								$this->_commit = true;
@@ -166,9 +184,9 @@ class AUTH {
 							sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN exception: INVALID');
 						}
 					}
-					if (isset($_COOKIE[self::COOKIE_REMEMBER])) {
+					if (isset($_COOKIE[$this->cookieREMEMBER])) {
 						try {
-							$rememberToken = (new CryptoCookie(self::COOKIE_REMEMBER))->read();
+							$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 							if($this->provider()->checkRememberToken($rememberToken['UID'], $rememberToken['TOKEN'])) {
 								$this->provider()->authenticateById($rememberToken['UID']);
 								$this->_commit = true;
@@ -194,10 +212,10 @@ class AUTH {
 				throw new AuthException(101, [$this->module]);
 
 			// XSRF-TOKEN
-			if(!isset($_COOKIE[self::COOKIE_XSRF]))
+			if(!isset($_COOKIE[$this->cookieXSRF]))
 				$this->_commit = true;
 			else
-				$this->_XSRF_TOKEN = $_COOKIE[self::COOKIE_XSRF];
+				$this->_XSRF_TOKEN = $_COOKIE[$this->cookieXSRF];
 			$XSRFToken = $Req->getHeader(self::HEADER_XSRF);
 			if ($XSRFToken && $XSRFToken === $this->_XSRF_TOKEN)
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
@@ -238,6 +256,7 @@ class AUTH {
 	/**
 	 * Commit AUTH data & XSRF-TOKEN to module storage.
 	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
+	 * @throws \Exception
 	 */
 	function commit() {
 		if(!$this->_commit) return;
@@ -246,7 +265,7 @@ class AUTH {
 			// XSRF-TOKEN (cookie + header)
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
-			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
 
 			if (is_null($this->_UID)) return;
@@ -266,13 +285,13 @@ class AUTH {
 					sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-TOKEN');
 					$authToken = [
 						//'aud' => 'http://example.com',
-						'exp' => time() + $this->authTTL, // Expiry
+						'exp' => time() + $this->ttlAUTH, // Expiry
 						'iat' => time() - 1, // Issued At
 						//'iss' => 'http://example.org', // Issuer
 						'nbf' => time() - 1, // Not Before
 						'data' => $data
 					];
-					setcookie(self::COOKIE_AUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->authTTL, '/', null, true, true);
+					setcookie($this->cookieAUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), time() + $this->ttlAUTH, '/', null, true, true);
 					break;
 				case 'SESSION':
 					sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
@@ -285,8 +304,8 @@ class AUTH {
 				'UID'	=> $this->_UID,
 				'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 			];
-			$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->refreshTTL);
-			(new CryptoCookie(self::COOKIE_REFRESH, 0, '/', null, false, true))->write($refreshToken);
+			$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->ttlREFRESH);
+			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, false, true))->write($refreshToken);
 
 			// REMEMBER-TOKEN
 			if($this->setRememberToken) {
@@ -295,8 +314,8 @@ class AUTH {
 					'UID'	=> $this->_UID,
 					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 				];
-				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->rememberTTL);
-				(new CryptoCookie(self::COOKIE_REMEMBER, time()+$this->rememberTTL, '/', null, false, true))->write($rememberToken);
+				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->ttlREMEMBER);
+				(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, false, true))->write($rememberToken);
 			}
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
@@ -315,6 +334,7 @@ class AUTH {
 	/**
 	 * Erase AUTH data.
 	 * To be invoked on LOGOUT or other required situations.
+	 * @throws \Exception
 	 */
 	function erase() {
 		$prevTraceFn = sys::traceFn($this->_.'->erase');
@@ -326,7 +346,7 @@ class AUTH {
 					break;
 				case 'JWT':
 					sys::trace(LOG_DEBUG, T_INFO, 'erase JWT AUTH-TOKEN');
-					setcookie(self::COOKIE_AUTH, '', time()-86400, '/', null, true, true);
+					setcookie($this->cookieAUTH, '', time()-86400, '/', null, true, true);
 					break;
 				case 'SESSION':
 					sys::trace(LOG_DEBUG, T_INFO, 'erase SESSION data');
@@ -335,29 +355,29 @@ class AUTH {
 			}
 
 			// delete REFRESH-TOKEN
-			if (isset($_COOKIE[self::COOKIE_REFRESH])) {
+			if (isset($_COOKIE[$this->cookieREFRESH])) {
 				sys::trace(LOG_DEBUG, T_INFO, 'erase REFRESH-TOKEN');
 				try {
-					$refreshToken = (new CryptoCookie(self::COOKIE_REFRESH))->read();
+					$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
 					$this->provider()->deleteRefreshToken($this->UID(), $refreshToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
-				setcookie(self::COOKIE_REFRESH, '', time() - 86400, '/', null, false, true);
+				setcookie($this->cookieREFRESH, '', time() - 86400, '/', null, false, true);
 			}
 
 			// delete REMEMBER-TOKEN
-			if (isset($_COOKIE[self::COOKIE_REMEMBER])) {
+			if (isset($_COOKIE[$this->cookieREMEMBER])) {
 				sys::trace(LOG_DEBUG, T_INFO, 'erase REMEMBER-TOKEN');
 				try {
-					$rememberToken = (new CryptoCookie(self::COOKIE_REMEMBER))->read();
+					$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 					$this->provider()->deleteRememberToken($this->UID(), $rememberToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
-				setcookie(self::COOKIE_REMEMBER, '', time()-86400, '/', null, false, true);
+				setcookie($this->cookieREMEMBER, '', time()-86400, '/', null, false, true);
 			}
 
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
-			setcookie(self::COOKIE_XSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
 			// erase data
 			$this->_data = [];
@@ -433,7 +453,7 @@ class AUTH {
 		static $Provider;
 		if(!$Provider) {
 			try {
-				$Provider = sys::context()->get('sys.AuthProvider', ProviderInterface::class);
+				$Provider = sys::context()->get($this->provider, ProviderInterface::class);
 			} catch (\Exception $Ex) {
 				$Provider = new PdoProvider;
 			}
