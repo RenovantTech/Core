@@ -95,7 +95,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testInit() {
 		sys::init();
-		$this->assertTrue(file_exists(sys::CACHE_FILE));
+		$this->assertTrue(file_exists(sys::SYS_YAML_CACHE));
 	}
 
 	function testInfo() {

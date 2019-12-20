@@ -1,111 +1,109 @@
 # =========================================================
-# APPs definitions
+# SYS configuration
 # =========================================================
-apps:
-  MNGR:
-    domain:     example.com
-    port:       8080
-    url:        /
-    namespace:  mngr
-  API_FOO:
-    url:        /api/foo/
-    namespace:  api.foo
-  API_BAR:
-    url:        /api/bar/
-    namespace:  api.bar
-  UI:
-    port:       80
-    url:        /
-    namespace:  ui
 
-# =========================================================
-# CLI definitions
-# =========================================================
-cli:
-  console:      test.console
+sys:
+  # -------------------------------------------------------
+  # APPs definitions ======================================
+  apps:
+    MNGR:
+      domain:     example.com
+      port:       8080
+      url:        /
+      namespace:  mngr
+    API_FOO:
+      url:        /api/foo/
+      namespace:  api.foo
+    API_BAR:
+      url:        /api/bar/
+      namespace:  api.bar
+    UI:
+      port:       80
+      url:        /
+      namespace:  ui
 
-# =========================================================
-# __autoload map namespace/directory
-# =========================================================
-namespaces:
-  test:           /
-  metadigit\lib:  /opt/metadigit-lib/src
+  # -------------------------------------------------------
+  # CLI definitions ---------------------------------------
+  cli:
+    console:      test.console
 
-# =========================================================
-# Environment constants
-# =========================================================
-constants:
-  ASSETS_DIR:   /var/www/devel.com/data/assets/
-  ASSETS_URL:   /assets/
-  UPLOAD_DIR:   /var/www/devel.com/data/files/
-  SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
+  # -------------------------------------------------------
+  # __autoload map namespace/directory --------------------
+  namespaces:
+    test:           /
+    metadigit\lib:  /opt/metadigit-lib/src
 
-# =========================================================
-# Php settings
-# =========================================================
-settings:
-  charset:      UTF-8
-  locale:       en_GB.UTF-8
-  timeZone:     Europe/London
+  # -------------------------------------------------------
+  # Environment constants ---------------------------------
+  constants:
+    ASSETS_DIR:   /var/www/devel.com/data/assets/
+    ASSETS_URL:   /assets/
+    UPLOAD_DIR:   /var/www/devel.com/data/files/
+    SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
 
-# =========================================================
-# CACHE service
-# =========================================================
-cache:
-  #sys:           ### System cache, override with CAUTION
-    #class:       renovant\core\cache\SqliteCache
-    #constructor: ['sys-cache', 'cache', true]
-  main:
-    class:        renovant\core\cache\SqliteCache
-    constructor:  [ 'sqlite', 'cache', false ]
+  # -------------------------------------------------------
+  # Php settings ------------------------------------------
+  settings:
+    charset:      UTF-8
+    locale:       en_GB.UTF-8
+    timeZone:     Europe/London
 
-# =========================================================
-# CmdManager service
-# =========================================================
-sys.CmdManager:
-  # class: renovant\core\console\CmdManager
-  constructor:
-    pdo:    sqlite
-    table:  sys_cmd
+  # -------------------------------------------------------
+  # CACHE settings ----------------------------------------
+  cache:
+    #sys:           ### System cache, override with CAUTION
+      #class:       renovant\core\cache\SqliteCache
+      #constructor: ['sys-cache', 'cache', true]
+    main:
+      class:        renovant\core\cache\SqliteCache
+      constructor:  [ 'sqlite', 'cache', false ]
 
-# =========================================================
-# DB service
-# =========================================================
-database:
-  #sys-cache:  ### System cache DB, override with CAUTION
-  #  dns:      sqlite:{{CACHE_DIR}}sys-cache.sqlite
-  #sys-trace:  ### System trace DB, override with CAUTION
-  #  dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
-  sqlite:
-    dns:      sqlite:/tmp/renovant-core/db.sqlite
-  mysql:
-    dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
-    user:     phpunit
-    pwd:      phpunit
 
-# =========================================================
-# LOG service
-# =========================================================
-log:
-  kernel:
-    level:    LOG_INFO
-    facility: kernel
-    class:    renovant\core\log\writer\FileWriter
-    param1:   kernel.log
-    param2:   null
-  system:
-    level:    LOG_DEBUG
-    facility: null
-    class:    renovant\core\log\writer\FileWriter
-    param1:   system.log
-    param2:   null
+  # -------------------------------------------------------
+  # DB settings -------------------------------------------
+  database:
+    sys-cache:  ### System cache DB, override with CAUTION
+      #dns:      sqlite:{{CACHE_DIR}}sys-cache.sqlite
+      dns:      sqlite:file:sys-cache?mode=memory
+    sys-trace:  ### System trace DB, override with CAUTION
+      #dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
+      dns:      sqlite:file:sys-trace?mode=memory
+    sqlite:
+      #dns:      sqlite:/tmp/renovant-core/db.sqlite
+      dns:      sqlite:file:sqlite?mode=memory
+    mysql:
+      dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
+      user:     phpunit
+      pwd:      phpunit
 
-# =========================================================
-# TRACE service
-# =========================================================
-trace:
-  level:      LOG_DEBUG
-  storeFn:    null
+  # -------------------------------------------------------
+  # LOG settings ------------------------------------------
+  log:
+    kernel:
+      level:    LOG_INFO
+      facility: kernel
+      class:    renovant\core\log\writer\FileWriter
+      param1:   kernel.log
+      param2:   null
+    system:
+      level:    LOG_DEBUG
+      facility: null
+      class:    renovant\core\log\writer\FileWriter
+      param1:   system.log
+      param2:   null
+
+  # -------------------------------------------------------
+  # TRACE settings ----------------------------------------
+  trace:
+    level:      LOG_DEBUG
+    storeFn:    null
+
+  # -------------------------------------------------------
+  # sys services override ---------------------------------
+  services:
+    acl:        sys.ACL
+    auth:       sys.AUTH
+    cmd:        sys.CmdManager
 
 # =========================================================
 # EVENTS
@@ -153,6 +151,7 @@ services:
       authTTL:      300     # 5 min
       refreshTTL:   86400   # 1 day
       rememberTTL:  2592000 # 1 month
+      provider:     sys.AuthProvider
       skipAuthApps: [ 'AUTH' ]
       skipAuthUrls: []
       skipXSRFApps: [ 'RRD' ]
@@ -168,6 +167,15 @@ services:
         users:    sys_users
     properties:
       fields:     '*'
+
+  # =========================================================
+  # CmdManager service
+  # =========================================================
+  sys.CmdManager:
+    class: renovant\core\console\CmdManager
+    constructor:
+      pdo:    sqlite
+      table:  sys_cmd
 
   # -------------------------------------------------------
   # SESSION service

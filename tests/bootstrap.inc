@@ -15,7 +15,7 @@ const UPLOAD_DIR	= '/tmp/renovant-core/upload/';
 const CLI_BOOTSTRAP	= __FILE__;
 const CLI_PHP_BIN	= '/usr/bin/php';
 // environment
-const SYS_YAML		= BASE_DIR.'sys.yml';
+const SYS_YAML		= 'sys.yml';
 const ENVIRONMENT	= 'PHPUNIT';
 
 define('TEST_DIR', __DIR__);
