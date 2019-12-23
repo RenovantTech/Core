@@ -78,7 +78,7 @@ class Tracer extends sys {
 			self::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 		}
 		if(self::$Sys->cnfTrace['storeFn']) {
-			call_user_func(self::$Sys->cnfTrace['storeFn'], self::$trace, self::$errorLevel);
+			call_user_func(self::$Sys->cnfTrace['storeFn'], self::$Req, self::$Res, self::$trace, self::$errorLevel);
 		}
 	}
 	static function export() {
