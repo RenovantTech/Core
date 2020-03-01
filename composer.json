@@ -18,7 +18,8 @@
 		"firebase/php-jwt": "v5.0.0",
 		"ext-pdo": "*",
 		"phpmailer/phpmailer": "^6.0",
-		"ext-yaml": "*"
+		"ext-yaml": "*",
+		"ext-sqlite3": "*"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",

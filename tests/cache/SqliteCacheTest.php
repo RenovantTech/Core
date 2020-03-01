@@ -2,14 +2,13 @@
 namespace test\cache;
 use renovant\core\sys,
 	renovant\core\cache\SqliteCache;
+use const renovant\core\CACHE_DIR;
 
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass() {
-		sys::pdo('sqlite')->exec('
-			DROP TABLE IF EXISTS `sqlite-cache`;
-			DROP TABLE IF EXISTS `sqlite-cache-buffered`;
-		');
+		unlink(CACHE_DIR.'sqlite1.sqlite');
+		unlink(CACHE_DIR.'sqlite2.sqlite');
 	}
 
 	static function tearDownAfterClass() {
@@ -21,13 +20,13 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstructor() {
-		$Cache = new SqliteCache('sqlite', 'sqlite-cache');
+		$Cache = new SqliteCache('sqlite1', 'cache');
 		$this->assertInstanceOf('renovant\core\cache\SqliteCache', $Cache);
 		return $Cache;
 	}
 
 	function testConstructor2() {
-		$CacheWithBuffer = new SqliteCache('sqlite', 'sqlite-cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite2', 'cache', true);
 		$this->assertInstanceOf('renovant\core\cache\SqliteCache', $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
@@ -150,7 +149,7 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 		$CacheWithBuffer->set('test1', 'HelloWorld');
 		$CacheWithBuffer = null;
 		SqliteCache::shutdown();
-		$CacheWithBuffer = new SqliteCache('sqlite', 'sqlite-cache-buffered', true);
+		$CacheWithBuffer = new SqliteCache('sqlite2', 'cache', true);
 		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }
