@@ -42,7 +42,20 @@ class SysBoot extends sys {
 
 		self::$Sys = new sys();
 
-		$config = Yaml::parseFile(BASE_DIR.SYS_YAML);
+		$config = array_merge_recursive([
+			'sys' => [
+				'apps' => [],
+				'cli' => [],
+				'namespaces' => [],
+				'constants' => [],
+				'settings' => [],
+				'cache' => [],
+				'database' => [],
+				'log' => [],
+				'trace' => [],
+				'services' => []
+			]
+		], Yaml::parseFile(BASE_DIR.SYS_YAML));
 
 		// APPS HTTP/CLI
 		self::$Sys->cnfApps['HTTP'] = $config['sys']['apps'];
@@ -66,7 +79,7 @@ class SysBoot extends sys {
 			self::$Sys->cnfConstants = $config['sys']['constants'];
 
 		// settings
-		if(is_array($config['sys']['constants']))
+		if(is_array($config['sys']['settings']))
 			self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['sys']['settings']);
 
 		// Cache service
@@ -91,7 +104,8 @@ class SysBoot extends sys {
 		if(is_array($config['sys']['log'])) self::$Sys->cnfLog = $config['sys']['log'];
 
 		// Trace service
-		self::$Sys->cnfTrace = array_merge(self::$Sys->cnfTrace, $config['sys']['trace']);
+		if(is_array($config['sys']['trace']))
+			self::$Sys->cnfTrace = array_merge(self::$Sys->cnfTrace, $config['sys']['trace']);
 		if(is_string(self::$Sys->cnfTrace['level']))
 			self::$Sys->cnfTrace['level'] = constant(self::$Sys->cnfTrace['level']);
 
