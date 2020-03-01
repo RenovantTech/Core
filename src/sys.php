@@ -59,6 +59,9 @@ class sys {
 	/** Log buffer
 	 * @var array */
 	static protected $log = [];
+	/** PDO instances
+	 * @var array */
+	static protected $pdo = [];
 	/** Current HTTP/CLI Request
 	 * @var object */
 	static protected $Req;
@@ -176,6 +179,9 @@ class sys {
 		defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
 		ini_restore('precision');
 		self::$traceFn = __METHOD__;
+		self::trace(LOG_DEBUG, T_INFO);
+		foreach (self::$pdo as $PDO)
+			if($PDO->inTransaction()) $PDO->rollBack();
 		register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
 		self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 		if(PHP_SAPI != 'cli') session_write_close();
@@ -426,16 +432,15 @@ class sys {
 	 * @throws \PDOException
 	 */
 	static function pdo($id='master') {
-		static $_ = [];
-		if(!isset($_[$id])) {
+		if(!isset(self::$pdo[$id])) {
 			$traceFn = self::traceFn(__METHOD__);
 			$cnf = self::$Sys->cnfPdo[$id];
 			self::trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
 			$pdo = @new db\PDO($cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
-			$_[$id] = $pdo;
+			self::$pdo[$id] = $pdo;
 			self::traceFn($traceFn);
 		}
-		return $_[$id];
+		return self::$pdo[$id];
 	}
 
 	/**
