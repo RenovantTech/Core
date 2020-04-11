@@ -11,6 +11,8 @@ class Class1 {
 	protected $name;
 	/** @validate(minLength=3, maxLength=30) */
 	protected $surname;
+	/** @validate(enum="PENDING, COMPLETED") */
+	protected $flag;
 	/** @validate(max=50) */
 	protected $age = 20;
 	/** @validate(email) */

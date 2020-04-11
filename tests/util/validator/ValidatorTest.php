@@ -6,7 +6,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	function testValidate() {
 		$Object = new \test\util\validator\Class1;
-		$this->assertCount(8, Validator::validate($Object));
+		$this->assertCount(9, Validator::validate($Object));
 
 		// min & max
 		$Object->id = 3;
@@ -26,6 +26,12 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase {
 
 		$Object->surname = 'Dalton';
 		$this->assertArrayNotHasKey('surname', Validator::validate($Object));
+
+		// enum
+		$Object->flag = ' COMPLETED';
+		$this->assertArrayHasKey('flag', Validator::validate($Object));
+		$Object->flag = 'COMPLETED';
+		$this->assertArrayNotHasKey('flag', Validator::validate($Object));
 
 		// email (NOT null, NOT empty)
 		$Object->email1 = 'test@';

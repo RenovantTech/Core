@@ -72,6 +72,9 @@ class Validator {
 	static function email($value) {
 		return (boolean) filter_var($value, FILTER_VALIDATE_EMAIL);
 	}
+	static function enum($value, $array) {
+		return (boolean) in_array($value, $array);
+	}
 	static function ip($value) {
 		return (boolean) filter_var($value, FILTER_VALIDATE_IP);
 	}

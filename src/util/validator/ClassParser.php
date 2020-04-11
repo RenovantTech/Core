@@ -42,6 +42,11 @@ class ClassParser {
 						$metadata['empty'][] = $prop;
 						unset($value['empty']);
 					}
+					foreach ($value as $k=>$v) {
+						switch ($k) {
+							case 'enum': $value[$k] = array_map('trim', explode(',', $v)); break;
+						}
+					}
 					$metadata['properties'][$prop] = array_merge($metadata['properties'][$prop], $value);
 				}
 			}
