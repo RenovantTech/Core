@@ -5,15 +5,15 @@ use renovant\core\http\Request,
 
 class ActionController extends \renovant\core\http\controller\ActionController {
 
-	function indexAction(Request $Req, Response $Res) {
+	function index(Request $Req, Response $Res) {
 		$Res->setView('index');
 	}
 
-	function fooAction(Request $Req, Response $Res) {
+	function foo(Request $Req, Response $Res) {
 		$Res->setView('foo');
 	}
 
-	function barAction(Request $Req, Response $Res) {
+	function bar(Request $Req, Response $Res) {
 		$Res->setView('bar');
 	}
 
@@ -22,7 +22,7 @@ class ActionController extends \renovant\core\http\controller\ActionController {
 	 * @param \renovant\core\http\Response $Res
 	 * @param integer $id
 	 */
-	function action2Action(Request $Req, Response $Res, $id) {
+	function action2(Request $Req, Response $Res, $id) {
 		$Res->set('id', $id)
 			->setView('id-'.$id);
 	}
@@ -32,7 +32,7 @@ class ActionController extends \renovant\core\http\controller\ActionController {
 	 * @param \renovant\core\http\Response $Res
 	 * @param string $name
 	 */
-	function action3Action(Request $Req, Response $Res, $name='Tom') {
+	function action3(Request $Req, Response $Res, $name='Tom') {
 		$Res->set('name', $name)
 			->setView('view3');
 	}
@@ -46,7 +46,7 @@ class ActionController extends \renovant\core\http\controller\ActionController {
 	 * @param integer $day
 	 * @param string $format
 	 */
-	function detailsAction(Request $Req, Response $Res, $year, $month, $day, $format) {
+	function details(Request $Req, Response $Res, $year, $month, $day, $format) {
 		$Res->set([
 			'year' => $year,
 			'month' => $month,
@@ -55,7 +55,7 @@ class ActionController extends \renovant\core\http\controller\ActionController {
 		])->setView('details');
 	}
 
-	function ex13Action(Request $Req, Response $Res) {
+	function ex13(Request $Req, Response $Res) {
 		$Res->setView((new \StdClass));
 	}
 }

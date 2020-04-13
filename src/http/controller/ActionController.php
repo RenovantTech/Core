@@ -14,11 +14,6 @@ use renovant\core\sys,
 	renovant\core\http\Exception;
 /**
  * MVC action Controller implementation.
- * Allows multiple requests types (aka action) to be handled by the same Controller class.
- * Action methods must have the following signature:
- * <code>
- * function exampleAction(Request $Req, Response $Res)
- * </code>
  * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 abstract class ActionController implements \renovant\core\http\ControllerInterface {
@@ -79,10 +74,10 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 				}
 			}
 		}
-		$prevTraceFn = sys::traceFn($this->_.'->'.$action.'Action');
+		$prevTraceFn = sys::traceFn($this->_.'->'.$action);
 		try {
 			sys::trace(LOG_DEBUG, T_INFO);
-			call_user_func_array([$this, $action.'Action'], $args);
+			call_user_func_array([$this, $action], $args);
 			$this->postHandle($Req, $Res);
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -131,6 +126,6 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 		}
 		if(isset($this->_config[$action])) return $action;
 		http_response_code(404);
-		throw new Exception(111, [$this->_, $action.'Action']);
+		throw new Exception(111, [$this->_, $action]);
 	}
 }

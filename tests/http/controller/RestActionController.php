@@ -11,7 +11,7 @@ class RestActionController extends \renovant\core\http\controller\ActionControll
 	 * @param Response $Res
 	 * @param string $class
 	 */
-	function createAction(Request $Req, Response $Res, $class) {
+	function create(Request $Req, Response $Res, $class) {
 		$Res->set([
 			'class' => $class,
 			'id' => $Req->get('id')
@@ -25,7 +25,7 @@ class RestActionController extends \renovant\core\http\controller\ActionControll
 	 * @param string $class
 	 * @param integer $id
 	 */
-	function readAction(Request $Req, Response $Res, $class, $id) {
+	function read(Request $Req, Response $Res, $class, $id) {
 		$Res->set([
 			'class' => $class,
 			'id' => $id
@@ -38,7 +38,7 @@ class RestActionController extends \renovant\core\http\controller\ActionControll
 	 * @param Response $Res
 	 * @param string $class
 	 */
-	function readAllAction(Request $Req, Response $Res, $class) {
+	function readAll(Request $Req, Response $Res, $class) {
 		$Res->set('class', $class)
 			->setView('readAll');
 	}
@@ -50,7 +50,7 @@ class RestActionController extends \renovant\core\http\controller\ActionControll
 	 * @param string $class
 	 * @param integer $id
 	 */
-	function updateAction(Request $Req, Response $Res, $class, $id) {
+	function update(Request $Req, Response $Res, $class, $id) {
 		$Res->set([
 			'class' => $class,
 			'id' => $id
@@ -64,7 +64,7 @@ class RestActionController extends \renovant\core\http\controller\ActionControll
 	 * @param string $class
 	 * @param integer $id
 	 */
-	function destroyAction(Request $Req, Response $Res, $class, $id) {
+	function destroy(Request $Req, Response $Res, $class, $id) {
 		$Res->set([
 			'class' => $class,
 			'id' => $id

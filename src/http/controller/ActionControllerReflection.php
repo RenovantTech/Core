@@ -33,8 +33,8 @@ class ActionControllerReflection {
 			if(in_array($methodName, ['preHandle','postHandle'])) {
 				if(!$RefMethod->isProtected()) throw new Exception(101, [$methodClass,$methodName]);
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
-			} elseif($RefMethod->isPublic() && substr($methodName,-6)=='Action') {
-				$action = substr($methodName,0,-6);
+			} elseif($RefMethod->isPublic() && !in_array($methodName,['handle']) && substr($methodName,0,2)!='__') {
+				$action = $methodName;
 				$config[$action] = [];
 				// routing
 				$DocComment = $RefMethod->getDocComment();
