@@ -66,12 +66,6 @@ sys:
   # -------------------------------------------------------
   # DB settings -------------------------------------------
   database:
-    sys-cache:  ### System cache DB, override with CAUTION
-      #dns:      sqlite:{{CACHE_DIR}}sys-cache.sqlite
-      dns:      sqlite:file:sys-cache?mode=memory
-    sys-trace:  ### System trace DB, override with CAUTION
-      #dns:      sqlite:{{DATA_DIR}}sys-trace.sqlite
-      dns:      sqlite:file:sys-trace?mode=memory
     sqlite:
       #dns:      sqlite:/tmp/renovant-core/db.sqlite
       dns:      sqlite:file:sqlite?mode=memory

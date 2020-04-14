@@ -75,8 +75,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfPdo');
 		$ReflProp->setAccessible(true);
 		$pdo = $ReflProp->getValue($Sys);
-		$this->assertArrayHasKey('sys-cache', $pdo);
-		$this->assertEquals('sqlite:/tmp/renovant-core/cache/sys-cache.sqlite', $pdo['sys-cache']['dns']);
+		$this->assertArrayHasKey('mysql', $pdo);
+		$this->assertEquals('mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit', $pdo['mysql']['dns']);
 
 		// LOG service
 		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfLog');
@@ -180,7 +180,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testInit
 	 */
 	function testPdo() {
-		$this->assertInstanceOf('renovant\core\db\PDO', sys::pdo('sys-cache'));
 		$this->assertInstanceOf('renovant\core\db\PDO', sys::pdo('mysql'));
 	}
 

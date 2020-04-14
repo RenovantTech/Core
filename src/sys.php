@@ -97,10 +97,7 @@ class sys {
 	protected $cnfLog = [];
 	/** Database PDO configurations
 	 * @var array */
-	protected $cnfPdo = [
-		'sys-cache' => [ 'dns' => 'sqlite:'.CACHE_DIR.'sys-cache.sqlite' ],
-		'sys-trace' => [ 'dns' => 'sqlite:'.DATA_DIR.'sys-trace.sqlite' ]
-	];
+	protected $cnfPdo = [];
 	/** system settings
 	 * @var array */
 	protected $cnfSettings = [
@@ -344,6 +341,7 @@ class sys {
 	/**
 	 * CmdManager helper
 	 * @return console\CmdManager
+	 * @throws \ReflectionException
 	 */
 	static function cmd() {
 		static $CmdManager;
