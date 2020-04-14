@@ -51,9 +51,10 @@ sys:
   # -------------------------------------------------------
   # CACHE settings ----------------------------------------
   cache:
-    #sys:           ### System cache, override with CAUTION
+    ### System cache, override with CAUTION
+    #sys:
       #class:       renovant\core\cache\SqliteCache
-      #constructor: ['sys-cache', 'cache', true]
+      #constructor: ['sys', 'cache', true]
     main:
       class:        renovant\core\cache\SqliteCache
       constructor:  [ 'sqlite', 'cache', false ]

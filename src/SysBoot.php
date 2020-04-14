@@ -17,6 +17,11 @@ use renovant\core\container\Container,
  */
 class SysBoot extends sys {
 
+	const SYS_CACHE_DEFAULT_CONFIG = [
+		'class' => 'renovant\core\cache\SqliteCache',
+		'constructor' => ['sys', 'cache', true]
+	];
+
 	/**
 	 * Framework bootstrap on first launch (or cache missing)
 	 * @throws util\yaml\YamlException
@@ -85,10 +90,7 @@ class SysBoot extends sys {
 			self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['sys']['settings']);
 
 		// Cache service
-		self::$Sys->cnfCache[SYS_CACHE] = [
-			'class' => 'renovant\core\cache\SqliteCache',
-			'constructor' => ['sys-cache', 'cache', true]
-		];
+		self::$Sys->cnfCache[SYS_CACHE] = self::SYS_CACHE_DEFAULT_CONFIG;
 		if(is_array($config['sys']['cache']))
 			self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['sys']['cache']);
 		foreach (self::$Sys->cnfCache as $id => $conf)
