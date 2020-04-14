@@ -16,6 +16,7 @@ use renovant\core\sys;
 class SqliteCache implements CacheInterface {
 	use \renovant\core\CoreTrait;
 
+	const FILE_EXT = '.sqlite';
 	const SQL_INIT = '
 		CREATE TABLE IF NOT EXISTS `%s` (
 			id VARCHAR NOT NULL,
@@ -34,30 +35,30 @@ class SqliteCache implements CacheInterface {
 	/** Write buffer
 	 * @var array */
 	static protected $buffer = [];
-	/** ID (Cache Identifier)
+	/** File name inside CACHE_DIR
 	 * @var string */
-	protected $id;
+	protected $filename;
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
 	/** SQLite3 resource (READ only)
 	 * @var \SQLite3 */
-	private $db;
+	protected $db;
 	/** SQLite3 resource (READ/WRITE)
 	 * @var \SQLite3 */
-	private $dbRW;
+	protected $dbRW;
 	/** PDOStatement for DELETE
 	 * @var \PDOStatement */
-	private $SqlDEL;
+	protected $SqlDEL;
 	/** PDOStatement for SELECT
 	 * @var \PDOStatement */
-	private $SqlGET;
+	protected $SqlGET;
 	/** PDOStatement for COUNT
 	 * @var \PDOStatement */
-	private $SqlHAS;
+	protected $SqlHAS;
 	/** PDOStatement for INSERT/REPLACE
 	 * @var \PDOStatement */
-	private $SqlSET;
+	protected $SqlSET;
 	/** PDO table name
 	 * @var string */
 	protected $table;
@@ -66,27 +67,28 @@ class SqliteCache implements CacheInterface {
 	protected $writeBuffer = false;
 
 	/**
-	 * @param string $id cache ID
+	 * @param string $filename SqLite file name
 	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($id, $table='cache', $writeBuffer=false) {
-		$this->id = $id;
+	function __construct($filename, $table='cache', $writeBuffer=false) {
+		$this->filename = $filename;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
 		$this->__wakeup('INIT');
 	}
 
 	function __sleep() {
-		return ['_', 'id', 'table', 'writeBuffer'];
+		return ['_', 'filename', 'table', 'writeBuffer'];
 	}
 
 	function __wakeup($mode='R') {
-		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] SQLite3 ('.$mode.'): '.CACHE_DIR.$this->id.'.sqlite, table: '.$this->table, null, $this->_);
+		$file = CACHE_DIR.$this->filename.self::FILE_EXT;
+		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] SQLite3 ('.$mode.'): '.$file.', table: '.$this->table, null, $this->_);
 		try {
 			switch ($mode) {
 				case 'INIT':
-					$this->dbRW = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
+					$this->dbRW = new \SQLite3($file, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 					$this->dbRW->busyTimeout(10);
 					$this->dbRW->exec(sprintf(self::SQL_INIT, $this->table));
 					if($this->writeBuffer) {
@@ -95,20 +97,20 @@ class SqliteCache implements CacheInterface {
 					}
 					break;
 				case 'RW':
-					$this->dbRW = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE);
+					$this->dbRW = new \SQLite3($file, SQLITE3_OPEN_READWRITE);
 					$this->dbRW->busyTimeout(10);
 					$this->SqlSET = $this->dbRW->prepare(sprintf(self::SQL_SET, $this->table));
 					$this->SqlDEL = $this->dbRW->prepare(sprintf(self::SQL_DELETE, $this->table));
 					if(!$this->SqlSET || !$this->SqlDEL)
-						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->id.' (RW) FAILURE', null, $this->_);
+						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->filename.' (RW) FAILURE', null, $this->_);
 					break;
 				case 'R':
-					$this->db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READONLY);
+					$this->db = new \SQLite3($file, SQLITE3_OPEN_READONLY);
 					$this->db->busyTimeout(50);
 					$this->SqlGET = $this->db->prepare(sprintf(self::SQL_GET, $this->table));
 					$this->SqlHAS = $this->db->prepare(sprintf(self::SQL_HAS, $this->table));
 					if(!$this->SqlGET || !$this->SqlHAS)
-						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->id.' (R) FAILURE', null, $this->_);
+						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->filename.' (R) FAILURE', null, $this->_);
 					break;
 			}
 		}  catch(\Exception $Ex) {
@@ -168,7 +170,7 @@ class SqliteCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-				self::$buffer[$this->id.'#'.$this->table][] = [$id, serialize($value), $expire, $tags];
+				self::$buffer[$this->filename.':'.$this->table][] = [$id, serialize($value), $expire, $tags];
 			} else {
 				if(is_null($this->SqlSET)) $this->__wakeup('RW');
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
@@ -234,8 +236,8 @@ class SqliteCache implements CacheInterface {
 		try {
 			foreach (self::$buffer as $k => $buffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
-				list($id, $table) = explode('#', $k);
-				$db = new \SQLite3(CACHE_DIR.$id.'.sqlite', SQLITE3_OPEN_READWRITE);
+				list($filename, $table) = explode(':', $k);
+				$db = new \SQLite3(CACHE_DIR.$filename.self::FILE_EXT, SQLITE3_OPEN_READWRITE);
 				$sqlSet = $db->prepare(sprintf(self::SQL_SET, $table));
 				foreach ($buffer as $data) {
 					list($id, $value, $expire, $tags) = $data;
