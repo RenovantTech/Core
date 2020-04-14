@@ -57,7 +57,7 @@ sys:
       #constructor: ['sys', 'cache', true]
     #sys:
       #class:       renovant\core\cache\MemcachedCache
-      #constructor: ['sys', ['localhost', 11211, 0], true]
+      #constructor: [['localhost', 11211, 0], true]
     main:
       class:        renovant\core\cache\SqliteCache
       constructor:  [ 'sqlite', 'cache', false ]
