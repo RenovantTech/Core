@@ -6,6 +6,8 @@
  * @license New BSD License
  */
 namespace renovant\core;
+use renovant\core\cache\ArrayCache;
+use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use renovant\core\acl\ACL,
 	renovant\core\auth\AUTH,
@@ -320,18 +322,23 @@ class sys {
 
 	/**
 	 * Cache helper
-	 * @param string $id Cache ID, default "system"
+	 * Will return an ArrayCache on failure
+	 * @param string $id Cache ID, default "main"
 	 * @return cache\CacheInterface
 	 */
 	static function cache($id='main') {
 		static $c = [];
-		if($id=='sys') return self::$Cache;
-		if(!isset($c[$id]) && !$c[$id] = self::cache('sys')->get($_ = 'sys.cache.'.strtoupper($id))) {
-			$cnf = self::$Sys->cnfCache[$id];
-			$c[$id] = self::$Container->build($_, $cnf['class'], $cnf['constructor'], $cnf['properties']);
-			self::cache('sys')->set($_, $c[$id]);
+		if($id==SYS_CACHE) return self::$Cache;
+		try {
+			if(!isset($c[$id]) && !$c[$id] = self::cache(SYS_CACHE)->get($_ = OBJ_ID_PREFIX.strtoupper($id))) {
+				$cnf = self::$Sys->cnfCache[$id];
+				$c[$id] = self::$Container->build($_, $cnf['class'], $cnf['constructor'], $cnf['properties']);
+				self::cache(SYS_CACHE)->set($_, $c[$id]);
+			}
+			return $c[$id];
+		} catch (\Exception $Ex) {
+			return new ArrayCache();
 		}
-		return $c[$id];
 	}
 
 	/**
@@ -340,9 +347,9 @@ class sys {
 	 */
 	static function cmd() {
 		static $CmdManager;
-		if(!isset($CmdManager) && !$CmdManager = self::cache('sys')->get(self::$Sys->cnfServices['cmd'])) {
+		if(!isset($CmdManager) && !$CmdManager = self::cache(SYS_CACHE)->get(self::$Sys->cnfServices['cmd'])) {
 			$CmdManager = self::$Container->build(self::$Sys->cnfServices['cmd'], CmdManager::class);
-			self::cache('sys')->set(self::$Sys->cnfServices['cmd'], $CmdManager);
+			self::cache(SYS_CACHE)->set(self::$Sys->cnfServices['cmd'], $CmdManager);
 		}
 		return $CmdManager;
 	}

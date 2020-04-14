@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\context;
+use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\{T_DEPINJ};
 use renovant\core\sys,
 	renovant\core\CoreProxy,
@@ -67,14 +68,14 @@ class Context {
 		if(in_array($namespace, $this->namespaces)) return;
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
 		$this->namespaces[] = $namespace;
-		if(!$context = sys::cache('sys')->get($namespace.'.$context')) {
+		if(!$context = sys::cache(SYS_CACHE)->get($namespace.'.$context')) {
 			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
 			$context['events'] = EventYamlParser::parseNamespace($namespace);
 			$services = $context['container']['services'];
 			unset($context['container']['services']);
-			sys::cache('sys')->set($namespace.'.$context', $context);
-			sys::cache('sys')->set($namespace.'.$services', $services);
+			sys::cache(SYS_CACHE)->set($namespace.'.$context', $context);
+			sys::cache(SYS_CACHE)->set($namespace.'.$services', $services);
 		}
 		$this->Container->init($namespace, $context['container']);
 		$this->EventDispatcher->init($namespace, $context['events']);
@@ -107,7 +108,7 @@ class Context {
 			$this->init(substr($id, 0, strrpos($id, '.')));
 			if($this->has($id, $class)) {
 				if(substr($id, 0, 4)=='sys.') {
-					if(!$Obj = sys::cache('sys')->get($id))
+					if(!$Obj = sys::cache(SYS_CACHE)->get($id))
 						$Obj = $this->Container->get($id, $class, $failureMode);
 					return $this->services[$id] = $Obj;
 				}

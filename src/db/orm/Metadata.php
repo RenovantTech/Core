@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\db\orm;
+use const renovant\core\SYS_CACHE;
 use renovant\core\sys;
 /**
  * ORM Metadata
@@ -97,9 +98,9 @@ class Metadata {
 		if(is_object($entity)) $entity = get_class($entity);
 		if(isset($cache[$entity])) return $cache[$entity];
 		$k = $entity.'#ORM-metadata';
-		if(!$cache[$entity] = sys::cache('sys')->get($k)) {
+		if(!$cache[$entity] = sys::cache(SYS_CACHE)->get($k)) {
 			$cache[$entity] = new Metadata($entity);
-			sys::cache('sys')->set($k, $cache[$entity], null, 'ORM-metadata');
+			sys::cache(SYS_CACHE)->set($k, $cache[$entity], null, 'ORM-metadata');
 		}
 		return $cache[$entity];
 	}

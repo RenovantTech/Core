@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\container;
+use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_DEPINJ;
 use renovant\core\sys;
 /**
@@ -44,6 +45,7 @@ class Container {
 	 * @param array|null $args constructor args
 	 * @param array $properties Object properties
 	 * @return object
+	 * @throws \ReflectionException
 	 * @internal
 	 */
 	function build($id, $class, array $args=null, array $properties=[]) {
@@ -71,16 +73,17 @@ class Container {
 		$maps = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
 		$this->id2classMap = array_merge($this->id2classMap, $maps['id2class']);
 		$this->class2idMap = array_merge($this->class2idMap, $maps['class2id']);
-		if(!$containerMaps) sys::cache('sys')->set($namespace.'.$services', $maps['services']);
+		if(!$containerMaps) sys::cache(SYS_CACHE)->set($namespace.'.$services', $maps['services']);
 	}
 
 	/**
 	 * Get an object
-	 * @param string $id           object OID
-	 * @param string $class        required object class
+	 * @param string $id object OID
+	 * @param string $class required object class
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContainerException
+	 * @throws \ReflectionException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
@@ -90,10 +93,10 @@ class Container {
 			if(!in_array($namespace, $this->namespaces)) $this->init($namespace);
 			if(!$this->has($id)) throw new ContainerException(1, [$this->_, $id]);
 			if(!$this->has($id, $class)) throw new ContainerException(2, [$this->_, $id, $class]);
-			if(!$Obj = sys::cache('sys')->get($id)) {
-				$obj = sys::cache('sys')->get($namespace.'.$services')[$id];
+			if(!$Obj = sys::cache(SYS_CACHE)->get($id)) {
+				$obj = sys::cache(SYS_CACHE)->get($namespace.'.$services')[$id];
 				$Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
-				sys::cache('sys')->set($id, $Obj);
+				sys::cache(SYS_CACHE)->set($id, $Obj);
 			}
 			return $this->services[$id] = $Obj;
 		} catch(ContainerException $Ex) {
@@ -107,6 +110,7 @@ class Container {
 	 * @param string $class desired class/interface
 	 * @return object[] services (can be empty)
 	 * @throws ContainerException
+	 * @throws \ReflectionException
 	 */
 	function getAllByType($class) {
 		$ids = $this->getListByType($class);
@@ -153,6 +157,7 @@ class Container {
 	 * @param mixed $v property value
 	 * @param object $Obj
 	 * @param \ReflectionObject $RObject
+	 * @throws \ReflectionException
 	 */
 	static protected function setProperty($k, $v, $Obj, \ReflectionObject $RObject) {
 		if($RObject->hasProperty($k)) {

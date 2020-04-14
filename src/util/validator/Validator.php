@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\util\validator;
+use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_ERROR;
 use renovant\core\sys;
 /**
@@ -18,6 +19,7 @@ class Validator {
 	 * @param $Object
 	 * @param array|null $validateSubset
 	 * @return array
+	 * @throws \ReflectionException
 	 */
 	static function validate($Object, $validateSubset=null) {
 		$class = get_class($Object);
@@ -45,9 +47,9 @@ class Validator {
 		$class = get_class($Object);
 		if(isset($cache[$class])) return $cache[$class];
 		$k = '#'.$class.'#validator';
-		if(!$cache[$class] = sys::cache('sys')->get($k)) {
+		if(!$cache[$class] = sys::cache(SYS_CACHE)->get($k)) {
 			$cache[$class] = (new ClassParser)->parse($class);
-			sys::cache('sys')->set($k, $cache[$class], null, 'validator');
+			sys::cache(SYS_CACHE)->set($k, $cache[$class], null, 'validator');
 		}
 		return $cache[$class];
 	}

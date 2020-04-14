@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core;
+use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\T_INFO;
 use renovant\core\container\Container,
 	renovant\core\util\yaml\Yaml;
@@ -19,6 +20,7 @@ class SysBoot extends sys {
 	/**
 	 * Framework bootstrap on first launch (or cache missing)
 	 * @throws util\yaml\YamlException
+	 * @throws \ReflectionException
 	 */
 	static function boot() {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
@@ -83,7 +85,7 @@ class SysBoot extends sys {
 			self::$Sys->cnfSettings = array_replace(self::$Sys->cnfSettings, $config['sys']['settings']);
 
 		// Cache service
-		self::$Sys->cnfCache['sys'] = [
+		self::$Sys->cnfCache[SYS_CACHE] = [
 			'class' => 'renovant\core\cache\SqliteCache',
 			'constructor' => ['sys-cache', 'cache', true]
 		];
@@ -91,8 +93,8 @@ class SysBoot extends sys {
 			self::$Sys->cnfCache = array_merge(self::$Sys->cnfCache, $config['sys']['cache']);
 		foreach (self::$Sys->cnfCache as $id => $conf)
 			self::$Sys->cnfCache[$id] = array_merge(Container::YAML_OBJ_SKELETON, $conf);
-		$sysCacheConf = self::$Sys->cnfCache['sys'];
-		unset(self::$Sys->cnfCache['sys']);
+		$sysCacheConf = self::$Sys->cnfCache[SYS_CACHE];
+		unset(self::$Sys->cnfCache[SYS_CACHE]);
 
 		// DB service
 		if(is_array($config['sys']['database']))
@@ -114,7 +116,7 @@ class SysBoot extends sys {
 			self::$Sys->cnfServices = array_merge(self::$Sys->cnfServices, $config['sys']['services']);
 
 		// initialize
-		self::$Cache = (new Container())->build('sys.cache.SYS', $sysCacheConf['class'], $sysCacheConf['constructor'], $sysCacheConf['properties']);
+		self::$Cache = (new Container())->build(OBJ_ID_PREFIX.strtoupper(SYS_CACHE), $sysCacheConf['class'], $sysCacheConf['constructor'], $sysCacheConf['properties']);
 
 		// write into SYS_YAML_CACHE file
 		$Sys = serialize(self::$Sys);

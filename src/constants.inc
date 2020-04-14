@@ -10,6 +10,10 @@ namespace renovant\core {
 	define('EOL', "\r\n");
 	const VERSION = '3.0.0';
 	define(__NAMESPACE__.'\DIR', (\Phar::running()) ? \Phar::running() : __DIR__);
+	const SYS_CACHE = 'sys';
+}
+namespace renovant\core\cache {
+	const OBJ_ID_PREFIX = 'sys.cache.';
 }
 
 namespace renovant\core\http {
