@@ -20,9 +20,6 @@ class MemcachedCache implements CacheInterface {
 	/** Write buffer
 	 * @var array */
 	static protected $buffer = [];
-	/** ID (Cache Identifier)
-	 * @var string */
-	protected $id;
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
@@ -34,22 +31,20 @@ class MemcachedCache implements CacheInterface {
 	protected $writeBuffer = false;
 	/** SQLite3 resource (READ only)
 	 * @var \Memcached */
-	private $Memcached;
+	protected $Memcached;
 
 	/**
-	 * @param string $id cache ID
 	 * @param string $params servers params
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($id, $params=null, $writeBuffer=false) {
-		$this->id = $id;
+	function __construct($params=null, $writeBuffer=false) {
 		$this->params = $params || self::DEFAULT_PARAMS;
 		$this->writeBuffer = (boolean) $writeBuffer;
 		$this->__wakeup();
 	}
 
 	function __sleep() {
-		return ['_', 'id', 'params', 'writeBuffer'];
+		return ['_', 'params', 'writeBuffer'];
 	}
 
 	function __wakeup() {
@@ -103,8 +98,8 @@ class MemcachedCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-				self::$buffer[$this->id]['params'] = $this->params;
-				self::$buffer[$this->id]['values'][$id] = [$value, $expire, $tags];
+				self::$buffer[$this->_]['params'] = $this->params;
+				self::$buffer[$this->_]['values'][$id] = [$value, $expire, $tags];
 			} else {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 				if(is_array($tags)) $tags = implode('|', $tags);
@@ -126,8 +121,8 @@ class MemcachedCache implements CacheInterface {
 		}
 		try {
 			sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
-			if($this->writeBuffer && isset(self::$buffer[$this->id]) && isset(self::$buffer[$this->id]['values'][$id])) {
-				unset(self::$buffer[$this->id]['values'][$id]);
+			if($this->writeBuffer && isset(self::$buffer[$this->_]) && isset(self::$buffer[$this->_]['values'][$id])) {
+				unset(self::$buffer[$this->_]['values'][$id]);
 				return true;
 			} else return $this->Memcached->delete($id);
 		} catch(\Exception $Ex) {
