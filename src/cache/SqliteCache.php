@@ -7,9 +7,8 @@
  */
 namespace renovant\core\cache;
 use const renovant\core\CACHE_DIR;
-use const renovant\core\trace\T_CACHE;
+use const renovant\core\trace\{T_CACHE,T_ERROR};
 use renovant\core\sys;
-use const renovant\core\trace\T_ERROR;
 /**
  * Sqlite implementation of CacheInterface
  * @author Daniele Sciacchitano <dan@renovant.tech>
