@@ -1,7 +1,6 @@
 <?php
 namespace test\cache;
-use renovant\core\sys,
-	renovant\core\cache\SqliteCache;
+use renovant\core\cache\SqliteCache;
 use const renovant\core\CACHE_DIR;
 
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {

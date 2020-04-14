@@ -9,6 +9,7 @@ namespace renovant\core\cache;
 use const renovant\core\CACHE_DIR;
 use const renovant\core\trace\T_CACHE;
 use renovant\core\sys;
+use const renovant\core\trace\T_ERROR;
 /**
  * Sqlite implementation of CacheInterface
  * @author Daniele Sciacchitano <dan@renovant.tech>
@@ -37,24 +38,27 @@ class SqliteCache implements CacheInterface {
 	/** ID (Cache Identifier)
 	 * @var string */
 	protected $id;
-	/** PDOStatement for DELETE
-	 * @var \SQLite3 */
-	private $db;
-	/** PDOStatement for DELETE
-	 * @var \PDOStatement */
-	private $_sql_del;
-	/** PDOStatement for SELECT
-	 * @var \PDOStatement */
-	private $_sql_get;
-	/** PDOStatement for COUNT
-	 * @var \PDOStatement */
-	private $_sql_has;
-	/** PDOStatement for INSERT/REPLACE
-	 * @var \PDOStatement */
-	private $_sql_set;
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
+	/** SQLite3 resource (READ only)
+	 * @var \SQLite3 */
+	private $db;
+	/** SQLite3 resource (READ/WRITE)
+	 * @var \SQLite3 */
+	private $dbRW;
+	/** PDOStatement for DELETE
+	 * @var \PDOStatement */
+	private $SqlDEL;
+	/** PDOStatement for SELECT
+	 * @var \PDOStatement */
+	private $SqlGET;
+	/** PDOStatement for COUNT
+	 * @var \PDOStatement */
+	private $SqlHAS;
+	/** PDOStatement for INSERT/REPLACE
+	 * @var \PDOStatement */
+	private $SqlSET;
 	/** PDO table name
 	 * @var string */
 	protected $table;
@@ -71,98 +75,149 @@ class SqliteCache implements CacheInterface {
 		$this->id = $id;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Sqlite: '.$id.', table: '.$table, null, $this->_);
-		$this->db = new \SQLite3(CACHE_DIR.$id.'.sqlite', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
-		$this->db->exec(sprintf(self::SQL_INIT, $table));
+		$this->__wakeup('INIT');
 	}
 
 	function __sleep() {
 		return ['_', 'id', 'table', 'writeBuffer'];
 	}
 
+	function __wakeup($mode='R') {
+		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] SQLite3 ('.$mode.'): '.CACHE_DIR.$this->id.'.sqlite, table: '.$this->table, null, $this->_);
+		try {
+			switch ($mode) {
+				case 'INIT':
+					$this->dbRW = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
+					$this->dbRW->busyTimeout(10);
+					$this->dbRW->exec(sprintf(self::SQL_INIT, $this->table));
+					if($this->writeBuffer) {
+						$this->dbRW->close();
+						unset($this->dbRW);
+					}
+					break;
+				case 'RW':
+					$this->dbRW = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE);
+					$this->dbRW->busyTimeout(10);
+					$this->SqlSET = $this->dbRW->prepare(sprintf(self::SQL_SET, $this->table));
+					$this->SqlDEL = $this->dbRW->prepare(sprintf(self::SQL_DELETE, $this->table));
+					if(!$this->SqlSET || !$this->SqlDEL)
+						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->id.' (RW) FAILURE', null, $this->_);
+					break;
+				case 'R':
+					$this->db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READONLY);
+					$this->db->busyTimeout(50);
+					$this->SqlGET = $this->db->prepare(sprintf(self::SQL_GET, $this->table));
+					$this->SqlHAS = $this->db->prepare(sprintf(self::SQL_HAS, $this->table));
+					if(!$this->SqlGET || !$this->SqlHAS)
+						sys::trace(LOG_ERR, T_ERROR, '[INIT] '.$this->id.' (R) FAILURE', null, $this->_);
+					break;
+			}
+		}  catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[INIT] FAILURE', null, $this->_);
+		}
+	}
+
 	function get($id) {
 		if(isset($this->cache[$id])) {
-			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] ' . $id, null, $this->_);
 			return $this->cache[$id];
-		} else {
-			if(!$this->db) $this->db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READONLY);
-			if(is_null($this->_sql_get)) $this->_sql_get = $this->db->prepare(sprintf(self::SQL_GET, $this->table));
-			$this->_sql_get->bindValue('id', $id);
-			$this->_sql_get->bindValue('t', time());
-			$res = $this->_sql_get->execute();
+		}
+		try {
 			$data = false;
-			if($res)
-				$data = $res->fetchArray(SQLITE3_NUM);
-			if($res===false || $data === false) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
-				return false;
+			if($this->SqlGET) {
+				$this->SqlGET->bindValue('id', $id);
+				$this->SqlGET->bindValue('t', time());
+				if($res = $this->SqlGET->execute()) { /** @var \SQLite3Result $res */
+					$data = $res->fetchArray(SQLITE3_NUM);
+					$res->finalize();
+				}
+				if($data) {
+					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
+					return $this->cache[$id] = unserialize((string)$data[0]);
+				}
 			}
-			sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
-			return $this->cache[$id] = unserialize((string)$data[0]);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
+			return false;
+		} catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[GET] '.$id.' FAILURE', null, $this->_);
+			return false;
 		}
 	}
 
 	function has($id) {
-		if(isset($this->cache[$id])) return true;
-		if(!$this->db) $this->db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READONLY);
-		if(is_null($this->_sql_has)) $this->_sql_has = $this->db->prepare(sprintf(self::SQL_HAS, $this->table));
-		$this->_sql_has->bindValue('id', $id);
-		$data = $this->_sql_has->execute()->fetchArray(SQLITE3_NUM);
-		return (boolean)$data[0];
+		if(isset($this->cache[$id]))
+			return true;
+		try {
+			$data = false;
+			if($this->SqlHAS) {
+				$this->SqlHAS->bindValue('id', $id);
+				if($res = $this->SqlHAS->execute()) { /** @var \SQLite3Result $res */
+					$data = $res->fetchArray(SQLITE3_NUM);
+					$res->finalize();
+				}
+				if($data)
+					return (boolean)$data[0];
+			}
+			return false;
+		} catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[HAS] '.$id.' FAILURE', null, $this->_);
+			return false;
+		}
 	}
 
 	function set($id, $value, $expire=null, $tags=null) {
-		static $db;
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
 				self::$buffer[$this->id.'#'.$this->table][] = [$id, serialize($value), $expire, $tags];
 			} else {
+				if(is_null($this->SqlSET)) $this->__wakeup('RW');
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
-				if(!$db) $db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE);
-				if(is_null($this->_sql_set)) $this->_sql_set = $db->prepare(sprintf(self::SQL_SET, $this->table));
 				if(is_array($tags)) $tags = implode('|', $tags);
-				$this->_sql_set->bindValue('id', $id);
-				$this->_sql_set->bindValue('data', serialize($value), SQLITE3_BLOB);
-				$this->_sql_set->bindValue('tags', $tags);
-				$this->_sql_set->bindValue('expireAt', $expire);
-				$this->_sql_set->bindValue('updateAt', time());
-				$this->_sql_set->execute();
-				unset($db);
+				$this->SqlSET->bindValue('id', $id);
+				$this->SqlSET->bindValue('data', serialize($value), SQLITE3_BLOB);
+				$this->SqlSET->bindValue('tags', $tags);
+				$this->SqlSET->bindValue('expireAt', $expire);
+				$this->SqlSET->bindValue('updateAt', time());
+				if(false === $this->SqlSET->execute())
+					throw new \Exception();
 			}
 			$this->cache[$id] = $value;
 			return true;
-		} catch(\PDOException $Ex) {
-			sys::trace(LOG_ERR, T_CACHE, '[STORE] '.$id.' FAILURE', null, $this->_);
+		} catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[STORE] '.$id.' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
 	function delete($id) {
-		static $db;
-		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 		if(isset($this->cache[$id])) {
 			$this->cache[$id] = null;
 			unset($this->cache[$id]);
 		}
-		if(!$db) $db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE);
-		if(is_null($this->_sql_del)) $this->_sql_del = $db->prepare(sprintf(self::SQL_DELETE, $this->table));
-		$this->_sql_del->bindValue('id', $id);
-		$this->_sql_del->execute();
-		unset($db);
-		return true;
+		try {
+			if(is_null($this->SqlDEL)) $this->__wakeup('RW');
+			sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
+			$this->SqlDEL->bindValue('id', $id);
+			if(false === $this->SqlDEL->execute())
+				throw new \Exception();
+			return true;
+		} catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[DELETE] '.$id.' FAILURE', null, $this->_);
+			return false;
+		}
 	}
 
 	function clean($mode=self::CLEAN_ALL, $tags=null) {
-		static $db;
-		if(!$db) $db = new \SQLite3(CACHE_DIR.$this->id.'.sqlite', SQLITE3_OPEN_READWRITE);
+		if(is_null($this->SqlDEL)) $this->__wakeup('RW');
+		sys::trace(LOG_DEBUG, T_CACHE, '[CLEAN]', null, $this->_);
 		$this->cache = [];
 		switch($mode) {
 			case self::CLEAN_ALL:
-				$db->exec(sprintf('DELETE FROM `%s`',$this->table));
+				$this->dbRW->exec(sprintf('DELETE FROM `%s`',$this->table));
 				break;
 			case self::CLEAN_OLD:
-				$db->exec(sprintf('DELETE FROM `%s` WHERE expireAt <= %s',$this->table, time()));
+				$this->dbRW->exec(sprintf('DELETE FROM `%s` WHERE expireAt <= %s',$this->table, time()));
 				break;
 			case self::CLEAN_ALL_TAG:
 			case self::CLEAN_ANY_TAG:
@@ -170,7 +225,6 @@ class SqliteCache implements CacheInterface {
 				//@TODO
 				break;
 		}
-		unset($db);
 		return true;
 	}
 
@@ -180,7 +234,7 @@ class SqliteCache implements CacheInterface {
 	static function shutdown() {
 		try {
 			foreach (self::$buffer as $k => $buffer) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: ' . count($buffer) . ' items on ' . $k, null, __METHOD__);
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$k, null, __METHOD__);
 				list($id, $table) = explode('#', $k);
 				$db = new \SQLite3(CACHE_DIR.$id.'.sqlite', SQLITE3_OPEN_READWRITE);
 				$sqlSet = $db->prepare(sprintf(self::SQL_SET, $table));
