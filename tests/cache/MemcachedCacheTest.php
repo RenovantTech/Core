@@ -4,19 +4,23 @@ use renovant\core\cache\MemcachedCache;
 
 class MemcachedCacheTest extends \PHPUnit\Framework\TestCase {
 
+	const PARAMS = ['127.0.0.1',11211,0];
+//	const PARAMS = ['/run/memcached/memcached.sock',0,0];
+
+
 	static function setUpBeforeClass() {
 
 	}
 
 	static function tearDownAfterClass() {
-		MemcachedCache::shutdown();
 		$Memcached = new \Memcached();
-		$Memcached->addServer('localhost',11211,0);
+		$Memcached->addServer('127.0.0.1',11211,0);
+//		$Memcached->addServer('/run/memcached/memcached.sock',0,0);
 		$Memcached->flush();
 	}
 
 	function testConstructor() {
-		$Cache = new MemcachedCache('main', ['localhost',11211,0]);
+		$Cache = new MemcachedCache(self::PARAMS, false);
 		$this->assertInstanceOf('renovant\core\cache\MemcachedCache', $Cache);
 		return $Cache;
 	}
@@ -77,7 +81,7 @@ class MemcachedCacheTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	function testConstructor2() {
-		$CacheWithBuffer = new MemcachedCache('main2', ['localhost',11211,0], true);
+		$CacheWithBuffer = new MemcachedCache(self::PARAMS, true);
 		$this->assertInstanceOf('renovant\core\cache\MemcachedCache', $CacheWithBuffer);
 		return $CacheWithBuffer;
 	}
@@ -145,7 +149,7 @@ class MemcachedCacheTest extends \PHPUnit\Framework\TestCase {
 		$CacheWithBuffer->set('test1', 'HelloWorld');
 		$CacheWithBuffer = null;
 		MemcachedCache::shutdown();
-		$CacheWithBuffer = new MemcachedCache('main2', 'cache', true);
+		$CacheWithBuffer = new MemcachedCache(self::PARAMS, true);
 		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }

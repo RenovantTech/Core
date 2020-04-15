@@ -50,9 +50,15 @@ class MemcachedCache implements CacheInterface {
 	function __wakeup() {
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Memcached', null, $this->_);
 		try {
-			$this->Memcached = new \Memcached();
-			if(is_array($this->params[0])) $this->Memcached->addServers($this->params);
-			else $this->Memcached->addServer($this->params[0], $this->params[1], $this->params[2]);
+			$this->Memcached = new \Memcached($this->_);
+			$this->Memcached->setOption(\Memcached::OPT_LIBKETAMA_COMPATIBLE, true);
+			$this->Memcached->setOption(\Memcached::OPT_NO_BLOCK, true);
+			$this->Memcached->setOption(\Memcached::OPT_TCP_NODELAY, true);
+			$this->Memcached->setOption(\Memcached::OPT_RETRY_TIMEOUT, 1);
+			if(empty($this->Memcached->getServerList())) {
+				if(is_array($this->params[0])) $this->Memcached->addServers($this->params);
+				else $this->Memcached->addServer($this->params[0], $this->params[1], $this->params[2]);
+			}
 		}  catch(\Exception $Ex) {
 			sys::trace(LOG_ERR, T_ERROR, '[INIT] FAILURE', null, $this->_);
 		}
