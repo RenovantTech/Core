@@ -105,11 +105,11 @@ class MemcachedCache implements CacheInterface {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
 				self::$buffer[$this->_]['params'] = $this->params;
-				self::$buffer[$this->_]['values'][$id] = [$value, $expire, $tags];
+				self::$buffer[$this->_]['values'][$id] = [$value, $tags, $expire];
 			} else {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 				if(is_array($tags)) $tags = implode('|', $tags);
-				if(false === $this->Memcached->set($id, ['v'=>$value, 'tags'=>$tags], $expire))
+				if(false === $this->Memcached->set($id, ['v'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], $expire))
 					throw new \Exception();
 			}
 			$this->cache[$id] = $value;
@@ -166,9 +166,9 @@ class MemcachedCache implements CacheInterface {
 				if(is_array($buffer['params'][0])) $Memcached->addServers($buffer['params']);
 				else $Memcached->addServer($buffer['params'][0], $buffer['params'][1], $buffer['params'][2]);
 				foreach ($buffer['values'] as $k => $data) {
-					list($value, $expire, $tags) = $data;
+					list($value, $tags, $expire) = $data;
 					if (is_array($tags)) $tags = implode('|', $tags);
-					$Memcached->set($k, ['v'=>$value, 'tags'=>$tags], $expire);
+					$Memcached->set($k, ['v'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], $expire);
 				}
 				unset($Memcached);
 			}
