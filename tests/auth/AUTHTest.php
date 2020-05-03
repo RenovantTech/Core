@@ -67,6 +67,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	function testInit() {
 		$AUTH = sys::context()->get('sys.AUTH');
 		session_start();
+		$_SESSION['__AUTH__']['UID'] = 1;
 		$_SESSION['__AUTH__']['foo'] = 'bar';
 		$_SERVER['REQUEST_URI'] = '/';
 		$AUTH->init(new Event(new Request, new Response));
