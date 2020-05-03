@@ -83,6 +83,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	function testInitException() {
 		try {
 			$AUTH = sys::context()->get('sys.AUTH');
+			unset($_SESSION);
 			$_SERVER['REQUEST_URI'] = '/';
 			$AUTH->init(new Event(new Request, new Response));
 			$this->fail('Expected Exception not thrown');
