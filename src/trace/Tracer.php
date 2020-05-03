@@ -74,7 +74,7 @@ class Tracer extends sys {
 	 */
 	static function shutdown() {
 		$err = error_get_last();
-		if(in_array($err['type'], [E_ERROR,E_PARSE,E_CORE_ERROR,E_CORE_WARNING,E_COMPILE_ERROR,E_COMPILE_WARNING])) {
+		if($err && in_array($err['type'], [E_ERROR,E_PARSE,E_CORE_ERROR,E_CORE_WARNING,E_COMPILE_ERROR,E_COMPILE_WARNING])) {
 			self::onError($err['type'], $err['message'], $err['file'], $err['line'], null);
 		}
 		if(self::$Sys->cnfTrace['storeFn']) {
