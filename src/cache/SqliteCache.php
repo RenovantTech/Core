@@ -170,7 +170,7 @@ class SqliteCache implements CacheInterface {
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-				self::$buffer[$this->filename.':'.$this->table][] = [$id, serialize($value), $expire, $tags];
+				self::$buffer[$this->filename.':'.$this->table][$id] = [serialize($value), $expire, $tags];
 			} else {
 				if(is_null($this->SqlSET)) $this->__wakeup('RW');
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
@@ -239,8 +239,8 @@ class SqliteCache implements CacheInterface {
 				list($filename, $table) = explode(':', $k);
 				$db = new \SQLite3(CACHE_DIR.$filename.self::FILE_EXT, SQLITE3_OPEN_READWRITE);
 				$sqlSet = $db->prepare(sprintf(self::SQL_SET, $table));
-				foreach ($buffer as $data) {
-					list($id, $value, $expire, $tags) = $data;
+				foreach ($buffer as $id => $data) {
+					list($value, $expire, $tags) = $data;
 					if (is_array($tags)) $tags = implode('|', $tags);
 					$sqlSet->bindValue('id', $id);
 					$sqlSet->bindValue('data', $value, SQLITE3_BLOB);

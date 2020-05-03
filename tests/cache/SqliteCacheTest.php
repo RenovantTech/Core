@@ -146,9 +146,9 @@ class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testWriteBuffer(SqliteCache $CacheWithBuffer) {
 		$CacheWithBuffer->set('test1', 'HelloWorld');
-		$CacheWithBuffer = null;
 		SqliteCache::shutdown();
 		$CacheWithBuffer = new SqliteCache('sqlite2', 'cache', true);
+		$CacheWithBuffer->__wakeup();
 		$this->assertEquals('HelloWorld', $CacheWithBuffer->get('test1'));
 	}
 }
