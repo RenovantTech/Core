@@ -27,7 +27,7 @@ class ContextHelper extends sys {
 		$files = scandir(\renovant\core\BASE_DIR);
 		foreach($files as $file) {
 			if(is_file(\renovant\core\BASE_DIR.$file) && substr($file,-4)=='.yml') {
-				$namespace = substr($file, 0, -12);
+				$namespace = substr($file, 0, -4);
 				$namespaces[] = $namespace;
 				sys::context()->init($namespace);
 			}
