@@ -23,16 +23,16 @@ class FileViewTest extends \PHPUnit\Framework\TestCase {
 		$Res = new Response;
 		$FileView->render($Req, $Res, TEST_DIR.'/http/templates/test.txt');
 		$output = ob_get_clean();
-		$this->assertRegExp('/Hello America/', $output);
+		$this->assertMatchesRegularExpression('/Hello America/', $output);
 	}
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 201
 	 * @param FileView $FileView
 	 */
 	function testRenderException(FileView $FileView) {
+		$this->expectExceptionCode(201);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$FileView->render($Req, $Res, TEST_DIR.'/http/templates/not-exists.txt');

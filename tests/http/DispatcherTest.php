@@ -11,12 +11,12 @@ use renovant\core\sys,
 
 class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		ACLTest::setUpBeforeClass();
 		new ACL(['ORM'], 'mysql');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		ACLTest::tearDownAfterClass();
 	}
 	/**
@@ -48,7 +48,6 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
 	 * @return Dispatcher
-	 * @throws \ReflectionException
 	 */
 	function testDoRoute(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'doRoute');
@@ -91,12 +90,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 11
 	 * @param Dispatcher $Dispatcher
-	 * @throws \ReflectionException
 	 */
 	function testDoRouteException11(Dispatcher $Dispatcher) {
+		$this->expectExceptionCode(11);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'doRoute');
 		$RefMethod->setAccessible(true);
 
@@ -109,7 +107,6 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
-	 * @throws \ReflectionException
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
@@ -158,12 +155,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends               testConstruct
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 12
 	 * @param Dispatcher $Dispatcher
-	 * @throws \ReflectionException
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
+		$this->expectExceptionCode(12);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
 		$RefMethod->setAccessible(true);
 
@@ -178,7 +174,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \renovant\core\container\ContainerException
+	 * @throws \renovant\core\container\ContainerException|\ReflectionException
 	 */
 	function testDispatch() {
 		ob_start();
@@ -192,6 +188,6 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
 		$this->assertNull($Dispatcher->dispatch($Req, $Res));
 		$output = ob_get_clean();
-		$this->assertRegExp('/<title>index<\/title>/', $output);
+		$this->assertMatchesRegularExpression('/<title>index<\/title>/', $output);
 	}
 }

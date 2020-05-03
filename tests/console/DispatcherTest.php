@@ -10,7 +10,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @return Dispatcher
 	 * @throws \renovant\core\container\ContainerException
-	 * @throws \renovant\core\util\yaml\YamlException
+	 * @throws \ReflectionException
 	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
@@ -88,11 +88,11 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @expectedException \renovant\core\console\Exception
-	 * @expectedExceptionCode 12
 	 * @param Dispatcher $Dispatcher
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
+		$this->expectExceptionCode(12);
+		$this->expectException(\renovant\core\console\Exception::class);
 		$ReflMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
 		$ReflMethod->setAccessible(true);
 
@@ -106,8 +106,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @throws \renovant\core\container\ContainerException
-	 * @throws \renovant\core\util\yaml\YamlException
+	 * @throws \renovant\core\container\ContainerException|\ReflectionException
 	 */
 	function testDispatch() {
 		$this->expectOutputRegex('/<title>mod1\/index<\/title>/');

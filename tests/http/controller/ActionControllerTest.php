@@ -73,10 +73,10 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
+		$this->expectExceptionCode(111);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$ActionController2 = new \test\http\controller\ActionController;
 		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
@@ -90,6 +90,8 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\ActionController $ActionController
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \renovant\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\ActionController $ActionController) {

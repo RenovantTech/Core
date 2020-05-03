@@ -7,8 +7,6 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @return AbstractController
-	 * @throws \ReflectionException
-	 * @throws \renovant\core\http\Exception
 	 */
 	function testConstructor() {
 		$AbstractController = new AbstractController;

@@ -23,6 +23,6 @@ class PhpViewTest extends \PHPUnit\Framework\TestCase {
 		$Res = new Response;
 		$PhpView->render($Req, $Res, TEST_DIR.'/http/templates/index');
 		$output = ob_get_clean();
-		$this->assertRegExp('/<title>index<\/title>/', $output);
+		$this->assertMatchesRegularExpression('/<title>index<\/title>/', $output);
 	}
 }

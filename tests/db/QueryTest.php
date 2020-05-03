@@ -5,7 +5,7 @@ use renovant\core\sys,
 
 class QueryTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			CREATE TABLE IF NOT EXISTS `people` (
 				id			SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -63,7 +63,7 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `people`;
 			DROP PROCEDURE IF EXISTS sp_people;
@@ -71,7 +71,7 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	protected function setUp() {
+	protected function setUp():void {
 		sys::pdo('mysql')->exec('
 			TRUNCATE `people`;
 			INSERT INTO `people` (id, name, surname, age, score) VALUES (1, "Albert",	"Brown", 21, 32.5);
@@ -173,7 +173,7 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(23000, $Ex->getCode());
-			$this->assertRegExp('/cannot be null/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/cannot be null/', $Ex->getMessage());
 		}
 	}
 

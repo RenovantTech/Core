@@ -8,7 +8,7 @@ use renovant\core\sys,
 
 class Repository2Test extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
@@ -24,14 +24,14 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		new ACL(['ORM'], 'mysql');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
 		ACLTest::tearDownAfterClass();
 	}
 
-	protected function setUp() {
+	protected function setUp():void {
 		sys::pdo('mysql')->exec('
 			TRUNCATE TABLE `stats`;
 			INSERT INTO `stats` (code, year, score) VALUES ("AA", 2013, 6.5);

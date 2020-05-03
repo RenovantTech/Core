@@ -5,13 +5,13 @@ use renovant\core\sys,
 
 class QueueTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_queue;
 		');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 --			DROP TABLE IF EXISTS sys_queue;
 		');

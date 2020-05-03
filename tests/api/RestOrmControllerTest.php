@@ -7,15 +7,15 @@ use renovant\core\sys,
 
 class RestOrmControllerTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		\test\db\orm\Repository1Test::setUpBeforeClass();
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		\test\db\orm\Repository1Test::tearDownAfterClass();
 	}
 
-	protected function setUp() {
+	protected function setUp():void {
 		\test\db\orm\Repository1Test::setUp();
 	}
 

@@ -6,7 +6,7 @@ use renovant\core\sys,
 
 class ACLTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_acl_filters_2_users;
 			DROP TABLE IF EXISTS sys_acl_filters_2_roles;
@@ -22,7 +22,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_acl_filters_2_users;
 			DROP TABLE IF EXISTS sys_acl_filters_2_roles;

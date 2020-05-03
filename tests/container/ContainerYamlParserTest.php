@@ -41,7 +41,7 @@ class ContainerYamlParserTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected ContainerException not thrown');
 		} catch(ContainerException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}
 	}
 }

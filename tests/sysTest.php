@@ -192,7 +192,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(0, $Ex->getCode());
-			$this->assertRegExp('/invalid data source name/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/invalid data source name/', $Ex->getMessage());
 		}
 	}
 
@@ -229,7 +229,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			sys::dispatch('http');
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/namespace mngr/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/namespace mngr/', $Ex->getMessage());
 		}
 
 		try {
@@ -239,7 +239,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			sys::dispatch('http');
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/namespace api.foo/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/namespace api.foo/', $Ex->getMessage());
 		}
 
 		try {
@@ -249,7 +249,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			sys::dispatch('http');
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/namespace api.bar/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/namespace api.bar/', $Ex->getMessage());
 		}
 
 		try {
@@ -259,7 +259,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			sys::dispatch('http');
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/namespace ui/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/namespace ui/', $Ex->getMessage());
 		}
 
 		try {
@@ -269,7 +269,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			sys::dispatch('http');
 		} catch (SysException $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
-			$this->assertRegExp('/bad-example.com:8080/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/bad-example.com:8080/', $Ex->getMessage());
 		}
 	}
 }

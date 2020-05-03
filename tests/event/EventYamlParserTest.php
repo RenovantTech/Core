@@ -26,7 +26,7 @@ class EventYamlParserTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected EventDispatcherException not thrown');
 		} catch(EventDispatcherException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}
 	}
 }

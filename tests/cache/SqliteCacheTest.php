@@ -5,12 +5,12 @@ use const renovant\core\CACHE_DIR;
 
 class SqliteCacheTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		unlink(CACHE_DIR.'sqlite1.sqlite');
 		unlink(CACHE_DIR.'sqlite2.sqlite');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		SqliteCache::shutdown();
 //		sys::pdo('sqlite')->exec('
 //--			DROP TABLE IF EXISTS `sqlite-cache`;
