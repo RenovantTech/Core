@@ -19,7 +19,7 @@ class PDOTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(0, $Ex->getCode());
-			$this->assertRegExp('/invalid data source name/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/invalid data source name/', $Ex->getMessage());
 		}
 
 		try {
@@ -27,7 +27,7 @@ class PDOTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(1045, $Ex->getCode());
-			$this->assertRegExp('/Access denied for user/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/Access denied for user/', $Ex->getMessage());
 		}
 	}
 

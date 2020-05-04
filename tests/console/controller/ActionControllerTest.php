@@ -63,10 +63,10 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
-	 * @expectedException \renovant\core\console\Exception
-	 * @expectedExceptionCode 111
 	 */
 	function testResolveActionException() {
+		$this->expectExceptionCode(111);
+		$this->expectException(\renovant\core\console\Exception::class);
 		$ActionController2 = new \test\console\controller\ActionController2;
 		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
 		$RefMethod->setAccessible(true);

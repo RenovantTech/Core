@@ -49,6 +49,7 @@ class Manager {
 	 * Manager constructor.
 	 * @param array $cookie cookie params
 	 * @param array $handler Handler config
+	 * @throws \ReflectionException
 	 */
 	function __construct(array $cookie=null, array $handler=null) {
 		if($cookie) $this->cookie = $cookie;
@@ -59,6 +60,9 @@ class Manager {
 
 	/**
 	 * @throws SessionException
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function start() {
 		if(PHP_SAPI=='cli') return;
@@ -84,6 +88,9 @@ class Manager {
 	 * Shutdown the session, close writing and detach $_SESSION from the back-end storage mechanism.
 	 * This will complete the internal data transformation on this request.
 	 * @return void
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function end() {
 		sys::event(self::EVENT_END);

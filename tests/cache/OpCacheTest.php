@@ -6,14 +6,14 @@ use renovant\core\sys,
 
 class OpCacheTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('sqlite')->exec('
 			DROP TABLE IF EXISTS `opcache1`;
 			DROP TABLE IF EXISTS `opcache2`;
 		');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('sqlite')->exec('
 			DROP TABLE IF EXISTS `opcache1`;
 			DROP TABLE IF EXISTS `opcache2`;

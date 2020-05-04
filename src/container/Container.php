@@ -148,7 +148,7 @@ class Container {
 	 * @return bool
 	 */
 	function has($id, $class=null) {
-		return ( isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) ) ) ? true : false;
+		return isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) );
 	}
 
 	/**

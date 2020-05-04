@@ -2,7 +2,6 @@
 namespace test\db\orm;
 use renovant\core\sys,
 	renovant\core\acl\ACL,
-	renovant\core\context\Context,
 	renovant\core\db\orm\Exception,
 	renovant\core\db\orm\Repository,
 	renovant\core\util\DateTime,
@@ -10,7 +9,7 @@ use renovant\core\sys,
 
 class Repository1Test extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `users`;
 			DROP PROCEDURE IF EXISTS sp_users_insert;
@@ -69,7 +68,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		new ACL(['ORM'], 'mysql');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `users`;
 			DROP PROCEDURE IF EXISTS sp_users_insert;
@@ -79,7 +78,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		ACLTest::tearDownAfterClass();
 	}
 
-	protected function setUp() {
+	protected function setUp():void {
 		sys::pdo('mysql')->exec('
 			TRUNCATE TABLE `users`;
 			INSERT INTO `users` (id, active, name, surname, age, score, lastTime) VALUES (1, 1, "Albert", "Brown", 21, 6.5, "2012-01-01 12:35:16");
@@ -130,12 +129,12 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($UsersRepository->delete(6, false));
 
 		$data = $UsersRepository->delete(7, Repository::FETCH_ARRAY);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame('Gen', $data['name']);
 		$this->assertSame('2013-01-15 18:40:00', $data['lastTime']->format('Y-m-d H:i:s'));
 
 		$data = $UsersRepository->delete(8, Repository::FETCH_JSON);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame('Hugh', $data['name']);
 		$this->assertSame('2013-02-15T18:40:00+00:00', $data['lastTime']);
 	}
@@ -401,7 +400,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame('Orange', $User9->surname);
 		$this->assertSame(20, $User9->age);
 		$this->assertSame(1.0, $User9->score);
-		$this->assertEquals($lastTime, $User9->lastTime);
+		$this->assertEquals($lastTime->format('Y-m-d H:i:s'), $User9->lastTime->format('Y-m-d H:i:s'));
 		$this->assertNotEquals('2000-01-01 00:00:00', $User9->updatedAt->format('Y-m-d H:i:s'));
 
 		// INSERT null key & values
@@ -443,13 +442,13 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame('2012-03-18 14:25:36', $User->lastTime->format('Y-m-d H:i:s'));
 
 		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_ARRAY);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame(25, $data['id']);
 		$this->assertSame('Chao', $data['name']);
 		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
 		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_JSON);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame(26, $data['id']);
 		$this->assertSame('Chao', $data['name']);
 		$this->assertSame('2012-03-18T14:25:36+00:00', $data['lastTime']);
@@ -518,12 +517,12 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>'2012-03-18 14:25:36'], true, false));
 
 		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>'2012-03-31 14:25:36' ], true, Repository::FETCH_ARRAY);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame('Franz3', $data['name']);
 		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
 		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>'2012-02-02 16:10:36' ], true, Repository::FETCH_JSON);
-		$this->assertInternalType('array', $data);
+		$this->assertIsArray($data);
 		$this->assertSame('Franz4', $data['name']);
 		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);
 	}

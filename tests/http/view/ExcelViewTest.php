@@ -29,17 +29,17 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 		]);
 		$ExcelView->render($Req, $Res, '/http/templates/excel-test');
 		$output = preg_replace('/\s+/', '', ob_get_clean());
-		$this->assertRegExp('/<thnowrap>Surname<\/th><thnowrap>Age<\/th>/', $output);
-		$this->assertRegExp('/<tdnowrap>GREEN<\/td><tdnowrap>24<\/td>/', $output);
+		$this->assertMatchesRegularExpression('/<thnowrap>Surname<\/th><thnowrap>Age<\/th>/', $output);
+		$this->assertMatchesRegularExpression('/<tdnowrap>GREEN<\/td><tdnowrap>24<\/td>/', $output);
 	}
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 201
 	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException1(ExcelView $ExcelView) {
+		$this->expectExceptionCode(201);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -48,11 +48,11 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 202
 	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException2(ExcelView $ExcelView) {
+		$this->expectExceptionCode(202);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -61,11 +61,11 @@ class ExcelViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 203
 	 * @param ExcelView $ExcelView
 	 */
 	function testRenderException3(ExcelView $ExcelView) {
+		$this->expectExceptionCode(203);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);

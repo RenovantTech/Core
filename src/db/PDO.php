@@ -96,13 +96,11 @@ class PDO extends \PDO {
 	 * @see http://www.php.net/manual/en/pdo.prepare.php
 	 * @param string $statement a valid SQL statement template
 	 * @param array $options holds one or more key=>value pairs to set attribute values for the PDOStatement object
-	 * @return PDOStatement
+	 * @return bool|PDOStatement
 	 * @throws \PDOException
 	 */
 	function prepare($statement, $options = null) {
-		$st = parent::prepare($statement, (array)$options);
-		/** @var PDOStatement $st */
-		return $st;
+		return parent::prepare($statement, (array)$options);
 	}
 
 	/**

@@ -8,11 +8,11 @@ class MemcachedCacheTest extends \PHPUnit\Framework\TestCase {
 //	const PARAMS = ['/run/memcached/memcached.sock',0,0];
 
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		$Memcached = new \Memcached();
 		$Memcached->addServer('127.0.0.1',11211,0);
 //		$Memcached->addServer('/run/memcached/memcached.sock',0,0);

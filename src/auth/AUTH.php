@@ -199,7 +199,7 @@ class AUTH {
 					}
 					break;
 				case 'SESSION':
-					if (session_status() != PHP_SESSION_ACTIVE) throw new Exception(23);
+					if (!isset($_SESSION)) throw new Exception(23);
 					if (isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
 						foreach ($_SESSION['__AUTH__'] as $k => $v)
 							$this->set($k, $v);

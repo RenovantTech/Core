@@ -42,7 +42,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected ContainerException not thrown');
 		} catch(ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
-			$this->assertRegExp('/YAML config file NOT FOUND/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}
 	}
 
@@ -90,7 +90,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected ContextException not thrown');
 		} catch(ContextException $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
-			$this->assertRegExp('/is NOT defined/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/is NOT defined/', $Ex->getMessage());
 		}
 	}
 }

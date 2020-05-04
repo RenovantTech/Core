@@ -58,7 +58,7 @@ class QueryRunner {
 				->on($Metadata->sql('target'))
 				->criteriaExp($Metadata->pkCriteria($Entity))
 				->criteriaExp($criteriaExp);
-			return ($Query->execDelete()==1 && $Query->errorCode()=='000000') ? true:false;
+			return $Query->execDelete()==1 && $Query->errorCode()=='000000';
 		}
 	}
 
@@ -91,6 +91,7 @@ class QueryRunner {
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|false
+	 * @throws \Exception
 	 */
 	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
@@ -128,6 +129,7 @@ class QueryRunner {
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
+	 * @throws \Exception
 	 */
 	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
@@ -216,7 +218,7 @@ class QueryRunner {
 			$Query = (new Query($pdo))
 				->on($Metadata->sql('target'), $fields)
 				->criteriaExp($Metadata->pkCriteria($Entity));
-			return (in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000') ? true:false;
+			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
 	}
 }

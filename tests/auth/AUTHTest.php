@@ -11,7 +11,7 @@ use renovant\core\sys,
 
 class AUTHTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass() {
+	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `sys_auth`;
 			DROP TABLE IF EXISTS `sys_tokens`;
@@ -19,7 +19,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	static function tearDownAfterClass() {
+	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `sys_auth`;
 			DROP TABLE IF EXISTS `sys_tokens`;
@@ -42,7 +42,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected Exception not thrown');
 		} catch(Exception $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
-			$this->assertRegExp('/INVALID/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/INVALID/', $Ex->getMessage());
 		}
 	}
 
@@ -83,12 +83,13 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	function testInitException() {
 		try {
 			$AUTH = sys::context()->get('sys.AUTH');
+			unset($_SESSION);
 			$_SERVER['REQUEST_URI'] = '/';
 			$AUTH->init(new Event(new Request, new Response));
 			$this->fail('Expected Exception not thrown');
 		} catch(Exception $Ex) {
 			$this->assertEquals(23, $Ex->getCode());
-			$this->assertRegExp('/must be already started/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/must be already started/', $Ex->getMessage());
 		}
 	}
 

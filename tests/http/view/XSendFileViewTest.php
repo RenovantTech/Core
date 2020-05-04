@@ -15,6 +15,7 @@ class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param XSendFileView $XSendFileView
+	 * @throws \renovant\core\http\Exception
 	 */
 	function testRender(XSendFileView $XSendFileView) {
 		header_remove();
@@ -30,11 +31,11 @@ class XSendFileViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 201
 	 * @param XSendFileView $XSendFileView
 	 */
 	function testRenderException(XSendFileView $XSendFileView) {
+		$this->expectExceptionCode(201);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$XSendFileView->render($Req, $Res, 'not-exists.txt');

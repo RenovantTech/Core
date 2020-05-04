@@ -38,7 +38,7 @@ class MemcachedCache implements CacheInterface {
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
 	function __construct($params=null, $writeBuffer=false) {
-		$this->params = $params || self::DEFAULT_PARAMS;
+		$this->params = $params ?? self::DEFAULT_PARAMS;
 		$this->writeBuffer = (boolean) $writeBuffer;
 		$this->__wakeup();
 	}

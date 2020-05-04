@@ -54,8 +54,8 @@ class DataMapper {
 					break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
 				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format(DateTime::W3C); break;
+				case 'array':
 				case 'object': $data[$k] = serialize($Entity->$k); break;
-				case 'array': $data[$k] = serialize($Entity->$k); break;
 			}
 		}
 		return $data;
@@ -82,8 +82,8 @@ class DataMapper {
 				case 'boolean': $data[$k] = (int)$Entity->$k; break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
 				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s'); break;
+				case 'array':
 				case 'object': $data[$k] = serialize($Entity->$k); break;
-				case 'array': $data[$k] = serialize($Entity->$k); break;
 			}
 		}
 		return $data;
@@ -94,6 +94,7 @@ class DataMapper {
 	 * @param array $data
 	 * @param string $class
 	 * @return array
+	 * @throws \Exception
 	 */
 	static function sql2array(array $data, $class) {
 		$prop = Metadata::get($class)->properties();
@@ -110,8 +111,8 @@ class DataMapper {
 				case 'boolean': $v = (bool) $v; break;
 				case 'date': $v = new Date($v); break;
 				case 'datetime': $v = new DateTime($v); break;
+				case 'array':
 				case 'object': $v = unserialize($v); break;
-				case 'array': $v = unserialize($v); break;
 			}
 		}
 		return $data;
@@ -132,14 +133,14 @@ class DataMapper {
 			}
 			if($prop[$k]['null'] && is_null($v)) continue;
 			switch($prop[$k]['type']) {
+				case 'date':
 				case 'string': break;
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
-				case 'date': break;
 				case 'datetime': $v = date(DateTime::W3C, strtotime($v)); break;
+				case 'array':
 				case 'object': $v = unserialize($v); break;
-				case 'array': $v = unserialize($v); break;
 			}
 		}
 		return $data;

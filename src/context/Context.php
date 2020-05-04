@@ -99,7 +99,7 @@ class Context {
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContextException
-	 * @throws EventDispatcherException
+	 * @throws EventDispatcherException|\ReflectionException
 	 */
 	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Context->get');

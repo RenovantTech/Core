@@ -29,17 +29,17 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 		]);
 		$CsvView->render($Req, $Res, '/http/templates/csv-test');
 		$output = ob_get_clean();
-		$this->assertRegExp('/"Surname","Age"/', $output);
-		$this->assertRegExp('/"GREEN","24"/', $output);
+		$this->assertMatchesRegularExpression('/"Surname","Age"/', $output);
+		$this->assertMatchesRegularExpression('/"GREEN","24"/', $output);
 	}
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 201
 	 * @param CsvView $CsvView
 	 */
 	function testRenderException1(CsvView $CsvView) {
+		$this->expectExceptionCode(201);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -48,11 +48,11 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 202
 	 * @param CsvView $CsvView
 	 */
 	function testRenderException2(CsvView $CsvView) {
+		$this->expectExceptionCode(202);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
@@ -61,11 +61,11 @@ class CsvViewTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstructor
-	 * @expectedException \renovant\core\http\Exception
-	 * @expectedExceptionCode 203
 	 * @param CsvView $CsvView
 	 */
 	function testRenderException3(CsvView $CsvView) {
+		$this->expectExceptionCode(203);
+		$this->expectException(\renovant\core\http\Exception::class);
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('RESOURCES_DIR', TEST_DIR);
