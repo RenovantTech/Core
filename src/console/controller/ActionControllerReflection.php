@@ -18,7 +18,7 @@ class ActionControllerReflection {
 	 * Return Controller's actions metadata
 	 * @param ActionController $Controller
 	 * @return array
-	 * @throws Exception
+	 * @throws Exception|\ReflectionException
 	 */
 	static function analyzeActions(ActionController $Controller) {
 		$config = [];

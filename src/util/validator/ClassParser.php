@@ -18,6 +18,7 @@ class ClassParser {
 	/**
 	 * @param string $class Entity class
 	 * @return array
+	 * @throws \ReflectionException
 	 */
 	function parse($class) {
 		$metadata = [

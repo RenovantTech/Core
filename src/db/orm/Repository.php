@@ -39,6 +39,7 @@ class Repository {
 	/**
 	 * @param string $class Entity class
 	 * @param string $pdo PDO instance ID, default to "master"
+	 * @throws \ReflectionException
 	 */
 	function __construct($class, $pdo='master') {
 		$this->class = $class;
@@ -435,7 +436,7 @@ class Repository {
 	/**
 	 * @param $Entity
 	 * @param bool|string $validateMode, TRUE or a named @orm-validate-subset
-	 * @throws Exception
+	 * @throws Exception|\ReflectionException
 	 */
 	protected function doValidate($Entity, $validateMode) {
 		sys::trace(LOG_DEBUG, T_INFO, 'subset: '.$validateMode);

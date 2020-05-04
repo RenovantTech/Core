@@ -295,7 +295,7 @@ class sys {
 	 * ACL helper
 	 * @return ACL
 	 * @throws ContextException
-	 * @throws EventDispatcherException
+	 * @throws EventDispatcherException|\ReflectionException
 	 */
 	static function acl() {
 		/** @var ACL $ACL */
@@ -308,7 +308,7 @@ class sys {
 	 * AUTH helper
 	 * @return AUTH
 	 * @throws ContextException
-	 * @throws EventDispatcherException
+	 * @throws EventDispatcherException|\ReflectionException
 	 */
 	static function auth() {
 		/** @var AUTH $AUTH */
@@ -420,8 +420,7 @@ class sys {
 	/**
 	 * QUEUE helper
 	 * @return Queue
-	 * @throws ContextException
-	 * @throws EventDispatcherException
+	 * @throws ContextException|EventDispatcherException|\ReflectionException
 	 */
 	static function queue() {
 		static $Queue;

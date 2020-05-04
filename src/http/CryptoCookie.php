@@ -46,6 +46,7 @@ class CryptoCookie {
 	 * @param $domain
 	 * @param $secure
 	 * @param $httpOnly
+	 * @throws \Exception
 	 */
 	function __construct($name, $expire=0, $path='', $domain='', $secure=false, $httpOnly=false) {
 		$this->name = (string) $name;
@@ -91,6 +92,7 @@ class CryptoCookie {
 	 * Writes an encrypted cookie
 	 * @param mixed $data
 	 * @return bool
+	 * @throws \Exception
 	 */
 	function write($data) {
 		$data = serialize($data);

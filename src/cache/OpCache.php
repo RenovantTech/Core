@@ -7,7 +7,6 @@
  */
 namespace renovant\core\cache;
 use const renovant\core\{CACHE_DIR, TMP_DIR};
-use renovant\core\db\PDO;
 use const renovant\core\trace\T_CACHE;
 use renovant\core\sys;
 /**
@@ -122,14 +121,8 @@ class OpCache implements CacheInterface {
 				sys::pdo($this->pdo)->exec(sprintf('DELETE FROM `%s`',$this->table), false);
 				break;
 			case self::CLEAN_OLD:
-				//@TODO
-				break;
 			case self::CLEAN_ALL_TAG:
-				//@TODO
-				break;
 			case self::CLEAN_ANY_TAG:
-				//@TODO
-				break;
 			case self::CLEAN_NOT_TAG:
 				//@TODO
 				break;
