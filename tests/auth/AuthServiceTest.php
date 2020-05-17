@@ -2,14 +2,14 @@
 namespace test\auth;
 use renovant\core\auth\provider\ProviderInterface;
 use renovant\core\sys,
-	renovant\core\auth\AUTH,
+	renovant\core\auth\Auth,
+	renovant\core\auth\AuthService,
 	renovant\core\auth\Exception,
 	renovant\core\http\Event,
 	renovant\core\http\Request,
-	renovant\core\http\Response,
-	test\auth\provider\PdoProviderTest;
+	renovant\core\http\Response;
 
-class AUTHTest extends \PHPUnit\Framework\TestCase {
+class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
@@ -17,6 +17,7 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
+		Auth::erase();
 	}
 
 	static function tearDownAfterClass():void {
@@ -25,20 +26,21 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
+		Auth::erase();
 	}
 
 	/**
-	 * @return AUTH
+	 * @return AuthService
 	 */
 	function testConstruct() {
-		$AUTH = new AUTH;
-		$this->assertInstanceOf(AUTH::class, $AUTH);
-		return $AUTH;
+		$AuthService = new AuthService;
+		$this->assertInstanceOf(AuthService::class, $AuthService);
+		return $AuthService;
 	}
 
 	function testConstructException() {
 		try {
-			new AUTH('INVALID');
+			new AuthService('INVALID');
 			$this->fail('Expected Exception not thrown');
 		} catch(Exception $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
@@ -48,11 +50,11 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AUTH $AUTH
+	 * @param AuthService $AuthService
 	 */
-	function testProvider(AUTH $AUTH) {
-		PdoProviderTest::setUpBeforeClass();
-		$this->assertInstanceOf(ProviderInterface::class, $AUTH->provider());
+	function testProvider(AuthService $AuthService) {
+		self::setUpBeforeClass();
+		$this->assertInstanceOf(ProviderInterface::class, $AuthService->provider());
 		sys::pdo('mysql')->exec('
 			INSERT INTO sys_users (name, surname, email) VALUES ("John", "Red", "john.red@gmail.com");
 			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
@@ -63,15 +65,17 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	function testInit() {
-		$AUTH = sys::context()->get('sys.AUTH');
+		$AuthService = sys::context()->get('sys.AUTH');
 		session_start();
 		$_SESSION['__AUTH__']['UID'] = 1;
 		$_SESSION['__AUTH__']['foo'] = 'bar';
 		$_SERVER['REQUEST_URI'] = '/';
-		$AUTH->init(new Event(new Request, new Response));
-		$this->assertEquals('bar', $AUTH->get('foo'));
+		$AuthService->init(new Event(new Request, new Response));
+		$Auth = Auth::instance();
+		$this->assertEquals('bar', $Auth->data('foo'));
 		session_destroy();
 	}
 
@@ -79,13 +83,14 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	function testInitException() {
 		try {
-			$AUTH = sys::context()->get('sys.AUTH');
+			$AuthService = sys::context()->get('sys.AUTH');
 			unset($_SESSION);
 			$_SERVER['REQUEST_URI'] = '/';
-			$AUTH->init(new Event(new Request, new Response));
+			$AuthService->init(new Event(new Request, new Response));
 			$this->fail('Expected Exception not thrown');
 		} catch(Exception $Ex) {
 			$this->assertEquals(23, $Ex->getCode());
@@ -95,68 +100,12 @@ class AUTHTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AUTH $AUTH
+	 * @param AuthService $AuthService
+	 * @throws \Exception
 	 */
-	function testSet(AUTH $AUTH) {
-		$AUTH->set('foo', 'bar');
-		$this->assertEquals('bar', $AUTH->get('foo'));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testGet(AUTH $AUTH) {
-		$AUTH->set('foo', 'bar');
-		$AUTH->set('color', 'red');
-		$this->assertEquals('bar', $AUTH->get('foo'));
-		$this->assertEquals('red', $AUTH->get('color'));
-		$this->assertEquals(['foo'=>'bar', 'color'=>'red'], $AUTH->get());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testGID(AUTH $AUTH) {
-		$AUTH->set('GID', 1);
-		$this->assertEquals(1, $AUTH->GID());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testGROUP(AUTH $AUTH) {
-		$AUTH->set('GROUP', 'admin');
-		$this->assertEquals('admin', $AUTH->GROUP());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testNAME(AUTH $AUTH) {
-		$AUTH->set('NAME', 'John Red');
-		$this->assertEquals('John Red', $AUTH->NAME());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testUID(AUTH $AUTH) {
-		$AUTH->set('UID', 1);
-		$this->assertEquals(1, $AUTH->UID());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param AUTH $AUTH
-	 */
-	function testCommit(AUTH $AUTH) {
-		$AUTH->set('foo', 'bar');
-		$AUTH->commit();
+	function testCommit(AuthService $AuthService) {
+//		$AuthService->set('foo', 'bar');
+		$AuthService->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
 	}
 }

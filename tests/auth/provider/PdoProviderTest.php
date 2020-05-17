@@ -1,7 +1,8 @@
 <?php
 namespace test\auth\provider;
 use renovant\core\sys,
-	renovant\core\auth\AUTH,
+	renovant\core\auth\Auth,
+	renovant\core\auth\AuthService,
 	renovant\core\auth\provider\PdoProvider;
 
 class PdoProviderTest extends \PHPUnit\Framework\TestCase {
@@ -12,6 +13,7 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
+		Auth::erase();
 	}
 
 	static function tearDownAfterClass():void {
@@ -20,6 +22,7 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
+		Auth::erase();
 	}
 
 	function testConstructor() {
@@ -39,14 +42,12 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
-	 * @throws \renovant\core\container\ContainerException
 	 */
 	function testAuthenticateById(PdoProvider $PdoProvider) {
-		$AUTH = sys::auth();
-
 		$this->assertTrue($PdoProvider->authenticateById(1));
-		$this->assertEquals(1, $AUTH->UID());
-		$this->assertEquals('john.red@gmail.com', $AUTH->get('email'));
+		$Auth = Auth::instance();
+		$this->assertEquals(1, $Auth->UID());
+		$this->assertEquals('john.red@gmail.com', $Auth->data('email'));
 
 		$this->assertFalse($PdoProvider->authenticateById(5));
 	}
@@ -56,9 +57,9 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @param PdoProvider $PdoProvider
 	 */
 	function testCheckCredentials(PdoProvider $PdoProvider) {
-		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
-		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
-		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
+		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
+		$this->assertEquals(AuthService::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
+		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
 		$this->assertEquals(1, $PdoProvider->checkCredentials('john.red', 'ABC123'));
 	}
 
@@ -67,9 +68,9 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @param PdoProvider $PdoProvider
 	 */
 	function testAuthenticate(PdoProvider $PdoProvider) {
-		$this->assertEquals(AUTH::LOGIN_UNKNOWN, $PdoProvider->authenticate('jack.green', '123456'));
-		$this->assertEquals(AUTH::LOGIN_DISABLED, $PdoProvider->authenticate('matt.brown', '123456'));
-		$this->assertEquals(AUTH::LOGIN_PWD_MISMATCH, $PdoProvider->authenticate('john.red', '123456'));
+		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $PdoProvider->authenticate('jack.green', '123456'));
+		$this->assertEquals(AuthService::LOGIN_DISABLED, $PdoProvider->authenticate('matt.brown', '123456'));
+		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $PdoProvider->authenticate('john.red', '123456'));
 		$this->assertEquals(1, $PdoProvider->authenticate('john.red', 'ABC123'));
 		$this->assertEquals(1, $PdoProvider->authenticate('dick.dastardly', 'GHI789'));
 	}

@@ -12,6 +12,8 @@ use renovant\core\Exception;
  * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class AuthException extends Exception {
+	const COD1 = 'AUTH data already initialized';
+
 	// COOKIE
 
 	// JWT

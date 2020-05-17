@@ -18,10 +18,10 @@ use renovant\core\sys,
 	Firebase\JWT\ExpiredException,
 	Firebase\JWT\JWT;
 /**
- * Authentication Manager.
+ * Authentication Service.
  * @author Daniele Sciacchitano <dan@renovant.tech>
  */
-class AUTH {
+class AuthService {
 	use \renovant\core\CoreTrait;
 
 	const COOKIE_AUTH		= 'AUTH-TOKEN';
@@ -46,21 +46,6 @@ class AUTH {
 	/** Pending commit  flag
 	 * @var bool */
 	protected $_commit = false;
-	/** User custom data
-	 * @var array */
-	protected $_data = [];
-	/** Group ID
-	 * @var integer|null */
-	protected $_GID = null;
-	/** Group name
-	 * @var string|null */
-	protected $_GROUP = null;
-	/** User name (full-name)
-	 * @var string|null */
-	protected $_NAME = null;
-	/** User ID
-	 * @var integer|null */
-	protected $_UID = null;
 	/** XSRF-TOKEN value
 	 * @var string|null */
 	protected $_XSRF_TOKEN = null;
@@ -157,8 +142,7 @@ class AUTH {
 						try {
 							$token = (array)JWT::decode($_COOKIE[$this->cookieAUTH], file_get_contents(self::JWT_KEY), ['HS512']);
 							if (isset($token['data']) && $token['data'] = (array)$token['data']) {
-								foreach ($token['data'] as $k => $v)
-									$this->set($k, $v);
+								Auth::init($token['data']);
 								$this->_commit = false;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN OK', $token['data']);
 								break;
@@ -201,14 +185,14 @@ class AUTH {
 				case 'SESSION':
 					if (!isset($_SESSION)) throw new Exception(23);
 					if (isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
-						foreach ($_SESSION['__AUTH__'] as $k => $v)
-							$this->set($k, $v);
+						Auth::init($_SESSION['__AUTH__']);
 						$this->_commit = false;
 						sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
 					}
 					break;
 			}
-			if (!$this->_UID && $URI != '/' && !in_array($APP, $this->skipAuthApps) && !$this->checkAUTH($URI))
+			$Auth = Auth::instance();
+			if (!$Auth->UID() && $URI != '/' && !in_array($APP, $this->skipAuthApps) && !$this->checkAUTH($URI))
 				throw new AuthException(101, [$this->module]);
 
 			// XSRF-TOKEN
@@ -268,15 +252,16 @@ class AUTH {
 			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
 
-			if (is_null($this->_UID)) return;
+			$Auth = Auth::instance();
+			if(!$Auth->UID()) return;
 
 			// AUTH-TOKEN
-			$data = array_merge([
-				'GID' => $this->_GID,
-				'GROUP' => $this->_GROUP,
-				'NAME' => $this->_NAME,
-				'UID' => $this->_UID
-			], $this->_data);
+			$data = array_merge($Auth->data(), [
+				'GID' => $Auth->GID(),
+				'GROUP' => $Auth->GROUP(),
+				'NAME' => $Auth->NAME(),
+				'UID' => $Auth->UID()
+			]);
 			switch ($this->module) {
 				case 'COOKIE':
 					// @TODO COOKIE module
@@ -301,20 +286,20 @@ class AUTH {
 			// REFRESH-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize REFRESH-TOKEN');
 			$refreshToken = [
-				'UID'	=> $this->_UID,
+				'UID'	=> $Auth->UID(),
 				'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 			];
-			$this->provider()->setRefreshToken($this->UID(), $refreshToken['TOKEN'], time()+$this->ttlREFRESH);
+			$this->provider()->setRefreshToken($Auth->UID(), $refreshToken['TOKEN'], time()+$this->ttlREFRESH);
 			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, false, true))->write($refreshToken);
 
 			// REMEMBER-TOKEN
 			if($this->setRememberToken) {
 				sys::trace(LOG_DEBUG, T_INFO, 'initialize REMEMBER-TOKEN');
 				$rememberToken = [
-					'UID'	=> $this->_UID,
+					'UID'	=> $Auth->UID(),
 					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
 				];
-				$this->provider()->setRememberToken($this->UID(), $rememberToken['TOKEN'], time()+$this->ttlREMEMBER);
+				$this->provider()->setRememberToken($Auth->UID(), $rememberToken['TOKEN'], time()+$this->ttlREMEMBER);
 				(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, false, true))->write($rememberToken);
 			}
 		} finally {
@@ -334,11 +319,12 @@ class AUTH {
 	/**
 	 * Erase AUTH data.
 	 * To be invoked on LOGOUT or other required situations.
-	 * @throws \Exception
 	 */
 	function erase() {
 		$prevTraceFn = sys::traceFn($this->_.'->erase');
 		try {
+			$Auth = Auth::instance();
+
 			// delete AUTH-TOKEN
 			switch ($this->module) {
 				case 'COOKIE':
@@ -359,7 +345,7 @@ class AUTH {
 				sys::trace(LOG_DEBUG, T_INFO, 'erase REFRESH-TOKEN');
 				try {
 					$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
-					$this->provider()->deleteRefreshToken($this->UID(), $refreshToken['TOKEN']);
+					$this->provider()->deleteRefreshToken($Auth->UID(), $refreshToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
 				setcookie($this->cookieREFRESH, '', time() - 86400, '/', null, false, true);
 			}
@@ -369,7 +355,7 @@ class AUTH {
 				sys::trace(LOG_DEBUG, T_INFO, 'erase REMEMBER-TOKEN');
 				try {
 					$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
-					$this->provider()->deleteRememberToken($this->UID(), $rememberToken['TOKEN']);
+					$this->provider()->deleteRememberToken($Auth->UID(), $rememberToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
 				setcookie($this->cookieREMEMBER, '', time()-86400, '/', null, false, true);
 			}
@@ -379,71 +365,11 @@ class AUTH {
 			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
 			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
-			// erase data
-			$this->_data = [];
-			$this->_GID = $this->_GROUP = $this->_NAME = $this->_UID = null;
+			Auth::erase();
 		} finally {
+			$this->_commit = false;
 			sys::traceFn($prevTraceFn);
 		}
-	}
-
-	/**
-	 * Get User data, whole set or single key
-	 * @param string|null $key
-	 * @return array|mixed|null
-	 */
-	function get($key=null) {
-		return (is_null($key)) ? $this->_data : ($this->_data[$key] ?? null);
-	}
-
-	/**
-	 * Get group ID
-	 * @return integer|null
-	 */
-	function GID() {
-		return $this->_GID;
-	}
-
-	/**
-	 * Get group name
-	 * @return string|null
-	 */
-	function GROUP() {
-		return $this->_GROUP;
-	}
-
-	/**
-	 * Get User name
-	 * @return string|null
-	 */
-	function NAME() {
-		return $this->_NAME;
-	}
-
-	/**
-	 * Set User data, also special values GID, GROUP, NAME, UID
-	 * @param string $key
-	 * @param mixed $value
-	 * @return AUTH
-	 */
-	function set($key, $value) {
-		switch ($key) {
-			case 'GID': $this->_GID = (integer) $value; break;
-			case 'GROUP': $this->_GROUP = (string) $value; break;
-			case 'NAME': $this->_NAME = (string) $value; break;
-			case 'UID': $this->_UID = (integer) $value; break;
-			default: $this->_data[$key] = $value;
-		}
-		$this->_commit = true;
-		return $this;
-	}
-
-	/**
-	 * Get User ID
-	 * @return integer|null
-	 */
-	function UID() {
-		return $this->_UID;
 	}
 
 	/**

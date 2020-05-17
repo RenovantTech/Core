@@ -306,15 +306,9 @@ class sys {
 
 	/**
 	 * AUTH helper
-	 * @return AUTH
-	 * @throws ContextException
-	 * @throws EventDispatcherException|\ReflectionException
 	 */
-	static function auth() {
-		/** @var AUTH $AUTH */
-		static $AUTH;
-		if(!$AUTH) $AUTH = self::$Context->get(self::$Sys->cnfServices['auth'], AUTH::class);
-		return $AUTH;
+	static function auth(): Auth {
+		return Auth::instance();
 	}
 
 	/**

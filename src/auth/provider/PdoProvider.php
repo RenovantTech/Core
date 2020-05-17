@@ -8,7 +8,8 @@
 namespace renovant\core\auth\provider;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
-	renovant\core\auth\AUTH;
+	renovant\core\auth\Auth,
+	renovant\core\auth\AuthService;
 /**
  * Authentication Provider via PDO.
  * @author Daniele Sciacchitano <dan@renovant.tech>
@@ -75,11 +76,11 @@ class PdoProvider implements ProviderInterface {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tables['users']))
 				->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
 			if(!is_array($data)) return false;
-			$AUTH = sys::auth();
-			foreach ($data as $k=>$v)
-				$AUTH->set($k, $v);
-			$AUTH->set('UID', $id);
-			$AUTH->set('NAME', ($data['name']??'').' '.($data['surname']??''));
+			Auth::erase();
+			$Auth = Auth::init(array_merge($data, [
+				'UID' => $id,
+				'NAME'=> ($data['name']??'').' '.($data['surname']??'')
+			]));
 			return true;
 		} catch (\Exception $Ex) {
 			return false;
@@ -93,12 +94,12 @@ class PdoProvider implements ProviderInterface {
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tables['auth']))
 				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
-			if(!$data) return AUTH::LOGIN_UNKNOWN;
-			if((int)$data['active'] != 1) return AUTH::LOGIN_DISABLED;
-			if(!password_verify($password, $data['password'])) return AUTH::LOGIN_PWD_MISMATCH;
+			if(!$data) return AuthService::LOGIN_UNKNOWN;
+			if((int)$data['active'] != 1) return AuthService::LOGIN_DISABLED;
+			if(!password_verify($password, $data['password'])) return AuthService::LOGIN_PWD_MISMATCH;
 			return $data['user_id'];
 		} catch (\Exception $Ex) {
-			return AUTH::LOGIN_EXCEPTION;
+			return AuthService::LOGIN_EXCEPTION;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

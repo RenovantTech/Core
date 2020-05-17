@@ -142,7 +142,7 @@ services:
   # AUTH service
   # -------------------------------------------------------
   sys.AUTH:
-    class: renovant\core\auth\AUTH
+    class: renovant\core\auth\AuthService
     constructor:
       module: SESSION
     properties:

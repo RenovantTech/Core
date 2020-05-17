@@ -17,7 +17,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @throws \renovant\core\util\yaml\YamlException
+	 * @throws \renovant\core\util\yaml\YamlException|\ReflectionException
 	 */
 	function testBoot() {
 		SysBoot::boot();
