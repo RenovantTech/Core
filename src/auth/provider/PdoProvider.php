@@ -25,9 +25,9 @@ class PdoProvider implements ProviderInterface {
 	const SQL_DELETE_RESET_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
-	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, :expire)';
+	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_RESET_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET", :user_id, :token, FROM_UNIXTIME(:expire))';
-	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, :expire)';
+	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, FROM_UNIXTIME(:expire))';
 
 	/** User table fields to load into AUTH data on login
 	 * @var string */
@@ -173,9 +173,8 @@ class PdoProvider implements ProviderInterface {
 	function setRefreshToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRefreshToken');
 		try {
-			$expire = $expireTime ? date('Y-m-d H:i:s', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tables['tokens']))
-				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -194,9 +193,8 @@ class PdoProvider implements ProviderInterface {
 	function setRememberToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRememberToken');
 		try {
-			$expire = $expireTime ? strftime('%F %T', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REMEMBER_TOKEN, $this->tables['tokens']))
-				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
