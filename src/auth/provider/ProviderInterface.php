@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\auth\provider;
+use renovant\core\auth\AuthException;
 /**
  * Authentication Provider interface.
  * @author Daniele Sciacchitano <dan@renovant.tech>
@@ -13,19 +14,12 @@ namespace renovant\core\auth\provider;
 interface ProviderInterface {
 
 	/**
-	 * Authenticate User by credentials
-	 * @param string $login
-	 * @param string $password
-	 * @return int 1 on SUCCESS, negative code on ERROR
+	 * Fetch user data
+	 * @param integer $id User ID
+	 * @return array
+	 * @throws AuthException
 	 */
-	function authenticate($login, $password): int;
-
-	/**
-	 * Authenticate User by ID
-	 * @param int $id User ID
-	 * @return bool
-	 */
-	function authenticateById($id): bool;
+	function fetchData(int $id): array;
 
 	/**
 	 * Perform login

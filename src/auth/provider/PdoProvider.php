@@ -8,7 +8,7 @@
 namespace renovant\core\auth\provider;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
-	renovant\core\auth\Auth,
+	renovant\core\auth\AuthException,
 	renovant\core\auth\AuthService;
 /**
  * Authentication Provider via PDO.
@@ -63,27 +63,29 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function authenticate($login, $password): int {
-		$id = $this->checkCredentials($login, $password);
-		if($id > 0) {
-			return (int) $this->authenticateById($id);
-		} else return $id;
-	}
-
-	function authenticateById($id): bool {
+	/**
+	 * @param integer $id User ID
+	 * @return array
+	 * @throws AuthException
+	 */
+	function fetchData(int $id): array {
 		$prevTraceFn = sys::traceFn($this->_.'->authenticateById');
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tables['users']))
 				->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
-			if(!is_array($data)) return false;
-			Auth::erase();
-			$Auth = Auth::init(array_merge($data, [
+			if(!is_array($data)) throw new AuthException(103);
+			unset($data['id']);
+			$GID = $data['gid'] ?? null; unset($data['gid']);
+			$NAME = ($data['name']??'').' '.($data['surname']??''); unset($data['name']); unset($data['surname']);
+			$GROUP = $data['group'] ?? null; unset($data['group']);
+			return array_merge($data, [
 				'UID' => $id,
-				'NAME'=> ($data['name']??'').' '.($data['surname']??'')
-			]));
-			return true;
+				'GID' => $GID,
+				'NAME'=> $NAME,
+				'GROUP'=>$GROUP
+			]);
 		} catch (\Exception $Ex) {
-			return false;
+			throw new AuthException(103);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
