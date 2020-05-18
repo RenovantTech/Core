@@ -77,6 +77,15 @@ interface ProviderInterface {
 	function deleteRememberToken($userId, $token): bool;
 
 	/**
+	 * @param int $userId
+	 * @param string $pwd
+	 * @param int|null $expireTime expiration time (unix timestamp)
+	 * @param string|null $oldPwd
+	 * @return integer 1 on success, negative code on ERROR
+	 */
+	function setPassword(int $userId, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int;
+
+	/**
 	 * Store new REFRESH-TOKEN value
 	 * @param int $userId User ID
 	 * @param string $token

@@ -39,6 +39,9 @@ class AuthService {
 		'SESSION'
 	];
 	const JWT_KEY = DATA_DIR.'JWT.key';
+	const SET_PWD_OK		= 1;
+	const SET_PWD_MISMATCH	= -1;
+	const SET_PWD_EXCEPTION	= -2;
 	const TTL_AUTH		= 300;
 	const TTL_REFRESH	= 86400;
 	const TTL_RESET		= 1800;
@@ -438,6 +441,18 @@ class AuthService {
 			}
 		}
 		return $Provider;
+	}
+
+	/**
+	 * Update User password
+	 * @param int $userID User ID
+	 * @param string $pwd new password
+	 * @param int|null $expireTime expiration time (unix timestamp)
+	 * @param string|null $oldPwd old password, will be verified if provided, pass NULL to avoid checking
+	 * @return integer 1 on success, negative code on ERROR
+	 */
+	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int {
+		return $this->provider()->setPassword($userID, $pwd, $expireTime, $oldPwd);
 	}
 
 	/**

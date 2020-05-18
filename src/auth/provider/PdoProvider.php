@@ -18,6 +18,7 @@ class PdoProvider implements ProviderInterface {
 	use \renovant\core\CoreTrait;
 
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
+	const SQL_CHECK_PWD = 'SELECT %s FROM %s WHERE user_id = :user_id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_RESET_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_REMEMBER_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token AND expire >= NOW()';
@@ -25,6 +26,7 @@ class PdoProvider implements ProviderInterface {
 	const SQL_DELETE_RESET_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
+	const SQL_SET_PASSWORD = 'UPDATE `%s` SET password = :password, passwordExpire = FROM_UNIXTIME(:expire) WHERE user_id = :user_id';
 	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_RESET_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, FROM_UNIXTIME(:expire))';
@@ -165,6 +167,23 @@ class PdoProvider implements ProviderInterface {
 		try {
 			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_REMEMBER_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function setPassword(int $userId, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int {
+		$prevTraceFn = sys::traceFn($this->_.'->setPassword');
+		try {
+			if($oldPwd) {
+				$storedPwd = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_PWD, 'password', $this->tables['auth']))
+					->execute(['user_id'=>$userId])->fetchColumn();
+				if(!password_verify($oldPwd, $storedPwd)) return AuthService::SET_PWD_MISMATCH;
+			}
+			return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_PASSWORD, $this->tables['auth']))
+				->execute(['user_id'=>$userId, 'password'=>password_hash($pwd, PASSWORD_DEFAULT), 'expire'=>$expireTime])->rowCount();
+		} catch (\Exception $Ex) {
+			return AuthService::SET_PWD_EXCEPTION;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

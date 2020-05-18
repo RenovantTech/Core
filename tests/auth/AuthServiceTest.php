@@ -154,6 +154,24 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param AuthService $AuthService
+	 * @throws \Exception
+	 */
+	function testSetPassword(AuthService $AuthService) {
+		// with verification
+		$this->assertEquals(AuthService::SET_PWD_MISMATCH, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123xxx'));
+		$this->assertEquals(AuthService::SET_PWD_OK, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123'));
+		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_auth WHERE user_id = 1')->fetchColumn();
+		$this->assertTrue(password_verify('XYZ123', $storedPwd));
+
+		// without verification
+		$this->assertEquals(1, $AuthService->setPassword(1, 'XYZ456'));
+		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_auth WHERE user_id = 1')->fetchColumn();
+		$this->assertTrue(password_verify('XYZ456', $storedPwd));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
 	 * @return string
 	 * @throws \Exception
 	 */
