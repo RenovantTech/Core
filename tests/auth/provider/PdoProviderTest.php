@@ -1,7 +1,6 @@
 <?php
 namespace test\auth\provider;
 use renovant\core\sys,
-	renovant\core\auth\Auth,
 	renovant\core\auth\AuthService,
 	renovant\core\auth\provider\PdoProvider;
 

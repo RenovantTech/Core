@@ -19,11 +19,14 @@ class PdoProvider implements ProviderInterface {
 
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';
+	const SQL_CHECK_RESET_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_REMEMBER_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token AND expire >= NOW()';
 	const SQL_DELETE_REFRESH_TOKEN = 'DELETE FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token';
+	const SQL_DELETE_RESET_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
 	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, :expire)';
+	const SQL_SET_RESET_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, :expire)';
 
 	/** User table fields to load into AUTH data on login
@@ -117,6 +120,16 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
+	function checkResetToken($token): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkResetToken');
+		try {
+			return (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_TOKEN, $this->tables['tokens']))
+				->execute(['token'=>$token])->fetchColumn();
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
 	function checkRememberToken($userId, $token): bool {
 		$prevTraceFn = sys::traceFn($this->_.'->checkRememberToken');
 		try {
@@ -137,6 +150,16 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
+	function deleteResetToken($userId, $token): bool {
+		$prevTraceFn = sys::traceFn($this->_.'->deleteResetToken');
+		try {
+			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
 	function deleteRememberToken($userId, $token): bool {
 		$prevTraceFn = sys::traceFn($this->_.'->deleteRememberToken');
 		try {
@@ -150,9 +173,19 @@ class PdoProvider implements ProviderInterface {
 	function setRefreshToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRefreshToken');
 		try {
-			$expire = $expireTime ? strftime('%F %T', $expireTime) : null;
+			$expire = $expireTime ? date('Y-m-d H:i:s', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function setResetToken($userId, $token, $expireTime) {
+		$prevTraceFn = sys::traceFn($this->_.'->setResetToken');
+		try {
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

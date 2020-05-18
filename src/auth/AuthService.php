@@ -41,6 +41,7 @@ class AuthService {
 	const JWT_KEY = DATA_DIR.'JWT.key';
 	const TTL_AUTH		= 300;
 	const TTL_REFRESH	= 86400;
+	const TTL_RESET		= 1800;
 	const TTL_REMEMBER	= 2592000;
 
 	/** Pending commit  flag
@@ -69,6 +70,9 @@ class AuthService {
 	/** Refresh Token TTL
 	 * @var int */
 	protected $ttlREFRESH = self::TTL_REFRESH;
+	/** Reset Token TTL
+	 * @var int */
+	protected $ttlRESET = self::TTL_RESET;
 	/** Remember Token TTL
 	 * @var int */
 	protected $ttlREMEMBER = self::TTL_REMEMBER;
@@ -135,7 +139,7 @@ class AuthService {
 	}
 
 	/**
-	 * @param int $id
+	 * @param int $id User ID
 	 * @throws AuthException
 	 */
 	function authenticateById(int $id) {
@@ -285,6 +289,14 @@ class AuthService {
 	}
 
 	/**
+	 * @param string $token
+	 * @return integer user ID on success, 0 on ERROR
+	 */
+	function checkResetToken(string $token): int {
+		return $this->provider()->checkResetToken($token);
+	}
+
+	/**
 	 * Commit AUTH data & XSRF-TOKEN to module storage.
 	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
 	 * @throws \Exception
@@ -426,5 +438,16 @@ class AuthService {
 			}
 		}
 		return $Provider;
+	}
+
+	/**
+	 * @param int $userID
+	 * @return string RESET-TOKEN
+	 * @throws \Exception
+	 */
+	function setResetToken(int $userID): string {
+		$token = substr(base64_encode(random_bytes(64)), 0, 64);
+		$this->provider()->setResetToken($userID, $token, time()+$this->ttlRESET);
+		return $token;
 	}
 }

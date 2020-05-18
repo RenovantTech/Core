@@ -38,25 +38,43 @@ interface ProviderInterface {
 	function checkRefreshToken($userId, $token): bool;
 
 	/**
+	 * Check RESET-TOKEN validity
+	 * @param $token
+	 * @return integer user ID on success, 0 on ERROR
+	 */
+	function checkResetToken($token): int;
+
+	/**
 	 * Check REMEMBER-TOKEN validity
 	 * @param $userId
 	 * @param $token
 	 * @return bool TRUE if valid
 	 */
 	function checkRememberToken($userId, $token): bool;
+
 	/**
 	 * Delete REFRESH-TOKEN
 	 * @param int $userId User ID
 	 * @param string $token
+	 * @return bool
 	 */
-	function deleteRefreshToken($userId, $token);
+	function deleteRefreshToken($userId, $token): bool;
+
+	/**
+	 * Delete RESET-TOKEN
+	 * @param int $userId User ID
+	 * @param string $token
+	 * @return bool
+	 */
+	function deleteResetToken($userId, $token): bool;
 
 	/**
 	 * Delete REMEMBER-TOKEN
 	 * @param int $userId User ID
 	 * @param string $token
+	 * @return bool
 	 */
-	function deleteRememberToken($userId, $token);
+	function deleteRememberToken($userId, $token): bool;
 
 	/**
 	 * Store new REFRESH-TOKEN value
@@ -65,6 +83,14 @@ interface ProviderInterface {
 	 * @param int $expireTime expiration time (unix timestamp)
 	 */
 	function setRefreshToken($userId, $token, $expireTime);
+
+	/**
+	 * Store new RESET-TOKEN value
+	 * @param int $userId User ID
+	 * @param string $token
+	 * @param int $expireTime expiration time (unix timestamp)
+	 */
+	function setResetToken($userId, $token, $expireTime);
 
 	/**
 	 * Store new REMEMBER-TOKEN value

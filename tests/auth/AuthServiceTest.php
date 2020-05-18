@@ -150,4 +150,29 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 		$AuthService->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
 	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
+	 * @return string
+	 * @throws \Exception
+	 */
+	function testSetResetToken(AuthService $AuthService) {
+		$token = $AuthService->setResetToken(3);
+		$this->assertEquals(64, strlen($token));
+		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$this->assertEquals($token, $dbToken);
+		return $token;
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @depends testSetResetToken
+	 * @param AuthService $AuthService
+	 * @param string $token
+	 */
+	function testCheckResetToken(AuthService $AuthService, string $token) {
+		$userID = $AuthService->checkResetToken($token);
+		$this->assertEquals(3, $userID);
+	}
 }
