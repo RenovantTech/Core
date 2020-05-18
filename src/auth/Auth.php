@@ -12,63 +12,33 @@ namespace renovant\core\auth;
  */
 class Auth {
 
-	static protected ?Auth $_ = null;
-
 	/** User custom data */
 	protected array $data = [];
 	/** Group ID
 	 * @var integer|null */
-	protected $GID = null;
+	protected ?int $GID = null;
 	/** Group name
 	 * @var string|null */
-	protected $GROUP = null;
+	protected ?string $GROUP = null;
 	/** User name (full-name)
 	 * @var string|null */
-	protected $NAME = null;
+	protected ?string $NAME = null;
 	/** User ID
 	 * @var integer|null */
-	protected $UID = null;
+	protected ?int $UID = null;
 
-	/**
-	 * Initialize Auth (static constructor)
-	 * @param array $data
-	 * @return Auth
-	 * @throws AuthException
-	 */
-	static function init(array $data=[]): Auth {
-		if(self::$_) throw new AuthException(1);
-		return self::$_ = new Auth($data);
-	}
-
-	/**
-	 * @return Auth
-	 */
 	static function instance(): Auth {
-		if(is_null(self::$_)) self::$_ = new Auth([]);
-		return self::$_;
+		static $Auth;
+		if(!isset($Auth)) $Auth = new Auth;
+		return $Auth;
 	}
 
-	/**
-	 * @internal
-	 */
-	static function erase(): void {
-		self::$_ = null;
-	}
-
-	/**
-	 * Set Auth data, also special values GID, GROUP, NAME, UID
-	 * @param array $data
-	 */
-	private function __construct(array $data) {
-		foreach ($data as $k=>$v) {
-			switch ($k) {
-				case 'GID': $this->GID = (integer) $v; break;
-				case 'GROUP': $this->GROUP = (string) $v; break;
-				case 'NAME': $this->NAME = (string) $v; break;
-				case 'UID': $this->UID = (integer) $v; break;
-				default: $this->data[$k] = $v;
-			}
-		}
+	private function __construct(?int $UID=null, ?int $GID=null, ?string $name=null, ?string $group=null, array $data=[]) {
+		$this->GID = $GID;
+		$this->GROUP = $group;
+		$this->NAME = $name;
+		$this->UID = $UID;
+		$this->data = $data;
 	}
 
 	/**
@@ -76,7 +46,7 @@ class Auth {
 	 * @param string|null $key
 	 * @return array|mixed|null
 	 */
-	function data($key=null) {
+	function data(?string $key=null) {
 		return (is_null($key)) ? $this->data : ($this->data[$key] ?? null);
 	}
 
@@ -84,7 +54,7 @@ class Auth {
 	 * Get group ID
 	 * @return integer|null
 	 */
-	function GID() {
+	function GID(): ?int {
 		return $this->GID;
 	}
 
@@ -92,7 +62,7 @@ class Auth {
 	 * Get group name
 	 * @return string|null
 	 */
-	function GROUP() {
+	function GROUP(): ?string {
 		return $this->GROUP;
 	}
 
@@ -100,7 +70,7 @@ class Auth {
 	 * Get User name
 	 * @return string|null
 	 */
-	function NAME() {
+	function NAME(): ?string {
 		return $this->NAME;
 	}
 
@@ -108,7 +78,7 @@ class Auth {
 	 * Get User ID
 	 * @return integer|null
 	 */
-	function UID() {
+	function UID(): ?int {
 		return $this->UID;
 	}
 }
