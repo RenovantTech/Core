@@ -118,6 +118,43 @@ class AuthService {
 	}
 
 	/**
+	 * @param int|null $UID
+	 * @param int|null $GID
+	 * @param string|null $name
+	 * @param string|null $group
+	 * @param array $data
+	 * @return Auth
+	 */
+	function authenticate(?int $UID, ?int $GID, ?string $name, ?string $group, array $data=[]): Auth {
+		$Auth = Auth::instance();
+		$RConstructor = (new \ReflectionClass(Auth::class))->getConstructor();
+		$RConstructor->setAccessible(true);
+		$RConstructor->invokeArgs($Auth, [$UID, $GID, $name, $group, $data]);
+		$this->_commit = true;
+		return $Auth;
+	}
+
+	/**
+	 * @param int $id
+	 * @throws AuthException
+	 */
+	function authenticateById(int $id) {
+		$this->doAuthenticate($this->provider()->fetchData($id));
+	}
+
+	/**
+	 * @internal
+	 * @param array $data
+	 */
+	protected function doAuthenticate(array $data=[]) {
+		$UID = $data['UID'] ?? null; unset($data['UID']);
+		$GID = $data['GID'] ?? null; unset($data['GID']);
+		$name = $data['NAME'] ?? null; unset($data['NAME']);
+		$group = $data['GROUP'] ?? null; unset($data['GROUP']);
+		$this->authenticate($UID, $GID, $name, $group, $data);
+	}
+
+	/**
 	 * Initialize AUTH module, perform Authentication & Security checks
 	 * To be invoked via event listener before HTTP Controller execution (HTTP:INIT, HTTP:ROUTE or HTTP:CONTROLLER).
 	 * @param HttpEvent $Event
@@ -142,7 +179,7 @@ class AuthService {
 						try {
 							$token = (array)JWT::decode($_COOKIE[$this->cookieAUTH], file_get_contents(self::JWT_KEY), ['HS512']);
 							if (isset($token['data']) && $token['data'] = (array)$token['data']) {
-								Auth::init($token['data']);
+								$this->doAuthenticate($token['data']);
 								$this->_commit = false;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-TOKEN OK', $token['data']);
 								break;
@@ -159,7 +196,7 @@ class AuthService {
 						try {
 							$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
 							if($this->provider()->checkRefreshToken($refreshToken['UID'], $refreshToken['TOKEN'])) {
-								$this->provider()->authenticateById($refreshToken['UID']);
+								$this->doAuthenticate($this->provider()->fetchData($refreshToken['UID']));
 								$this->_commit = true;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT REFRESH-TOKEN OK');
 								break;
@@ -172,7 +209,7 @@ class AuthService {
 						try {
 							$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 							if($this->provider()->checkRememberToken($rememberToken['UID'], $rememberToken['TOKEN'])) {
-								$this->provider()->authenticateById($rememberToken['UID']);
+								$this->doAuthenticate($this->provider()->fetchData($rememberToken['UID']));
 								$this->_commit = true;
 								sys::trace(LOG_DEBUG, T_INFO, 'JWT REMEMBER-TOKEN OK');
 								break;
@@ -185,8 +222,7 @@ class AuthService {
 				case 'SESSION':
 					if (!isset($_SESSION)) throw new Exception(23);
 					if (isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
-						Auth::init($_SESSION['__AUTH__']);
-						$this->_commit = false;
+						$this->doAuthenticate($_SESSION['__AUTH__']);
 						sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
 					}
 					break;
@@ -235,6 +271,17 @@ class AuthService {
 		foreach ($this->skipXSRFUrls as $url)
 			if(preg_match($url, $URI)) return true;
 		return false;
+	}
+
+	/**
+	 * @param string $login
+	 * @param string $password
+	 * @param bool $remember enable REMEMBER-TOKEN
+	 * @return int
+	 */
+	function checkCredentials(string $login, string $password, bool $remember=false): int {
+		$this->setRememberToken = $remember;
+		return $this->provider()->checkCredentials($login, $password);
 	}
 
 	/**
@@ -309,16 +356,9 @@ class AuthService {
 	}
 
 	/**
-	 * Enable REMEMBER-TOKEN
-	 */
-	function enableRememberToken() {
-		$this->_commit = true;
-		$this->setRememberToken = true;
-	}
-
-	/**
 	 * Erase AUTH data.
 	 * To be invoked on LOGOUT or other required situations.
+	 * @throws \Exception
 	 */
 	function erase() {
 		$prevTraceFn = sys::traceFn($this->_.'->erase');
@@ -365,7 +405,8 @@ class AuthService {
 			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
 			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
-			Auth::erase();
+			// erase data
+			$this->doAuthenticate();
 		} finally {
 			$this->_commit = false;
 			sys::traceFn($prevTraceFn);

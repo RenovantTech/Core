@@ -12,8 +12,6 @@ use renovant\core\Exception;
  * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class AuthException extends Exception {
-	const COD1 = 'AUTH data already initialized';
-
 	// COOKIE
 
 	// JWT
@@ -27,4 +25,5 @@ class AuthException extends Exception {
 	// common
 	const COD101 = 'AUTH required: Unauthorized';
 	const COD102 = 'XSRF-TOKEN required: Unauthorized';
+	const COD103 = 'Exception initializing user data';
 }
