@@ -8,7 +8,7 @@
 namespace renovant\core\http\controller;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
-	renovant\core\auth\AUTH,
+	renovant\core\auth\Auth,
 	renovant\core\http\Request,
 	renovant\core\http\Response,
 	renovant\core\http\Exception;
@@ -41,8 +41,6 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 	/**
 	 * @param Request $Req
 	 * @param Response $Res
-	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function handle(Request $Req, Response $Res) {
 		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
@@ -65,7 +63,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 					switch ($param['class']) {
 						case Request::class: $args[$i] = $Req; break;
 						case Response::class: $args[$i] = $Res; break;
-						case AUTH::class: $args[$i] = sys::auth(); break;
+						case Auth::class: $args[$i] = Auth::instance(); break;
 						default: $args[$i] = new $param['class']($Req);
 					}
 				} elseif (isset($param['type'])) {
