@@ -13,7 +13,6 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
-		Auth::erase();
 	}
 
 	static function tearDownAfterClass():void {
@@ -22,7 +21,6 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
-		Auth::erase();
 	}
 
 	function testConstructor() {
@@ -43,36 +41,11 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
 	 */
-	function testAuthenticateById(PdoProvider $PdoProvider) {
-		$this->assertTrue($PdoProvider->authenticateById(1));
-		$Auth = Auth::instance();
-		$this->assertEquals(1, $Auth->UID());
-		$this->assertEquals('john.red@gmail.com', $Auth->data('email'));
-
-		$this->assertFalse($PdoProvider->authenticateById(5));
-	}
-
-	/**
-	 * @depends testConstructor
-	 * @param PdoProvider $PdoProvider
-	 */
 	function testCheckCredentials(PdoProvider $PdoProvider) {
 		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
 		$this->assertEquals(AuthService::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
 		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
 		$this->assertEquals(1, $PdoProvider->checkCredentials('john.red', 'ABC123'));
-	}
-
-	/**
-	 * @depends testConstructor
-	 * @param PdoProvider $PdoProvider
-	 */
-	function testAuthenticate(PdoProvider $PdoProvider) {
-		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $PdoProvider->authenticate('jack.green', '123456'));
-		$this->assertEquals(AuthService::LOGIN_DISABLED, $PdoProvider->authenticate('matt.brown', '123456'));
-		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $PdoProvider->authenticate('john.red', '123456'));
-		$this->assertEquals(1, $PdoProvider->authenticate('john.red', 'ABC123'));
-		$this->assertEquals(1, $PdoProvider->authenticate('dick.dastardly', 'GHI789'));
 	}
 
 	/**

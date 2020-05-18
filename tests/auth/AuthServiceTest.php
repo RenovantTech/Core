@@ -17,7 +17,6 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
-		Auth::erase();
 	}
 
 	static function tearDownAfterClass():void {
@@ -26,7 +25,6 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS `sys_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
-		Auth::erase();
 	}
 
 	/**
@@ -57,8 +55,41 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf(ProviderInterface::class, $AuthService->provider());
 		sys::pdo('mysql')->exec('
 			INSERT INTO sys_users (name, surname, email) VALUES ("John", "Red", "john.red@gmail.com");
+			INSERT INTO sys_users (name, surname, email) VALUES ("Matt", "Brown", "matt.brown@gmail.com");
+			INSERT INTO sys_users (name, surname, email) VALUES ("Dick", "Dastardly", "dick.dastardly@gmail.com");
 			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
+			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE user_id = 2;
+			UPDATE sys_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE user_id = 3;
 		');
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
+	 */
+	function testAuthenticate(AuthService $AuthService) {
+		$AuthService->authenticate(11, 100, 'John Black', 'admin', ['foo'=>'bar']);
+		$Auth = Auth::instance();
+		$this->assertEquals(11, $Auth->UID());
+		$this->assertEquals(100, $Auth->GID());
+		$this->assertEquals('John Black', $Auth->NAME());
+		$this->assertEquals('admin', $Auth->GROUP());
+		$this->assertEquals('bar', $Auth->data('foo'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
+	 * @throws \renovant\core\auth\AuthException
+	 */
+	function testAuthenticateById(AuthService $AuthService) {
+		$AuthService->authenticateById(3);
+		$Auth = Auth::instance();
+		$this->assertEquals(3, $Auth->UID());
+		$this->assertEquals(null, $Auth->GID());
+		$this->assertEquals('Dick Dastardly', $Auth->NAME());
+		$this->assertEquals(null, $Auth->GROUP());
+		$this->assertEquals('dick.dastardly@gmail.com', $Auth->data('email'));
 	}
 
 	/**
@@ -96,6 +127,17 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals(23, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/must be already started/', $Ex->getMessage());
 		}
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
+	 */
+	function testCheckCredentials(AuthService $AuthService) {
+		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $AuthService->checkCredentials('jack.green', '123456'));
+		$this->assertEquals(AuthService::LOGIN_DISABLED, $AuthService->checkCredentials('matt.brown', '123456'));
+		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $AuthService->checkCredentials('john.red', '123456'));
+		$this->assertEquals(1, $AuthService->checkCredentials('john.red', 'ABC123'));
 	}
 
 	/**

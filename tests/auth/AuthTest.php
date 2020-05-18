@@ -1,55 +1,36 @@
 <?php
 namespace test\auth;
-use renovant\core\auth\Auth,
-	renovant\core\auth\AuthException;
+use renovant\core\sys,
+	renovant\core\auth\Auth;
 
 class AuthTest extends \PHPUnit\Framework\TestCase {
 
-	static function setUpBeforeClass(): void {
-		Auth::erase();
-	}
-
-	static function tearDownAfterClass():void {
-		Auth::erase();
-	}
-
 	/**
 	 * @return Auth
-	 * @throws \renovant\core\auth\AuthException
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function testInit(): Auth {
-		$Auth = Auth::init([
-			'GID' => 11,
-			'GROUP' => 'admin',
-			'NAME' => 'John Black',
-			'UID' => 11,
+	function testConstruct(): Auth {
+		/** @var @AuthService $AuthService */
+		$AuthService = sys::context()->get('sys.AUTH');
+		$Auth = $AuthService->authenticate(11, 11, 'John Black', 'admin', [
 			'foo' => 'foo1',
-			'bar' => 'bar1',
-
+			'bar' => 'bar1'
 		]);
 		$this->assertInstanceOf(Auth::class, $Auth);
 		return $Auth;
 	}
 
 	/**
-	 * @depends testInit
-	 * @throws AuthException
-	 */
-	function testInitException() {
-		$this->expectExceptionCode(1);
-		$this->expectException(AuthException::class);
-		Auth::init([]);
-	}
-
-	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 */
 	function testInstance() {
 		$this->assertInstanceOf(Auth::class, Auth::instance());
 	}
 
 	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
 	function testData(Auth $Auth) {
@@ -59,7 +40,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
 	function testGID(Auth $Auth) {
@@ -67,7 +48,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
 	function testGROUP(Auth $Auth) {
@@ -75,7 +56,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
 	function testNAME(Auth $Auth) {
@@ -83,7 +64,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testInit
+	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
 	function testUID(Auth $Auth) {
