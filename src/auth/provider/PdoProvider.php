@@ -20,15 +20,15 @@ class PdoProvider implements ProviderInterface {
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
 	const SQL_CHECK_PWD = 'SELECT %s FROM %s WHERE user_id = :user_id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';
-	const SQL_CHECK_RESET_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET" AND token = :token AND expire >= NOW()';
+	const SQL_CHECK_RESET_PWD_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET_PWD" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_REMEMBER_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token AND expire >= NOW()';
 	const SQL_DELETE_REFRESH_TOKEN = 'DELETE FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token';
-	const SQL_DELETE_RESET_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET" AND user_id = :user_id AND token = :token';
+	const SQL_DELETE_RESET_PWD_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET_PWD" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
 	const SQL_SET_PASSWORD = 'UPDATE `%s` SET password = :password, passwordExpire = FROM_UNIXTIME(:expire) WHERE user_id = :user_id';
 	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, FROM_UNIXTIME(:expire))';
-	const SQL_SET_RESET_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET", :user_id, :token, FROM_UNIXTIME(:expire))';
+	const SQL_SET_RESET_PWD_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET_PWD", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, FROM_UNIXTIME(:expire))';
 
 	/** User table fields to load into AUTH data on login
@@ -122,10 +122,10 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function checkResetToken($token): int {
-		$prevTraceFn = sys::traceFn($this->_.'->checkResetToken');
+	function checkResetPwdToken($token): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkResetPwdToken');
 		try {
-			return (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_TOKEN, $this->tables['tokens']))
+			return (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_PWD_TOKEN, $this->tables['tokens']))
 				->execute(['token'=>$token])->fetchColumn();
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -152,10 +152,10 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function deleteResetToken($userId, $token): bool {
-		$prevTraceFn = sys::traceFn($this->_.'->deleteResetToken');
+	function deleteResetPwdToken($userId, $token): bool {
+		$prevTraceFn = sys::traceFn($this->_.'->deleteResetPwdToken');
 		try {
-			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_TOKEN, $this->tables['tokens']))
+			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_PWD_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -199,10 +199,10 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function setResetToken($userId, $token, $expireTime) {
-		$prevTraceFn = sys::traceFn($this->_.'->setResetToken');
+	function setResetPwdToken($userId, $token, $expireTime) {
+		$prevTraceFn = sys::traceFn($this->_.'->setResetPwdToken');
 		try {
-			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_TOKEN, $this->tables['tokens']))
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_PWD_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);

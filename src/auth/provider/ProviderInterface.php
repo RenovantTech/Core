@@ -42,7 +42,7 @@ interface ProviderInterface {
 	 * @param $token
 	 * @return integer user ID on success, 0 on ERROR
 	 */
-	function checkResetToken($token): int;
+	function checkResetPwdToken($token): int;
 
 	/**
 	 * Check REMEMBER-TOKEN validity
@@ -66,7 +66,7 @@ interface ProviderInterface {
 	 * @param string $token
 	 * @return bool
 	 */
-	function deleteResetToken($userId, $token): bool;
+	function deleteResetPwdToken($userId, $token): bool;
 
 	/**
 	 * Delete REMEMBER-TOKEN
@@ -99,7 +99,7 @@ interface ProviderInterface {
 	 * @param string $token
 	 * @param int $expireTime expiration time (unix timestamp)
 	 */
-	function setResetToken($userId, $token, $expireTime);
+	function setResetPwdToken($userId, $token, $expireTime);
 
 	/**
 	 * Store new REMEMBER-TOKEN value

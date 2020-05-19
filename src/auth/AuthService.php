@@ -295,8 +295,8 @@ class AuthService {
 	 * @param string $token
 	 * @return integer user ID on success, 0 on ERROR
 	 */
-	function checkResetToken(string $token): int {
-		return $this->provider()->checkResetToken($token);
+	function checkResetPwdToken(string $token): int {
+		return $this->provider()->checkResetPwdToken($token);
 	}
 
 	/**
@@ -460,9 +460,9 @@ class AuthService {
 	 * @return string RESET-TOKEN
 	 * @throws \Exception
 	 */
-	function setResetToken(int $userID): string {
+	function setResetPwdToken(int $userID): string {
 		$token = substr(base64_encode(random_bytes(64)), 0, 64);
-		$this->provider()->setResetToken($userID, $token, time()+$this->ttlRESET);
+		$this->provider()->setResetPwdToken($userID, $token, time()+$this->ttlRESET);
 		return $token;
 	}
 }

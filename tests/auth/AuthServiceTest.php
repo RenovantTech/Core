@@ -176,9 +176,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \Exception
 	 */
 	function testSetResetToken(AuthService $AuthService) {
-		$token = $AuthService->setResetToken(3);
+		$token = $AuthService->setResetPwdToken(3);
 		$this->assertEquals(64, strlen($token));
-		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET_PWD" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
 		$this->assertEquals($token, $dbToken);
 		return $token;
 	}
@@ -189,8 +189,8 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @param AuthService $AuthService
 	 * @param string $token
 	 */
-	function testCheckResetToken(AuthService $AuthService, string $token) {
-		$userID = $AuthService->checkResetToken($token);
+	function testCheckResetPwdToken(AuthService $AuthService, string $token) {
+		$userID = $AuthService->checkResetPwdToken($token);
 		$this->assertEquals(3, $userID);
 	}
 }
