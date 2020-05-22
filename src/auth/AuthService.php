@@ -310,7 +310,7 @@ class AuthService {
 		try {
 			// XSRF-TOKEN (cookie + header)
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
+			$this->_XSRF_TOKEN = $this->generateToken();
 			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
 
@@ -349,7 +349,7 @@ class AuthService {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize REFRESH-TOKEN');
 			$refreshToken = [
 				'UID'	=> $Auth->UID(),
-				'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
+				'TOKEN'	=> $this->generateToken()
 			];
 			$this->provider()->setRefreshToken($Auth->UID(), $refreshToken['TOKEN'], time()+$this->ttlREFRESH);
 			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, false, true))->write($refreshToken);
@@ -359,7 +359,7 @@ class AuthService {
 				sys::trace(LOG_DEBUG, T_INFO, 'initialize REMEMBER-TOKEN');
 				$rememberToken = [
 					'UID'	=> $Auth->UID(),
-					'TOKEN'	=> substr(base64_encode(random_bytes(64)), 0, 64)
+					'TOKEN'	=> $this->generateToken()
 				];
 				$this->provider()->setRememberToken($Auth->UID(), $rememberToken['TOKEN'], time()+$this->ttlREMEMBER);
 				(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, false, true))->write($rememberToken);
@@ -417,7 +417,7 @@ class AuthService {
 
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = substr(base64_encode(random_bytes(64)), 0, 64);
+			$this->_XSRF_TOKEN = $this->generateToken();
 			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
 
 			// erase data
@@ -458,11 +458,19 @@ class AuthService {
 	/**
 	 * @param int $userID
 	 * @return string RESET-TOKEN
-	 * @throws \Exception
 	 */
 	function setResetPwdToken(int $userID): string {
-		$token = substr(base64_encode(random_bytes(64)), 0, 64);
+		$token = $this->generateToken(64, true);
 		$this->provider()->setResetPwdToken($userID, $token, time()+$this->ttlRESET);
 		return $token;
+	}
+
+	protected function generateToken(int $length=64, bool $urlFriendly=false) {
+		try {
+			$token = substr(base64_encode(random_bytes($length)), 0, $length);
+		} catch (\Exception $e) {
+			$token = openssl_random_pseudo_bytes($length);
+		}
+		return $urlFriendly ? strtr($token, '+/', '-_') : $token;
 	}
 }
