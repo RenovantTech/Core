@@ -194,13 +194,11 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	function testCheckResetEmailToken(AuthService $AuthService, string $token) {
 		// false token
 		$this->assertEquals(0, $AuthService->checkResetEmailToken('f43hth34th34ht'));
-
 		// true token
 		$userID = $AuthService->checkResetEmailToken($token);
 		$this->assertEquals(3, $userID);
 		$email = sys::pdo('mysql')->query('SELECT login FROM sys_auth WHERE user_id = 3')->fetchColumn();
 		$this->assertEquals('dick.dastardly@yahoo.com', $email);
-
 		// try 2 shot
 		$this->assertEquals(0, $AuthService->checkResetEmailToken($token));
 	}
@@ -226,7 +224,11 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @param string $token
 	 */
 	function testCheckResetPwdToken(AuthService $AuthService, string $token) {
-		$userID = $AuthService->checkResetPwdToken($token);
-		$this->assertEquals(3, $userID);
+		// false token
+		$this->assertEquals(0, $AuthService->checkResetPwdToken('f43hth34th34ht'));
+		// true token
+		$this->assertEquals(3, $AuthService->checkResetPwdToken($token));
+		// try 2 shot
+		$this->assertEquals(0, $AuthService->checkResetPwdToken($token));
 	}
 }

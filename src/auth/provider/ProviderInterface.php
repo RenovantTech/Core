@@ -68,14 +68,6 @@ interface ProviderInterface {
 	function deleteRefreshToken($userId, $token): bool;
 
 	/**
-	 * Delete RESET-TOKEN
-	 * @param int $userId User ID
-	 * @param string $token
-	 * @return bool
-	 */
-	function deleteResetPwdToken($userId, $token): bool;
-
-	/**
 	 * Delete REMEMBER-TOKEN
 	 * @param int $userId User ID
 	 * @param string $token

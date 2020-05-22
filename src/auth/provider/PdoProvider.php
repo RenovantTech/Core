@@ -139,7 +139,7 @@ class PdoProvider implements ProviderInterface {
 				&&
 				(bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_MAIL_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount()
-			) ? $userId : 0;
+			) ? (int)$userId : 0;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -148,8 +148,11 @@ class PdoProvider implements ProviderInterface {
 	function checkResetPwdToken($token): int {
 		$prevTraceFn = sys::traceFn($this->_.'->checkResetPwdToken');
 		try {
-			return (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_PWD_TOKEN, $this->tables['tokens']))
+			$userId = (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_PWD_TOKEN, $this->tables['tokens']))
 				->execute(['token'=>$token])->fetchColumn();
+			if($userId) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_PWD_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
+			return $userId;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -169,16 +172,6 @@ class PdoProvider implements ProviderInterface {
 		$prevTraceFn = sys::traceFn($this->_.'->deleteRefreshToken');
 		try {
 			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_REFRESH_TOKEN, $this->tables['tokens']))
-				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
-		} finally {
-			sys::traceFn($prevTraceFn);
-		}
-	}
-
-	function deleteResetPwdToken($userId, $token): bool {
-		$prevTraceFn = sys::traceFn($this->_.'->deleteResetPwdToken');
-		try {
-			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_PWD_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
 		} finally {
 			sys::traceFn($prevTraceFn);
