@@ -20,14 +20,18 @@ class PdoProvider implements ProviderInterface {
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
 	const SQL_CHECK_PWD = 'SELECT %s FROM %s WHERE user_id = :user_id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';
+	const SQL_CHECK_RESET_EMAIL_TOKEN = 'SELECT user_id, data FROM `%s` WHERE type = "RESET_EMAIL" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_RESET_PWD_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET_PWD" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_REMEMBER_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token AND expire >= NOW()';
 	const SQL_DELETE_REFRESH_TOKEN = 'DELETE FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token';
+	const SQL_DELETE_RESET_MAIL_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET_EMAIL" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_RESET_PWD_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET_PWD" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
+	const SQL_SET_EMAIL = 'UPDATE `%s` SET email = :email WHERE id = :user_id';
 	const SQL_SET_PASSWORD = 'UPDATE `%s` SET password = :password, passwordExpire = FROM_UNIXTIME(:expire) WHERE user_id = :user_id';
 	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, FROM_UNIXTIME(:expire))';
+	const SQL_SET_RESET_EMAIL_TOKEN = 'INSERT INTO `%s` (type, user_id, token, data, expire) VALUES ("RESET_EMAIL", :user_id, :token, :data, FROM_UNIXTIME(:expire))';
 	const SQL_SET_RESET_PWD_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET_PWD", :user_id, :token, FROM_UNIXTIME(:expire))';
 	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, FROM_UNIXTIME(:expire))';
 
@@ -122,6 +126,25 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
+	function checkResetEmailToken($token): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkResetEmailToken');
+		try {
+			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_EMAIL_TOKEN, $this->tables['tokens']))
+				->execute(['token'=>$token])->fetch(\PDO::FETCH_NUM);
+			if(!is_array($data)) return 0;
+			list($userId, $newEmail) = $data;
+			return (
+				(bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_EMAIL, $this->tables['users']))
+				->execute(['user_id'=>$userId, 'email'=>$newEmail])->rowCount()
+				&&
+				(bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_MAIL_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount()
+			) ? $userId : 0;
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
 	function checkResetPwdToken($token): int {
 		$prevTraceFn = sys::traceFn($this->_.'->checkResetPwdToken');
 		try {
@@ -194,6 +217,16 @@ class PdoProvider implements ProviderInterface {
 		try {
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function setResetEmailToken($userId, $newEmail, $token, $expireTime) {
+		$prevTraceFn = sys::traceFn($this->_.'->setResetEmailToken');
+		try {
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_EMAIL_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token, 'data'=>$newEmail, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

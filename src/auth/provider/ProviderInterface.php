@@ -42,6 +42,13 @@ interface ProviderInterface {
 	 * @param $token
 	 * @return integer user ID on success, 0 on ERROR
 	 */
+	function checkResetEmailToken($token): int;
+
+	/**
+	 * Check RESET-TOKEN validity
+	 * @param $token
+	 * @return integer user ID on success, 0 on ERROR
+	 */
 	function checkResetPwdToken($token): int;
 
 	/**
@@ -92,6 +99,15 @@ interface ProviderInterface {
 	 * @param int $expireTime expiration time (unix timestamp)
 	 */
 	function setRefreshToken($userId, $token, $expireTime);
+
+	/**
+	 * Store new RESET-TOKEN value
+	 * @param int $userId User ID
+	 * @param string $newEmail
+	 * @param string $token
+	 * @param int $expireTime expiration time (unix timestamp)
+	 */
+	function setResetEmailToken($userId, $newEmail, $token, $expireTime);
 
 	/**
 	 * Store new RESET-TOKEN value

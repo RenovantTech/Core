@@ -175,7 +175,43 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @return string
 	 * @throws \Exception
 	 */
-	function testSetResetToken(AuthService $AuthService) {
+	function testSetResetEmailToken(AuthService $AuthService) {
+		$token = $AuthService->setResetEmailToken(3, 'dick.dastardly@yahoo.com');
+		$this->assertEquals(64, strlen($token));
+		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$this->assertEquals($token, $dbToken);
+		$newEmail = sys::pdo('mysql')->query('SELECT data FROM sys_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$this->assertEquals('dick.dastardly@yahoo.com', $newEmail);
+		return $token;
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @depends testSetResetEmailToken
+	 * @param AuthService $AuthService
+	 * @param string $token
+	 */
+	function testCheckResetEmailToken(AuthService $AuthService, string $token) {
+		// false token
+		$this->assertEquals(0, $AuthService->checkResetEmailToken('f43hth34th34ht'));
+
+		// true token
+		$userID = $AuthService->checkResetEmailToken($token);
+		$this->assertEquals(3, $userID);
+		$email = sys::pdo('mysql')->query('SELECT login FROM sys_auth WHERE user_id = 3')->fetchColumn();
+		$this->assertEquals('dick.dastardly@yahoo.com', $email);
+
+		// try 2 shot
+		$this->assertEquals(0, $AuthService->checkResetEmailToken($token));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @param AuthService $AuthService
+	 * @return string
+	 * @throws \Exception
+	 */
+	function testSetResetPwdToken(AuthService $AuthService) {
 		$token = $AuthService->setResetPwdToken(3);
 		$this->assertEquals(64, strlen($token));
 		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET_PWD" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
@@ -185,7 +221,7 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @depends testSetResetToken
+	 * @depends testSetResetPwdToken
 	 * @param AuthService $AuthService
 	 * @param string $token
 	 */

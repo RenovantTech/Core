@@ -295,6 +295,14 @@ class AuthService {
 	 * @param string $token
 	 * @return integer user ID on success, 0 on ERROR
 	 */
+	function checkResetEmailToken(string $token): int {
+		return $this->provider()->checkResetEmailToken($token);
+	}
+
+	/**
+	 * @param string $token
+	 * @return integer user ID on success, 0 on ERROR
+	 */
 	function checkResetPwdToken(string $token): int {
 		return $this->provider()->checkResetPwdToken($token);
 	}
@@ -453,6 +461,17 @@ class AuthService {
 	 */
 	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int {
 		return $this->provider()->setPassword($userID, $pwd, $expireTime, $oldPwd);
+	}
+
+	/**
+	 * @param int $userID
+	 * @param string $newEmail
+	 * @return string RESET-TOKEN
+	 */
+	function setResetEmailToken(int $userID, string $newEmail): string {
+		$token = $this->generateToken(64, true);
+		$this->provider()->setResetEmailToken($userID, $newEmail, $token, time()+$this->ttlRESET);
+		return $token;
 	}
 
 	/**
