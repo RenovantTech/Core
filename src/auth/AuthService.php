@@ -319,7 +319,7 @@ class AuthService {
 			// XSRF-TOKEN (cookie + header)
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = $this->generateToken();
-			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
 			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
 
 			$Auth = Auth::instance();
@@ -360,7 +360,7 @@ class AuthService {
 				'TOKEN'	=> $this->generateToken()
 			];
 			$this->provider()->setRefreshToken($Auth->UID(), $refreshToken['TOKEN'], time()+$this->ttlREFRESH);
-			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, false, true))->write($refreshToken);
+			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, true, true))->write($refreshToken);
 
 			// REMEMBER-TOKEN
 			if($this->setRememberToken) {
@@ -370,7 +370,7 @@ class AuthService {
 					'TOKEN'	=> $this->generateToken()
 				];
 				$this->provider()->setRememberToken($Auth->UID(), $rememberToken['TOKEN'], time()+$this->ttlREMEMBER);
-				(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, false, true))->write($rememberToken);
+				(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, true, true))->write($rememberToken);
 			}
 		} finally {
 			$this->_commit = false; // avoid double invocation on init() Exception
@@ -410,7 +410,7 @@ class AuthService {
 					$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
 					$this->provider()->deleteRefreshToken($Auth->UID(), $refreshToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
-				setcookie($this->cookieREFRESH, '', time() - 86400, '/', null, false, true);
+				setcookie($this->cookieREFRESH, '', time() - 86400, '/', null, true, true);
 			}
 
 			// delete REMEMBER-TOKEN
@@ -420,13 +420,13 @@ class AuthService {
 					$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 					$this->provider()->deleteRememberToken($Auth->UID(), $rememberToken['TOKEN']);
 				} catch (HttpException $Ex) {} // CryptoCookie Exception
-				setcookie($this->cookieREMEMBER, '', time()-86400, '/', null, false, true);
+				setcookie($this->cookieREMEMBER, '', time()-86400, '/', null, true, true);
 			}
 
 			// regenerate XSRF-TOKEN
 			sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = $this->generateToken();
-			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, false, false);
+			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
 
 			// erase data
 			$this->doAuthenticate();
