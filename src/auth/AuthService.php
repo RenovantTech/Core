@@ -317,10 +317,12 @@ class AuthService {
 		$prevTraceFn = sys::traceFn($this->_.'->commit');
 		try {
 			// XSRF-TOKEN (cookie + header)
-			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
-			$this->_XSRF_TOKEN = $this->generateToken();
-			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
-			header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
+			if(!isset($_COOKIE[$this->cookieXSRF])) {
+				sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
+				$this->_XSRF_TOKEN = $this->generateToken();
+				setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
+				header(self::HEADER_XSRF.': '.$this->_XSRF_TOKEN);
+			}
 
 			$Auth = Auth::instance();
 			if(!$Auth->UID()) return;
