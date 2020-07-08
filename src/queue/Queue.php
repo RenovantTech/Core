@@ -14,7 +14,8 @@ class Queue {
 
 	const DEFAULT_QUEUE = 'default';
 	const SQL_ACK		= 'UPDATE %s SET status = "OK", timeOK = NOW() WHERE id = :id AND status = "RUNNING"';
-	const SQL_PUSH		= 'INSERT INTO %s (queue, priority, delay, ttr, job) VALUES (:queue, :priority, :delay, :ttr, :job)';
+	const SQL_DATA		= 'SELECT data FROM %s WHERE id = :id';
+	const SQL_PUSH		= 'INSERT INTO %s (queue, priority, delay, ttr, data) VALUES (:queue, :priority, :delay, :ttr, :data)';
 	const SQL_RESERVE	= 'SELECT * FROM %s WHERE status = "WAITING" AND DATE_ADD(timeIN, INTERVAL delay SECOND) <= NOW() %s ORDER BY priority ASC, id ASC LIMIT 1';
 	const SQL_RELEASE	= 'UPDATE %s SET status = "WAITING", attempt = attempt + 1 WHERE id = :id AND status = "RUNNING"';
 	const SQL_STATS		= 'SELECT status, priority, delay, ttr, attempt FROM %s WHERE id = :id';
@@ -27,17 +28,17 @@ class Queue {
 
 	/** PDO instance ID
 	 * @var string */
-	protected $pdo = 'master';
+	protected string $pdo = 'master';
 	/** DB table
 	 * @var string */
-	protected $table = 'sys_queue';
+	protected string $table = 'sys_queue';
 
 	/**
 	 * Queue constructor.
 	 * @param string $pdo PDO instance ID, default to "master"
 	 * @param string $table
 	 */
-	function __construct($pdo='master', $table='sys_queue') {
+	function __construct(string $pdo='master', string $table='sys_queue') {
 		$prevTraceFn = sys::traceFn('sys.Queue');
 		if ($pdo) $this->pdo = $pdo;
 		if ($table) $this->table = $table;
@@ -54,56 +55,68 @@ class Queue {
 
 	/**
 	 * Acknowledge a message, to be removed from the queue
-	 * @param $id
+	 * @param int $id
 	 * @return bool TRUE on success
 	 */
-	function ack($id) {
+	function ack(int $id): bool {
 		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_ACK, $this->table))
 			->execute(['id'=>$id], false)->rowCount();
 	}
 
+	/**
+	 * Fetch job data
+	 * @param int $id job ID
+	 * @return mixed
+	 */
+	function data(int $id) {
+		$data = unserialize(sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DATA, $this->table))
+			->execute(['id'=>$id], false)->fetch(\PDO::FETCH_COLUMN));
+		sys::trace(LOG_DEBUG, T_INFO, '[DATA] JOB: '.$id, $data);
+		return $data;
+	}
+
 	/** Check whether the job is waiting for execution
-	 * @param $id
+	 * @param int $id
 	 * @return bool
 	 */
-	function isWaiting($id) {
+	function isWaiting(int $id): bool {
 		$stats = $this->stats($id);
 		return ($stats['status'] == self::STATUS_WAITING);
 	}
 
 	/** Check whether a worker got the job from the queue and executes it.
-	 * @param $id
+	 * @param int $id
 	 * @return bool
 	 */
-	function isRunning($id) {
+	function isRunning(int $id): bool {
 		$stats = $this->stats($id);
 		return ($stats['status'] == self::STATUS_RUNNING);
 	}
 
 	/** Check whether a worker has executed the job
-	 * @param $id
+	 * @param int $id
 	 * @return bool
 	 */
-	function isDone($id) {
+	function isDone(int $id): bool {
 		$stats = $this->stats($id);
 		return ($stats['status'] == self::STATUS_OK);
 	}
 
 	/**
 	 * Push a message in the queue
-	 * @param mixed $job
+	 * @param mixed $data data
 	 * @param integer $priority
 	 * @param string $queue
 	 * @param integer $delay seconds
 	 * @param integer|null $ttr
 	 * @return int JOB id
 	 */
-	function push($job, $priority=100, $queue=self::DEFAULT_QUEUE, $delay=0, $ttr=null) {
+	function push($data, int $priority=100, string $queue=self::DEFAULT_QUEUE, int $delay=0, ?int $ttr=null): int {
 		$prevTraceFn = sys::traceFn($this->_.'->'.__FUNCTION__);
 		try {
-			sys::trace(LOG_DEBUG, T_INFO, '[PUSH] PRI: '.$priority.' QUEUE: '.$queue, $job);
+			sys::trace(LOG_DEBUG, T_INFO, '[PUSH] PRI: '.$priority.' QUEUE: '.$queue, $data);
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_PUSH, $this->table))
-				->execute(['queue'=>$queue, 'priority'=>$priority, 'delay'=>$delay, 'ttr'=>$ttr, 'job'=>serialize($job)], false);
+				->execute(['queue'=>$queue, 'priority'=>$priority, 'delay'=>$delay, 'ttr'=>$ttr, 'data'=>serialize($data)], false);
 			return (int)sys::pdo($this->pdo)->lastInsertId();
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -112,20 +125,20 @@ class Queue {
 
 	/**
 	 * Release a message, to be picked up again by a new worker
-	 * @param $id
+	 * @param int $id
 	 * @return bool TRUE on success
 	 */
-	function release($id) {
+	function release(int $id): bool {
 		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_RELEASE, $this->table))
 			->execute(['id'=>$id], false)->rowCount();
 	}
 
 	/**
 	 * Takes one message from the queue and reserves it for handling
-	 * @param null $queue
+	 * @param string|null $queue
 	 * @return array job ID & job data
 	 */
-	function reserve($queue=null) {
+	function reserve(?string $queue=null): array {
 		$params = $queue ? ['queue'=>$queue] : null;
 		$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_RESERVE, $this->table, $queue?' AND queue = :queue ':null))
 			->execute($params, false)->fetch(\PDO::FETCH_ASSOC);
@@ -133,13 +146,12 @@ class Queue {
 			$params = ['id'=>$data['id'], 'status'=>'RUNNING'];
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_UPDATE, $this->table, ' status = :status, timeRUN = CURRENT_TIMESTAMP '))
 				->execute($params, false);
-		}
-		return [$data['id'], unserialize($data['job'])];
+			return [$data['id'], unserialize($data['data'])];
+		} else return [null, null];
 	}
 
-	function stats($id) {
+	function stats(int $id): array {
 		return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_STATS, $this->table))
 			->execute(['id'=>$id], false)->fetch(\PDO::FETCH_ASSOC);
 	}
-
 }
