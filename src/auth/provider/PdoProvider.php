@@ -8,7 +8,8 @@
 namespace renovant\core\auth\provider;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
-	renovant\core\auth\AUTH;
+	renovant\core\auth\AuthException,
+	renovant\core\auth\AuthService;
 /**
  * Authentication Provider via PDO.
  * @author Daniele Sciacchitano <dan@renovant.tech>
@@ -17,13 +18,22 @@ class PdoProvider implements ProviderInterface {
 	use \renovant\core\CoreTrait;
 
 	const SQL_AUTHENTICATE = 'SELECT %s FROM %s WHERE id = :id';
+	const SQL_CHECK_PWD = 'SELECT %s FROM %s WHERE user_id = :user_id';
 	const SQL_CHECK_REFRESH_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token AND expire >= NOW()';
+	const SQL_CHECK_RESET_EMAIL_TOKEN = 'SELECT user_id, data FROM `%s` WHERE type = "RESET_EMAIL" AND token = :token AND expire >= NOW()';
+	const SQL_CHECK_RESET_PWD_TOKEN = 'SELECT user_id FROM `%s` WHERE type = "RESET_PWD" AND token = :token AND expire >= NOW()';
 	const SQL_CHECK_REMEMBER_TOKEN = 'SELECT COUNT(*) FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token AND expire >= NOW()';
 	const SQL_DELETE_REFRESH_TOKEN = 'DELETE FROM `%s` WHERE type = "REFRESH" AND user_id = :user_id AND token = :token';
+	const SQL_DELETE_RESET_MAIL_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET_EMAIL" AND user_id = :user_id AND token = :token';
+	const SQL_DELETE_RESET_PWD_TOKEN = 'DELETE FROM `%s` WHERE type = "RESET_PWD" AND user_id = :user_id AND token = :token';
 	const SQL_DELETE_REMEMBER_TOKEN = 'DELETE FROM `%s` WHERE type = "REMEMBER" AND user_id = :user_id AND token = :token';
 	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
-	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, :expire)';
-	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, :expire)';
+	const SQL_SET_EMAIL = 'UPDATE `%s` SET email = :email WHERE id = :user_id';
+	const SQL_SET_PASSWORD = 'UPDATE `%s` SET password = :password, passwordExpire = FROM_UNIXTIME(:expire) WHERE user_id = :user_id';
+	const SQL_SET_REFRESH_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REFRESH", :user_id, :token, FROM_UNIXTIME(:expire))';
+	const SQL_SET_RESET_EMAIL_TOKEN = 'INSERT INTO `%s` (type, user_id, token, data, expire) VALUES ("RESET_EMAIL", :user_id, :token, :data, FROM_UNIXTIME(:expire))';
+	const SQL_SET_RESET_PWD_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("RESET_PWD", :user_id, :token, FROM_UNIXTIME(:expire))';
+	const SQL_SET_REMEMBER_TOKEN = 'INSERT INTO `%s` (type, user_id, token, expire) VALUES ("REMEMBER", :user_id, :token, FROM_UNIXTIME(:expire))';
 
 	/** User table fields to load into AUTH data on login
 	 * @var string */
@@ -62,27 +72,29 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function authenticate($login, $password): int {
-		$id = $this->checkCredentials($login, $password);
-		if($id > 0) {
-			return (int) $this->authenticateById($id);
-		} else return $id;
-	}
-
-	function authenticateById($id): bool {
+	/**
+	 * @param integer $id User ID
+	 * @return array
+	 * @throws AuthException
+	 */
+	function fetchData(int $id): array {
 		$prevTraceFn = sys::traceFn($this->_.'->authenticateById');
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tables['users']))
 				->execute(['id'=>$id])->fetch(\PDO::FETCH_ASSOC);
-			if(!is_array($data)) return false;
-			$AUTH = sys::auth();
-			foreach ($data as $k=>$v)
-				$AUTH->set($k, $v);
-			$AUTH->set('UID', $id);
-			$AUTH->set('NAME', ($data['name']??'').' '.($data['surname']??''));
-			return true;
+			if(!is_array($data)) throw new AuthException(103);
+			unset($data['id']);
+			$GID = $data['gid'] ?? null; unset($data['gid']);
+			$NAME = ($data['name']??'').' '.($data['surname']??''); unset($data['name']); unset($data['surname']);
+			$GROUP = $data['group'] ?? null; unset($data['group']);
+			return array_merge($data, [
+				'UID' => $id,
+				'GID' => $GID,
+				'NAME'=> $NAME,
+				'GROUP'=>$GROUP
+			]);
 		} catch (\Exception $Ex) {
-			return false;
+			throw new AuthException(103);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -93,12 +105,12 @@ class PdoProvider implements ProviderInterface {
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tables['auth']))
 				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
-			if(!$data) return AUTH::LOGIN_UNKNOWN;
-			if((int)$data['active'] != 1) return AUTH::LOGIN_DISABLED;
-			if(!password_verify($password, $data['password'])) return AUTH::LOGIN_PWD_MISMATCH;
+			if(!$data) return AuthService::LOGIN_UNKNOWN;
+			if((int)$data['active'] != 1) return AuthService::LOGIN_DISABLED;
+			if(!password_verify($password, $data['password'])) return AuthService::LOGIN_PWD_MISMATCH;
 			return $data['user_id'];
 		} catch (\Exception $Ex) {
-			return AUTH::LOGIN_EXCEPTION;
+			return AuthService::LOGIN_EXCEPTION;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -109,6 +121,38 @@ class PdoProvider implements ProviderInterface {
 		try {
 			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_REFRESH_TOKEN, $this->tables['tokens']))
 				->execute(['user_id'=>$userId, 'token'=>$token])->fetchColumn();
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function checkResetEmailToken($token): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkResetEmailToken');
+		try {
+			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_EMAIL_TOKEN, $this->tables['tokens']))
+				->execute(['token'=>$token])->fetch(\PDO::FETCH_NUM);
+			if(!is_array($data)) return 0;
+			list($userId, $newEmail) = $data;
+			return (
+				(bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_EMAIL, $this->tables['users']))
+				->execute(['user_id'=>$userId, 'email'=>$newEmail])->rowCount()
+				&&
+				(bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_MAIL_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount()
+			) ? (int)$userId : 0;
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function checkResetPwdToken($token): int {
+		$prevTraceFn = sys::traceFn($this->_.'->checkResetPwdToken');
+		try {
+			$userId = (int) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RESET_PWD_TOKEN, $this->tables['tokens']))
+				->execute(['token'=>$token])->fetchColumn();
+			if($userId) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DELETE_RESET_PWD_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token])->rowCount();
+			return $userId;
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -144,12 +188,48 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
+	function setPassword(int $userId, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int {
+		$prevTraceFn = sys::traceFn($this->_.'->setPassword');
+		try {
+			if($oldPwd) {
+				$storedPwd = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_PWD, 'password', $this->tables['auth']))
+					->execute(['user_id'=>$userId])->fetchColumn();
+				if(!password_verify($oldPwd, $storedPwd)) return AuthService::SET_PWD_MISMATCH;
+			}
+			return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_PASSWORD, $this->tables['auth']))
+				->execute(['user_id'=>$userId, 'password'=>password_hash($pwd, PASSWORD_DEFAULT), 'expire'=>$expireTime])->rowCount();
+		} catch (\Exception $Ex) {
+			return AuthService::SET_PWD_EXCEPTION;
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
 	function setRefreshToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRefreshToken');
 		try {
-			$expire = $expireTime ? strftime('%F %T', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REFRESH_TOKEN, $this->tables['tokens']))
-				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function setResetEmailToken($userId, $newEmail, $token, $expireTime) {
+		$prevTraceFn = sys::traceFn($this->_.'->setResetEmailToken');
+		try {
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_EMAIL_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token, 'data'=>$newEmail, 'expire'=>$expireTime]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	function setResetPwdToken($userId, $token, $expireTime) {
+		$prevTraceFn = sys::traceFn($this->_.'->setResetPwdToken');
+		try {
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_RESET_PWD_TOKEN, $this->tables['tokens']))
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -158,9 +238,8 @@ class PdoProvider implements ProviderInterface {
 	function setRememberToken($userId, $token, $expireTime) {
 		$prevTraceFn = sys::traceFn($this->_.'->setRememberToken');
 		try {
-			$expire = $expireTime ? strftime('%F %T', $expireTime) : null;
 			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_REMEMBER_TOKEN, $this->tables['tokens']))
-				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expire]);
+				->execute(['user_id'=>$userId, 'token'=>$token, 'expire'=>$expireTime]);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}

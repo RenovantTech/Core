@@ -27,7 +27,8 @@
 		"ext-sodium": "*",
 		"ext-mbstring": "*",
 		"ext-dom": "*",
-		"ext-libxml": "*"
+		"ext-libxml": "*",
+		"ext-openssl": "*"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",

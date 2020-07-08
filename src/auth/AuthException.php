@@ -25,4 +25,5 @@ class AuthException extends Exception {
 	// common
 	const COD101 = 'AUTH required: Unauthorized';
 	const COD102 = 'XSRF-TOKEN required: Unauthorized';
+	const COD103 = 'Exception initializing user data';
 }

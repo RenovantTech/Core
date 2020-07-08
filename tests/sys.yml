@@ -142,13 +142,14 @@ services:
   # AUTH service
   # -------------------------------------------------------
   sys.AUTH:
-    class: renovant\core\auth\AUTH
+    class: renovant\core\auth\AuthService
     constructor:
       module: SESSION
     properties:
-      authTTL:      300     # 5 min
-      refreshTTL:   86400   # 1 day
-      rememberTTL:  2592000 # 1 month
+      ttlAUTH:      300     # 5 min
+      ttlREFRESH:   86400   # 1 day
+      ttlRESET:     1800    # 30 min
+      ttlREMEMBER:  2592000 # 1 month
       provider:     sys.AuthProvider
       skipAuthApps: [ 'AUTH' ]
       skipAuthUrls: []
