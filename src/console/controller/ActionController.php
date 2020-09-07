@@ -34,7 +34,7 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 
 	/**
 	 * ActionController constructor.
-	 * @throws Exception
+	 * @throws Exception|\ReflectionException
 	 */
 	function __construct() {
 		$this->_config = ActionControllerReflection::analyzeActions($this);
@@ -64,6 +64,7 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 					switch($param['type']) {
 						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
 						case 'integer': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
+						case 'float': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (float) $v; break;
 						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
 						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
 						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: $v;
@@ -71,11 +72,11 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 				}
 			}
 		}
-		$prevTraceFn = sys::traceFn($this->_.'->'.$action.'Action');
+		$prevTraceFn = sys::traceFn($this->_.'->'.$action);
 		try {
 			sys::trace(LOG_DEBUG, T_INFO);
-			$View = call_user_func_array([$this,$action.'Action'], $args);
-			$this->postHandle($Req, $Res, $View);
+			call_user_func_array([$this,$action], $args);
+			$this->postHandle($Req, $Res);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
@@ -95,9 +96,8 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
 	 * @param Response $Res current response
-	 * @param \renovant\core\console\ViewInterface|string $View the View or view name
 	 */
-	protected function postHandle(Request $Req, Response $Res, $View=null) {
+	protected function postHandle(Request $Req, Response $Res) {
 	}
 
 	/**
@@ -114,6 +114,6 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 		if(isset($this->_config[$action])) return $action;
 		if(isset($this->_config[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
 		http_response_code(404);
-		throw new Exception(111, [$this->_, $action.'Action']);
+		throw new Exception(111, [$this->_, $action]);
 	}
 }

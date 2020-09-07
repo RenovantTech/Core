@@ -31,8 +31,7 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 
 	/**
 	 * ActionController constructor.
-	 * @throws Exception
-	 * @throws \ReflectionException
+	 * @throws Exception|\ReflectionException
 	 */
 	function __construct() {
 		$this->_config = ActionControllerReflection::analyzeActions($this);

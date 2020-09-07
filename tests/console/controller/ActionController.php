@@ -7,15 +7,15 @@ class ActionController extends \renovant\core\console\controller\ActionControlle
 
 	const FALLBACK_ACTION = 'fallback';
 
-	function indexAction(Response $Res) {
+	function index(Response $Res) {
 		$Res->setView('index');
 	}
 
-	function fooAction(Response $Res) {
+	function foo(Response $Res) {
 		$Res->setView('foo');
 	}
 
-	function barAction(Response $Res) {
+	function bar(Response $Res) {
 		$Res->setView('bar');
 	}
 
@@ -23,7 +23,7 @@ class ActionController extends \renovant\core\console\controller\ActionControlle
 	 * @param Response $Res
 	 * @param integer $id
 	 */
-	function action2Action(Response $Res, $id) {
+	function action2(Response $Res, $id) {
 		$Res->set('id', $id);
 		$Res->setView('id-'.$id);
 	}
@@ -32,12 +32,12 @@ class ActionController extends \renovant\core\console\controller\ActionControlle
 	 * @param Response $Res
 	 * @param string $name
 	 */
-	function action3Action(Response $Res, $name='Tom') {
+	function action3(Response $Res, $name='Tom') {
 		$Res->set('name', $name);
 		$Res->setView('view3');
 	}
 
-	function fallbackAction(Request $Req, Response $Res) {
+	function fallback(Request $Req, Response $Res) {
 
 	}
 }

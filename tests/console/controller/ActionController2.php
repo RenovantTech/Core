@@ -5,7 +5,7 @@ use renovant\core\console\Request,
 
 class ActionController2 extends \renovant\core\console\controller\ActionController {
 
-	function indexAction(Request $Req, Response $Res) {
+	function index(Request $Req, Response $Res) {
 		$Res->setView('index');
 	}
 }
