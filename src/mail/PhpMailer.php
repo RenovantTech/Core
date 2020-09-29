@@ -96,14 +96,18 @@ class PhpMailer {
 	 * Wrapper for PHPMailer->send().
 	 * It add debug support.
 	 * @return boolean
-	 * @throws \PHPMailer\PHPMailer\Exception
 	 * @see PHPMailer::send()
 	 */
 	function send() {
-		if(is_null($this->Mailer)) $this->initMailer();
-		$ok = $this->Mailer->send();
-		if ($ok) sys::trace(LOG_DEBUG, T_INFO, 'OK: Mail successfully sent!');
-		else sys::trace(LOG_DEBUG, T_ERROR, 'ERROR: Mail not sent!');
-		return $ok;
+		try {
+			if(is_null($this->Mailer)) $this->initMailer();
+			$this->Mailer->send();
+			sys::trace(LOG_DEBUG, T_INFO, 'OK: Mail successfully sent!');
+			return true;
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_DEBUG, T_ERROR, 'ERROR: Mail not sent!', $Ex->getMessage());
+			trigger_error($Ex->getMessage(), E_USER_WARNING);
+			return false;
+		}
 	}
 }
