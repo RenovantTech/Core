@@ -17,7 +17,7 @@ class Queue {
 	const SQL_DATA		= 'SELECT data FROM %s WHERE id = :id';
 	const SQL_PUSH		= 'INSERT INTO %s (queue, priority, delay, ttr, data) VALUES (:queue, :priority, :delay, :ttr, :data)';
 	const SQL_RESERVE	= 'SELECT * FROM %s WHERE status = "WAITING" AND DATE_ADD(timeIN, INTERVAL delay SECOND) <= NOW() %s ORDER BY priority ASC, id ASC LIMIT 1';
-	const SQL_RELEASE	= 'UPDATE %s SET status = "WAITING", attempt = attempt + 1 WHERE id = :id AND status = "RUNNING"';
+	const SQL_RELEASE	= 'UPDATE %s SET status = :status, attempt = attempt + 1 WHERE id = :id AND status = "RUNNING"';
 	const SQL_STATS		= 'SELECT status, priority, delay, ttr, attempt FROM %s WHERE id = :id';
 	const SQL_UPDATE	= 'UPDATE %s SET %s WHERE id = :id';
 
@@ -124,13 +124,15 @@ class Queue {
 	}
 
 	/**
-	 * Release a message, to be picked up again by a new worker
+	 * Release a message, to be picked up again by a new worker, or to be left as error
 	 * @param int $id
+	 * @param bool $retry
 	 * @return bool TRUE on success
 	 */
-	function release(int $id): bool {
+	function release(int $id, bool $retry=true): bool {
+		$status = $retry ? self::STATUS_WAITING : self::STATUS_ERROR;
 		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_RELEASE, $this->table))
-			->execute(['id'=>$id], false)->rowCount();
+			->execute(['id'=>$id, 'status'=>$status], false)->rowCount();
 	}
 
 	/**
