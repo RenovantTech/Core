@@ -156,10 +156,12 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 
 	function testExecInsert() {
 		$Query = (new Query('mysql'))->on('people');
-		$this->assertEquals(1, $Query->execInsert(['name'=>'John', 'surname'=>'Foo']));
-		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
 		$this->assertEquals(1, $Query->execInsert(['name'=>'Dick', 'surname'=>'Foo']));
-		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('name = "Dick"')->execCount());
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
+		$this->assertEquals(1, $Query->execInsert(['name'=>'Dick', 'surname'=>'Foo2']));
+		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('name = "Dick"')->execCount());
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo2"')->execCount());
 
 		$Query = (new Query('mysql'))->on('sales');
 		$this->assertEquals(1, $Query->execInsert(['year'=>2014, 'product_id'=>1, 'sales1'=>25500, 'sales2'=>0, 'sales3'=>32000, 'sales4'=>28450.50, 'sales5'=>0, 'sales6'=>0, 'sales7'=>0, 'sales8'=>0, 'sales9'=>0, 'sales10'=>0, 'sales11'=>0, 'sales12'=>0]));
@@ -183,7 +185,11 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('id = 1 AND age = 22')->execCount());
 		$Query = (new Query('mysql'))->on('people');
 		$this->assertEquals(1, $Query->execInsertUpdate(['id'=>9, 'name'=>'Dick', 'surname'=>'Foo'],['id']));
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('name = "Dick"')->execCount());
 		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo"')->execCount());
+		$this->assertEquals(1, $Query->execInsertUpdate(['id'=>10, 'name'=>'Dick', 'surname'=>'Foo2'],['id']));
+		$this->assertEquals(2, (new Query('mysql'))->on('people')->criteria('name = "Dick"')->execCount());
+		$this->assertEquals(1, (new Query('mysql'))->on('people')->criteria('surname = "Foo2"')->execCount());
 	}
 
 	function testExecSelect() {

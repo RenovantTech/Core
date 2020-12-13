@@ -166,7 +166,7 @@ class Query {
 			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		return (int) $this->doExec()->rowCount();
+		return (int) $this->doExec($data)->rowCount();
 	}
 
 	/**
@@ -190,7 +190,7 @@ class Query {
 			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		return (int) $this->doExec()->rowCount();
+		return (int) $this->doExec($data)->rowCount();
 	}
 
 	/**
@@ -229,7 +229,7 @@ class Query {
 			$sql = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql,2), $this->parseCriteria());
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		return (int) $this->doExec()->rowCount();
+		return (int) $this->doExec($data)->rowCount();
 	}
 
 	function errorCode() {
@@ -387,9 +387,10 @@ class Query {
 
 	/**
 	 * Execute query
+	 * @param array|null $data
 	 * @return \PDOStatement
 	 */
-	protected function doExec() {
+	protected function doExec(?array $data=[]) {
 		$execParams = $this->criteria;
 		foreach($this->params as $k=>$v) {
 			if($keys = array_keys($execParams, ':'.$k, true)) {
@@ -398,6 +399,8 @@ class Query {
 				}
 			} else $execParams[$k] = $v;
 		}
+		foreach ($data as $k=>$v)
+			$execParams[$k] = $v;
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
 	}
