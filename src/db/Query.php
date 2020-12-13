@@ -15,16 +15,22 @@ class Query {
 	use \renovant\core\CoreTrait;
 
 	const EXP_DELIMITER = '|';
+	/** criteria params
+	 * @var array */
+	protected $criteria = [];
 	/** SQL criteria
 	 * @var array */
 	protected $criteriaSql = [];
 	/** SQL criteria exp
 	 * @var array */
 	protected $criteriaExp = [];
+	/** SQL data (for INSERT, UPDATE)
+	 * @var string */
+	protected $data;
 	/** Criteria Expression dictionary
 	 * @var array */
 	protected $dictionary = [];
-	/** SQL fields (for SELECT, INSERT, UPDATE)
+	/** SQL fields (for SELECT)
 	 * @var string */
 	protected $fields;
 	/** PDO instance ID
@@ -69,40 +75,39 @@ class Query {
 	/**
 	 * Set Query target: table, view, procedure
 	 * @param string $target SQL target
-	 * @param string|null $fields SQL fields (for SELECT, INSERT, UPDATE)
 	 * @return $this
 	 */
-	function on($target, $fields=null) {
+	function on(string $target) {
 		$this->PDOStatement = null;
 		$this->target = $target;
-		$this->fields = $fields;
 		return $this;
 	}
 
 	/**
 	 * Execute CALL statement
-	 * @param array $params
+	 * @param array $data
 	 * @return array|true|null output params if any
 	 */
-	function execCall(array $params=[]) {
-		$sql = '';
-		$outputParams = [];
-		if(!empty($this->fields)) {
-			$fields = explode(',',str_replace(' ','',$this->fields));
-			foreach($fields as $k=>$v){
-				$k++;
-				if($v[0]!='@') {
-					$sql .= ', :'.$v.'_'.$k;
-					$this->params[$v.'_'.$k] = ':'.$v;
-				} else {
-					$sql .= ', '.$v;
-					$outputParams[] = $v;
+	function execCall(array $data=[]) {
+		if(is_null($this->PDOStatement)) {
+			$sql = '';
+			$outputParams = [];
+			if(!empty($data)) {
+				foreach($data as $k=>$v){
+					if($v[0]!='@') {
+						$sql .= ', :'.$k;
+						$this->params[$k] = $v;
+					} else {
+						$sql .= ', '.$v;
+						$outputParams[] = $v;
+					}
 				}
+				$sql = substr($sql,2);
 			}
-			$sql = substr($sql,2);
+			$sql = sprintf('CALL %s(%s)', $this->target, $sql);
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		$sql = sprintf('CALL %s(%s)', $this->target, $sql);
-		$this->doExec($sql, $params)->rowCount();
+		$this->doExec()->rowCount();
 		if(empty($outputParams)) return true;
 		else {
 			$keys = [];
@@ -114,106 +119,117 @@ class Query {
 
 	/**
 	 * Execute COUNT statement
-	 * @param array $params PDO params
+	 * @param string $fields SQL fields
 	 * @return integer count result
 	 */
-	function execCount(array $params=[]) {
-		$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
-		if(!empty($this->groupBy)) {
-			$sql .= ' GROUP BY '.$this->groupBy;
-			if($this->withRollup) $sql .= ' WITH ROLLUP ';
+	function execCount(string $fields='*') {
+		if(is_null($this->PDOStatement)) {
+			$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', $fields, $this->target, $this->parseCriteria());
+			if(!empty($this->groupBy)) {
+				$sql .= ' GROUP BY '.$this->groupBy;
+				if($this->withRollup) $sql .= ' WITH ROLLUP ';
+			}
+			if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
+			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
-		if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-		return (int) $this->doExec($sql, $params)->fetchColumn();
+		return (int) $this->doExec()->fetchColumn();
 	}
 
 	/**
 	 * Execute DELETE statement
-	 * @param array $params PDO params
 	 * @return int n° of deleted rows
 	 */
-	function execDelete(array $params=[]) {
-		$sql = sprintf('DELETE FROM `%s` %s', $this->target, $this->parseCriteria());
-		if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-		if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
-		return (int) $this->doExec($sql, $params)->rowCount();
+	function execDelete() {
+		if(is_null($this->PDOStatement)) {
+			$sql = sprintf('DELETE FROM `%s` %s', $this->target, $this->parseCriteria());
+			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
+			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+		}
+		return (int) $this->doExec()->rowCount();
 	}
 
 	/**
 	 * Execute INSERT statement
-	 * @param array $params PDO params
+	 * @param array $data
 	 * @return int n° of inserted rows
 	 */
-	function execInsert(array $params) {
-		$sql1 = $sql2 = '';
-		$fields = explode(',',str_replace(' ','',$this->fields));
-		foreach($fields as $k=>$v) {
-			$k++;
-			$sql1 .= ', `'.$v.'`';
-			$sql2 .= ', :'.$v.'_'.$k;
-			$this->params[$v.'_'.$k] = ':'.$v;
+	function execInsert(array $data) {
+		if(is_null($this->PDOStatement)) {
+			$sql1 = $sql2 = '';
+			foreach($data as $k=>$v) {
+				$sql1 .= ', `'.$k.'`';
+				$sql2 .= ', :'.$k;
+				$this->params[$k] = $v;
+			}
+			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
-		return (int) $this->doExec($sql, $params)->rowCount();
+		return (int) $this->doExec()->rowCount();
 	}
 
 	/**
 	 * Execute INSERT .. ON DUPLICATE KEY UPDATE statement
-	 * @param array $params PDO params
+	 * @param array $data
 	 * @param array $keys table PRIMARY/UNIQUE keys
 	 * @return int n° of inserted rows
 	 */
-	function execInsertUpdate(array $params, array $keys) {
-		$sql1 = $sql2 = $sql3 = '';
-		$fields = explode(',',str_replace(' ','',$this->fields));
-		foreach($fields as $k=>$v) {
-			$k++;
-			$sql1 .= ', `'.$v.'`';
-			$sql2 .= ', :'.$v.'_'.$k;
-			$this->params[$v.'_'.$k] = ':'.$v;
-			if(!in_array($v, $keys)) {
-				$sql3 .= ', '.$v.' = :'.$v.'__'.$k;
-				$this->params[$v.'__'.$k] = ':'.$v;
+	function execInsertUpdate(array $data, array $keys) {
+		if(is_null($this->PDOStatement)) {
+			$sql1 = $sql2 = $sql3 = '';
+			foreach($data as $k=>$v) {
+				$sql1 .= ', `'.$k.'`';
+				$sql2 .= ', :'.$k;
+				$this->params[$k] = $v;
+				if(!in_array($k, $keys)) {
+					$sql3 .= ', '.$k.' = :_'.$k;
+					$this->params['_'.$k] = $v;
+				}
 			}
+			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
-		return (int) $this->doExec($sql, $params)->rowCount();
+		return (int) $this->doExec()->rowCount();
 	}
 
 	/**
 	 * Execute SELECT statement
-	 * @param array $params PDO params
+	 * @param string $fields SQL fields
 	 * @return \PDOStatement
 	 */
-	function execSelect(array $params=[]) {
-		$sql = sprintf('SELECT %s FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
-		if(!empty($this->groupBy)) {
-			$sql .= ' GROUP BY '.$this->groupBy;
-			if($this->withRollup) $sql .= ' WITH ROLLUP ';
+	function execSelect(string $fields='*') {
+		if(is_null($this->PDOStatement)) {
+			$sql = sprintf('SELECT %s FROM `%s` %s', $fields, $this->target, $this->parseCriteria());
+			if(!empty($this->groupBy)) {
+				$sql .= ' GROUP BY '.$this->groupBy;
+				if($this->withRollup) $sql .= ' WITH ROLLUP ';
+			}
+			if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
+			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
+			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
+			if(!empty($this->offset)) $sql .= ' OFFSET '.$this->offset;
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
-		if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-		if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
-		if(!empty($this->offset)) $sql .= ' OFFSET '.$this->offset;
-		return $this->doExec($sql, $params);
+		return $this->doExec();
 	}
 
 	/**
 	 * Execute UPDATE statement
-	 * @param array $params
+	 * @param array $data
 	 * @return int n° of rows deleted
 	 */
-	function execUpdate(array $params) {
-		$sql = '';
-		$fields = explode(',',str_replace(' ','',$this->fields));
-		foreach($fields as $k=>$v){
-			$k++;
-			$sql .= ', `'.$v.'` = :'.$v.'_'.$k;
-			$this->params[$v.'_'.$k] = ':'.$v;
+	function execUpdate(array $data) {
+		if(is_null($this->PDOStatement)) {
+			$sql = '';
+			foreach($data as $k=>$v){
+				$sql .= ', `'.$k.'` = :'.$k;
+				$this->params[$k] = $v;
+			}
+			$sql = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql,2), $this->parseCriteria());
+			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		$sql = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql,2), $this->parseCriteria());
-		return (int) $this->doExec($sql, $params)->rowCount();
+		return (int) $this->doExec()->rowCount();
 	}
 
 	function errorCode() {
@@ -225,7 +241,8 @@ class Query {
 	 * @param string $criteria
 	 * @return $this
 	 */
-	function criteria($criteria) {
+	function criteria(string $criteria) {
+		$this->PDOStatement = null;
 		if(!empty($criteria)) $this->criteriaSql[] = $criteria;
 		return $this;
 	}
@@ -235,7 +252,8 @@ class Query {
 	 * @param string $criteriaExp
 	 * @return $this
 	 */
-	function criteriaExp($criteriaExp) {
+	function criteriaExp(string $criteriaExp) {
+		$this->PDOStatement = null;
 		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, $criteriaExp));
 		return $this;
 	}
@@ -245,7 +263,7 @@ class Query {
 	 * @param string $groupBy
 	 * @return $this
 	 */
-	function groupBy($groupBy) {
+	function groupBy(string $groupBy) {
 		$this->PDOStatement = null;
 		$this->groupBy = $groupBy;
 		return $this;
@@ -256,7 +274,7 @@ class Query {
 	 * @param string $having
 	 * @return $this
 	 */
-	function having($having) {
+	function having(string $having) {
 		$this->PDOStatement = null;
 		$this->having = $having;
 		return $this;
@@ -264,10 +282,10 @@ class Query {
 
 	/**
 	 * Set LIMIT
-	 * @param integer $limit
+	 * @param integer|null $limit
 	 * @return $this
 	 */
-	function limit($limit) {
+	function limit(?int $limit) {
 		$this->PDOStatement = null;
 		$this->limit = (int)$limit;
 		return $this;
@@ -279,19 +297,30 @@ class Query {
 	 * @param integer $pageSize
 	 * @return $this
 	 */
-	function page($page, $pageSize) {
+	function page(int $page, int $pageSize) {
 		$this->PDOStatement = null;
-		$this->limit = (int)$pageSize;
-		$this->offset = (int) ($pageSize * $page - $pageSize);
+		$this->limit = $pageSize;
+		$this->offset = ($pageSize * $page - $pageSize);
+		return $this;
+	}
+
+	/**
+	 * Set PDO params
+	 * @param array $params
+	 * @return $this
+	 */
+	function params(array $params) {
+		$this->PDOStatement = null;
+		$this->params = $params;
 		return $this;
 	}
 
 	/**
 	 * Set OFFSET
-	 * @param integer $offset
+	 * @param integer|null $offset
 	 * @return $this
 	 */
-	function offset($offset) {
+	function offset(?int $offset) {
 		$this->PDOStatement = null;
 		$this->offset = (int)$offset;
 		return $this;
@@ -299,10 +328,10 @@ class Query {
 
 	/**
 	 * Set ORDER BY
-	 * @param string $orderBy
+	 * @param string|null $orderBy
 	 * @return $this
 	 */
-	function orderBy($orderBy) {
+	function orderBy(?string $orderBy) {
 		$this->PDOStatement = null;
 		$this->orderBy = $orderBy;
 		return $this;
@@ -310,10 +339,10 @@ class Query {
 
 	/**
 	 * Set ORDER BY Expression
-	 * @param string $orderByExp
+	 * @param string|null $orderByExp
 	 * @return $this
 	 */
-	function orderByExp($orderByExp) {
+	function orderByExp(?string $orderByExp) {
 		$this->PDOStatement = null;
 		$expArray = explode(self::EXP_DELIMITER, $orderByExp);
 		$orderBy = [];
@@ -358,20 +387,17 @@ class Query {
 
 	/**
 	 * Execute query
-	 * @param string $sql SQL statement
-	 * @param array $params PDO params
 	 * @return \PDOStatement
 	 */
-	protected function doExec($sql, array $params=[]) {
-		$execParams = $this->params;
-		foreach($params as $k=>$v) {
+	protected function doExec() {
+		$execParams = $this->criteria;
+		foreach($this->params as $k=>$v) {
 			if($keys = array_keys($execParams, ':'.$k, true)) {
 				foreach($keys as $key) {
 					$execParams[$key] = $v;
 				}
 			} else $execParams[$k] = $v;
 		}
-		if(is_null($this->PDOStatement)) $this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
 	}
@@ -501,7 +527,8 @@ class Query {
 					trigger_error(__METHOD__.' - invalid criteriaExp: '.$cExp, E_USER_ERROR);
 			}
 		}
-		$this->params = array_merge($this->params, $params);
+//		$this->params = array_merge($this->params, $params);
+		$this->criteria = $params;
 		return (empty($sql)) ? '' : 'WHERE '.implode(' AND ',$sql);
 	}
 }

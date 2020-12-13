@@ -2,7 +2,6 @@
 namespace test\db\orm;
 use renovant\core\sys,
 	renovant\core\acl\ACL,
-	renovant\core\context\Context,
 	renovant\core\db\orm\Repository,
 	test\acl\ACLTest;
 
@@ -45,6 +44,11 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
+	/**
+	 * @return object|null
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\container\ContainerException
+	 */
 	function testConstructor() {
 		$StatsRepository = sys::context()->container()->get('test.db.orm.StatsRepository');
 		$this->assertInstanceOf('renovant\core\db\orm\Repository', $StatsRepository);
@@ -66,6 +70,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testDelete(Repository $StatsRepository) {
 		// passing Entity
@@ -81,6 +86,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testDeleteAll(Repository $StatsRepository) {
 		$this->assertSame(4, $StatsRepository->deleteAll(null, null, 'year,EQ,2013'));
@@ -97,6 +103,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testFetch(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -118,6 +125,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testFetchOne(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -137,6 +145,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testFetchAll(Repository $StatsRepository) {
 		// FETCH_OBJ
@@ -157,6 +166,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testToArray(Repository $StatsRepository) {
 		// no subset
@@ -178,6 +188,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testInsert(Repository $StatsRepository) {
 		// INSERT null key & object
@@ -190,7 +201,6 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame(9.5, $Stats->score);
 
 		// INSERT null key & values
-		$Stats = new \test\db\orm\Stats;
 		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
 		$Stats = $StatsRepository->fetch(['FF', 2015]);
 		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
@@ -210,6 +220,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testUpdate(Repository $StatsRepository) {
 
@@ -226,7 +237,6 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame(11.0, $Stats->score);
 
 		// test without re-fetch
-		$Stats = $StatsRepository->fetch(['AA', 2014]);
 		$this->assertTrue($StatsRepository->update(['AA', 2014], ['score'=>4.2], true, false));
 	}
 }

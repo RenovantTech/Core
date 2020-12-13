@@ -26,7 +26,7 @@ class QueryRunner {
 	static function count($pdo, $class, $criteriaExp=null) {
 		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'), '*')
+			->on($Metadata->sql('source'))
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
 			->criteriaExp($criteriaExp);
@@ -46,7 +46,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$deleteFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure);
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -97,14 +97,14 @@ class QueryRunner {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'), $subset)
+			->on($Metadata->sql('source'))
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit(1)
 			->offset($offset);
-		if($data = $Query->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
+		if($data = $Query->execSelect($subset)->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
 				case Repository::FETCH_ARRAY:
 					$Entity = DataMapper::sql2array($data, $class);
@@ -135,14 +135,14 @@ class QueryRunner {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'), $subset)
+			->on($Metadata->sql('source'))
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit($limit)
 			->offset($offset);
-		$St = $Query->execSelect();
+		$St = $Query->execSelect($subset);
 		$entities = [];
 		while($data = $St->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
@@ -170,7 +170,7 @@ class QueryRunner {
 		if($insertFn = $Metadata->sql('insertFn')) {
 			$params = explode(',',str_replace(' ','',$insertFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure);
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -180,7 +180,7 @@ class QueryRunner {
 			return true;
 		} else {
 			$fields = implode(',', array_keys(array_filter($Metadata->properties(), function($p) { return !$p['readonly']; })));
-			$Query = (new Query($pdo))->on($Metadata->sql('target'), $fields);
+			$Query = (new Query($pdo))->on($Metadata->sql('target'));
 			if($Query->execInsert($data)==1) {
 				// fetch AUTO ID
 				if(count($Metadata->pkeys())==1 && isset($Metadata->properties()[$Metadata->pkeys()[0]]['autoincrement'])) {
@@ -205,7 +205,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$updateFn));
 			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure, implode(',',$params));
+			$Query = (new Query($pdo))->on($procedure);
 			$execParams = [];
 			foreach($params as $k){
 				if($k[0]!='@') $execParams[$k] = $data[$k];
@@ -216,7 +216,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
 			$Query = (new Query($pdo))
-				->on($Metadata->sql('target'), $fields)
+				->on($Metadata->sql('target'))
 				->criteriaExp($Metadata->pkCriteria($Entity));
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
