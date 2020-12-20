@@ -1,6 +1,7 @@
 <?php
 namespace test\db\orm;
-use renovant\core\db\orm\Metadata;
+use renovant\core\db\orm\OrmEvent,
+	renovant\core\db\orm\Metadata;
 
 class MetadataTest extends \PHPUnit\Framework\TestCase {
 
@@ -15,6 +16,12 @@ class MetadataTest extends \PHPUnit\Framework\TestCase {
 		$pkeys = $Metadata->pkeys();
 		$this->assertCount(1, $pkeys);
 		$this->assertContains('id', $pkeys);
+
+		// events
+		$this->assertTrue($Metadata->event(OrmEvent::EVENT_PRE_UPDATE));
+		$this->assertTrue($Metadata->event(OrmEvent::EVENT_POST_UPDATE));
+		$this->assertFalse($Metadata->event(OrmEvent::EVENT_PRE_FETCH));
+		$this->assertFalse($Metadata->event(OrmEvent::EVENT_POST_FETCH));
 
 		// criteria
 		$criteria = $Metadata->criteria();

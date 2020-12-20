@@ -29,6 +29,9 @@ class Metadata {
 	/** Custom criteriaExp definitions
 	 * @var array */
 	protected $criteria = [];
+	/** ORM events to launch
+	 * @var array */
+	protected $events = [];
 	/** Custom orderBy definitions
 	 * @var array */
 	protected $order = [];
@@ -75,6 +78,10 @@ class Metadata {
 
 	function sql($k) {
 		return isset($this->sql[$k]) ? $this->sql[$k] : null;
+	}
+
+	function event($eventName) {
+		return in_array($eventName, $this->events);
 	}
 
 	function fetchSubset($name) {

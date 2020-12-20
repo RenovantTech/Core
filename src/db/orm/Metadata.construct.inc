@@ -34,6 +34,14 @@ foreach($this->sql as $k=>$v) {
 	if(is_null($v)) throw new Exception(603, [$entityClass, $k]);
 }
 
+// ORM events
+if($DocComment->hasTag('orm-events')) {
+	$tagValues = $DocComment->getTagValues('orm-events');
+	foreach($tagValues as $value) {
+		foreach($value as $k => $v) $this->events[] = 'orm:'.strtolower($k);
+	}
+}
+
 // ORM criteria
 if($DocComment->hasTag('orm-criteria')) {
 	$tagValues = $DocComment->getTagValues('orm-criteria');
