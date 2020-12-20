@@ -90,12 +90,12 @@ class Query {
 			$outputParams = [];
 			if(!empty($params)) {
 				foreach($params as $k=>$v){
-					if($v[0]!='@') {
-						$sql .= ', :'.$k;
-					} else {
+					if(is_string($v) && $v[0]=='@') {
 						$sql .= ', '.$v;
 						$outputParams[] = $v;
 						unset($params[$k]);
+					} else {
+						$sql .= ', :'.$k;
 					}
 				}
 				$sql = substr($sql,2);
@@ -291,11 +291,11 @@ class Query {
 
 	/**
 	 * Set LIMIT & OFFSET
-	 * @param integer $page
-	 * @param integer $pageSize
+	 * @param integer|null $page
+	 * @param integer|null $pageSize
 	 * @return $this
 	 */
-	function page(int $page, int $pageSize) {
+	function page(?int $page, ?int $pageSize) {
 		$this->PDOStatement = null;
 		$this->limit = $pageSize;
 		$this->offset = ($pageSize * $page - $pageSize);
