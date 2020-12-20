@@ -20,10 +20,10 @@ class QueryRunner {
 	/**
 	 * @param string $pdo
 	 * @param string $class
-	 * @param string $criteriaExp
+	 * @param string|null $criteriaExp
 	 * @return int
 	 */
-	static function count($pdo, $class, $criteriaExp=null) {
+	static function count(string $pdo, string $class, ?string $criteriaExp=null) {
 		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo))
 			->on($Metadata->sql('source'))
@@ -37,10 +37,10 @@ class QueryRunner {
 	 * @param string $pdo
 	 * @param string $class
 	 * @param object $Entity
-	 * @param string $criteriaExp
+	 * @param string|null $criteriaExp
 	 * @return boolean
 	 */
-	static function deleteOne($pdo, $class, $Entity, $criteriaExp=null) {
+	static function deleteOne(string $pdo, string $class, object $Entity, ?string $criteriaExp=null) {
 		$Metadata = Metadata::get($class);
 		if($deleteFn = $Metadata->sql('deleteFn')) {
 			$data = DataMapper::object2sql($Entity);
@@ -65,12 +65,12 @@ class QueryRunner {
 	/**
 	 * @param string $pdo
 	 * @param string $class
-	 * @param integer $limit
-	 * @param string $orderExp
-	 * @param string $criteriaExp
+	 * @param integer|null $limit
+	 * @param string|null $orderExp
+	 * @param string|null $criteriaExp
 	 * @return integer
 	 */
-	static function deleteAll($pdo, $class, $limit, $orderExp, $criteriaExp) {
+	static function deleteAll(string $pdo, string $class, ?int $limit, ?string $orderExp, ?string $criteriaExp) {
 		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo))
 			->on($Metadata->sql('target'))
@@ -85,26 +85,26 @@ class QueryRunner {
 	/**
 	 * @param string $pdo
 	 * @param string $class
-	 * @param integer $offset
-	 * @param string $orderExp
-	 * @param string $criteriaExp
+	 * @param int|null $offset
+	 * @param string|null $orderExp
+	 * @param string|null $criteriaExp
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|false
 	 * @throws \Exception
 	 */
-	static function fetchOne($pdo, $class, $offset, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
+	static function fetchOne(string $pdo, string $class, ?int $offset, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'))
+			->on($Metadata->sql('source'), $subset)
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit(1)
 			->offset($offset);
-		if($data = $Query->execSelect($subset)->fetch(\PDO::FETCH_ASSOC)) {
+		if($data = $Query->execSelect()->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
 				case Repository::FETCH_ARRAY:
 					$Entity = DataMapper::sql2array($data, $class);
@@ -122,27 +122,27 @@ class QueryRunner {
 	/**
 	 * @param string $pdo
 	 * @param string $class
-	 * @param integer $offset
-	 * @param integer $limit
-	 * @param string $orderExp
-	 * @param string $criteriaExp
+	 * @param int|null $offset
+	 * @param integer|null $limit
+	 * @param string|null $orderExp
+	 * @param string|null $criteriaExp
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 * @throws \Exception
 	 */
-	static function fetchAll($pdo, $class, $offset, $limit, $orderExp, $criteriaExp, $fetchMode=Repository::FETCH_OBJ, $fetchSubset=null) {
+	static function fetchAll(string $pdo, string $class, ?int $offset, ?int $limit, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
 		$Metadata = Metadata::get($class);
 		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'))
+			->on($Metadata->sql('source'), $subset)
 			->setCriteriaDictionary($Metadata->criteria())
 			->setOrderByDictionary($Metadata->order())
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit($limit)
 			->offset($offset);
-		$St = $Query->execSelect($subset);
+		$St = $Query->execSelect();
 		$entities = [];
 		while($data = $St->fetch(\PDO::FETCH_ASSOC)) {
 			switch($fetchMode) {
@@ -164,7 +164,7 @@ class QueryRunner {
 	 * @param object $Entity
 	 * @return boolean
 	 */
-	static function insert($pdo, $Entity) {
+	static function insert(string $pdo, object $Entity) {
 		$Metadata = Metadata::get($Entity);
 		$data = DataMapper::object2sql($Entity);
 		if($insertFn = $Metadata->sql('insertFn')) {
@@ -180,7 +180,7 @@ class QueryRunner {
 			return true;
 		} else {
 			$fields = implode(',', array_keys(array_filter($Metadata->properties(), function($p) { return !$p['readonly']; })));
-			$Query = (new Query($pdo))->on($Metadata->sql('target'));
+			$Query = (new Query($pdo))->on($Metadata->sql('target'), $fields);
 			if($Query->execInsert($data)==1) {
 				// fetch AUTO ID
 				if(count($Metadata->pkeys())==1 && isset($Metadata->properties()[$Metadata->pkeys()[0]]['autoincrement'])) {
@@ -199,7 +199,7 @@ class QueryRunner {
 	 * @param array $changes
 	 * @return boolean
 	 */
-	static function update($pdo, $Entity, $changes) {
+	static function update(string $pdo, object $Entity, array $changes) {
 		$Metadata = Metadata::get($Entity);
 		if($updateFn = $Metadata->sql('updateFn')) {
 			$data = DataMapper::object2sql($Entity);
@@ -216,7 +216,7 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
 			$Query = (new Query($pdo))
-				->on($Metadata->sql('target'))
+				->on($Metadata->sql('target'), $fields)
 				->criteriaExp($Metadata->pkCriteria($Entity));
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
