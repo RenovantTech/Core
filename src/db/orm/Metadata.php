@@ -104,10 +104,10 @@ class Metadata {
 		static $cache = [];
 		if(is_object($entity)) $entity = get_class($entity);
 		if(isset($cache[$entity])) return $cache[$entity];
-		$k = $entity.'#ORM-metadata';
+		$k = str_replace('\\','.',$entity).':orm:metadata';
 		if(!$cache[$entity] = sys::cache(SYS_CACHE)->get($k)) {
 			$cache[$entity] = new Metadata($entity);
-			sys::cache(SYS_CACHE)->set($k, $cache[$entity], null, 'ORM-metadata');
+			sys::cache(SYS_CACHE)->set($k, $cache[$entity], null, 'orm:metadata');
 		}
 		return $cache[$entity];
 	}

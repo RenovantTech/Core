@@ -45,6 +45,7 @@ class Repository {
 		$this->class = $class;
 		$this->pdo = $pdo;
 		class_exists($class);
+		Metadata::get($class);
 		$this->_onInit = new \ReflectionMethod($class, 'onInit');
 		$this->_onInit->setAccessible(true);
 		$this->_onSave = new \ReflectionMethod($class, 'onSave');
@@ -59,6 +60,7 @@ class Repository {
 
 	function __wakeup() {
 		class_exists($this->class);
+		Metadata::get($this->class);
 		$this->_onInit = new \ReflectionMethod($this->class, 'onInit');
 		$this->_onInit->setAccessible(true);
 		$this->_onSave = new \ReflectionMethod($this->class, 'onSave');
@@ -461,5 +463,6 @@ class Repository {
 		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
 	}
 }
+class_exists('renovant\core\db\orm\Metadata');
 class_exists('renovant\core\db\orm\util\DataMapper');
 class_exists('renovant\core\db\orm\util\QueryRunner');
