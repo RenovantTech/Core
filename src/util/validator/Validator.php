@@ -46,7 +46,7 @@ class Validator {
 		static $cache = [];
 		$class = get_class($Object);
 		if(isset($cache[$class])) return $cache[$class];
-		$k = '#'.$class.'#validator';
+		$k = str_replace('\\','.',$class).':util:validator';
 		if(!$cache[$class] = sys::cache(SYS_CACHE)->get($k)) {
 			$cache[$class] = (new ClassParser)->parse($class);
 			sys::cache(SYS_CACHE)->set($k, $cache[$class], null, 'validator');
