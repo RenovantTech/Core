@@ -135,7 +135,7 @@ class sys {
 	 */
 	static function init($namespace='sys') {
 		self::$traceFn = __METHOD__;
-		self::trace(LOG_DEBUG, T_INFO);
+		self::trace();
 		set_exception_handler(__NAMESPACE__.'\trace\Tracer::onException');
 		set_error_handler(__NAMESPACE__.'\trace\Tracer::onError');
 		register_shutdown_function(__CLASS__.'::shutdown');
@@ -178,7 +178,7 @@ class sys {
 		defined(__NAMESPACE__.'\trace\TRACE_END_TIME') or define(__NAMESPACE__.'\trace\TRACE_END_TIME',microtime(1));
 		ini_restore('precision');
 		self::$traceFn = __METHOD__;
-		self::trace(LOG_DEBUG, T_INFO);
+		self::trace();
 		foreach (self::$pdo as $PDO)
 			if($PDO->inTransaction()) $PDO->rollBack();
 		register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
@@ -282,10 +282,11 @@ class sys {
 	 * __autoload() implementation
 	 * @param string $class class name
 	 */
-	static function autoload($class) {
+	static function autoload(string $class) {
 		if(@file_exists($file = self::info($class, self::INFO_PATH).'.php')) {
 			self::trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
 			require($file);
+			if(in_array(\renovant\core\db\orm\EntityTrait::class, class_uses($class))) call_user_func($class.'::metadata');
 			if(class_exists($class,0) || interface_exists($class,0) || trait_exists($class,0)) return;
 		}
 		trigger_error('FAILED loading '.$class, E_USER_ERROR);
@@ -363,7 +364,7 @@ class sys {
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	static function event($eventName, $EventOrParams=null): Event {
+	static function event(string $eventName, $EventOrParams=null): Event {
 		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
 	}
 
@@ -373,7 +374,7 @@ class sys {
 	 * @param int|null $return
 	 * @return array|string|false
 	 */
-	static function info($path, $return=null) {
+	static function info(string $path, $return=null) {
 		$path= str_replace('.', '\\', $path);
 		if(false === $i = strrpos($path, '\\')) {
 			$namespace = null;
@@ -391,11 +392,11 @@ class sys {
 			}
 		}
 		switch ($return) {
-			case self::INFO_NAMESPACE: return $namespace; break;
-			case self::INFO_CLASS: return $class; break;
-			case self::INFO_PATH: return $realPath; break;
-			case self::INFO_PATH_DIR: return dirname($realPath); break;
-			case self::INFO_PATH_FILE: return basename($realPath); break;
+			case self::INFO_NAMESPACE: return $namespace;
+			case self::INFO_CLASS: return $class;
+			case self::INFO_PATH: return $realPath;
+			case self::INFO_PATH_DIR: return dirname($realPath);
+			case self::INFO_PATH_FILE: return basename($realPath);
 			default: return [$namespace, $class, dirname($realPath), basename($realPath)];
 		}
 	}
@@ -404,9 +405,9 @@ class sys {
 	 * System log helper
 	 * @param string $message log message
 	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
-	 * @param string $facility optional log facility, default NULL
+	 * @param null $facility optional log facility, default NULL
 	 */
-	static function log($message, $level=LOG_INFO, $facility=null) {
+	static function log(string $message, $level=LOG_INFO, $facility=null) {
 		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}

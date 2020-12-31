@@ -6,7 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\db\orm\util;
-use renovant\core\db\orm\Metadata,
+use renovant\core\db\orm\Repository,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
 /**
@@ -22,12 +22,10 @@ class DataMapper {
 	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2array($Entity, $fetchSubset=null) {
-		$Metadata = Metadata::get($Entity);
-		$prop = $Metadata->properties();
+	static function object2array(object $Entity, $fetchSubset=null) {
 		$data = [];
-		foreach($prop as $k=>$v) {
-			if($fetchSubset && strstr($Metadata->fetchSubset($fetchSubset),$k)===false) continue;
+		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
+			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset), $k)===false) continue;
 			$data[$k] = $Entity->$k;
 		}
 		return $data;
@@ -39,12 +37,10 @@ class DataMapper {
 	 * @param string|null $fetchSubset
 	 * @return array
 	 */
-	static function object2json($Entity, $fetchSubset=null) {
-		$Metadata = Metadata::get($Entity);
-		$prop = $Metadata->properties();
+	static function object2json(object $Entity, $fetchSubset=null) {
 		$data = [];
-		foreach($prop as $k=>$v) {
-			if($fetchSubset && strstr($Metadata->fetchSubset($fetchSubset),$k)===false) continue;
+		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
+			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset),$k)===false) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':
@@ -67,12 +63,11 @@ class DataMapper {
 	 * @param array $changes changed values on update
 	 * @return array
 	 */
-	static function object2sql($Entity, array $changes=[]) {
-		$prop = Metadata::get($Entity)->properties();
+	static function object2sql(object $Entity, array $changes=[]) {
 		$data = [];
-		foreach($prop as $k=>$v) {
+		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
 			if($changes && !in_array($k, $changes)) continue;
-			if($prop[$k]['readonly']) continue;
+			if($Entity::metadata(Repository::META_PROPS)[$k]['readonly']) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':
@@ -96,15 +91,12 @@ class DataMapper {
 	 * @return array
 	 * @throws \Exception
 	 */
-	static function sql2array(array $data, $class) {
-		$prop = Metadata::get($class)->properties();
+	static function sql2array(array $data, string $class) {
+		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
 		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && is_null($v)) continue;
-			switch($prop[$k]['type']) {
+			if(!isset($props[$k])) continue;
+			if($props[$k]['null'] && is_null($v)) continue;
+			switch($props[$k]['type']) {
 				case 'string': break;
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
@@ -124,15 +116,12 @@ class DataMapper {
 	 * @param string $class
 	 * @return array
 	 */
-	static function sql2json(array $data, $class) {
-		$prop = Metadata::get($class)->properties();
+	static function sql2json(array $data, string $class) {
+		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
 		foreach($data as $k=>&$v) {
-			if(!isset($prop[$k])) {
-				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
-				continue;
-			}
-			if($prop[$k]['null'] && is_null($v)) continue;
-			switch($prop[$k]['type']) {
+			if(!isset($props[$k])) continue;
+			if($props[$k]['null'] && is_null($v)) continue;
+			switch($props[$k]['type']) {
 				case 'date':
 				case 'string': break;
 				case 'integer': $v = (int) $v; break;

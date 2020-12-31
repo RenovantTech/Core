@@ -8,7 +8,6 @@
 namespace renovant\core\db\orm\util;
 use renovant\core\sys,
 	renovant\core\db\Query,
-	renovant\core\db\orm\Metadata,
 	renovant\core\db\orm\Repository;
 /**
  * ORM QueryRunner
@@ -24,11 +23,10 @@ class QueryRunner {
 	 * @return int
 	 */
 	static function count(string $pdo, string $class, ?string $criteriaExp=null) {
-		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'))
-			->setCriteriaDictionary($Metadata->criteria())
-			->setOrderByDictionary($Metadata->order())
+			->on(call_user_func($class.'::metadata', Repository::META_SQL, 'source'))
+			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
+			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
 			->criteriaExp($criteriaExp);
 		return (int) $Query->execCount();
 	}
@@ -41,8 +39,7 @@ class QueryRunner {
 	 * @return boolean
 	 */
 	static function deleteOne(string $pdo, string $class, object $Entity, ?string $criteriaExp=null) {
-		$Metadata = Metadata::get($class);
-		if($deleteFn = $Metadata->sql('deleteFn')) {
+		if($deleteFn = call_user_func($class.'::metadata', Repository::META_SQL, 'deleteFn')) {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$deleteFn));
 			$procedure = array_shift($params);
@@ -55,8 +52,8 @@ class QueryRunner {
 			return true;
 		} else {
 			$Query = (new Query($pdo))
-				->on($Metadata->sql('target'))
-				->criteriaExp($Metadata->pkCriteria($Entity))
+				->on(call_user_func($class.'::metadata', Repository::META_SQL, 'target'))
+				->criteriaExp(call_user_func($class.'::metadata', Repository::META_PKCRITERIA, $Entity))
 				->criteriaExp($criteriaExp);
 			return $Query->execDelete()==1 && $Query->errorCode()=='000000';
 		}
@@ -71,11 +68,10 @@ class QueryRunner {
 	 * @return integer
 	 */
 	static function deleteAll(string $pdo, string $class, ?int $limit, ?string $orderExp, ?string $criteriaExp) {
-		$Metadata = Metadata::get($class);
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('target'))
-			->setCriteriaDictionary($Metadata->criteria())
-			->setOrderByDictionary($Metadata->order())
+			->on(call_user_func($class.'::metadata', Repository::META_SQL, 'target'))
+			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
+			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit($limit);
@@ -94,12 +90,11 @@ class QueryRunner {
 	 * @throws \Exception
 	 */
 	static function fetchOne(string $pdo, string $class, ?int $offset, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
-		$Metadata = Metadata::get($class);
-		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
+		$subset = ($fetchSubset) ? call_user_func($class.'::metadata', Repository::META_FETCH_SUBSETS, $fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'), $subset)
-			->setCriteriaDictionary($Metadata->criteria())
-			->setOrderByDictionary($Metadata->order())
+			->on(call_user_func($class.'::metadata', Repository::META_SQL, 'source'), $subset)
+			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
+			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit(1)
@@ -132,12 +127,11 @@ class QueryRunner {
 	 * @throws \Exception
 	 */
 	static function fetchAll(string $pdo, string $class, ?int $offset, ?int $limit, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
-		$Metadata = Metadata::get($class);
-		$subset = ($fetchSubset) ? $Metadata->fetchSubset($fetchSubset) : '*';
+		$subset = ($fetchSubset) ? call_user_func($class.'::metadata', Repository::META_FETCH_SUBSETS, $fetchSubset) : '*';
 		$Query = (new Query($pdo))
-			->on($Metadata->sql('source'), $subset)
-			->setCriteriaDictionary($Metadata->criteria())
-			->setOrderByDictionary($Metadata->order())
+			->on(call_user_func($class.'::metadata', Repository::META_SQL, 'source'), $subset)
+			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
+			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
 			->orderByExp($orderExp)
 			->criteriaExp($criteriaExp)
 			->limit($limit)
@@ -165,9 +159,8 @@ class QueryRunner {
 	 * @return boolean
 	 */
 	static function insert(string $pdo, object $Entity) {
-		$Metadata = Metadata::get($Entity);
 		$data = DataMapper::object2sql($Entity);
-		if($insertFn = $Metadata->sql('insertFn')) {
+		if($insertFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'insertFn')) {
 			$params = explode(',',str_replace(' ','',$insertFn));
 			$procedure = array_shift($params);
 			$Query = (new Query($pdo))->on($procedure);
@@ -179,12 +172,14 @@ class QueryRunner {
 			foreach($pkeys as $k=>$v) $Entity->$k = $v;
 			return true;
 		} else {
-			$fields = implode(',', array_keys(array_filter($Metadata->properties(), function($p) { return !$p['readonly']; })));
-			$Query = (new Query($pdo))->on($Metadata->sql('target'), $fields);
+			$fields = implode(',', array_keys(array_filter(call_user_func(get_class($Entity).'::metadata', Repository::META_PROPS), function($p) { return !$p['readonly']; })));
+			$Query = (new Query($pdo))->on(call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'target'), $fields);
 			if($Query->execInsert($data)==1) {
 				// fetch AUTO ID
-				if(count($Metadata->pkeys())==1 && isset($Metadata->properties()[$Metadata->pkeys()[0]]['autoincrement'])) {
-					$k = $Metadata->pkeys()[0];
+				$pkeys = call_user_func(get_class($Entity).'::metadata', Repository::META_PKEYS);
+
+				if(count($pkeys)==1 && isset(call_user_func(get_class($Entity).'::metadata', Repository::META_PROPS, $pkeys[0])['autoincrement'])) {
+					$k = $pkeys[0];
 					$v = (int)sys::pdo($pdo)->lastInsertId();
 					$Entity->$k =$v;
 				}
@@ -200,8 +195,7 @@ class QueryRunner {
 	 * @return boolean
 	 */
 	static function update(string $pdo, object $Entity, array $changes) {
-		$Metadata = Metadata::get($Entity);
-		if($updateFn = $Metadata->sql('updateFn')) {
+		if($updateFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'updateFn')) {
 			$data = DataMapper::object2sql($Entity);
 			$params = explode(',',str_replace(' ','',$updateFn));
 			$procedure = array_shift($params);
@@ -216,8 +210,8 @@ class QueryRunner {
 			$data = DataMapper::object2sql($Entity, array_keys($changes));
 			$fields = implode(',', array_keys($changes));
 			$Query = (new Query($pdo))
-				->on($Metadata->sql('target'), $fields)
-				->criteriaExp($Metadata->pkCriteria($Entity));
+				->on(call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'target'), $fields)
+				->criteriaExp(call_user_func(get_class($Entity).'::metadata', Repository::META_PKCRITERIA, $Entity));
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
 	}
