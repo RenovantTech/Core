@@ -191,17 +191,24 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testInsert(Repository $StatsRepository) {
-		// INSERT null key & object
+		// INSERT object
 		$Stats = new \test\db\orm\Stats(['code'=>'EE', 'year'=>2015, 'score'=>9.5]);
-		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(null, $Stats));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert($Stats));
 		$Stats = $StatsRepository->fetch(['EE', 2015]);
 		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('EE', $Stats->code);
 		$this->assertSame(2015, $Stats->year);
 		$this->assertSame(9.5, $Stats->score);
+	}
 
+	/**
+	 * @depends testConstructor
+	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
+	 */
+	function testInsertOne(Repository $StatsRepository) {
 		// INSERT null key & values
-		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insertOne(null, [ 'code'=>'FF', 'year'=>2015, 'score'=>8.4 ]));
 		$Stats = $StatsRepository->fetch(['FF', 2015]);
 		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('FF', $Stats->code);
@@ -209,7 +216,7 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame(8.4, $Stats->score);
 
 		// INSERT key & values
-		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insert(['HH', 2015], [ 'score'=>null ]));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->insertOne(['HH', 2015], [ 'score'=>null ]));
 		$Stats = $StatsRepository->fetch(['HH', 2015]);
 		$this->assertInstanceOf('test\db\orm\Stats', $Stats);
 		$this->assertSame('HH', $Stats->code);
@@ -223,20 +230,25 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 	 * @throws \renovant\core\db\orm\Exception
 	 */
 	function testUpdate(Repository $StatsRepository) {
-
-		// 1 - change Entity directly
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$Stats->score = 12;
-		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->update(['AA', 2013], $Stats));
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->update($Stats));
 		$Stats = $StatsRepository->fetch(['AA', 2013]);
 		$this->assertSame(12.0, $Stats->score);
+	}
 
-		// 2 - pass new values array
-		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->update(['BB',2013], ['score'=>11]));
+	/**
+	 * @depends testConstructor
+	 * @param Repository $StatsRepository
+	 * @throws \renovant\core\db\orm\Exception
+	 */
+	function testUpdateOne(Repository $StatsRepository) {
+		// pass new values array
+		$this->assertInstanceOf('test\db\orm\Stats', $StatsRepository->updateOne(['BB',2013], ['score'=>11]));
 		$Stats = $StatsRepository->fetch(['BB', 2013]);
 		$this->assertSame(11.0, $Stats->score);
 
 		// test without re-fetch
-		$this->assertTrue($StatsRepository->update(['AA', 2014], ['score'=>4.2], true, false));
+		$this->assertTrue($StatsRepository->updateOne(['AA', 2014], ['score'=>4.2], true, false));
 	}
 }

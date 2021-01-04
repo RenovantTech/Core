@@ -367,18 +367,18 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 		// skip validation on "age"
 		$data = ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10];
-		$User = $UsersRepository->insert(null, $data, 'main');
+		$User = $UsersRepository->insertOne(null, $data, 'main');
 		$this->assertInstanceOf('test\db\orm\User', $User);
 
 		// skip validation on "name"
 		$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>20];
-		$User = $UsersRepository->insert(null, $data, 'extra');
+		$User = $UsersRepository->insertOne(null, $data, 'extra');
 		$this->assertInstanceOf('test\db\orm\User', $User);
 
 		// skip validation on "age", exception on "name"
 		try {
 			$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>10];
-			$UsersRepository->insert(null, $data, 'main');
+			$UsersRepository->insertOne(null, $data, 'main');
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: name', $Ex->getMessage());
@@ -388,7 +388,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		// skip validation on "name", exception on "age"
 		try {
 			$data = ['name'=>'Ugo', 'surname'=>'Orange', 'age'=>10];
-			$UsersRepository->insert(null, $data, 'extra');
+			$UsersRepository->insertOne(null, $data, 'extra');
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
@@ -404,9 +404,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	function testInsert(Repository $UsersRepository) {
 		$lastTime = new DateTime();
 
-		// INSERT null key & object
+		// INSERT object
 		$User9 = new \test\db\orm\User(['name'=>'Zack', 'surname'=>'Orange', 'lastTime'=>$lastTime, 'email'=>'test@example.com', 'updatedAt'=>date_create('2000-01-01 00:00:00')]);
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(null, $User9));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert($User9));
 		$User9 = $UsersRepository->fetch(9);
 		$this->assertInstanceOf('test\db\orm\User', $User9);
 		$this->assertSame(9, $User9->id);
@@ -417,27 +417,38 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals($lastTime->format('Y-m-d H:i:s'), $User9->lastTime->format('Y-m-d H:i:s'));
 		$this->assertNotEquals('2000-01-01 00:00:00', $User9->updatedAt->format('Y-m-d H:i:s'));
 
-		// INSERT null key & values
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
-		$User10 = $UsersRepository->fetch(10);
-		$this->assertInstanceOf('test\db\orm\User', $User10);
-		$this->assertSame(10, $User10->id);
-		$this->assertSame('Chao', $User10->name);
-		$this->assertSame('Xing', $User10->surname);
-		$this->assertNull($User10->lastTime);
-
-		// INSERT key & object
-		$User21 = new \test\db\orm\User([ 'name'=>'Zack', 'surname'=>'Johnson', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ]);
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(21, $User21));
+		// INSERT object with key
+		$User21 = new \test\db\orm\User([ 'id'=>21, 'name'=>'Zack', 'surname'=>'Johnson', 'email'=>'test@example.com', 'lastTime'=>date_create('2012-03-18 14:25:36') ]);
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert($User21));
 		$User21 = $UsersRepository->fetch(21);
 		$this->assertInstanceOf('test\db\orm\User', $User21);
 		$this->assertSame(21, $User21->id);
 		$this->assertSame('Zack', $User21->name);
 		$this->assertSame('Johnson', $User21->surname);
 		$this->assertSame('2012-03-18 14:25:36', $User21->lastTime->format('Y-m-d H:i:s'));
+	}
+
+
+	/**
+	 * @depends testConstructor
+	 * @param Repository $UsersRepository
+	 * @throws Exception
+	 */
+	function testInsertOne(Repository $UsersRepository) {
+		$lastTime = new DateTime();
+
+		// INSERT null key & values
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insertOne(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
+		$User9 = $UsersRepository->fetch(9);
+		$this->assertInstanceOf('test\db\orm\User', $User9);
+		$this->assertSame(9, $User9->id);
+		$this->assertSame('Chao', $User9->name);
+		$this->assertSame('Xing', $User9->surname);
+		$this->assertNull($User9->lastTime);
+
 
 		// INSERT key & values
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insertOne(22, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>null ]));
 		$User22 = $UsersRepository->fetch(22);
 		$this->assertInstanceOf('test\db\orm\User', $User22);
 		$this->assertSame(22, $User22->id);
@@ -447,21 +458,21 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 		// test FETCH MODES
 
-		$this->assertTrue($UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, false));
+		$this->assertTrue($UsersRepository->insertOne(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, false));
 
-		$User = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_OBJ);
+		$User = $UsersRepository->insertOne(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_OBJ);
 		$this->assertInstanceOf('test\db\orm\User', $User);
 		$this->assertSame(24, $User->id);
 		$this->assertSame('Chao', $User->name);
 		$this->assertSame('2012-03-18 14:25:36', $User->lastTime->format('Y-m-d H:i:s'));
 
-		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_ARRAY);
+		$data = $UsersRepository->insertOne(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_ARRAY);
 		$this->assertIsArray($data);
 		$this->assertSame(25, $data['id']);
 		$this->assertSame('Chao', $data['name']);
 		$this->assertSame('2012-03-18 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
-		$data = $UsersRepository->insert(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_JSON);
+		$data = $UsersRepository->insertOne(null, [ 'name'=>'Chao', 'surname'=>'Xing', 'email'=>'test@example.com', 'lastTime'=>'2012-03-18 14:25:36' ], true, Repository::FETCH_JSON);
 		$this->assertIsArray($data);
 		$this->assertSame(26, $data['id']);
 		$this->assertSame('Chao', $data['name']);
@@ -476,14 +487,14 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	function testInsertException(Repository $UsersRepository) {
 		$lastTime = new DateTime();
 		try {
-			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+			$UsersRepository->insertOne(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'test@', 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
 			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
 		}
 		try {
-			$UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
+			$UsersRepository->insertOne(null, ['name'=>'Zack', 'surname'=>'Orange', 'age'=>10, 'lastTime'=>$lastTime, 'updatedAt'=>'2000-01-01 00:00:00']);
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: age', $Ex->getMessage());
@@ -497,9 +508,10 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @throws Exception
 	 */
 	function testInsertWithEmptyNull(Repository $UsersRepository) {
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'', 'lastTime'=>'', 'updatedAt'=>'2000-01-01 00:00:00']));
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insert(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>null, 'lastTime'=>null, 'updatedAt'=>'2000-01-01 00:00:00']));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insertOne(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>'', 'lastTime'=>'', 'updatedAt'=>'2000-01-01 00:00:00']));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->insertOne(null, ['name'=>'Zack', 'surname'=>'Orange', 'email'=>null, 'lastTime'=>null, 'updatedAt'=>'2000-01-01 00:00:00']));
 	}
+
 
 	/**
 	 * @depends testConstructor
@@ -507,38 +519,44 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @throws Exception
 	 */
 	function testUpdate(Repository $UsersRepository) {
-
-		// 1 - change Entity directly
 		$User1 = $UsersRepository->fetch(1);
 		$User1->surname = 'Brown2';
 		$User1->updatedAt = '2000-01-01 00:00:00';
 		$User1->lastTime = null;
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update(1, $User1));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update($User1));
 		$User1 = $UsersRepository->fetch(1);
 		$this->assertSame('Brown2', $User1->surname);
 		$this->assertSame(7.5, $User1->score);
 		$this->assertNotEquals('2000-01-01 00:00:00', $User1->updatedAt->format('Y-m-d H:i:s'));
 		$this->assertNull($User1->lastTime);
+	}
 
-		// 2 - pass new values array
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update(2, ['surname'=>'Yellow2']));
+	/**
+	 * @depends testConstructor
+	 * @param Repository $UsersRepository
+	 * @throws Exception
+	 */
+	function testUpdateOne(Repository $UsersRepository) {
+
+		// 1 - pass new values array
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->updateOne(2, ['surname'=>'Yellow2']));
 		$User2 = $UsersRepository->fetch(2);
 		$this->assertSame('Yellow2', $User2->surname);
 		$this->assertSame(8.1, $User2->score);
 
-		// 3 - skipped update (same values)
-		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update(2, ['surname'=>'Yellow2']));
+		// 2 - skipped update (same values)
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->updateOne(2, ['surname'=>'Yellow2']));
 
 		// test FETCH MODES
 
-		$this->assertTrue($UsersRepository->update(6, ['name'=>'Franz2', 'lastTime'=>'2012-03-18 14:25:36'], true, false));
+		$this->assertTrue($UsersRepository->updateOne(6, ['name'=>'Franz2', 'lastTime'=>'2012-03-18 14:25:36'], true, false));
 
-		$data = $UsersRepository->update(6, [ 'name'=>'Franz3', 'lastTime'=>'2012-03-31 14:25:36' ], true, Repository::FETCH_ARRAY);
+		$data = $UsersRepository->updateOne(6, [ 'name'=>'Franz3', 'lastTime'=>'2012-03-31 14:25:36' ], true, Repository::FETCH_ARRAY);
 		$this->assertIsArray($data);
 		$this->assertSame('Franz3', $data['name']);
 		$this->assertSame('2012-03-31 14:25:36', $data['lastTime']->format('Y-m-d H:i:s'));
 
-		$data = $UsersRepository->update(6, [ 'name'=>'Franz4', 'lastTime'=>'2012-02-02 16:10:36' ], true, Repository::FETCH_JSON);
+		$data = $UsersRepository->updateOne(6, [ 'name'=>'Franz4', 'lastTime'=>'2012-02-02 16:10:36' ], true, Repository::FETCH_JSON);
 		$this->assertIsArray($data);
 		$this->assertSame('Franz4', $data['name']);
 		$this->assertSame('2012-02-02T16:10:36+00:00', $data['lastTime']);
@@ -551,14 +569,14 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 */
 	function testUpdateException(Repository $UsersRepository) {
 		try {
-			$UsersRepository->update(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@']);
+			$UsersRepository->updateOne(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@']);
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: email', $Ex->getMessage());
 			$this->assertEquals([ 'email'=>'email'], $Ex->getData());
 		}
 		try {
-			$UsersRepository->insert(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@', 'age'=>10]);
+			$UsersRepository->insertOne(1, ['name'=>'Albert2', 'surname'=>'Brown2', 'email'=>'test@', 'age'=>10]);
 		} catch(Exception $Ex) {
 			$this->assertEquals(500, $Ex->getCode());
 			$this->assertEquals('VALIDATION error: age, email', $Ex->getMessage());

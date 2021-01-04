@@ -154,7 +154,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function fetch($id, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function fetch($id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
 		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -170,7 +170,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function fetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		if($offset) $offset--;
 		return $this->execFetchOne($offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -187,15 +187,14 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function fetchAll($page=null, $pageSize=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
 		return $this->execFetchAll($offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
 	/**
 	 * Insert Entity into DB
-	 * @param mixed $id primary key(s)
-	 * @param array|object $data new Entity data, or Entity object
+	 * @param object $Entity
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
@@ -203,14 +202,28 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function insert($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function insert(object $Entity, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+		return $this->execInsertOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
+	}
+
+	/**
+	 * Insert raw data into DB
+	 * @param mixed $id primary key(s)
+	 * @param array $data new Entity data
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
+	 */
+	function insertOne($id, array $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
+
 	}
 
 	/**
 	 * Update Entity into DB
-	 * @param mixed $id primary key(s)
-	 * @param array|object $data new Entity data, or Entity object
+	 * @param object $Entity
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
@@ -218,7 +231,22 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function update($id, $data=[], $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function update(object $Entity, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
+	}
+
+	/**
+	 * Update raw data into DB
+	 * @param mixed $id primary key(s)
+	 * @param array $data new Entity data
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
+	 * @throws \Exception
+	 */
+	function updateOne($id, array $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -229,7 +257,7 @@ class Repository {
 	 * @param string|null $validateMode
 	 * @return array map of properties & error codes, empty if VALID
 	 */
-	function validate($Entity, $validateMode) {
+	function validate(object $Entity, ?string $validateMode) {
 		return [];
 	}
 
@@ -240,7 +268,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execCount($criteriaExp=null) {
+	protected function execCount(?string $criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_COUNT))
@@ -261,7 +289,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execDeleteOne($Entity, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execDeleteOne($Entity, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_DELETE))
@@ -295,7 +323,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	protected function execDeleteAll(?int $limit, $orderExp=null, $criteriaExp=null) {
+	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_DELETE_ALL))
@@ -321,7 +349,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execFetchOne($offset=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_FETCH))
@@ -349,7 +377,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execFetchAll($offset=null, $limit=null, $orderExp=null, $criteriaExp=null, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_FETCH_ALL))
@@ -369,14 +397,14 @@ class Repository {
 	 * Insert Entity using a Query.
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
-	 * @param bool $validate FALSE to skip validation
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execInsertOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	protected function execInsertOne($id, $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		try {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
@@ -410,17 +438,22 @@ class Repository {
 	 * Update Entity using a Query.
 	 * @param mixed $id primary key(s)
 	 * @param array|object $data new Entity data, or Entity object
-	 * @param bool $validate
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execUpdateOne($id, $data, $validate=true, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
-		$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
-		if(is_object($data)) $data = DataMapper::object2array($data);
+	protected function execUpdateOne($id, $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		try {
+			if(is_object($data)) {
+				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $data);
+				$data = DataMapper::object2array($data);
+			} else {
+				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
+
+			}
 			$dbData = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
 			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->class);
 			$Entity = new $this->class($newData);
@@ -460,7 +493,7 @@ class Repository {
 	 * @param bool|string $validateMode, TRUE or a named @orm-validate-subset
 	 * @throws Exception|\ReflectionException
 	 */
-	protected function doValidate($Entity, $validateMode) {
+	protected function doValidate(object $Entity, $validateMode) {
 		sys::trace(LOG_DEBUG, T_INFO, 'subset: '.$validateMode);
 		$validateSubset = (is_string($validateMode)) ? call_user_func($this->class.'::metadata', self::META_VALIDATE_SUBSETS, $validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
