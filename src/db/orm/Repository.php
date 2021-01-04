@@ -412,7 +412,7 @@ class Repository {
 				$Entity->__construct(array_combine(call_user_func($this->class.'::metadata', self::META_PKEYS), (array)$id));
 			}
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_INSERT))
+			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_PRE_INSERT))
 				sys::event(OrmEvent::EVENT_PRE_INSERT, $OrmEvent);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'INSERT', sys::auth()->UID());
 			$this->_onSave->invoke($Entity);
@@ -422,11 +422,11 @@ class Repository {
 			if(!QueryRunner::insert($this->pdo, $Entity))
 				$response = false;
 			elseif($fetchMode) {
-				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $Entity);
+				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
 				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_INSERT))
+			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_POST_INSERT))
 				sys::event(OrmEvent::EVENT_POST_INSERT, $OrmEvent);
 			return $response;
 		} catch(\PDOException $Ex) {
@@ -455,7 +455,7 @@ class Repository {
 				$Entity($data);
 			}
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE))
+			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE))
 				sys::event(OrmEvent::EVENT_PRE_UPDATE, $OrmEvent);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
 			// onSave callback
@@ -464,7 +464,7 @@ class Repository {
 			$postData = DataMapper::object2array($Entity);
 			// detect changes after onSave()
 			$changes = $Entity->_changes();
-			$props = call_user_func($this->class.'::metadata', self::META_PROPS);
+			$props = $Entity::metadata(self::META_PROPS);
 			foreach($preData as $k=>$v) {
 				if($preData[$k] !== $postData[$k] && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
 					$changes[] = $k;
@@ -475,11 +475,11 @@ class Repository {
 			if(!QueryRunner::update($this->pdo, $Entity, $changes))
 				$response = false;
 			elseif($fetchMode) {
-				$criteriaExp = call_user_func($this->class . '::metadata', self::META_PKCRITERIA, $Entity);
+				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
 				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_UPDATE))
+			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_POST_UPDATE))
 				sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);
 			return $response;
 		} catch(\PDOException $Ex) {
@@ -493,8 +493,7 @@ class Repository {
 	 * @throws Exception|\ReflectionException
 	 */
 	protected function doValidate(object $Entity, $validateMode) {
-		sys::trace(LOG_DEBUG, T_INFO, 'subset: '.$validateMode);
-		$validateSubset = (is_string($validateMode)) ? call_user_func($this->class.'::metadata', self::META_VALIDATE_SUBSETS, $validateMode) : null;
+		$validateSubset = (is_string($validateMode)) ? $Entity::metadata(self::META_VALIDATE_SUBSETS, $validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
 		$errorsByFn = $this->validate($Entity, $validateMode);
