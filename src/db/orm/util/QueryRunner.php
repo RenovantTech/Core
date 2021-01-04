@@ -207,10 +207,9 @@ class QueryRunner {
 			$Query->execCall($execParams);
 			return true;
 		} else {
-			$data = DataMapper::object2sql($Entity, array_keys($changes));
-			$fields = implode(',', array_keys($changes));
+			$data = DataMapper::object2sql($Entity, $changes);
 			$Query = (new Query($pdo))
-				->on(call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'target'), $fields)
+				->on(call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'target'))
 				->criteriaExp(call_user_func(get_class($Entity).'::metadata', Repository::META_PKCRITERIA, $Entity));
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}

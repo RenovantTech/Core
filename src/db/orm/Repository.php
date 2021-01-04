@@ -448,37 +448,36 @@ class Repository {
 	protected function execUpdateOne($id, $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		try {
 			if(is_object($data)) {
-				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $data);
-				$data = DataMapper::object2array($data);
+				$Entity = $data;
 			} else {
 				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
-
+				$Entity = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp);
+				$Entity($data);
 			}
-			$dbData = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp, self::FETCH_ARRAY);
-			$newData = DataMapper::sql2array(array_merge($dbData, $data), $this->class);
-			$Entity = new $this->class($newData);
 			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE))
 				sys::event(OrmEvent::EVENT_PRE_UPDATE, $OrmEvent);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
 			// onSave callback
+			$preData = DataMapper::object2array($Entity);
 			$this->_onSave->invoke($Entity);
-			// re-check changes after onSave()
-			$newData = DataMapper::object2sql($Entity);
-			$changes = [];
+			$postData = DataMapper::object2array($Entity);
+			// detect changes after onSave()
+			$changes = $Entity->_changes();
 			$props = call_user_func($this->class.'::metadata', self::META_PROPS);
-			foreach($newData as $k=>$v) {
-				if(!isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
-					$changes[$k] = $newData[$k];
+			foreach($preData as $k=>$v) {
+				if($preData[$k] !== $postData[$k] && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
+					$changes[] = $k;
 			}
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run UPDATE & build response
 			if(!QueryRunner::update($this->pdo, $Entity, $changes))
 				$response = false;
-			elseif($fetchMode)
+			elseif($fetchMode) {
+				$criteriaExp = call_user_func($this->class . '::metadata', self::META_PKCRITERIA, $Entity);
 				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
-			else
+			} else
 				$response = true;
 			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_UPDATE))
 				sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);

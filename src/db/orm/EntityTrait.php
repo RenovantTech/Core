@@ -88,6 +88,7 @@ trait EntityTrait {
 	function __construct(array $data=[]) {
 		$this->__invoke($data);
 		$this->onInit();
+		$this->_changes = [];
 	}
 
 	function __get($k) {
@@ -112,7 +113,7 @@ trait EntityTrait {
 					case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
 				}
 			}
-//			if($this->$k !== $v) $this->_changes[] = $k;
+			if($this->$k !== $v) $this->_changes[] = $k;
 			$this->$k = $v;
 		}
 	}
@@ -125,10 +126,7 @@ trait EntityTrait {
 	protected function onSave() {}
 	protected function onDelete() {}
 
-	private function _changes(): array {
+	function _changes(): array {
 		return $this->_changes;
-	}
-	private function _isDirty(): bool {
-		return !empty($this->_changes);
 	}
 }
