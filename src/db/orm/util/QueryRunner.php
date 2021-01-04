@@ -40,15 +40,7 @@ class QueryRunner {
 	 */
 	static function deleteOne(string $pdo, string $class, object $Entity, ?string $criteriaExp=null) {
 		if($deleteFn = call_user_func($class.'::metadata', Repository::META_SQL, 'deleteFn')) {
-			$data = DataMapper::object2sql($Entity);
-			$params = explode(',',str_replace(' ','',$deleteFn));
-			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure);
-			$execParams = [];
-			foreach($params as $k){
-				if($k[0]!='@') $execParams[$k] = $data[$k];
-			}
-			$Query->execCall($execParams);
+			self::execCall($pdo, $deleteFn, $Entity);
 			return true;
 		} else {
 			$Query = (new Query($pdo))
@@ -161,14 +153,7 @@ class QueryRunner {
 	static function insert(string $pdo, object $Entity) {
 		$data = DataMapper::object2sql($Entity);
 		if($insertFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'insertFn')) {
-			$params = explode(',',str_replace(' ','',$insertFn));
-			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure);
-			$execParams = [];
-			foreach($params as $k){
-				if($k[0]!='@') $execParams[$k] = $data[$k];
-			}
-			$pkeys = $Query->execCall($execParams);
+			$pkeys = self::execCall($pdo, $insertFn, $Entity);
 			foreach($pkeys as $k=>$v) $Entity->$k = $v;
 			return true;
 		} else {
@@ -196,15 +181,7 @@ class QueryRunner {
 	 */
 	static function update(string $pdo, object $Entity, array $changes) {
 		if($updateFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'updateFn')) {
-			$data = DataMapper::object2sql($Entity);
-			$params = explode(',',str_replace(' ','',$updateFn));
-			$procedure = array_shift($params);
-			$Query = (new Query($pdo))->on($procedure);
-			$execParams = [];
-			foreach($params as $k){
-				if($k[0]!='@') $execParams[$k] = $data[$k];
-			}
-			$Query->execCall($execParams);
+			self::execCall($pdo, $updateFn, $Entity);
 			return true;
 		} else {
 			$data = DataMapper::object2sql($Entity, $changes);
@@ -213,5 +190,17 @@ class QueryRunner {
 				->criteriaExp(call_user_func(get_class($Entity).'::metadata', Repository::META_PKCRITERIA, $Entity));
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
+	}
+
+	protected static function execCall(string $pdo, string $storedFn, object $Entity) {
+		$data = DataMapper::object2sql($Entity);
+		$params = explode(',',str_replace(' ','',$storedFn));
+		$procedure = array_shift($params);
+		$Query = (new Query($pdo))->on($procedure);
+		$execParams = [];
+		foreach($params as $k){
+			if($k[0]!='@') $execParams[$k] = $data[$k];
+		}
+		return $Query->execCall($execParams);
 	}
 }
