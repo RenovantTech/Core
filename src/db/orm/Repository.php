@@ -6,7 +6,6 @@
  * @license New BSD License
  */
 namespace renovant\core\db\orm;
-use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\db\orm\util\DataMapper,
 	renovant\core\db\orm\util\QueryRunner,
@@ -463,7 +462,7 @@ class Repository {
 			$this->_onSave->invoke($Entity);
 			$postData = DataMapper::object2array($Entity);
 			// detect changes after onSave()
-			$changes = $Entity->_changes();
+			$changes = $Entity::changes($Entity);
 			$props = $Entity::metadata(self::META_PROPS);
 			foreach($preData as $k=>$v) {
 				if($preData[$k] !== $postData[$k] && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])

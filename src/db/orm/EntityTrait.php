@@ -34,9 +34,20 @@ function metadataFetch($class) {
  */
 trait EntityTrait {
 
+	static protected array $_changes;
 	static protected array $_metadata;
 
 	/**
+	 * @internal
+	 * @param object $Obj
+	 * @return array
+	 */
+	static function changes(object $Obj): array {
+		return self::$_changes[spl_object_id($Obj)];
+	}
+
+	/**
+	 * @internal
 	 * @param string|null $k
 	 * @param mixed|null $param
 	 * @return mixed|void
@@ -79,16 +90,14 @@ trait EntityTrait {
 		}
 	}
 
-	private array $_changes = [];
-
-	/**
-	 * Entity constructor
-	 * @param array $data Entity data
-	 */
 	function __construct(array $data=[]) {
 		$this->__invoke($data);
 		$this->onInit();
-		$this->_changes = [];
+		self::$_changes[spl_object_id($this)] = [];
+	}
+
+	function __destruct() {
+		unset(self::$_changes[spl_object_id($this)]);
 	}
 
 	function __get($k) {
@@ -113,9 +122,10 @@ trait EntityTrait {
 					case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
 				}
 			}
-			if($this->$k !== $v) $this->_changes[] = $k;
+			if($this->$k !== $v) self::$_changes[spl_object_id($this)][] = $k;
 			$this->$k = $v;
 		}
+		return $this;
 	}
 
 	function __set($k, $v) {
@@ -125,8 +135,4 @@ trait EntityTrait {
 	protected function onInit() {}
 	protected function onSave() {}
 	protected function onDelete() {}
-
-	function _changes(): array {
-		return $this->_changes;
-	}
 }
