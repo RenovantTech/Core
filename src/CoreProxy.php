@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core;
+use renovant\core\db\orm\Repository;
 use const renovant\core\trace\T_INFO;
 use renovant\core\container\Container,
 	renovant\core\container\ContainerException;
@@ -49,7 +50,8 @@ class CoreProxy {
 				$this->Obj = sys::cache(SYS_CACHE)->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
 			}
 			defined('SYS_ACL_SERVICES') and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, sys::auth()->UID());
-			sys::trace(LOG_DEBUG, T_INFO);
+			if($this->Obj instanceof Repository) sys::trace(LOG_DEBUG, T_INFO, $this->_.'->'.$method, null, $prevTraceFn);
+			else sys::trace();
 			return call_user_func_array([$this->Obj, $method], $args);
 		} finally {
 			sys::traceFn($prevTraceFn);
