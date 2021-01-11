@@ -47,6 +47,8 @@ class Repository {
 	protected $_onSave;
 	protected $_onDelete;
 
+	protected $OrmEvent;
+
 	/**
 	 * @param string $class Entity class
 	 * @param string $pdo PDO instance ID, default to "master"
@@ -269,12 +271,11 @@ class Repository {
 	 * @throws \Exception
 	 */
 	protected function execCount(?string $criteriaExp=null) {
-		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
+		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_COUNT))
-				sys::event(OrmEvent::EVENT_PRE_COUNT, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'COUNT', sys::auth()->UID());
-			return QueryRunner::count($this->pdo, $this->class, $OrmEvent->getCriteriaExp());
+			return QueryRunner::count($this->pdo, $this->class, $this->OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -290,16 +291,14 @@ class Repository {
 	 * @throws \Exception
 	 */
 	protected function execDeleteOne($Entity, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 		try {
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_DELETE))
-				sys::event(OrmEvent::EVENT_PRE_DELETE, $OrmEvent);
+			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
-			if(!QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $OrmEvent->getCriteriaExp()))
+			if(!QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $this->OrmEvent->getCriteriaExp()))
 				return false;
 			$this->_onDelete->invoke($Entity);
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_DELETE))
-				sys::event(OrmEvent::EVENT_POST_DELETE, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE);
 			switch($fetchMode) {
 				case self::FETCH_OBJ: return $Entity;
 				case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset);
@@ -324,14 +323,12 @@ class Repository {
 	 * @throws \Exception
 	 */
 	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null) {
-		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
+		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_DELETE_ALL))
-				sys::event(OrmEvent::EVENT_PRE_DELETE_ALL, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
-			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $OrmEvent->getCriteriaExp());
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_DELETE_ALL))
-				sys::event(OrmEvent::EVENT_POST_DELETE_ALL, $OrmEvent);
+			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $this->OrmEvent->getCriteriaExp());
+			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE_ALL);
 			return $n;
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -350,14 +347,12 @@ class Repository {
 	 * @throws \Exception
 	 */
 	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
+		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_FETCH))
-				sys::event(OrmEvent::EVENT_PRE_FETCH, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
-			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
-				if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_FETCH))
-					sys::event(OrmEvent::EVENT_POST_FETCH, $OrmEvent->setEntity($Entity));
+			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH, $Entity);
 			}
 			return $Entity;
 		} catch(\PDOException $Ex) {
@@ -378,14 +373,12 @@ class Repository {
 	 * @throws \Exception
 	 */
 	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
-		$OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
+		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
-			if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_PRE_FETCH_ALL))
-				sys::event(OrmEvent::EVENT_PRE_FETCH_ALL, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
-			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
-				if(call_user_func($this->class.'::metadata', self::META_EVENTS, OrmEvent::EVENT_POST_FETCH_ALL))
-					sys::event(OrmEvent::EVENT_POST_FETCH_ALL, $OrmEvent->setEntities($entities));
+			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH_ALL, $entities);
 			}
 			return $entities;
 		} catch(\PDOException $Ex) {
@@ -411,9 +404,8 @@ class Repository {
 			if($id) {
 				$Entity->__construct(array_combine(call_user_func($this->class.'::metadata', self::META_PKEYS), (array)$id));
 			}
-			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_PRE_INSERT))
-				sys::event(OrmEvent::EVENT_PRE_INSERT, $OrmEvent);
+			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'INSERT', sys::auth()->UID());
 			$this->_onSave->invoke($Entity);
 			// validate
@@ -423,11 +415,10 @@ class Repository {
 				$response = false;
 			elseif($fetchMode) {
 				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
-				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
-			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_POST_INSERT))
-				sys::event(OrmEvent::EVENT_POST_INSERT, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
 			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(100, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -454,9 +445,8 @@ class Repository {
 				$Entity = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp);
 				$Entity($data);
 			}
-			$OrmEvent = (new OrmEvent($this))->setEntity($Entity);
-			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE))
-				sys::event(OrmEvent::EVENT_PRE_UPDATE, $OrmEvent);
+			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
+			$this->triggerEvent(OrmEvent::EVENT_PRE_UPDATE);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
 			// onSave callback
 			$preData = DataMapper::object2array($Entity);
@@ -480,10 +470,9 @@ class Repository {
 				$response = true;
 			if($response && $fetchMode) {
 				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
-				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			}
-			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_POST_UPDATE))
-				sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);
+			$this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
 			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(300, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -502,6 +491,21 @@ class Repository {
 		$errorsByFn = $this->validate($Entity, $validateMode);
 		$errors = array_merge($errorsByTags, $errorsByFn);
 		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
+	}
+
+	/**
+	 * @param $eventName
+	 * @param mixed $param
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 */
+	protected function triggerEvent($eventName, $param=null) {
+		if($name = call_user_func($this->class.'::metadata', self::META_EVENTS, $eventName)) {
+			if(is_object($param)) $this->OrmEvent->setEntity($param);
+			elseif(is_array($param)) $this->OrmEvent->setEntities($param);
+			sys::event(is_string($name) ? $name : $eventName, $this->OrmEvent);
+		}
 	}
 }
 class_exists('renovant\core\db\PDO');

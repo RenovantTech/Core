@@ -236,10 +236,10 @@ class Query {
 
 	/**
 	 * Add Criteria
-	 * @param string $criteria
+	 * @param string|null $criteria
 	 * @return $this
 	 */
-	function criteria(string $criteria) {
+	function criteria(?string $criteria) {
 		$this->PDOStatement = null;
 		if(!empty($criteria)) $this->criteriaSql[] = $criteria;
 		return $this;
@@ -247,10 +247,10 @@ class Query {
 
 	/**
 	 * Add Criteria Expression
-	 * @param string $criteriaExp
+	 * @param string|null $criteriaExp
 	 * @return $this
 	 */
-	function criteriaExp(string $criteriaExp) {
+	function criteriaExp(?string $criteriaExp) {
 		$this->PDOStatement = null;
 		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, $criteriaExp));
 		return $this;

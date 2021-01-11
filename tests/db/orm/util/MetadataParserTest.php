@@ -23,7 +23,7 @@ class MetadataParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertContains('id', $pkeys);
 
 		// events
-		$this->assertTrue(\test\db\orm\User::metadata(Repository::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE));
+		$this->assertEquals('USERS:UPDATING', \test\db\orm\User::metadata(Repository::META_EVENTS, OrmEvent::EVENT_PRE_UPDATE));
 		$this->assertTrue(\test\db\orm\User::metadata(Repository::META_EVENTS, OrmEvent::EVENT_POST_UPDATE));
 		$this->assertFalse(\test\db\orm\User::metadata(Repository::META_EVENTS, OrmEvent::EVENT_PRE_FETCH));
 		$this->assertFalse(\test\db\orm\User::metadata(Repository::META_EVENTS, OrmEvent::EVENT_POST_FETCH));

@@ -57,7 +57,7 @@ class MetadataParser {
 		if($DocComment->hasTag('orm-events')) {
 			$tagValues = $DocComment->getTagValues('orm-events');
 			foreach($tagValues as $value) {
-				foreach($value as $k => $v) $metadata[Repository::META_EVENTS][] = 'orm:'.strtolower($k);
+				foreach($value as $k => $v) $metadata[Repository::META_EVENTS]['orm:'.strtolower($k)] = $v;
 			}
 		}
 

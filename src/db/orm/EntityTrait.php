@@ -61,7 +61,7 @@ trait EntityTrait {
 			case null:
 				return;
 			case Repository::META_EVENTS:
-				return in_array($param, self::$_metadata[Repository::META_EVENTS]);
+				return self::$_metadata[Repository::META_EVENTS][$param] ?? false;
 			case Repository::META_FETCH_SUBSETS:
 				if(isset(self::$_metadata[Repository::META_FETCH_SUBSETS][$param])) return self::$_metadata[Repository::META_FETCH_SUBSETS][$param];
 				trigger_error('Invalid FETCH SUBSET requested: '.$param, E_USER_WARNING);

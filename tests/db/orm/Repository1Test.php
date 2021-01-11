@@ -1,5 +1,7 @@
 <?php
 namespace test\db\orm;
+use renovant\core\db\orm\OrmEvent;
+use renovant\core\event\EventDispatcher;
 use renovant\core\sys,
 	renovant\core\acl\ACL,
 	renovant\core\db\orm\Exception,
@@ -127,7 +129,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($UsersRepository->fetch(2));
 
 		// passing key
-		$this->assertInstanceOf('test\db\orm\User',$UsersRepository->delete(3));
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->delete(3));
 		$this->assertFalse($UsersRepository->fetch(3));
 
 		// test FETCH MODES
@@ -428,7 +430,6 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame('2012-03-18 14:25:36', $User21->lastTime->format('Y-m-d H:i:s'));
 	}
 
-
 	/**
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
@@ -529,6 +530,28 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$this->assertSame(7.5, $User1->score);
 		$this->assertNotEquals('2000-01-01 00:00:00', $User1->updatedAt->format('Y-m-d H:i:s'));
 		$this->assertNull($User1->lastTime);
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param Repository $UsersRepository
+	 * @throws Exception
+	 */
+	function testUpdateEvents(Repository $UsersRepository) {
+		$RefProp = new \ReflectionProperty('renovant\core\sys', 'EventDispatcher');
+		$RefProp->setAccessible(true);
+		$EventDispatcher = $RefProp->getValue();
+
+		$eventFn = function (OrmEvent $Event) {
+			$User = $Event->getEntity();
+			$this->assertInstanceOf('test\db\orm\User', $User);
+		};
+		$EventDispatcher->listen('USERS:UPDATING', $eventFn);
+
+		$User = $UsersRepository->fetch(1);
+		$User->name = 'Zack2';
+		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update($User));
+		$this->assertSame('Zack2', $User->name);
 	}
 
 	/**

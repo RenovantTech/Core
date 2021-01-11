@@ -3,7 +3,7 @@ namespace test\db\orm;
 
 /**
  * @orm(source="users")
- * @orm-events(pre-update, post-update)
+ * @orm-events(pre-update="USERS:UPDATING", post-update)
  * @orm-criteria(activeAge="active,EQ,1|age,GTE,?1", dateMonth="YEAR(lastTime) = ?1 AND MONTH(lastTime) = ?2")
  * @orm-order-by(nameASC="name ASC, surname ASC")
  * @orm-fetch-subset(mini="id, name, score", medium="id, active, name, score")
