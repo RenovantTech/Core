@@ -6,6 +6,7 @@
  * @license New BSD License
  */
 namespace renovant\core\db\orm;
+use const renovant\core\trace\T_DB;
 use renovant\core\sys,
 	renovant\core\db\orm\util\DataMapper,
 	renovant\core\db\orm\util\QueryRunner,
@@ -471,13 +472,16 @@ class Repository {
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run UPDATE & build response
-			if(!QueryRunner::update($this->pdo, $Entity, $changes))
-				$response = false;
-			elseif($fetchMode) {
+			$response = false;
+			if(empty($changes)) {
+				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $Entity::metadata(self::META_SQL, 'target'), $Entity::metadata(self::META_PKCRITERIA, $Entity)));
+				$response = true;
+			} elseif(QueryRunner::update($this->pdo, $Entity, $changes))
+				$response = true;
+			if($response && $fetchMode) {
 				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
 				$response = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
-			} else
-				$response = true;
+			}
 			if($Entity::metadata(self::META_EVENTS, OrmEvent::EVENT_POST_UPDATE))
 				sys::event(OrmEvent::EVENT_POST_UPDATE, $OrmEvent);
 			return $response;
