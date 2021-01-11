@@ -28,7 +28,7 @@ class EventDispatcher {
 	 * @param array|null $eventsMaps
 	 * @throws EventDispatcherException
 	 */
-	function init($namespace, array $eventsMaps=null) {
+	function init(string $namespace, array $eventsMaps=null) {
 		if(in_array($namespace, $this->namespaces)) return;
 		//sys::trace(LOG_DEBUG, T_EVENT, $namespace, null, 'sys.EventDispatcher->init');
 		$this->namespaces[] = $namespace;
@@ -44,7 +44,7 @@ class EventDispatcher {
 	 * @param callable $callback the callback function to be invoked
 	 * @param int $priority trigger precedence on the listeners chain (higher values execute earliest)
 	 */
-	function listen($eventName, $callback, $priority=1) {
+	function listen(string $eventName, callable $callback, $priority=1) {
 		$eventName = strtoupper($eventName);
 		$this->listeners[$eventName][(int)$priority][] = $callback;
 		krsort($this->listeners[$eventName], SORT_NUMERIC);
@@ -59,7 +59,7 @@ class EventDispatcher {
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	function trigger($eventName, $EventOrParams=null): Event {
+	function trigger(string $eventName, $EventOrParams=null): Event {
 		$eventName = strtoupper($eventName);
 		if(!isset($this->listeners[$eventName]))
 			sys::trace(LOG_DEBUG, T_EVENT, $eventName);
@@ -74,12 +74,14 @@ class EventDispatcher {
 						list($objID, $method) = explode('->', $callback);
 						$callback = [$Context->get($objID), $method];
 					}
-				} else {
+				} elseif(is_array($callback)) {
 					list($Obj, $method) = $callback;
 					$RefProp = new \ReflectionProperty($Obj, '_');
 					$RefProp->setAccessible(true);
 					$_ = $RefProp->getValue($Obj);
 					sys::trace(LOG_DEBUG, T_EVENT, $eventName.' ['.$priority.'] '.$_.'->'.$method);
+				} elseif(is_callable($callback)) {
+					sys::trace(LOG_DEBUG, T_EVENT, $eventName.' ['.$priority.'] callable function');
 				}
 				call_user_func($callback, $Event);
 				if($Event->isPropagationStopped()) break;
