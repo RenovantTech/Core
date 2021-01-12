@@ -9,6 +9,7 @@ use renovant\core\sys,
 	renovant\core\util\DateTime,
 	test\acl\ACLTest;
 
+$v = 1;
 class Repository1Test extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
@@ -538,11 +539,15 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @throws Exception
 	 */
 	function testUpdateEvents(Repository $UsersRepository) {
+		global $v;
 		$RefProp = new \ReflectionProperty('renovant\core\sys', 'EventDispatcher');
 		$RefProp->setAccessible(true);
 		$EventDispatcher = $RefProp->getValue();
 
+		$v = 1;
 		$eventFn = function (OrmEvent $Event) {
+			global $v;
+			$v++;
 			$User = $Event->getEntity();
 			$this->assertInstanceOf('test\db\orm\User', $User);
 		};
@@ -552,6 +557,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		$User->name = 'Zack2';
 		$this->assertInstanceOf('test\db\orm\User', $UsersRepository->update($User));
 		$this->assertSame('Zack2', $User->name);
+		$this->assertSame(2, $v);
 	}
 
 	/**
