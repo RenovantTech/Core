@@ -39,7 +39,7 @@ class User2 {
 
 	// ==================== EVENTS ================================================================
 
-	protected function onSave() {
+	function onSave() {
 		$this->score++;
 	}
 }

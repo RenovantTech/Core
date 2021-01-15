@@ -34,7 +34,7 @@ function metadataFetch($class) {
  */
 trait EntityTrait {
 
-	static protected array $_changes;
+	static protected array $_data;
 	static protected array $_metadata;
 
 	/**
@@ -43,7 +43,10 @@ trait EntityTrait {
 	 * @return array
 	 */
 	static function changes(object $Obj): array {
-		return self::$_changes[spl_object_id($Obj)];
+		$changes = [];
+		foreach (self::$_metadata[Repository::META_PROPS] as $k => $meta)
+			if($Obj->$k != self::$_data[spl_object_id($Obj)][$k]) $changes[] = $k;
+		return $changes;
 	}
 
 	/**
@@ -92,12 +95,14 @@ trait EntityTrait {
 
 	function __construct(array $data=[]) {
 		$this->__invoke($data);
-		$this->onInit();
-		self::$_changes[spl_object_id($this)] = [];
+		if(method_exists($this, 'onInit')) $this->onInit();
+		foreach (self::$_metadata[Repository::META_PROPS] as $k => $meta) {
+			self::$_data[spl_object_id($this)][$k] = $this->$k;
+		}
 	}
 
 	function __destruct() {
-		unset(self::$_changes[spl_object_id($this)]);
+		unset(self::$_data[spl_object_id($this)]);
 	}
 
 	function __get($k) {
@@ -122,7 +127,6 @@ trait EntityTrait {
 					case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
 				}
 			}
-			if($this->$k !== $v) self::$_changes[spl_object_id($this)][] = $k;
 			$this->$k = $v;
 		}
 		return $this;
@@ -131,8 +135,4 @@ trait EntityTrait {
 	function __set($k, $v) {
 		$this([$k => $v]);
 	}
-
-	protected function onInit() {}
-	protected function onSave() {}
-	protected function onDelete() {}
 }

@@ -43,10 +43,6 @@ class Repository {
 	 * @var string */
 	protected $pdo = 'master';
 
-	protected $_onInit;
-	protected $_onSave;
-	protected $_onDelete;
-
 	protected $OrmEvent;
 
 	/**
@@ -64,17 +60,8 @@ class Repository {
 		return ['_', 'class', 'pdo'];
 	}
 
-	/**
-	 * @throws \ReflectionException
-	 */
 	function __wakeup() {
 		class_exists($this->class);
-		$this->_onInit = new \ReflectionMethod($this->class, 'onInit');
-		$this->_onInit->setAccessible(true);
-		$this->_onSave = new \ReflectionMethod($this->class, 'onSave');
-		$this->_onSave->setAccessible(true);
-		$this->_onDelete = new \ReflectionMethod($this->class, 'onDelete');
-		$this->_onDelete->setAccessible(true);
 	}
 
 	/**
@@ -297,7 +284,7 @@ class Repository {
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
 			if(!QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $this->OrmEvent->getCriteriaExp()))
 				return false;
-			$this->_onDelete->invoke($Entity);
+			if(method_exists($Entity, 'onDelete')) $Entity->onDelete();
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE);
 			switch($fetchMode) {
 				case self::FETCH_OBJ: return $Entity;
@@ -407,7 +394,7 @@ class Repository {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'INSERT', sys::auth()->UID());
-			$this->_onSave->invoke($Entity);
+			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run INSERT & build response
@@ -449,16 +436,9 @@ class Repository {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_UPDATE);
 			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
 			// onSave callback
-			$preData = DataMapper::object2array($Entity);
-			$this->_onSave->invoke($Entity);
-			$postData = DataMapper::object2array($Entity);
+			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// detect changes after onSave()
 			$changes = $Entity::changes($Entity);
-			$props = $Entity::metadata(self::META_PROPS);
-			foreach($preData as $k=>$v) {
-				if($preData[$k] !== $postData[$k] && !isset($props[$k]['primarykey']) && !$props[$k]['readonly'])
-					$changes[] = $k;
-			}
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run UPDATE & build response
