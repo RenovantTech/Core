@@ -48,7 +48,6 @@ class Repository {
 	/**
 	 * @param string $class Entity class
 	 * @param string $pdo PDO instance ID, default to "master"
-	 * @throws \ReflectionException
 	 */
 	function __construct(string $class, $pdo='master') {
 		$this->class = $class;
@@ -70,7 +69,7 @@ class Repository {
 	 * @param string|null $subset
 	 * @return array
 	 */
-	function toArray($entities, $subset=null) {
+	function toArray($entities, ?string $subset=null): array {
 		$data = [];
 		if(is_array($entities)) {
 			foreach($entities as $Entity) {
@@ -83,13 +82,31 @@ class Repository {
 	}
 
 	/**
+	 * Convert entities objects to JSON array
+	 * @param object|array $entities one or more Entities
+	 * @param string|null $subset
+	 * @return array
+	 */
+	function toJson($entities, ?string $subset=null): array {
+		$data = [];
+		if(is_array($entities)) {
+			foreach($entities as $Entity) {
+				$data[] = DataMapper::object2json($Entity, $subset);
+			}
+		} elseif(is_object($entities))
+			$data = DataMapper::object2json($entities, $subset);
+		else trigger_error('Invalid data');
+		return $data;
+	}
+
+	/**
 	 * Count entities by a set of Criteria
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @return integer
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function count($criteriaExp=null) {
+	function count($criteriaExp=null): int {
 		return $this->execCount($criteriaExp);
 	}
 
@@ -98,7 +115,7 @@ class Repository {
 	 * @param array $data Entity data
 	 * @return object Entity
 	 */
-	function create(array $data=[]) {
+	function create(array $data=[]): object {
 		return new $this->class($data);
 	}
 
