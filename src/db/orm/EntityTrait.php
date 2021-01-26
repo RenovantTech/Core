@@ -45,7 +45,7 @@ trait EntityTrait {
 	static function changes(object $Obj): array {
 		$changes = [];
 		foreach (self::$_metadata[Repository::META_PROPS] as $k => $meta)
-			if($Obj->$k !== self::$_data[spl_object_id($Obj)][$k]) $changes[] = $k;
+			if(!$meta['readonly'] && $Obj->$k !== self::$_data[spl_object_id($Obj)][$k]) $changes[] = $k;
 		return $changes;
 	}
 
