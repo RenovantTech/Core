@@ -44,8 +44,8 @@ class PdoProvider implements ProviderInterface {
 	/** DB tables
 	 * @var array */
 	protected $tables = [
-		'auth'		=> 'sys_auth',
-		'tokens'	=> 'sys_tokens',
+		'auth'		=> 'sys_users_auth',
+		'tokens'	=> 'sys_users_tokens',
 		'users'		=> 'sys_users'
 	];
 

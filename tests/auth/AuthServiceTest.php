@@ -13,16 +13,16 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users_auth`;
+			DROP TABLE IF EXISTS `sys_users_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
 
 	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users_auth`;
+			DROP TABLE IF EXISTS `sys_users_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
@@ -57,9 +57,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 			INSERT INTO sys_users (name, surname, email) VALUES ("John", "Red", "john.red@gmail.com");
 			INSERT INTO sys_users (name, surname, email) VALUES ("Matt", "Brown", "matt.brown@gmail.com");
 			INSERT INTO sys_users (name, surname, email) VALUES ("Dick", "Dastardly", "dick.dastardly@gmail.com");
-			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
-			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE user_id = 2;
-			UPDATE sys_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE user_id = 3;
+			UPDATE sys_users_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
+			UPDATE sys_users_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE user_id = 2;
+			UPDATE sys_users_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE user_id = 3;
 		');
 	}
 
@@ -160,12 +160,12 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 		// with verification
 		$this->assertEquals(AuthService::SET_PWD_MISMATCH, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123xxx'));
 		$this->assertEquals(AuthService::SET_PWD_OK, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123'));
-		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_auth WHERE user_id = 1')->fetchColumn();
+		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_users_auth WHERE user_id = 1')->fetchColumn();
 		$this->assertTrue(password_verify('XYZ123', $storedPwd));
 
 		// without verification
 		$this->assertEquals(1, $AuthService->setPassword(1, 'XYZ456'));
-		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_auth WHERE user_id = 1')->fetchColumn();
+		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_users_auth WHERE user_id = 1')->fetchColumn();
 		$this->assertTrue(password_verify('XYZ456', $storedPwd));
 	}
 
@@ -178,9 +178,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	function testSetResetEmailToken(AuthService $AuthService) {
 		$token = $AuthService->setResetEmailToken(3, 'dick.dastardly@yahoo.com');
 		$this->assertEquals(64, strlen($token));
-		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_users_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
 		$this->assertEquals($token, $dbToken);
-		$newEmail = sys::pdo('mysql')->query('SELECT data FROM sys_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$newEmail = sys::pdo('mysql')->query('SELECT data FROM sys_users_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
 		$this->assertEquals('dick.dastardly@yahoo.com', $newEmail);
 		return $token;
 	}
@@ -197,7 +197,7 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 		// true token
 		$userID = $AuthService->checkResetEmailToken($token);
 		$this->assertEquals(3, $userID);
-		$email = sys::pdo('mysql')->query('SELECT login FROM sys_auth WHERE user_id = 3')->fetchColumn();
+		$email = sys::pdo('mysql')->query('SELECT login FROM sys_users_auth WHERE user_id = 3')->fetchColumn();
 		$this->assertEquals('dick.dastardly@yahoo.com', $email);
 		// try 2 shot
 		$this->assertEquals(0, $AuthService->checkResetEmailToken($token));
@@ -212,7 +212,7 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	function testSetResetPwdToken(AuthService $AuthService) {
 		$token = $AuthService->setResetPwdToken(3);
 		$this->assertEquals(64, strlen($token));
-		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_tokens WHERE type = "RESET_PWD" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
+		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_users_tokens WHERE type = "RESET_PWD" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
 		$this->assertEquals($token, $dbToken);
 		return $token;
 	}

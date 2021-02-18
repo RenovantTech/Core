@@ -161,8 +161,8 @@ services:
     constructor:
       pdo:        mysql
       tables:
-        auth:     sys_auth
-        tokens:   sys_tokens
+        auth:     sys_users_auth
+        tokens:   sys_users_tokens
         users:    sys_users
     properties:
       fields:     '*'

@@ -8,16 +8,16 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users_auth`;
+			DROP TABLE IF EXISTS `sys_users_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
 
 	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS `sys_auth`;
-			DROP TABLE IF EXISTS `sys_tokens`;
+			DROP TABLE IF EXISTS `sys_users_auth`;
+			DROP TABLE IF EXISTS `sys_users_tokens`;
 			DROP TABLE IF EXISTS `sys_users`;
 		');
 	}
@@ -29,9 +29,9 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 			INSERT INTO sys_users (name, surname, email) VALUES ("John", "Red", "john.red@gmail.com");
 			INSERT INTO sys_users (name, surname, email) VALUES ("Matt", "Brown", "matt.brown@gmail.com");
 			INSERT INTO sys_users (name, surname, email) VALUES ("Dick", "Dastardly", "dick.dastardly@gmail.com");
-			UPDATE sys_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
-			UPDATE sys_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE user_id = 2;
-			UPDATE sys_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE user_id = 3;
+			UPDATE sys_users_auth SET active = 1, login = "john.red", password = "'.password_hash('ABC123', PASSWORD_DEFAULT).'" WHERE user_id = 1;
+			UPDATE sys_users_auth SET active = 0, login = "matt.brown", password = "'.password_hash('DEF456', PASSWORD_DEFAULT).'" WHERE user_id = 2;
+			UPDATE sys_users_auth SET active = 1, login = "dick.dastardly", password = "'.password_hash('GHI789', PASSWORD_DEFAULT).'" WHERE user_id = 3;
 		');
 		return $PdoProvider;
 	}
