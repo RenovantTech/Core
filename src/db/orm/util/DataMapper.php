@@ -50,6 +50,7 @@ class DataMapper {
 					break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
 				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format(DateTime::W3C); break;
+				case 'microdatetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u'); break;
 				case 'array':
 				case 'object': $data[$k] = serialize($Entity->$k); break;
 			}
@@ -77,6 +78,7 @@ class DataMapper {
 				case 'boolean': $data[$k] = (int)$Entity->$k; break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
 				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s'); break;
+				case 'microdatetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u'); break;
 				case 'array':
 				case 'object': $data[$k] = serialize($Entity->$k); break;
 			}
@@ -103,6 +105,7 @@ class DataMapper {
 				case 'boolean': $v = (bool) $v; break;
 				case 'date': $v = new Date($v); break;
 				case 'datetime': $v = new DateTime($v); break;
+				case 'microdatetime': $v = DateTime::createFromFormat('Y-m-d H:i:s.u', $v); break;
 				case 'array':
 				case 'object': $v = unserialize($v); break;
 			}
@@ -128,6 +131,7 @@ class DataMapper {
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
 				case 'datetime': $v = date(DateTime::W3C, strtotime($v)); break;
+				case 'microdatetime': $v = (string) $v; break;
 				case 'array':
 				case 'object': $v = unserialize($v); break;
 			}

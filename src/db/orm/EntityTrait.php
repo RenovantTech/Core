@@ -123,6 +123,7 @@ trait EntityTrait {
 					case 'boolean': $v = (bool) $v; break;
 					case 'date': $v = ($v instanceof \DateTime) ? $v : new Date($v); break;
 					case 'datetime': $v = ($v instanceof \DateTime) ? $v : new DateTime($v); break;
+					case 'microdatetime': $v = ($v instanceof \DateTime) ? $v : DateTime::createFromFormat('Y-m-d H:i:s.u', $v); break;
 					case 'object': $v = (is_object($v)) ? $v : unserialize($v); break;
 					case 'array': $v = (is_array($v)) ? $v : unserialize($v); break;
 				}

@@ -102,7 +102,7 @@ class MetadataParser {
 			if(!$DocComment->hasTag('orm')) continue;
 			$metadata[Repository::META_PROPS][$prop] = ['type'=>'string', 'null'=>false, 'readonly'=>false];
 			if($tag = $DocComment->getTag('orm')) {
-				if(isset($tag['type']) && !in_array($tag['type'], ['string','integer','float','boolean','date','datetime','object','array'])) throw new Exception(604, [$entityClass, $prop, $tag['type']]);
+				if(isset($tag['type']) && !in_array($tag['type'], ['string','integer','float','boolean','date','datetime','microdatetime','object','array'])) throw new Exception(604, [$entityClass, $prop, $tag['type']]);
 				$metadata[Repository::META_PROPS][$prop] = array_merge($metadata[Repository::META_PROPS][$prop], (array)$tag);
 				if(isset($tag['primarykey'])) $metadata[Repository::META_PKEYS][] = $prop;
 			}
