@@ -334,9 +334,15 @@ class Query {
 		$expArray = explode(self::EXP_DELIMITER, $orderByExp);
 		$orderBy = [];
 		foreach($expArray as $oExp) {
-			if(isset($this->dictionary['order-by'][str_replace('.','',$oExp)]))
-				$oExp = $this->dictionary['order-by'][str_replace('.','',$oExp)];
-			$orderBy[] = str_replace('.',' ',$oExp);
+			$sort = strtok($oExp, '.');
+			$dir = strtok('.');
+			if(isset($this->dictionary['order-by'][$sort])) {
+				$oExp = str_replace('?', strtoupper($dir), $this->dictionary['order-by'][$sort]);
+				$orderBy[] = $oExp;
+				var_dump($sort, $dir, $this->dictionary['order-by'], $oExp);
+			} else {
+				$orderBy[] = str_replace('.',' ',$oExp);
+			}
 		}
 		$this->orderBy = implode(', ',$orderBy);
 		return $this;

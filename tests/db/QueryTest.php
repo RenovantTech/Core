@@ -235,7 +235,7 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(7, $data[0]['id']);
 
 		// GROUP BY
-		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$data = (new Query('mysql'))->on('people', 'age, COUNT(*) AS n')->groupBy('age')->orderByExp('age.ASC')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertCount(6, $data);
 		$this->assertEquals(['age'=>21, 'n'=>2], $data[2]);
 
@@ -342,13 +342,12 @@ class QueryTest extends \PHPUnit\Framework\TestCase {
 
 	function testSetOrderByDictionary() {
 		$dictionary = [
-			'surnameASC' => 'surname ASC, name ASC',
-			'surnameDESC' => 'surname DESC, name DESC'
+			'fullname' => 'surname ?, name ?'
 		];
-		$items = (new Query('mysql'))->on('people')->setOrderByDictionary($dictionary)->orderByExp('surname.ASC')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$items = (new Query('mysql'))->on('people')->setOrderByDictionary($dictionary)->orderByExp('fullname.asc')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertEquals(6, $items[3]['id']);
 		$this->assertEquals(8, $items[6]['id']);
-		$items = (new Query('mysql'))->on('people')->setOrderByDictionary($dictionary)->orderByExp('surname.DESC')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
+		$items = (new Query('mysql'))->on('people')->setOrderByDictionary($dictionary)->orderByExp('fullname.desc')->execSelect()->fetchAll(\PDO::FETCH_ASSOC);
 		$this->assertEquals(7, $items[3]['id']);
 		$this->assertEquals(3, $items[6]['id']);
 	}
