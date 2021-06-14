@@ -36,13 +36,13 @@ class Request {
 
 	/**
 	 * Constructor: create a new HTTP Request
-	 * @param string $uri the HTTP URI
-	 * @param string $method the HTTP method
-	 * @param array $params the GET/POST parameters
-	 * @param array $headers
-	 * @param string $data the raw body data
+	 * @param string|null $uri the HTTP URI
+	 * @param string|null $method the HTTP method
+	 * @param array|null $params the GET/POST parameters
+	 * @param array|null $headers
+	 * @param string|null $data the raw body data
 	 */
-	function __construct($uri=null, $method=null, array $params=null, array $headers=null, $data=null) {
+	function __construct(string $uri=null, string $method=null, array $params=null, array $headers=null, string $data=null) {
 		$this->URI = strstr(($uri ? : $_SERVER['REQUEST_URI']).'?','?',true);
 		$this->method = $method ? : $_SERVER['REQUEST_METHOD'];
 		// @FIXME avoid memory duplication
@@ -62,7 +62,7 @@ class Request {
 			}
 		}
 		if(isset($this->headers['content-type']) && substr($this->headers['content-type'],0,16)=='application/json') {
-			$this->params = array_merge($this->params, (array) json_decode($this->rawData));
+			$this->params = array_merge($this->params, (array) json_decode($this->rawData, true));
 		}
 	}
 
@@ -71,12 +71,12 @@ class Request {
 	 * @param string $p parameter name
 	 * @return mixed|null
 	 */
-	function get($p) {
-		return isset($this->params[$p]) ? $this->params[$p] : null;
+	function get(string $p) {
+		return $this->params[$p] ?? null;
 	}
 
 	function getAttribute($k) {
-		return isset($this->attrs[$k]) ? $this->attrs[$k] : null;
+		return $this->attrs[$k] ?? null;
 	}
 
 	/**
@@ -84,7 +84,7 @@ class Request {
 	 * @param string $p parameter name
 	 * @param mixed $v parameter value
 	 */
-	function set($p, $v) {
+	function set(string $p, $v) {
 		$this->params[$p]=$v;
 	}
 
@@ -96,7 +96,7 @@ class Request {
 	 * Return QUERY_STRING
 	 * @return string
 	 */
-	function QUERY() {
+	function QUERY(): string {
 		return $this->QUERY;
 	}
 
@@ -107,32 +107,36 @@ class Request {
 	/**
 	 * @return array GET data
 	 */
-	function getGetData() {
+	function getGetData(): array {
 		return $_GET;
 	}
 
 	function getHeader($key) {
 		$key = strtolower($key);
-		return isset($this->headers[$key]) ? $this->headers[$key] : null;
+		return $this->headers[$key] ?? null;
 	}
 
 	/**
 	 * Get the HTTP method (GET, POST, PUT, ...)
 	 * @return string HTTP method
 	 */
-	function getMethod() {
+	function getMethod(): string {
 		return $this->method;
+	}
+
+	function getJsonData(): array {
+		return json_decode($this->rawData, true);
 	}
 
 	/**
 	 * @return array POST data
 	 */
-	function getPostData() {
+	function getPostData(): array {
 		return $_POST;
 	}
 
 	/**
-	 * @return array POST data
+	 * @return false|string|null POST data
 	 */
 	function getPutData() {
 		return ($this->method == 'PUT') ? $this->rawData : null;
@@ -145,14 +149,14 @@ class Request {
 	/**
 	 * @return boolean TRUE if Request method = GET
 	 */
-	function isGet() {
+	function isGet(): bool {
 		return ($this->method=='GET');
 	}
 
 	/**
 	 * @return boolean TRUE if Request method = GET
 	 */
-	function isPost() {
+	function isPost(): bool {
 		return ($this->method=='POST');
 	}
 }
