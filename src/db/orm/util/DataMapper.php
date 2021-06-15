@@ -46,6 +46,7 @@ class DataMapper {
 				case 'integer':
 				case 'float':
 				case 'boolean':
+				case 'time':
 					$data[$k] = $Entity->$k;
 					break;
 				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'); break;
@@ -73,6 +74,7 @@ class DataMapper {
 				case 'string':
 				case 'integer':
 				case 'float':
+				case 'time':
 					$data[$k] = $Entity->$k;
 					break;
 				case 'boolean': $data[$k] = (int)$Entity->$k; break;
@@ -99,7 +101,8 @@ class DataMapper {
 			if(!isset($props[$k])) continue;
 			if($props[$k]['null'] && is_null($v)) continue;
 			switch($props[$k]['type']) {
-				case 'string': break;
+				case 'string':
+				case 'time': break;
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
@@ -126,6 +129,7 @@ class DataMapper {
 			if($props[$k]['null'] && is_null($v)) continue;
 			switch($props[$k]['type']) {
 				case 'date':
+				case 'time':
 				case 'string': break;
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
