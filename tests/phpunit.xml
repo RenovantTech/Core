@@ -23,6 +23,7 @@
 			<directory>context</directory>
 		</testsuite>
 		<testsuite name="db">
+			<file>db/ProcedureTest.php</file>
 			<file>db/QueryTest.php</file>
 			<directory>db/orm</directory>
 		</testsuite>
