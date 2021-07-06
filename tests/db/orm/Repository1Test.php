@@ -1,10 +1,9 @@
 <?php
 namespace test\db\orm;
-use renovant\core\db\orm\OrmEvent;
-use renovant\core\event\EventDispatcher;
 use renovant\core\sys,
 	renovant\core\acl\ACL,
 	renovant\core\db\orm\Exception,
+	renovant\core\db\orm\OrmEvent,
 	renovant\core\db\orm\Repository,
 	renovant\core\util\DateTime,
 	test\acl\ACLTest;

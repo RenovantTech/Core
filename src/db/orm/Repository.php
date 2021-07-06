@@ -47,9 +47,9 @@ class Repository {
 
 	/**
 	 * @param string $class Entity class
-	 * @param string $pdo PDO instance ID, default to "master"
+	 * @param string|null $pdo PDO instance ID, default to "master"
 	 */
-	function __construct(string $class, $pdo='master') {
+	function __construct(string $class, ?string $pdo='master') {
 		$this->class = $class;
 		$this->pdo = $pdo;
 		$this->__wakeup();

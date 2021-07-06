@@ -60,23 +60,14 @@ class Query {
 
 	/**
 	 * Create new Query object
-	 * @param string $pdo optional PDO instance ID, default to 'master'
-	 */
-	function __construct($pdo='master') {
-		$this->pdo = $pdo;
-	}
-
-	/**
-	 * Set Query target: table, view, procedure
 	 * @param string $target SQL target
 	 * @param string|null $fields SQL fields (for SELECT, COUNT)
-	 * @return $this
+	 * @param string $pdo optional PDO instance ID, default to 'master'
 	 */
-	function on(string $target, ?string $fields=null) {
-		$this->PDOStatement = null;
+	function __construct(string $target, ?string $fields=null, string $pdo='master') {
 		$this->target = $target;
 		$this->fields = $fields;
-		return $this;
+		$this->pdo = $pdo;
 	}
 
 	/**
@@ -110,7 +101,7 @@ class Query {
 			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		return (int) $this->doExec($params)->rowCount();
+		return $this->doExec($params)->rowCount();
 	}
 
 	/**
@@ -153,7 +144,7 @@ class Query {
 			if(!in_array($k, $keys))
 				$data['_'.$k] = $v;
 		}
-		return (int) $this->doExec($data)->rowCount();
+		return $this->doExec($data)->rowCount();
 	}
 
 	/**
@@ -193,7 +184,7 @@ class Query {
 		}
 		foreach($params as $k=>$v)
 			$data[$k] = $v;
-		return (int) $this->doExec($data)->rowCount();
+		return $this->doExec($data)->rowCount();
 	}
 
 	function errorCode() {
