@@ -109,7 +109,8 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	 */
 	protected function resolveActionMethod(Request $Req) {
 		$action = substr(strrchr($Req->CMD(), ' '), 1);
-		$action = str_replace(['-','.'], '_', $action);
+		// kebab to camel case
+		$action = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $action))));
 		if(empty($action)) $action = self::DEFAULT_ACTION;
 		if(isset($this->_config[$action])) return $action;
 		if(isset($this->_config[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
