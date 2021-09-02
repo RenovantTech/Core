@@ -446,11 +446,11 @@ class sys {
 	 * Trace helper
 	 * @param integer $level trace level, use a LOG_* constant value
 	 * @param integer $type trace type, use a T_* constant value
-	 * @param string $msg the trace message
+	 * @param string|null $msg the trace message
 	 * @param mixed $data the trace data
-	 * @param string $function the tracing object method / function
+	 * @param string|null $function the tracing object method / function
 	 */
-	static function trace($level=LOG_DEBUG, $type=T_INFO, $msg=null, $data=null, $function=null) {
+	static function trace(int $level=LOG_DEBUG, int $type=T_INFO, ?string $msg=null, $data=null, ?string $function=null) {
 		if($level > self::$traceLevel) return;
 		$fn = str_replace('renovant\core', '\\', $function?:self::$traceFn);
 		self::$trace[] = [round(microtime(1)-$_SERVER['REQUEST_TIME_FLOAT'],5), memory_get_usage(), $level, $type, $fn, $msg, serialize($data)];
@@ -461,7 +461,7 @@ class sys {
 	 * @param string|null $fn
 	 * @return string
 	 */
-	static function traceFn($fn=null) {
+	static function traceFn(?string $fn=null) {
 		$prev = self::$traceFn;
 		if($fn) self::$traceFn = $fn;
 		return $prev;
