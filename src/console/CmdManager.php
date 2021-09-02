@@ -38,7 +38,7 @@ class CmdManager {
 	static function shutdown() {
 		foreach (self::$buffer as $cmd) {
 			$exec = CLI_PHP_BIN.' '.CLI_BOOTSTRAP.' '.$cmd;
-			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] '.$cmd, $exec, 'sys.CmdManager');
+			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] '.$cmd, $exec, 'sys.CmdManager::shutdown');
 			shell_exec('nohup '.$exec.' > /dev/null 2>&1 & echo $!');
 		}
 	}
