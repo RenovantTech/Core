@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm\util;
 use renovant\core\db\orm\Repository,
 	renovant\core\util\Date,
@@ -12,7 +6,6 @@ use renovant\core\db\orm\Repository,
 /**
  * ORM data hydrate helper
  * Helper class that hydrate/dehydrate Entity data.
- * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class DataMapper {
 

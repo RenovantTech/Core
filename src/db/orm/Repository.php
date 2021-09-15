@@ -1,20 +1,10 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm;
 use const renovant\core\trace\T_DB;
 use renovant\core\sys,
 	renovant\core\db\orm\util\DataMapper,
 	renovant\core\db\orm\util\QueryRunner,
 	renovant\core\util\validator\Validator;
-/**
- * ORM Repository
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Repository {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;

@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\container;
 use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_DEPINJ;
 use renovant\core\sys;
-/**
- * Dependency Injection Container
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Container {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;

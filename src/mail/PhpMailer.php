@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\mail;
 use const renovant\core\trace\T_ERROR;
 use const renovant\core\trace\T_INFO;
@@ -16,7 +10,6 @@ use renovant\core\sys;
  * {@example mail/Mailer.php 2}
  * Configuration file example: project/services/context.xml
  * {@example mail/Mailer.xml}
- * @author Daniele Sciacchitano <dan@renovant.tech>
  * @link https://github.com/PHPMailer/PHPMailer
  */
 class PhpMailer {

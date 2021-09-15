@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\api;
 use const renovant\core\http\ENGINE_JSON;
 use const renovant\core\trace\{T_ERROR, T_INFO};
@@ -13,9 +7,6 @@ use renovant\core\sys,
 	renovant\core\db\orm\Repository,
 	renovant\core\http\Request,
 	renovant\core\http\Response;
-/**
- * REST ActionController proxy for ORM Repositories
- */
 class RestOrmController extends \renovant\core\http\controller\ActionController {
 
 	/** JSON data param

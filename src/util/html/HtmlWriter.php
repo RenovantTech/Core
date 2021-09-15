@@ -1,16 +1,6 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\util\html;
 use renovant\core\sys;
-/**
- * HTML Writer
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class HtmlWriter {
 	use \renovant\core\CoreTrait;
 

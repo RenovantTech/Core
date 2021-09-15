@@ -1,15 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http;
 use const renovant\core\DATA_DIR;
 /**
  * Crypt Cookie using sodium library
- * @author Daniele Sciacchitano <dan@renovant.tech>
  * @see https://paragonie.com/book/pecl-libsodium/read/09-recipes.md#encrypted-cookies
  */
 class CryptoCookie {

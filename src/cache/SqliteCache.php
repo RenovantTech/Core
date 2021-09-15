@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\cache;
 use const renovant\core\CACHE_DIR;
 use const renovant\core\trace\{T_CACHE,T_ERROR};
 use renovant\core\sys;
-/**
- * Sqlite implementation of CacheInterface
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class SqliteCache implements CacheInterface {
 	use \renovant\core\CoreTrait;
 

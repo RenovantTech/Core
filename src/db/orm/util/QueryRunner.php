@@ -1,20 +1,9 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm\util;
 use renovant\core\sys,
 	renovant\core\db\Procedure,
 	renovant\core\db\Query,
 	renovant\core\db\orm\Repository;
-/**
- * ORM QueryRunner
- * Helper class that build & execute queries
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class QueryRunner {
 
 	/**

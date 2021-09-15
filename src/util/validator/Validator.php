@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\util\validator;
 use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_ERROR;
 use renovant\core\sys;
-/**
- * Validator
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Validator {
 
 	/**

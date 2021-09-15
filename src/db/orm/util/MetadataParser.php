@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm\util;
 use renovant\core\db\orm\Exception,
 	renovant\core\db\orm\Repository,
 	renovant\core\util\reflection\ReflectionClass;
-/**
- * ORM Metadata Parser
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class MetadataParser {
 
 	/**

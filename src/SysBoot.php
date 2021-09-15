@@ -1,18 +1,10 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core;
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\T_INFO;
 use renovant\core\container\Container,
 	renovant\core\util\yaml\Yaml;
 /**
- * System bootstrap helper
- * @author Daniele Sciacchitano <dan@renovant.tech>
  * @internal
  */
 class SysBoot extends sys {

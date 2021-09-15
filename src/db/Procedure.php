@@ -1,16 +1,6 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db;
 use renovant\core\sys;
-/**
- * Procedure
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Procedure {
 	use \renovant\core\CoreTrait;
 

@@ -1,12 +1,5 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\util\xml;
-
 class XMLException extends \renovant\core\Exception {
 	const COD1 = 'Validation with DTD Schema failed';
 	const COD2 = 'Validation with XML Schema failed.';

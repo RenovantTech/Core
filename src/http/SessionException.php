@@ -1,15 +1,5 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http;
-/**
- * HTTP Session Exception.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class SessionException extends \renovant\core\Exception {
 	// Session configuration
 	const COD1 = 'PHP configuration ERROR - please set session.auto_start 0 in your php.ini';

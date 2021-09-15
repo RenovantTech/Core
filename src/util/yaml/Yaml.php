@@ -1,19 +1,9 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\util\yaml;
 use const renovant\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
 use const renovant\core\trace\T_DEPINJ;
 use renovant\core\sys,
 	renovant\core\CoreProxy;
-/**
- * YAML Parser
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Yaml {
 
 	/**

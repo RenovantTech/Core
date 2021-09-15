@@ -1,17 +1,7 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\console\controller;
 use renovant\core\console\Exception,
 	renovant\core\util\reflection\ReflectionClass;
-/**
- * Utility class for ActionController
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class ActionControllerReflection {
 
 	/**

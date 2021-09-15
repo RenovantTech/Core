@@ -1,22 +1,14 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\console\controller;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\console\Request,
 	renovant\core\console\Response,
 	renovant\core\console\Exception;
-
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
  * Implementation classes must implement a doHandle() method.
- * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 abstract class AbstractController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;

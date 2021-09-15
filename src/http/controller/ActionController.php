@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http\controller;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
@@ -12,10 +6,6 @@ use renovant\core\sys,
 	renovant\core\http\Request,
 	renovant\core\http\Response,
 	renovant\core\http\Exception;
-/**
- * MVC action Controller implementation.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 abstract class ActionController implements \renovant\core\http\ControllerInterface {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;

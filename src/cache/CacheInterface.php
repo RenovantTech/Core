@@ -1,15 +1,5 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\cache;
-/**
- * Interface for Cache drivers.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 interface CacheInterface {
 
 	const CLEAN_ALL = 0;

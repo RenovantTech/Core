@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http;
 /**
  * MVC View for an HTTP Request.
@@ -13,7 +7,6 @@ namespace renovant\core\http;
  * View implementations may differ widely. An obvious implementation would be
  * PHP-based. Other implementations might be XSLT-based, or use an HTML generation library.
  * This interface is designed to avoid restricting the range of possible implementations.
- * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 interface ViewInterface {
 	/**

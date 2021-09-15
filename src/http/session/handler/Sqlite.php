@@ -1,17 +1,7 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http\session\handler;
 use renovant\core\sys,
 	renovant\core\http\SessionException;
-/**
- * HTTP Session Handler implementation with an Sqlite database.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class Sqlite implements \SessionHandlerInterface {
 	use \renovant\core\CoreTrait;
 

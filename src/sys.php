@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core;
 use renovant\core\cache\ArrayCache;
 use const renovant\core\cache\OBJ_ID_PREFIX;
@@ -26,7 +20,6 @@ use renovant\core\acl\ACL,
 	renovant\core\queue\Queue;
 /**
  * System Kernel
- * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 class sys {
 

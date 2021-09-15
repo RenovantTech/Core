@@ -1,17 +1,7 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\util\csv;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys;
-/**
- * CSV Writer
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class CsvWriter {
 	use \renovant\core\CoreTrait;
 

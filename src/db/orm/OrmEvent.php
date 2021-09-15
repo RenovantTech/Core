@@ -1,17 +1,6 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm;
 use renovant\core\db\Query;
-/**
- * ORM Event
- * Main event passed throughout ORM flow.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class OrmEvent extends \renovant\core\event\Event {
 
 	const EVENT_PRE_COUNT		= 'orm:pre-count';

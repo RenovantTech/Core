@@ -1,20 +1,10 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\console\view;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\console\Request,
 	renovant\core\console\Response,
 	renovant\core\console\Exception;
-/**
- * Php template View.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class PhpView implements \renovant\core\console\ViewInterface {
 	use \renovant\core\CoreTrait;
 

@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\event;
 use const renovant\core\trace\T_EVENT;
 use renovant\core\sys,
 	renovant\core\context\ContextException;
-/**
- * The EventDispatcher is the core of the framework event system.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class EventDispatcher {
 
 	/** registered listeners (callbacks)

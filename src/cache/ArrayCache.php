@@ -1,18 +1,7 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\cache;
 use const renovant\core\trace\T_CACHE;
 use renovant\core\sys;
-/**
- * Array implementation of CacheInterface, useful for testing.
- * ATTENTION: it's volatile, only in the current Request.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class ArrayCache implements CacheInterface {
 	use \renovant\core\CoreTrait;
 

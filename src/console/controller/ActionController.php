@@ -1,25 +1,10 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\console\controller;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\console\Request,
 	renovant\core\console\Response,
 	renovant\core\console\Exception;
-/**
- * MVC action Controller implementation.
- * Allows multiple requests types (aka action) to be handled by the same Controller class.
- * Action methods must have the following signature:
- * <code>
- * function exampleAction(Request $Req, Response $Res)
- * </code>
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 abstract class ActionController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;

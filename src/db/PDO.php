@@ -1,18 +1,8 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db;
 // @TODO use const renovant\core\TMP_DIR;
 use const renovant\core\trace\T_DB;
 use renovant\core\sys;
-/**
- * PDO wrapper
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class PDO extends \PDO {
 
 	/**

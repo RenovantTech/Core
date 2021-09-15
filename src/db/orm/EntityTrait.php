@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\db\orm;
 use const renovant\core\SYS_CACHE;
 use renovant\core\sys,
@@ -30,7 +24,6 @@ function metadataFetch($class) {
 
 /**
  * Entity trait class must use to make ORM Repository work.
- * @author Daniele Sciacchitano <dan@renovant.tech>
  */
 trait EntityTrait {
 

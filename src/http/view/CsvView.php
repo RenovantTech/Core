@@ -1,10 +1,4 @@
 <?php
-/**
- * Renovant Technology Core PHP Framework
- * @link https://github.com/RenovantTech/Core
- * @copyright Copyright (c) 2004-2018 Daniele Sciacchitano
- * @license New BSD License
- */
 namespace renovant\core\http\view;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
@@ -13,11 +7,6 @@ use renovant\core\sys,
 	renovant\core\http\Exception,
 	renovant\core\http\ViewInterface,
 	renovant\core\util\csv\CsvWriter;
-/**
- * CSV View
- * It outputs a CSV file to the client.
- * @author Daniele Sciacchitano <dan@renovant.tech>
- */
 class CsvView implements ViewInterface {
 
 	const CONTENT_TYPE = 'text/csv';
