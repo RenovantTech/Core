@@ -205,14 +205,14 @@ class sys {
 				if(self::$Req->CMD(0) == $conf['cmd']) {
 					$namespace = $conf['namespace'];
 					$dispatcherID = $namespace.'.Dispatcher';
-					self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
+					self::$Req->setAttribute('APP_MOD_URI', trim(strstr(self::$Req->CMD(),' ')));
 					break;
 				}
 			}
 			if(is_null($app)) throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
 			self::$Req->setAttribute('APP', $app);
-			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
-			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			self::$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
+			self::$Req->setAttribute('APP_MOD_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
 			$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
 			self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
@@ -227,29 +227,30 @@ class sys {
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	static function dispatchHTTP(array $routes) {
+	static function dispatchHTTP($app, array $routes) {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
 		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
-		$app = $dispatcherID = $namespace = null;
-		foreach($routes as $app => $conf) {
+		$module = $dispatcherID = $namespace = null;
+		foreach($routes as $module => $conf) {
 			if(strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
 				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR']==$conf['domain']) &&
 				(!isset($conf['port']) || $_SERVER['SERVER_PORT']==$conf['port']))
 			{
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
-				self::$Req->setAttribute('APP_URI', '/'.ltrim('/'.substr(self::$Req->URI(), strlen($conf['url'])), '/'));
-				self::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$conf['url'].' => APP namespace: '.$namespace, null, 'sys->dispatchHTTP');
+				self::$Req->setAttribute('APP_MOD_URI', '/'.ltrim('/'.substr(self::$Req->URI(), strlen($conf['url'])), '/'));
+				self::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$conf['url'].' => MODULE namespace: '.$namespace, null, 'sys->dispatchHTTP');
 				break;
 			}
 		}
 		try {
 			if(is_null($namespace)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
 			self::$Req->setAttribute('APP', $app);
-			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
-			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
+			self::$Req->setAttribute('APP_MOD', $module);
+			self::$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
+			self::$Req->setAttribute('APP_MOD_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
 			self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 		} catch (AuthException $Ex) {

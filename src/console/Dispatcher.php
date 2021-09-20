@@ -89,14 +89,14 @@ class Dispatcher {
 	 */
 	protected function doRoute(Request $Req, Response $Res) {
 		foreach($this->routes as $cmd => $controllerID) {
-			if(0===strpos($Req->getAttribute('APP_URI'), $cmd)) {
+			if(0===strpos($Req->getAttribute('APP_MOD_URI'), $cmd)) {
 				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: '.$cmd.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
-				$Req->setAttribute('APP_CONTROLLER', $controllerID);
+				$Req->setAttribute('APP_MOD_CONTROLLER', $controllerID);
 				return $controllerID;
 			}
 		}
 		$Res->setExitStatus(404);
-		throw new Exception(11, [$Req->getAttribute('APP_URI')]);
+		throw new Exception(11, [$Req->getAttribute('APP_MOD_URI')]);
 	}
 
 	/**
@@ -113,8 +113,8 @@ class Dispatcher {
 			@list($_, $engine, $resource) = $matches;
 			$engine = (empty($engine)) ? $this->defaultViewEngine : substr($engine,0,-1);
 			if(!empty($resource)) {
-				$resource = (substr($resource,0,1) != '/' ) ? dirname('/'.str_replace(' ','/',$Req->getAttribute('APP_URI'))).'/'.$resource : $resource;
-				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
+				$resource = (substr($resource,0,1) != '/' ) ? dirname('/'.str_replace(' ','/',$Req->getAttribute('APP_MOD_URI'))).'/'.$resource : $resource;
+				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_MOD_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			}
 			if(!isset($this->viewEngines[$engine])) throw new Exception(12, [$view, $resource]);
 			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);

@@ -14,7 +14,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
-		define('renovant\core\APP_URI', '/');
+		define('renovant\core\APP_MOD_URI', '/');
 		new Request;
 		new Response;
 		/** @var Dispatcher $Dispatcher */
@@ -35,19 +35,19 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'] = ['console','db','optimize'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'db optimize');
+		$Req->setAttribute('APP_MOD_URI', 'db optimize');
 		$this->assertSame('test.console.AbstractController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','mod1','foo'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'mod1 foo');
+		$Req->setAttribute('APP_MOD_URI', 'mod1 foo');
 		$this->assertSame('test.console.ActionController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		$_SERVER['argv'] = ['console','cron','backup'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'cron backup');
+		$Req->setAttribute('APP_MOD_URI', 'cron backup');
 		$this->assertSame('test.console.SimpleController', $RefMethod->invoke($Dispatcher, $Req, $Res));
 
 		return $Dispatcher;
@@ -64,8 +64,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
+		$Req->setAttribute('APP_MOD_URI', 'mod1 index');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'index', $Req, $Res);
 		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/index', $resource);
@@ -76,8 +76,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'] = ['sys','mod1','foo1'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'mod1 foo1');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
+		$Req->setAttribute('APP_MOD_URI', 'mod1 foo1');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/console/');
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, 'foo1', $Req, $Res);
 		$this->assertInstanceOf('renovant\core\console\view\PhpView', $View);
 		$this->assertSame('/mod1/foo1', $resource);
@@ -99,8 +99,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'] = ['sys','mod1','indexERR'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
+		$Req->setAttribute('APP_MOD_URI', 'mod1 index');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/console/');
 		$ReflMethod->invoke($Dispatcher, 'xxx:index', $Req, $Res);
 	}
 
@@ -115,8 +115,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['argv'] = ['sys','mod1','index'];
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', 'mod1 index');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/console/');
+		$Req->setAttribute('APP_MOD_URI', 'mod1 index');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/console/');
 		$this->assertNull($Dispatcher->dispatch($Req, $Res));
 	}
 }

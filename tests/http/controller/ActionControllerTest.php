@@ -55,17 +55,17 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/action/';
 		$Req = new Request;
-		$Req->setAttribute('APP_CONTROLLER_URI', '');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', '');
 		$this->assertEquals('index', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/action/foo';
 		$Req = new Request;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'foo');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'foo');
 		$this->assertEquals('foo', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['REQUEST_URI'] = '/action/31/02/2013/details-xml';
 		$Req = new Request;
-		$Req->setAttribute('APP_CONTROLLER_URI', '31/02/2013/details-xml');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', '31/02/2013/details-xml');
 		$this->assertEquals('details', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
@@ -83,7 +83,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/action/not-exists';
 		$Req = new Request;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'not-exists');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'not-exists');
 		$RefMethod->invoke($ActionController2, $Req);
 	}
 
@@ -99,7 +99,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_GET['id'] = 7;
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'action2');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action2');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['id-7', null, null], $Res->getView());
 		$this->assertEquals(7, $Res->get('id'));
@@ -108,7 +108,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		unset($_GET['name']);
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'action3');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action3');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['view3', null, null], $Res->getView());
 		$this->assertEquals('Tom', $Res->get('name'));
@@ -117,7 +117,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_GET['name'] = 'Jack';
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'action3');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action3');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['view3', null, null], $Res->getView());
 		$this->assertEquals('Jack', $Res->get('name'));
@@ -125,7 +125,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_SERVER['REQUEST_URI'] = '31/02/2013/details-xml';
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_CONTROLLER_URI', '31/02/2013/details-xml');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', '31/02/2013/details-xml');
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals(['details', null, null], $Res->getView());
 		$this->assertSame(2013, $Res->get('year'));

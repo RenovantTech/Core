@@ -96,12 +96,12 @@ class Dispatcher {
 	 * @throws Exception
 	 */
 	protected function doRoute(Request $Req) {
-		$url = $Req->getAttribute('APP_URI');
+		$url = $Req->getAttribute('APP_MOD_URI');
 		foreach($this->routes as $pattern => $controllerID) {
 			if(preg_match($pattern, $url, $matches))	 {
 				sys::trace(LOG_DEBUG, T_INFO, 'URL: '.$url.' matching pattern '.$pattern.' => Controller: '.$controllerID, null, $this->_.'->'.__FUNCTION__);
-				$Req->setAttribute('APP_CONTROLLER', $controllerID);
-				$Req->setAttribute('APP_CONTROLLER_URI', substr($Req->getAttribute('APP_URI'), strlen($matches[0])));
+				$Req->setAttribute('APP_MOD_CONTROLLER', $controllerID);
+				$Req->setAttribute('APP_MOD_CONTROLLER_URI', substr($Req->getAttribute('APP_MOD_URI'), strlen($matches[0])));
 				// inject URL params into Request
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
@@ -110,7 +110,7 @@ class Dispatcher {
 			}
 		}
 		http_response_code(404);
-		throw new Exception(11, [$Req->getAttribute('APP_URI')]);
+		throw new Exception(11, [$Req->getAttribute('APP_MOD_URI')]);
 	}
 
 	/**
@@ -132,8 +132,8 @@ class Dispatcher {
 			$Event->setView($View);
 			// detect resource
 			if(!empty($view)) {
-				$resource = str_replace('//','/', (substr($view,0,1) != '/' ) ? dirname($Req->getAttribute('APP_URI').'*').'/'.$view : $view);
-				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
+				$resource = str_replace('//','/', (substr($view,0,1) != '/' ) ? dirname($Req->getAttribute('APP_MOD_URI').'*').'/'.$view : $view);
+				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_MOD_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
 			} else $resource = null;
 			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);
 			return [$View, $resource, $viewOptions];
