@@ -116,14 +116,15 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
-	 * @param string $namespace the system namespace to initialize
+	 * @param string $sys the system namespace to initialize
+	 * @param string $app the APP namespace to initialize
 	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 * @throws util\yaml\YamlException
 	 */
-	static function init($namespace='sys') {
+	static function init(string $sys='sys', string $app='app') {
 		self::$traceFn = __METHOD__;
 		self::trace();
 		set_exception_handler(__NAMESPACE__.'\trace\Tracer::onException');
@@ -154,7 +155,8 @@ class sys {
 		self::$Container = new Container;
 		self::$EventDispatcher = new EventDispatcher;
 		self::$Context = new Context(self::$Container, self::$EventDispatcher);
-		self::$Context->init($namespace);
+		self::$Context->init($sys);
+		self::$Context->init($app);
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
@@ -226,7 +228,7 @@ class sys {
 	 * @throws \ReflectionException
 	 */
 	static function dispatchHTTP(array $routes) {
-		self::trace(LOG_DEBUG, T_INFO, null, null, 'sys->dispatchHTTP');
+		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
 		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
