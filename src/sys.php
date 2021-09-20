@@ -199,9 +199,9 @@ class sys {
 			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
 			file_put_contents($pidLock, getmypid());
 			$app = $dispatcherID = $namespace = null;
-			foreach($routes as $id => $namespace) {
-				if(self::$Req->CMD(0) == $id) {
-					$app = $id;
+			foreach($routes as $app => $conf) {
+				if(self::$Req->CMD(0) == $conf['cmd']) {
+					$namespace = $conf['namespace'];
 					$dispatcherID = $namespace.'.Dispatcher';
 					self::$Req->setAttribute('APP_URI', trim(strstr(self::$Req->CMD(),' ')));
 					break;
