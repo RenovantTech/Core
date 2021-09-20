@@ -76,9 +76,6 @@ class sys {
 	 * @var integer */
 	static protected $traceLevel = LOG_DEBUG;
 
-	/** HTTP/CLI apps routing
-	 * @var array */
-	protected $cnfApps = [];
 	/** Cache configurations
 	 * @var array */
 	protected $cnfCache = [];
@@ -188,24 +185,13 @@ class sys {
 	}
 
 	/**
-	 * Dispatch HTTP/CLI request
-	 * @param string $api PHP_SAPI
-	 * @throws SysException
-	 * @throws ContextException
-	 * @throws EventDispatcherException
-	 * @throws \ReflectionException
-	 */
-	static function dispatch($api=PHP_SAPI) {
-		($api=='cli') ? self::dispatchCLI() : self::dispatchHTTP();
-	}
-
-	/**
+	 * @param array $routes CLI APP modules routing
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws SysException
 	 * @throws \ReflectionException
 	 */
-	static protected function dispatchCLI() {
+	static function dispatchCLI(array $routes) {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new console\Request;
 		self::$Res = new console\Response;
@@ -213,7 +199,7 @@ class sys {
 			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
 			file_put_contents($pidLock, getmypid());
 			$app = $dispatcherID = $namespace = null;
-			foreach(self::$Sys->cnfApps['CLI'] as $id => $namespace) {
+			foreach($routes as $id => $namespace) {
 				if(self::$Req->CMD(0) == $id) {
 					$app = $id;
 					$dispatcherID = $namespace.'.Dispatcher';
@@ -234,17 +220,18 @@ class sys {
 	}
 
 	/**
+	 * @param array $routes HTTP APP modules routing
 	 * @throws ContextException
 	 * @throws EventDispatcherException
-	 * @throws SysException
 	 * @throws \ReflectionException
 	 */
-	static protected function dispatchHTTP() {
-		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
+	static function dispatchHTTP(array $routes) {
+		self::trace(LOG_DEBUG, T_INFO, null, null, 'sys->dispatchHTTP');
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
+		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 		$app = $dispatcherID = $namespace = null;
-		foreach(self::$Sys->cnfApps['HTTP'] as $app => $conf) {
+		foreach($routes as $app => $conf) {
 			if(strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
 				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR']==$conf['domain']) &&
 				(!isset($conf['port']) || $_SERVER['SERVER_PORT']==$conf['port']))
@@ -252,20 +239,27 @@ class sys {
 				$namespace = $conf['namespace'];
 				$dispatcherID = $namespace.'.Dispatcher';
 				self::$Req->setAttribute('APP_URI', '/'.ltrim('/'.substr(self::$Req->URI(), strlen($conf['url'])), '/'));
-				self::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$conf['url'].' => APP namespace: '.$namespace, null, __FUNCTION__);
+				self::trace(LOG_DEBUG, T_INFO, 'matched URL: '.$conf['url'].' => APP namespace: '.$namespace, null, 'sys->dispatchHTTP');
 				break;
 			}
 		}
-		if(is_null($namespace)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
-		self::$Req->setAttribute('APP', $app);
-		self::$Req->setAttribute('APP_NAMESPACE', $namespace);
-		self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
-		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 		try {
+			if(is_null($namespace)) throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
+			self::$Req->setAttribute('APP', $app);
+			self::$Req->setAttribute('APP_NAMESPACE', $namespace);
+			self::$Req->setAttribute('APP_DIR', self::info($namespace.'.class', self::INFO_PATH_DIR).'/');
 			self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 		} catch (AuthException $Ex) {
 			http_response_code(401);
+			$HttpEvent->setException($Ex);
+			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+		} catch (SysException $Ex) {
+			http_response_code(404);
+			$HttpEvent->setException($Ex);
+			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+		} catch (\Exception $Ex) {
+			http_response_code(500);
 			$HttpEvent->setException($Ex);
 			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
 		}
