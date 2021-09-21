@@ -79,15 +79,15 @@ class AuthService {
 	/** REMEMBER-TOKEN flag
 	 * @var boolean */
 	protected $setRememberToken = false;
-	/** APPs to be skipped by checkAUTH()
+	/** APP modules to be skipped by checkAUTH()
 	 * @var array */
-	protected $skipAuthApps = [];
+	protected $skipAuthModules = [ 'AUTH' ];
 	/** URLs to be skipped by checkAUTH()
 	 * @var array */
 	protected $skipAuthUrls = [];
-	/** APPs to be skipped by checkXSRF()
+	/** APP modules to be skipped by checkXSRF()
 	 * @var array */
-	protected $skipXSRFApps = [];
+	protected $skipXSRFModules = [];
 	/** URLs to be skipped by checkXSRF()
 	 * @var array */
 	protected $skipXSRFUrls = [];
@@ -98,7 +98,7 @@ class AuthService {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function __construct($module='SESSION') {
+	function __construct(string $module='SESSION') {
 		if(!in_array($module, self::MODULES)) throw new Exception(1, [$module, implode(', ', self::MODULES)]);
 		$this->module = $module;
 		switch ($this->module) {
@@ -111,7 +111,7 @@ class AuthService {
 	}
 
 	function __sleep() {
-		return ['_', 'cookieAUTH', 'cookieREFRESH', 'cookieREMEMBER', 'cookieXSRF', 'module', 'provider', 'ttlAUTH', 'ttlREFRESH', 'ttlREMEMBER', 'skipAuthApps', 'skipAuthUrls', 'skipXSRFApps', 'skipXSRFUrls'];
+		return ['_', 'cookieAUTH', 'cookieREFRESH', 'cookieREMEMBER', 'cookieXSRF', 'module', 'provider', 'ttlAUTH', 'ttlREFRESH', 'ttlREMEMBER', 'skipAuthModules', 'skipAuthUrls', 'skipXSRFModules', 'skipXSRFUrls'];
 	}
 
 	/**
@@ -163,7 +163,7 @@ class AuthService {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
 		try {
 			$Req = $Event->getRequest();
-			$APP = $Req->getAttribute('APP');
+			$APP_MOD = $Req->getAttribute('APP_MOD');
 			$URI = $Req->URI();
 
 			// AUTH-TOKEN & REFRESH-TOKEN
@@ -225,7 +225,7 @@ class AuthService {
 					break;
 			}
 			$Auth = Auth::instance();
-			if (!$Auth->UID() && $URI != '/' && !in_array($APP, $this->skipAuthApps) && !$this->checkAUTH($URI))
+			if (!$Auth->UID() && $URI != '/' && !in_array($APP_MOD, $this->skipAuthModules) && !$this->checkAUTH($URI))
 				throw new AuthException(101, [$this->module]);
 
 			// XSRF-TOKEN
@@ -238,7 +238,7 @@ class AuthService {
 				sys::trace(LOG_DEBUG, T_INFO, 'XSRF-TOKEN OK');
 			elseif ($XSRFToken && $XSRFToken != $this->_XSRF_TOKEN)
 				throw new AuthException(50, [$this->module]);
-			elseif ($URI != '/' && !in_array($APP, $this->skipXSRFApps) && !$this->checkXSRF($URI))
+			elseif ($URI != '/' && !in_array($APP_MOD, $this->skipXSRFModules) && !$this->checkXSRF($URI))
 				throw new AuthException(102, [$this->module]);
 
 		} catch (AuthException $Ex) {
