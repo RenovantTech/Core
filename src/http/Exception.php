@@ -20,4 +20,7 @@ class Exception extends \renovant\core\Exception {
 	const COD256 = 'JSON View Exception - Unknown error';
 	const COD261 = 'X-SendFile View Exception: constant XSENDFILE_PATH not defined';
 	const COD262 = 'X-SendFile View Exception: constant XSENDFILE_URL not defined';
+	/* CryptoCookie */
+	const COD401 = 'CryptoCookie Exception - Decryption failed';
+	const COD402 = 'CryptoCookie SodiumException - Decryption failed';
 }
