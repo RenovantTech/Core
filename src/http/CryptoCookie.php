@@ -33,21 +33,21 @@ class CryptoCookie {
 
 	/**
 	 * CryptoCookie constructor.
-	 * @param $name
-	 * @param $expire
-	 * @param $path
-	 * @param $domain
-	 * @param $secure
-	 * @param $httpOnly
+	 * @param string $name
+	 * @param int $expire
+	 * @param string $path
+	 * @param string|null $domain
+	 * @param bool $secure
+	 * @param bool $httpOnly
 	 * @throws \Exception
 	 */
-	function __construct($name, $expire=0, $path='', $domain='', $secure=false, $httpOnly=false) {
-		$this->name = (string) $name;
-		$this->expire = (int) $expire;
-		$this->path = (string) $path;
+	function __construct(string $name, int $expire=0, string $path='', ?string $domain='', bool $secure=false, bool $httpOnly=false) {
+		$this->name = $name;
+		$this->expire = $expire;
+		$this->path = $path;
 		$this->domain = (string) $domain;
-		$this->secure = (bool) $secure;
-		$this->httpOnly = (bool) $httpOnly;
+		$this->secure = $secure;
+		$this->httpOnly = $httpOnly;
 		if(file_exists(self::KEY_FILE))
 			$this->_key = file_get_contents(self::KEY_FILE);
 		else {
@@ -63,22 +63,26 @@ class CryptoCookie {
 	 */
 	function read() {
 		if(!array_key_exists($this->name, $_COOKIE)) return null;
-		$cookie = sodium_hex2bin($_COOKIE[$this->name]);
-		list ($encKey, $authKey) = $this->splitKeys();
-		$mac = mb_substr($cookie, 0, SODIUM_CRYPTO_AUTH_BYTES, '8bit');
-		$nonce = mb_substr($cookie, SODIUM_CRYPTO_AUTH_BYTES, SODIUM_CRYPTO_STREAM_NONCEBYTES, '8bit');
-		$cipherText = mb_substr($cookie, SODIUM_CRYPTO_AUTH_BYTES + SODIUM_CRYPTO_STREAM_NONCEBYTES, null, '8bit');
-		if (sodium_crypto_auth_verify($mac, $nonce . $cipherText, $authKey)) {
-			sodium_memzero($authKey);
-			$data = sodium_crypto_stream_xor($cipherText, $nonce, $encKey);
-			sodium_memzero($encKey);
-			if($data !== false)
-				return unserialize($data);
-		} else {
-			sodium_memzero($authKey);
-			sodium_memzero($encKey);
+		try {
+			$cookie = sodium_hex2bin($_COOKIE[$this->name]);
+			list ($encKey, $authKey) = $this->splitKeys();
+			$mac = mb_substr($cookie, 0, SODIUM_CRYPTO_AUTH_BYTES, '8bit');
+			$nonce = mb_substr($cookie, SODIUM_CRYPTO_AUTH_BYTES, SODIUM_CRYPTO_STREAM_NONCEBYTES, '8bit');
+			$cipherText = mb_substr($cookie, SODIUM_CRYPTO_AUTH_BYTES + SODIUM_CRYPTO_STREAM_NONCEBYTES, null, '8bit');
+			if (sodium_crypto_auth_verify($mac, $nonce . $cipherText, $authKey)) {
+				sodium_memzero($authKey);
+				$data = sodium_crypto_stream_xor($cipherText, $nonce, $encKey);
+				sodium_memzero($encKey);
+				if($data != false)
+					return unserialize($data);
+			} else {
+				sodium_memzero($authKey);
+				sodium_memzero($encKey);
+			}
+			throw new Exception(401);
+		} catch (\SodiumException $Ex) {
+			throw new Exception(402);
 		}
-		throw new Exception('Decryption failed.');
 	}
 
 	/**
@@ -105,6 +109,7 @@ class CryptoCookie {
 	 * Just an example. In a real system, you want to use HKDF for
 	 * key-splitting instead of just a keyed BLAKE2b hash.
 	 * @return array(2) [encryption key, authentication key]
+	 * @throws \SodiumException
 	 */
 	private function splitKeys() {
 		$encKey = sodium_crypto_generichash(

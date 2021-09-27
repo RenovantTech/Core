@@ -42,7 +42,7 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 		$_GET['name'] = 'Jack';
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_CONTROLLER_URI', 'books/history+math/32');
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'books/history+math/32');
 		$AbstractController->handle($Req, $Res);
 		$this->assertEquals(['view',null,null], $Res->getView());
 		$this->assertEquals('books', $Res->get('categ'));

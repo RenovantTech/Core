@@ -34,22 +34,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertArrayHasKey('test', $namespaces);
 		$this->assertEquals(__DIR__, realpath($namespaces['test']));
 
-		// APPS HTTP/CLI
-		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfApps');
-		$ReflProp->setAccessible(true);
-		$apps = $ReflProp->getValue($Sys);
-		$this->assertArrayHasKey('MNGR', 		$apps['HTTP']);
-		$this->assertEquals(8080,			$apps['HTTP']['MNGR']['port']);
-		$this->assertEquals('/',			$apps['HTTP']['MNGR']['url']);
-		$this->assertEquals('mngr',		$apps['HTTP']['MNGR']['namespace']);
-		$this->assertArrayHasKey('API_FOO',	$apps['HTTP']);
-		$this->assertNull(							$apps['HTTP']['API_FOO']['port']);
-		$this->assertEquals('/api/foo/',	$apps['HTTP']['API_FOO']['url']);
-		$this->assertEquals('api.foo',		$apps['HTTP']['API_FOO']['namespace']);
-		$this->assertCount(1, $apps['CLI']);
-
-		$this->assertEquals('test.console',		$apps['CLI']['console']);
-
 		// constants
 		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'cnfConstants');
 		$ReflProp->setAccessible(true);

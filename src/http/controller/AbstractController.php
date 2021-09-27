@@ -43,7 +43,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 		}
 		// inject URL params into Request
 		if(isset($this->_config['route'])) {
-			if(preg_match($this->_config['route'], $Req->getAttribute('APP_CONTROLLER_URI'), $matches)) {
+			if(preg_match($this->_config['route'], $Req->getAttribute('APP_MOD_CONTROLLER_URI'), $matches)) {
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
 				}

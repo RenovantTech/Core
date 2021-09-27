@@ -43,8 +43,6 @@ class SysBoot extends sys {
 
 		$config = array_merge_recursive([
 			'sys' => [
-				'apps' => [],
-				'cli' => [],
 				'namespaces' => [],
 				'constants' => [],
 				'settings' => [],
@@ -55,10 +53,6 @@ class SysBoot extends sys {
 				'services' => []
 			]
 		], Yaml::parseFile(BASE_DIR.SYS_YAML));
-
-		// APPS HTTP/CLI
-		self::$Sys->cnfApps['HTTP'] = $config['sys']['apps'];
-		self::$Sys->cnfApps['CLI'] = $config['sys']['cli'];
 
 		// namespaces
 		foreach($config['sys']['namespaces'] as $k => $dir) {

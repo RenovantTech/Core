@@ -15,7 +15,7 @@ class SysException extends Exception {
 	const ERR32 = 'Invalid namespace configuration - Namespace "{1}, path "{2}" is NOT a Phar stream wrapper';
 
 	// configuration
-	const ERR1 = 'Failed to run application "{1}", path not available.<br>- APP="{1}" defined in bootstrap file (index.php);<br>- Core XML configuration ({2}) DO NOT contain "{1}" application path.<br>- Default directory "{BASE_DIR}apps/{1}" NOT found.';
+	const ERR1 = 'Failed to run application module "{1}", path not available.<br>- APP_MOD="{1}" defined in bootstrap file (index.php);<br>- Core XML configuration ({2}) DO NOT contain "{1}" application path.<br>- Default directory "{BASE_DIR}apps/{1}" NOT found.';
 
 	// class autoloading
 	const ERR11 = 'Autoloading class {1}: file {2} not found';

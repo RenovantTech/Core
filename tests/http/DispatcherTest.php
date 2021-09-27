@@ -26,7 +26,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testConstruct() {
 		$_SERVER['REQUEST_URI'] = '/';
-		define('renovant\core\APP_URI', '/');
+		define('renovant\core\APP_MOD_URI', '/');
 		new Request;
 		new Response;
 		/** @var Dispatcher $Dispatcher */
@@ -55,34 +55,34 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/home';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/home');
+		$Req->setAttribute('APP_MOD_URI', '/home');
 		$this->assertSame('test.http.SimpleController', $RefMethod->invoke($Dispatcher, $Req));
-		$this->assertSame('', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('', $Req->getAttribute('APP_MOD_CONTROLLER_URI'));
 
 		$_SERVER['REQUEST_URI'] = '/action/foo';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/action/foo');
+		$Req->setAttribute('APP_MOD_URI', '/action/foo');
 		$this->assertSame('test.http.ActionController', $RefMethod->invoke($Dispatcher, $Req));
-		$this->assertSame('foo', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('foo', $Req->getAttribute('APP_MOD_CONTROLLER_URI'));
 
 		$_SERVER['REQUEST_METHOD'] = 'GET';
 		$_SERVER['REQUEST_URI'] = '/rest/book/14';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/rest/book/14');
+		$Req->setAttribute('APP_MOD_URI', '/rest/book/14');
 		$this->assertSame('test.http.RestActionController', $RefMethod->invoke($Dispatcher, $Req));
-		$this->assertSame('book/14', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('book/14', $Req->getAttribute('APP_MOD_CONTROLLER_URI'));
 
 		$_SERVER['REQUEST_URI'] = '/catalog/books/science/13';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/catalog/books/science/13');
+		$Req->setAttribute('APP_MOD_URI', '/catalog/books/science/13');
 		$this->assertSame('test.http.AbstractController', $RefMethod->invoke($Dispatcher, $Req));
-		$this->assertSame('books/science/13', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('books/science/13', $Req->getAttribute('APP_MOD_CONTROLLER_URI'));
 
 		$_SERVER['REQUEST_URI'] = '/blog/science/13-foobar';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/blog/science/13-foobar');
+		$Req->setAttribute('APP_MOD_URI', '/blog/science/13-foobar');
 		$this->assertSame('test.http.ActionController', $RefMethod->invoke($Dispatcher, $Req));
-		$this->assertSame('13-foobar', $Req->getAttribute('APP_CONTROLLER_URI'));
+		$this->assertSame('13-foobar', $Req->getAttribute('APP_MOD_CONTROLLER_URI'));
 		$this->assertSame('science', $Req->get('category'));
 
 		return $Dispatcher;
@@ -100,7 +100,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/not-exists/foo';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/not-exists/foo');
+		$Req->setAttribute('APP_MOD_URI', '/not-exists/foo');
 		$RefMethod->invoke($Dispatcher, $Req);
 	}
 
@@ -114,8 +114,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
+		$Req->setAttribute('APP_MOD_URI', '/');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
@@ -127,8 +127,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/app/action/';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/action/');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
+		$Req->setAttribute('APP_MOD_URI', '/action/');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('index', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
@@ -141,8 +141,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/app/action/foo1';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/action/foo1');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
+		$Req->setAttribute('APP_MOD_URI', '/action/foo1');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/http/');
 		$Res = (new Response)->setView('foo1', null, ENGINE_PHP);
 		list($View, $resource) = $RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
 		$this->assertInstanceOf('renovant\core\http\view\PhpView', $View);
@@ -165,8 +165,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 
 		$_SERVER['REQUEST_URI'] = '/';
 		$Req = new Request;
-		$Req->setAttribute('APP_URI', '/');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
+		$Req->setAttribute('APP_MOD_URI', '/');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/http/');
 		$Res = new Response;
 		$Res->setView('index', null, 'xxx');
 		$RefMethod->invoke($Dispatcher, $Req, $Res, new Event($Req, $Res));
@@ -184,8 +184,8 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 		define('SESSION_UID', 1);
 		$Req = new Request;
 		$Res = new Response;
-		$Req->setAttribute('APP_URI', '/home');
-		$Req->setAttribute('APP_DIR', TEST_DIR.'/http/');
+		$Req->setAttribute('APP_MOD_URI', '/home');
+		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/http/');
 		$this->assertNull($Dispatcher->dispatch($Req, $Res));
 		$output = ob_get_clean();
 		$this->assertMatchesRegularExpression('/<title>index<\/title>/', $output);

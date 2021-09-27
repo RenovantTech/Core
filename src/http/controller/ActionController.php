@@ -102,7 +102,7 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 			if(
 				($params['method'] == '*' || $params['method'] == $Req->getMethod())
 				&&
-				preg_match($params['pattern'], $Req->getAttribute('APP_CONTROLLER_URI'), $matches)
+				preg_match($params['pattern'], $Req->getAttribute('APP_MOD_CONTROLLER_URI'), $matches)
 			) {
 				foreach($matches as $k=>$v) {
 					if(is_string($k)) $Req->set($k, $v);
