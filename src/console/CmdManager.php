@@ -1,10 +1,14 @@
 <?php
 namespace renovant\core\console;
-use const renovant\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR};
+use const renovant\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR, TMP_DIR};
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys;
 class CmdManager {
 	use \renovant\core\CoreTrait;
+
+	const SQL_ON_START	= 'UPDATE %s SET runningPID = :pid, runningAt = :runningAt WHERE id = :id';
+	const SQL_ON_END	= 'UPDATE %s SET runningPID = NULL, lastTime = runningAt, runningAt = NULL, lastStatus = :lastStatus WHERE id = :id';
+	const SQL_ON_LOG	= 'INSERT INTO %s_logs (id, startedAt, execTime, status, log) VALUES (:id, :startedAt, :execTime, :status, :log)';
 
 	static protected $buffer = [];
 
@@ -14,6 +18,9 @@ class CmdManager {
 	/** PDO tables prefix
 	 * @var string */
 	protected $tablePrefix = 'sys_cmd';
+	/** Timestamps of running batches
+	 * @var array */
+	protected $timestamps = [];
 
 	/**
 	 * @param string|null $pdo PDO instance ID, default to "master"
@@ -32,6 +39,49 @@ class CmdManager {
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
+	}
+
+	/**
+	 * Before event CONSOLE:CONTROLLER
+	 * @param Request $Req
+	 * @param Response $Res
+	 * @throws Exception
+	 */
+	function onStart(Request $Req, Response $Res) {
+		$prevTraceFn = sys::traceFn('sys.CmdManager');
+		try {
+			$cmd = $Req->CMD();
+			$outputFile = TMP_DIR.str_replace(' ','-', $cmd).'.'.posix_getpid().'.out';
+			$Res->setOutput(fopen($outputFile, 'w'));
+			$this->timestamps[$cmd] = time();
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_ON_START, $this->tablePrefix))->execute(['id'=>$cmd, 'pid'=>posix_getpid(), 'runningAt'=>date('Y-m-d H:i:s')]);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
+
+	/**
+	 * After event CONSOLE:RESPONSE
+	 * @param string $cmd
+	 */
+	function onEnd(string $cmd) {
+		$this->_onEnd($cmd, 'OK');
+	}
+
+	/**
+	 * After event CONSOLE:EXCEPTION
+	 * @param string $cmd
+	 */
+	function onException(string $cmd) {
+		$this->_onEnd($cmd, 'ERROR');
+	}
+
+	/**
+	 * After event CONSOLE:SIGTERM
+	 * @param string $cmd
+	 */
+	function onSIGTERM(string $cmd) {
+		$this->_onEnd($cmd, 'SIGTERM');
 	}
 
 	function exec(string $cmd) {
@@ -54,6 +104,24 @@ class CmdManager {
 	function scan() {
 		include __DIR__.'/CmdManager.scan.inc';
 		scan($this->pdo, $this->tablePrefix);
+	}
+
+	protected function _onEnd(string $cmd, $status=null) {
+		$prevTraceFn = sys::traceFn('sys.CmdManager');
+		try {
+			$startTime = $this->timestamps[$cmd];
+			unset($this->timestamps[$cmd]);
+			$execTime = time() - $startTime;
+			$outputFile = TMP_DIR.str_replace(' ','-', $cmd).'.'.posix_getpid().'.out';
+			sys::pdo($this->pdo)->prepare(sprintf(self::SQL_ON_END, $this->tablePrefix))->execute(['id'=>$cmd, 'lastStatus'=>$status]);
+			if(filesize($outputFile)) {
+				$log = bzcompress(file_get_contents($outputFile));
+				sys::pdo($this->pdo)->prepare(sprintf(self::SQL_ON_LOG, $this->tablePrefix))->execute(['id'=>$cmd, 'startedAt'=>date('Y-m-d H:i:s',$startTime), 'execTime'=>$execTime, 'status'=>$status, 'log'=>$log]);
+			}
+			unlink($outputFile);
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	static function shutdown() {

@@ -28,7 +28,8 @@
 		"ext-mbstring": "*",
 		"ext-dom": "*",
 		"ext-libxml": "*",
-		"ext-openssl": "*"
+		"ext-openssl": "*",
+		"ext-bz2": "*"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",

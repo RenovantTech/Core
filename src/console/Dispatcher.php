@@ -1,5 +1,7 @@
 <?php
 namespace renovant\core\console;
+use renovant\core\context\ContextException;
+use renovant\core\event\EventDispatcherException;
 use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
@@ -41,6 +43,7 @@ class Dispatcher {
 		$Controller = $controllerID = $resource = null;
 		$Event = new Event($Req, $Res);
 		try {
+			sys::cmd()->onStart($Req, $Res);
 			if(!sys::event(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
 				$controllerID = $this->doRoute($Req, $Res);
 				$Controller = sys::context()->get($controllerID, ControllerInterface::class);
@@ -48,12 +51,13 @@ class Dispatcher {
 			}
 			if($Controller) {
 				if(ENVIRONMENT != 'PHPUNIT') {
-					$signalFn = function($sig) use ($Controller, $Event, $controllerID) {
+					$signalFn = function($sig) use ($Controller, $Event, $controllerID, $Req, $Res) {
 						sys::trace(LOG_DEBUG, T_INFO, self::SIGNALS[$sig], null, 'sys');
 						$method = 'on'.self::SIGNALS[$sig];
 						if(method_exists(sys::context()->container()->getType($controllerID), $method)) $Controller->$method();
 						if($sig == SIGTERM) {
 							sys::event(Event::EVENT_SIGTERM, $Event);
+							sys::cmd()->onSIGTERM($Req->CMD());
 							exit;
 						}
 					};
@@ -72,11 +76,13 @@ class Dispatcher {
 				}
 			}
 			sys::event(Event::EVENT_RESPONSE, $Event);
+			sys::cmd()->onEnd($Req->CMD());
 			$Res->send();
 		} catch(\Exception $Ex) {
 			Tracer::onException($Ex);
 			$Event->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $Event);
+			sys::cmd()->onException($Req->CMD());
 		}
 	}
 
@@ -107,7 +113,7 @@ class Dispatcher {
 	 * @return array
 	 * @throws \Exception
 	 */
-	protected function resolveView($view, Request $Req, Response $Res) {
+	protected function resolveView(string $view, Request $Req, Response $Res) {
 		try {
 			preg_match('/^([a-z-]+:)?([^:\s]+)?$/', $view, $matches);
 			@list($_, $engine, $resource) = $matches;
