@@ -63,6 +63,9 @@ class sys {
 	/** Current HTTP/CLI Response
 	 * @var object */
 	static protected $Res;
+	/** Current HTTP/CLI routes
+	 * @var array */
+	static protected $routes = [];
 	/** Singleton instance
 	 * @var sys */
 	static protected $Sys;
@@ -197,6 +200,7 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new console\Request;
 		self::$Res = new console\Response;
+		self::$routes = $routes;
 		try {
 			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
 			file_put_contents($pidLock, getmypid());
@@ -231,6 +235,7 @@ class sys {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req = new http\Request;
 		self::$Res = new http\Response;
+		self::$routes = $routes;
 		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 		$module = $dispatcherID = $namespace = null;
 		foreach($routes as $module => $conf) {

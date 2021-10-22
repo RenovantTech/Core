@@ -38,7 +38,7 @@ class Container {
 	 * @throws \ReflectionException
 	 * @internal
 	 */
-	function build($id, $class, array $args=null, array $properties=[]) {
+	function build(string $id, string $class, array $args=[], array $properties=[]) {
 		$RClass = new \ReflectionClass($class);
 		$Obj = $RClass->newInstanceWithoutConstructor();
 		$RObj = new \ReflectionObject($Obj);
@@ -56,7 +56,7 @@ class Container {
 	 * @param array|null $containerMaps
 	 * @throws ContainerException
 	 */
-	function init($namespace, array $containerMaps=null) {
+	function init(string $namespace, array $containerMaps=null) {
 		if(in_array($namespace, $this->namespaces)) return;
 		//sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
 		$this->namespaces[] = $namespace;
@@ -69,13 +69,13 @@ class Container {
 	/**
 	 * Get an object
 	 * @param string $id object OID
-	 * @param string $class required object class
+	 * @param string|null $class required object class
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContainerException
 	 * @throws \ReflectionException
 	 */
-	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
+	function get(string $id, ?string $class=null, int $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
 		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
@@ -102,7 +102,7 @@ class Container {
 	 * @throws ContainerException
 	 * @throws \ReflectionException
 	 */
-	function getAllByType($class) {
+	function getAllByType(string $class) {
 		$ids = $this->getListByType($class);
 		$_ = [];
 		foreach($ids as $id){
@@ -116,7 +116,7 @@ class Container {
 	 * @param string $class desired class/interface
 	 * @return array[string] services IDs (can be empty)
 	 */
-	function getListByType($class) {
+	function getListByType(string $class) {
 		return $this->class2idMap[$class] ?: [];
 	}
 
@@ -126,7 +126,7 @@ class Container {
 	 * @return string object class
 	 * @throws ContainerException
 	 */
-	function getType($id) {
+	function getType(string $id) {
 		if(isset($this->id2classMap[$id])) return $this->id2classMap[$id][0];
 		throw new ContainerException(1, [$this->_, $id]);
 	}
@@ -134,10 +134,10 @@ class Container {
 	/**
 	 * Return TRUE if contains object (optionally verifying class)
 	 * @param string $id object identifier
-	 * @param string $class class/interface that object must extend/implement (optional)
+	 * @param string|null $class class/interface that object must extend/implement (optional)
 	 * @return bool
 	 */
-	function has($id, $class=null) {
+	function has(string $id, ?string $class=null) {
 		return isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) );
 	}
 
@@ -147,9 +147,8 @@ class Container {
 	 * @param mixed $v property value
 	 * @param object $Obj
 	 * @param \ReflectionObject $RObject
-	 * @throws \ReflectionException
 	 */
-	static protected function setProperty($k, $v, $Obj, \ReflectionObject $RObject) {
+	static protected function setProperty(string $k, $v, object $Obj, \ReflectionObject $RObject) {
 		if($RObject->hasProperty($k)) {
 			$RProperty = $RObject->getProperty($k);
 			$RProperty->setAccessible(true);

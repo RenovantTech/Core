@@ -1,0 +1,10 @@
+services:
+  # Dispatcher
+  renovant.core.bin.Dispatcher:
+    class: renovant\core\console\Dispatcher
+    properties:
+      routes:
+        cmd:    renovant.core.bin.CmdController
+  # Controllers
+  renovant.core.bin.CmdController:
+    class: renovant\core\bin\CmdController
