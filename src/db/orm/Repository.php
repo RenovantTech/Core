@@ -223,12 +223,28 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
 	function update(object $Entity, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
+	}
+
+	/**
+	 * Update Entity into DB
+	 * @param array $entities
+	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
+	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
+	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
+	 * @return array Entity objects or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @throws Exception
+	 */
+	function updateAll(array $entities, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+		$data = [];
+		foreach ($entities as $Entity)
+			$data[] = $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
+		return $data;
 	}
 
 	/**
@@ -238,7 +254,7 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
@@ -249,7 +265,7 @@ class Repository {
 	/**
 	 * Validate Entity.
 	 * Empty implementation, can be overridden by subclasses
-	 * @param $Entity
+	 * @param object $Entity
 	 * @param string|null $validateMode
 	 * @return array map of properties & error codes, empty if VALID
 	 */
@@ -426,7 +442,7 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
@@ -467,9 +483,10 @@ class Repository {
 	}
 
 	/**
-	 * @param $Entity
-	 * @param bool|string $validateMode, TRUE or a named @orm-validate-subset
-	 * @throws Exception|\ReflectionException
+	 * @param object $Entity
+	 * @param bool|string $validateMode TRUE or a named @orm-validate-subset
+	 * @throws Exception
+	 * @throws \ReflectionException
 	 */
 	protected function doValidate(object $Entity, $validateMode) {
 		$validateSubset = (is_string($validateMode)) ? $Entity::metadata(self::META_VALIDATE_SUBSETS, $validateMode) : null;
