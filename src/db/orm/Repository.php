@@ -427,7 +427,7 @@ class Repository {
 				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
-			$this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
+			if($response) $this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
 			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(100, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -474,7 +474,7 @@ class Repository {
 				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
 				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			}
-			$this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
+			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
 			return $response;
 		} catch(\PDOException $Ex) {
 			throw new Exception(300, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
