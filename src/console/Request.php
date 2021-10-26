@@ -27,7 +27,7 @@ class Request {
 				// --foo
 				if($eqPos === false) {
 					$key	= substr($arg, 2);
-					$value	= isset($this->data[$key]) ? $this->data[$key] : true;
+					$value	= $this->data[$key] ?? true;
 					$this->data[$key]	= $value;
 				}
 				// --bar=baz
@@ -46,11 +46,11 @@ class Request {
 					$this->data[$key]	= $value;
 				}
 				// -abc
-				else{
+				else {
 					$chars = str_split(substr($arg,1));
 					foreach($chars as $char) {
 						$key		= $char;
-						$value		= isset($this->data[$key]) ? $this->data[$key] : true;
+						$value		= $this->data[$key] ?? true;
 						$this->data[$key]	= $value;
 					}
 				}
@@ -67,7 +67,7 @@ class Request {
 	 * @param int|null $i arg index, NULL to have the full command string
 	 * @return string
 	 */
-	function CMD($i=null) {
+	function CMD(int $i=null) {
 		if(is_null($i)) return implode(' ', $this->cmd);
 		else return $this->cmd[$i];
 	}
@@ -77,12 +77,12 @@ class Request {
 	 * @param string $p parameter name
 	 * @return mixed|null
 	 */
-	function get($p) {
-		return isset($this->data[$p]) ? $this->data[$p] : null;
+	function get(string $p) {
+		return $this->data[$p] ?? null;
 	}
 
 	function getAttribute($k) {
-		return isset($this->attrs[$k]) ? $this->attrs[$k] : null;
+		return $this->attrs[$k] ?? null;
 	}
 
 	/**
@@ -90,8 +90,8 @@ class Request {
 	 * @param string $p parameter name
 	 * @param mixed $v parameter value
 	 */
-	function set($p, $v) {
-		$this->data[$p]=$v;
+	function set(string $p, $v) {
+		$this->data[$p] = $v;
 	}
 
 	function setAttribute($k, $v) {
