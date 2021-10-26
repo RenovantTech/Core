@@ -11,7 +11,7 @@ class PDO extends \PDO {
 	 * @param string $statement the SQL statement
 	 * @param array|null $params
 	 */
-	static function trace($id, $level=LOG_INFO, $statement, array $params = null) {
+	static function trace(string $id, $level=LOG_INFO, string $statement, ?array $params = null) {
 		if($level===false) return;
 		if(!empty($params)) {
 			$keys = $values = [];
@@ -22,7 +22,7 @@ class PDO extends \PDO {
 			$statement = preg_replace($keys, $values, $statement, 1);
 		}
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		sys::trace($level, T_DB, sprintf('[%s] %s', $id, $msg), $statement);
+		sys::trace($level, T_DB, sprintf('[%s] %s', $id, $msg), preg_replace('/(FROM|LEFT JOIN|RIGHT JOIN|JOIN|WHERE|SET|VALUES|ORDER BY)/', "\n$1", $statement));
 	}
 
 	/** database ID

@@ -112,13 +112,12 @@ class Repository {
 	/**
 	 * Delete Entity from DB
 	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch before delete
+	 * @param int|null $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch before delete
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
 	 */
-	function delete($EntityOrKey, $fetchMode=self::FETCH_OBJ, $fetchSubset=null) {
+	function delete($EntityOrKey, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
@@ -137,7 +136,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function deleteAll(?int $limit, $orderExp=null, $criteriaExp=null) {
+	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null) {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
 	}
 
@@ -194,7 +193,7 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
@@ -209,7 +208,7 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
 	function insertOne($id, array $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
@@ -382,7 +381,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
@@ -403,7 +402,7 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
