@@ -201,9 +201,6 @@ class sys {
 		self::$Req = new console\Request;
 		self::$Res = new console\Response;
 		self::$routes = $routes;
-		try {
-			$pidLock = RUN_DIR.str_replace(' ', '-', self::$Req->CMD()).'.pid';
-			file_put_contents($pidLock, getmypid());
 			$app = $dispatcherID = $namespace = null;
 			foreach($routes as $app => $conf) {
 				if(self::$Req->CMD(0) == $conf['cmd']) {
@@ -220,9 +217,6 @@ class sys {
 			$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
 			self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
 			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
-		} finally {
-			unlink($pidLock);
-		}
 	}
 
 	/**
