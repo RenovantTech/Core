@@ -95,6 +95,19 @@ class CmdManager {
 		}
 	}
 
+	/**
+	 * @param string $cmd
+	 * @return array|false [$output, $exitCode] on SUCCESS, FALSE on FAILURE
+	 */
+	function execWait(string $cmd) {
+		$exec = CLI_PHP_BIN.' '.CLI_BOOTSTRAP.' '.$cmd;
+		sys::trace(LOG_DEBUG, T_INFO, '[EXEC] '.$cmd, $exec, 'sys.CmdManager');
+		if(exec($exec, $output, $exitCode)) {
+			return [$output, $exitCode];
+		} else
+			return false;
+	}
+
 	function stop($cmd) {
 		$pidLock = RUN_DIR.str_replace(' ', '-', $cmd).'.pid';
 		$pid = file_get_contents($pidLock);
