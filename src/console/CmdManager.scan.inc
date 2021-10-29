@@ -3,7 +3,8 @@ namespace renovant\core\console;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\util\reflection\ReflectionMethod,
-	renovant\core\util\reflection\ReflectionProperty;
+	renovant\core\util\reflection\ReflectionProperty,
+	renovant\core\util\str;
 
 const SQLITE_INSERT = 'INSERT OR IGNORE INTO %s (id, class, namespace, description) VALUES (:id, :class, :namespace, :description)';
 const SQLITE_UPDATE = 'UPDATE %s SET class = :class, namespace = :namespace, description = :description WHERE id = :id';
@@ -58,7 +59,7 @@ function scan(string $pdo, string $table): void {
 					foreach ($actions as $action => $config) {
 						$RefMethod = new ReflectionMethod($BatchController, $action);
 						if ($RefMethod->getDocComment()->hasTag('batch')) {
-							$params['id'] = $conf['cmd'] . ' ' . $cmd2 . ' ' . str_replace('_', '-', $action);
+							$params['id'] = $conf['cmd'] . ' ' . $cmd2 . ' ' . str::camel2kebab($action);
 							$params['description'] = $RefMethod->getDocComment()->getTag('batch')['description'];
 							$c++;
 							sys::trace(LOG_DEBUG, T_INFO, '[STORE] ' . $params['id']);

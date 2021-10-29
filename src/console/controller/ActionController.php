@@ -4,7 +4,8 @@ use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\console\Request,
 	renovant\core\console\Response,
-	renovant\core\console\Exception;
+	renovant\core\console\Exception,
+	renovant\core\util\str;
 abstract class ActionController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
@@ -93,9 +94,7 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	 * @throws Exception if no handler method can be found for the given request
 	 */
 	protected function resolveActionMethod(Request $Req) {
-		$action = substr(strrchr($Req->CMD(), ' '), 1);
-		// kebab to camel case
-		$action = lcfirst(str_replace(' ', '', ucwords(str_replace('-', ' ', $action))));
+		$action = str::kebab2camel(substr(strrchr($Req->CMD(), ' '), 1));
 		if(empty($action)) $action = self::DEFAULT_ACTION;
 		if(isset($this->_config[$action])) return $action;
 		if(isset($this->_config[$this::FALLBACK_ACTION])) return $this::FALLBACK_ACTION;
