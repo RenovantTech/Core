@@ -4,106 +4,77 @@ use renovant\core\auth\AuthException;
 interface ProviderInterface {
 
 	/**
-	 * Fetch user data
-	 * @param integer $id User ID
-	 * @return array
-	 * @throws AuthException
-	 */
-	function fetchData(int $id): array;
-
-	/**
 	 * Perform login
 	 * @param string $login
 	 * @param string $password
 	 * @return integer user ID on success, negative code on ERROR
 	 */
-	function checkCredentials($login, $password): int;
+	function checkCredentials(string $login, string $password): int;
 
 	/**
-	 * Check REFRESH-TOKEN validity
-	 * @param $userId
-	 * @param $token
-	 * @return bool TRUE if valid
+	 * Fetch User data
+	 * @param integer $id User ID
+	 * @return array
+	 * @throws AuthException
 	 */
-	function checkRefreshToken($userId, $token): bool;
+	function fetchUserData(int $id): array;
 
 	/**
-	 * Check RESET-TOKEN validity
-	 * @param $token
-	 * @return integer user ID on success, 0 on ERROR
+	 * @param int $userID
+	 * @param bool $active
+	 * @return integer 1 on success, negative code on ERROR
 	 */
-	function checkResetEmailToken($token): int;
+	function setActive(int $userID, bool $active): int;
 
 	/**
-	 * Check RESET-TOKEN validity
-	 * @param $token
-	 * @return integer user ID on success, 0 on ERROR
+	 * @param int $userID
+	 * @param string $email
+	 * @return integer 1 on success, negative code on ERROR
 	 */
-	function checkResetPwdToken($token): int;
+	function setEmail(int $userID, string $email): int;
 
 	/**
-	 * Check REMEMBER-TOKEN validity
-	 * @param $userId
-	 * @param $token
-	 * @return bool TRUE if valid
-	 */
-	function checkRememberToken($userId, $token): bool;
-
-	/**
-	 * Delete REFRESH-TOKEN
-	 * @param int $userId User ID
-	 * @param string $token
-	 * @return bool
-	 */
-	function deleteRefreshToken($userId, $token): bool;
-
-	/**
-	 * Delete REMEMBER-TOKEN
-	 * @param int $userId User ID
-	 * @param string $token
-	 * @return bool
-	 */
-	function deleteRememberToken($userId, $token): bool;
-
-	/**
-	 * @param int $userId
+	 * @param int $userID
 	 * @param string $pwd
 	 * @param int|null $expireTime expiration time (unix timestamp)
 	 * @param string|null $oldPwd
 	 * @return integer 1 on success, negative code on ERROR
 	 */
-	function setPassword(int $userId, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int;
+	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int;
 
 	/**
-	 * Store new REFRESH-TOKEN value
-	 * @param int $userId User ID
+	 * Check TOKEN validity
+	 * @param string $tokenType
 	 * @param string $token
-	 * @param int $expireTime expiration time (unix timestamp)
+	 * @param int $userID
+	 * @return bool TRUE if valid
 	 */
-	function setRefreshToken($userId, $token, $expireTime);
+	function tokenCheck(string $tokenType, string $token, int $userID): bool;
 
 	/**
-	 * Store new RESET-TOKEN value
-	 * @param int $userId User ID
-	 * @param string $newEmail
+	 * Delete TOKEN
+	 * @param string $tokenType
 	 * @param string $token
-	 * @param int $expireTime expiration time (unix timestamp)
+	 * @param int $userID User ID
+	 * @return bool
 	 */
-	function setResetEmailToken($userId, $newEmail, $token, $expireTime);
+	function tokenDelete(string $tokenType, string $token, int $userID): bool;
 
 	/**
-	 * Store new RESET-TOKEN value
-	 * @param int $userId User ID
+	 * Fetch TOKEN data
+	 * @param string $tokenType
 	 * @param string $token
-	 * @param int $expireTime expiration time (unix timestamp)
+	 * @return array|null userID & data if valid, NULL if invalid
 	 */
-	function setResetPwdToken($userId, $token, $expireTime);
+	function tokenFetch(string $tokenType, string $token): ?array;
 
 	/**
-	 * Store new REMEMBER-TOKEN value
-	 * @param int $userId User ID
+	 * Store new TOKEN value
+	 * @param string $tokenType
+	 * @param int $userID User ID
 	 * @param string $token
+	 * @param string|null $data
 	 * @param int $expireTime expiration time (unix timestamp)
 	 */
-	function setRememberToken($userId, $token, $expireTime);
+	function tokenSet(string $tokenType, int $userID, string $token, ?string $data, int $expireTime);
 }

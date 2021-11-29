@@ -10,7 +10,7 @@ class Auth {
 	/** Group name
 	 * @var string|null */
 	protected ?string $GROUP = null;
-	/** User name (full-name)
+	/** Username (full-name)
 	 * @var string|null */
 	protected ?string $NAME = null;
 	/** User ID
@@ -57,7 +57,7 @@ class Auth {
 	}
 
 	/**
-	 * Get User name
+	 * Get Username
 	 * @return string|null
 	 */
 	function NAME(): ?string {

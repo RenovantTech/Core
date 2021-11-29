@@ -4,12 +4,13 @@ use renovant\core\auth\provider\ProviderInterface;
 use renovant\core\sys,
 	renovant\core\auth\Auth,
 	renovant\core\auth\AuthService,
+	renovant\core\auth\AuthServiceJWT,
 	renovant\core\auth\Exception,
 	renovant\core\http\Event,
 	renovant\core\http\Request,
 	renovant\core\http\Response;
 
-class AuthServiceTest extends \PHPUnit\Framework\TestCase {
+class AuthServiceJWTTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
@@ -28,17 +29,17 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @return AuthService
+	 * @return AuthServiceJWT
 	 */
 	function testConstruct() {
-		$AuthService = new AuthService;
-		$this->assertInstanceOf(AuthService::class, $AuthService);
+		$AuthService = new AuthServiceJWT;
+		$this->assertInstanceOf(AuthServiceJWT::class, $AuthService);
 		return $AuthService;
 	}
 
 	function testConstructException() {
 		try {
-			new AuthService('INVALID');
+			new AuthServiceJWT('INVALID');
 			$this->fail('Expected Exception not thrown');
 		} catch(Exception $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
@@ -48,9 +49,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 */
-	function testProvider(AuthService $AuthService) {
+	function testProvider(AuthServiceJWT $AuthService) {
 		self::setUpBeforeClass();
 		$this->assertInstanceOf(ProviderInterface::class, $AuthService->provider());
 		sys::pdo('mysql')->exec('
@@ -65,9 +66,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 */
-	function testAuthenticate(AuthService $AuthService) {
+	function testAuthenticate(AuthServiceJWT $AuthService) {
 		$AuthService->authenticate(11, 100, 'John Black', 'admin', ['foo'=>'bar']);
 		$Auth = Auth::instance();
 		$this->assertEquals(11, $Auth->UID());
@@ -79,10 +80,10 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @throws \renovant\core\auth\AuthException
 	 */
-	function testAuthenticateById(AuthService $AuthService) {
+	function testAuthenticateById(AuthServiceJWT $AuthService) {
 		$AuthService->authenticateById(3);
 		$Auth = Auth::instance();
 		$this->assertEquals(3, $Auth->UID());
@@ -131,9 +132,9 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 */
-	function testCheckCredentials(AuthService $AuthService) {
+	function testCheckCredentials(AuthServiceJWT $AuthService) {
 		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $AuthService->checkCredentials('jack.green', '123456'));
 		$this->assertEquals(AuthService::LOGIN_DISABLED, $AuthService->checkCredentials('matt.brown', '123456'));
 		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $AuthService->checkCredentials('john.red', '123456'));
@@ -142,10 +143,10 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @throws \Exception
 	 */
-	function testCommit(AuthService $AuthService) {
+	function testCommit(AuthServiceJWT $AuthService) {
 //		$AuthService->set('foo', 'bar');
 		$AuthService->commit();
 		$this->assertEquals('bar', $_SESSION['__AUTH__']['foo']);
@@ -153,10 +154,10 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @throws \Exception
 	 */
-	function testSetPassword(AuthService $AuthService) {
+	function testSetPassword(AuthServiceJWT $AuthService) {
 		// with verification
 		$this->assertEquals(AuthService::SET_PWD_MISMATCH, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123xxx'));
 		$this->assertEquals(AuthService::SET_PWD_OK, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123'));
@@ -171,11 +172,11 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @return string
 	 * @throws \Exception
 	 */
-	function testSetResetEmailToken(AuthService $AuthService) {
+	function testSetResetEmailToken(AuthServiceJWT $AuthService) {
 		$token = $AuthService->setResetEmailToken(3, 'dick.dastardly@yahoo.com');
 		$this->assertEquals(64, strlen($token));
 		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_users_tokens WHERE type = "RESET_EMAIL" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
@@ -188,10 +189,10 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @depends testSetResetEmailToken
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @param string $token
 	 */
-	function testCheckResetEmailToken(AuthService $AuthService, string $token) {
+	function testCheckResetEmailToken(AuthServiceJWT $AuthService, string $token) {
 		// false token
 		$this->assertEquals(0, $AuthService->checkResetEmailToken('f43hth34th34ht'));
 		// true token
@@ -205,11 +206,11 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @return string
 	 * @throws \Exception
 	 */
-	function testSetResetPwdToken(AuthService $AuthService) {
+	function testSetResetPwdToken(AuthServiceJWT $AuthService) {
 		$token = $AuthService->setResetPwdToken(3);
 		$this->assertEquals(64, strlen($token));
 		$dbToken = sys::pdo('mysql')->query('SELECT token FROM sys_users_tokens WHERE type = "RESET_PWD" AND user_id = 3 AND expire >= NOW()')->fetchColumn();
@@ -220,10 +221,10 @@ class AuthServiceTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @depends testSetResetPwdToken
-	 * @param AuthService $AuthService
+	 * @param AuthServiceJWT $AuthService
 	 * @param string $token
 	 */
-	function testCheckResetPwdToken(AuthService $AuthService, string $token) {
+	function testCheckResetPwdToken(AuthServiceJWT $AuthService, string $token) {
 		// false token
 		$this->assertEquals(0, $AuthService->checkResetPwdToken('f43hth34th34ht'));
 		// true token
