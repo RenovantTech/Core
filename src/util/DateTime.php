@@ -1,8 +1,6 @@
 <?php
 namespace renovant\core\util;
-/**
- * DateTime: extends base php DataTime class.
- */
+
 class DateTime extends \DateTime {
 
 	function sformat($format) {
