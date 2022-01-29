@@ -11,7 +11,7 @@ class Validator {
 	 * @return array
 	 * @throws \ReflectionException
 	 */
-	static function validate($Object, $validateSubset=null) {
+	static function validate($Object, ?array $validateSubset=null) {
 		$class = get_class($Object);
 		$metadata = self::metadata($Object);
 		$errors = [];
@@ -32,6 +32,9 @@ class Validator {
 		return $errors;
 	}
 
+	/**
+	 * @throws \ReflectionException
+	 */
 	static protected function metadata($Object) {
 		static $cache = [];
 		$class = get_class($Object);
@@ -65,7 +68,8 @@ class Validator {
 		return (boolean) filter_var($value, FILTER_VALIDATE_EMAIL);
 	}
 	static function enum($value, $array) {
-		return (boolean) in_array($value, $array);
+		$array = array_map('trim', explode(',', $array));
+		return in_array($value, $array);
 	}
 	static function ip($value) {
 		return (boolean) filter_var($value, FILTER_VALIDATE_IP);
