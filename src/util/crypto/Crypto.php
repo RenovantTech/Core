@@ -1,58 +1,53 @@
 <?php
 namespace renovant\core\util\crypto;
 use const renovant\core\DATA_DIR;
-use Defuse\Crypto\Crypto as DefuseCrypto,
-	Defuse\Crypto\Key;
-
-/**
- * Encryption utility using defuse/php-encryption library
- */
 class Crypto {
 
 	const KEY_FILE = DATA_DIR.'crypto.key';
 	static protected $key = null;
 
 	/**
-	 * @throws \Defuse\Crypto\Exception\BadFormatException
-	 * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+	 * @throws \Exception
 	 */
 	static protected function init() {
 		if(!is_null(self::$key)) return;
-		if(!file_exists(self::KEY_FILE)) {
-			$Key = Key::createNewRandomKey();
-			file_put_contents(self::KEY_FILE, $Key->saveToAsciiSafeString());
+
+		if(file_exists(self::KEY_FILE))
+			self::$key = file_get_contents(self::KEY_FILE);
+		else {
+			self::$key = random_bytes(SODIUM_CRYPTO_SECRETBOX_KEYBYTES);
+			file_put_contents(self::KEY_FILE, self::$key);
 		}
-		self::$key = Key::loadFromAsciiSafeString(file_get_contents(self::KEY_FILE));
 	}
 
 	/**
 	 * Encrypt data (with automatic object JSON encoding)
 	 * @param mixed $data
 	 * @return string
-	 * @throws \Defuse\Crypto\Exception\BadFormatException
-	 * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
+	 * @throws \SodiumException
+	 * @throws \Exception
 	 */
 	static function encrypt($data) {
 		self::init();
-		if(is_object($data)) $data = json_encode($data);
-		return DefuseCrypto::encrypt($data, self::$key);
+		$data = serialize($data);
+		$nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);
+		$cipherText = sodium_crypto_secretbox($data, $nonce, self::$key);
+		return sodium_bin2hex($nonce.$cipherText);
 	}
-
 
 	/**
 	 * Decrypt data (with automatic object JSON decoding)
-	 * @param $data
+	 * @param $cryptData
 	 * @return mixed
-	 * @throws \Defuse\Crypto\Exception\BadFormatException
-	 * @throws \Defuse\Crypto\Exception\EnvironmentIsBrokenException
-	 * @throws \Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException
+	 * @throws \SodiumException
+	 * @throws \Exception
 	 */
-	static function decrypt($data) {
+	static function decrypt($cryptData) {
 		self::init();
-		$data = DefuseCrypto::decrypt($data, self::$key);
-		$d = json_decode($data);
-		if(json_last_error() === JSON_ERROR_NONE) return $d;
-		return $data;
+		$data = sodium_hex2bin($cryptData);
+		$nonce = mb_substr($data, 0, SODIUM_CRYPTO_STREAM_NONCEBYTES, '8bit');
+		$cipherText = mb_substr($data, SODIUM_CRYPTO_STREAM_NONCEBYTES, null, '8bit');
+		$data = sodium_crypto_secretbox_open($cipherText, $nonce, self::$key);
+		return unserialize($data);
 	}
-
 }
