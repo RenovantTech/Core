@@ -2,7 +2,8 @@
 namespace renovant\core\auth;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
-	renovant\core\http\Event as HttpEvent;
+	renovant\core\http\Event as HttpEvent,
+	PragmaRX\Google2FA\Google2FA;
 abstract class AuthService {
 	use \renovant\core\CoreTrait;
 
@@ -11,8 +12,10 @@ abstract class AuthService {
 
 	const LOGIN_UNKNOWN			= -1;
 	const LOGIN_DISABLED		= -2;
-	const LOGIN_PWD_MISMATCH	= -3;
-	const LOGIN_EXCEPTION		= -4;
+	const LOGIN_PWD_INVALID		= -3;
+	const LOGIN_2FA_REQUIRED	= -4;
+	const LOGIN_2FA_INVALID		= -5;
+	const LOGIN_EXCEPTION		= -6;
 
 	const SET_PWD_OK		= 1;
 	const SET_PWD_MISMATCH	= -1;
@@ -107,12 +110,30 @@ abstract class AuthService {
 	/**
 	 * @param string $login
 	 * @param string $password
+	 * @param string $otp 2FA code
 	 * @param bool $remember enable REMEMBER-TOKEN
-	 * @return int
+	 * @return int User ID or error code
 	 */
-	function checkCredentials(string $login, string $password, bool $remember=false): int {
-		$this->rememberFlag = $remember;
-		return $this->Provider->checkCredentials($login, $password);
+	function checkCredentials(string $login, string $password, string $otp='', bool $remember=false): int {
+		try {
+			$this->rememberFlag = $remember;
+			$data = $this->Provider->fetchCredentials($login);
+			if (!$data) return self::LOGIN_UNKNOWN;
+			if ((int)$data['active'] != 1) return self::LOGIN_DISABLED;
+			if (!password_verify($password, $data['password'])) return self::LOGIN_PWD_INVALID;
+			if (!empty($data['tfaKey'])) {
+				if(empty($otp)) return self::LOGIN_2FA_REQUIRED;
+				if((new Google2FA())->verifyKey($data['tfaKey'], $otp, 1) ) return $data['user_id'];
+				elseif(in_array($otp, $data['tfaRescue'])) {
+					unset($data['tfaRescue'][array_search($otp, $data['tfaRescue'])]);
+					$this->Provider->set2FA($data['user_id'], $data['tfaKey'], $data['tfaRescue']);
+					return $data['user_id'];
+				} else return self::LOGIN_2FA_INVALID;
+			}
+			return $data['user_id'];
+		} catch (\Exception $Ex) {
+			return self::LOGIN_EXCEPTION;
+		}
 	}
 
 	/**

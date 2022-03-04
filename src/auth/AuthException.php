@@ -12,6 +12,10 @@ class AuthException extends Exception {
 
 	// XSRF
 	const COD50 = 'XSRF token INVALID';
+
+	// 2FA
+	const COD60 = '2FA code INVALID';
+
 	// common
 	const COD101 = 'AUTH required: Unauthorized';
 	const COD102 = 'XSRF-TOKEN required: Unauthorized';

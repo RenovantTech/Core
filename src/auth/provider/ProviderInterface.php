@@ -6,10 +6,14 @@ interface ProviderInterface {
 	/**
 	 * Perform login
 	 * @param string $login
-	 * @param string $password
-	 * @return integer user ID on success, negative code on ERROR
+	 * @return array
+	 * @throws \PDOException
 	 */
-	function checkCredentials(string $login, string $password): int;
+	function fetchCredentials(string $login): array;
+
+	function disable2FA(int $userID): bool;
+
+	function isEnabled2FA(int $userID): bool;
 
 	/**
 	 * Fetch User data
@@ -41,6 +45,16 @@ interface ProviderInterface {
 	 * @return integer 1 on success, negative code on ERROR
 	 */
 	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int;
+
+	/**
+	 * Set 2FA secret key
+	 * @param integer $userID User ID
+	 * @param string $secretKey
+	 * @param array $rescueCodes
+	 * @return bool
+	 * @throws AuthException
+	 */
+	function set2FA(int $userID, string $secretKey, array $rescueCodes): bool;
 
 	/**
 	 * Check TOKEN validity

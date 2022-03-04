@@ -3,7 +3,8 @@ namespace renovant\core\auth\provider;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\auth\AuthException,
-	renovant\core\auth\AuthService;
+	renovant\core\auth\AuthService,
+	renovant\core\util\crypto\Crypto;
 class PdoProvider implements ProviderInterface {
 	use \renovant\core\CoreTrait;
 
@@ -15,7 +16,12 @@ class PdoProvider implements ProviderInterface {
 	const SQL_TOKEN_SET			= 'INSERT INTO `%s` (type, user_id, token, data, expire) VALUES (:type, :user_id, :token, :data, FROM_UNIXTIME(:expire))';
 	const SQL_TOKEN_DELETE		= 'DELETE FROM `%s` WHERE type = :type AND user_id = :user_id AND token = :token';
 
-	const SQL_LOGIN = 'SELECT user_id, active, password FROM `%s` WHERE login = :login';
+	const SQL_2FA_DISABLE		= 'UPDATE `%s` SET tfaKey = NULL, tfaRescue = NULL WHERE user_id = :user_id';
+	const SQL_2FA_FETCH			= 'SELECT tfaKey, tfaRescue FROM `%s` WHERE user_id = :user_id';
+	const SQL_2FA_IS_ENABLED	= 'SELECT COUNT(*) FROM `%s` WHERE user_id = :user_id AND tfaKey IS NOT NULL';
+	const SQL_2FA_SET			= 'UPDATE `%s` SET tfaKey = :tfaKey, tfaRescue = :tfaRescue WHERE user_id = :user_id';
+
+	const SQL_LOGIN = 'SELECT user_id, active, password, tfaKey, tfaRescue FROM `%s` WHERE login = :login';
 	const SQL_SET_ACTIVE = 'UPDATE `%s` SET active = :active WHERE user_id = :user_id';
 	const SQL_SET_EMAIL = 'UPDATE `%s` SET email = :email WHERE id = :user_id';
 	const SQL_SET_PASSWORD = 'UPDATE `%s` SET password = :password, passwordExpire = FROM_UNIXTIME(:expire) WHERE user_id = :user_id';
@@ -57,22 +63,30 @@ class PdoProvider implements ProviderInterface {
 		}
 	}
 
-	function checkCredentials(string $login, string $password): int {
-		try {
-			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tables['auth']))
-				->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
-			if(!$data) return AuthService::LOGIN_UNKNOWN;
-			if((int)$data['active'] != 1) return AuthService::LOGIN_DISABLED;
-			if(!password_verify($password, $data['password'])) return AuthService::LOGIN_PWD_MISMATCH;
-			return $data['user_id'];
-		} catch (\Exception $Ex) {
-			return AuthService::LOGIN_EXCEPTION;
+	/**
+	 * @throws \SodiumException
+	 */
+	function fetchCredentials(string $login): array {
+		$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tables['auth']))
+			->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
+		if(is_array($data)) {
+			$data['tfaKey'] = is_null($data['tfaKey']) ? null : Crypto::decrypt($data['tfaKey']);
+			$data['tfaRescue'] = is_null($data['tfaRescue']) ? null : Crypto::decrypt($data['tfaRescue']);
 		}
+		return $data;
 	}
 
-	/**
-	 * @throws AuthException
-	 */
+	function disable2FA(int $userID): bool {
+		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_2FA_DISABLE, $this->tables['auth']))
+			->execute(['user_id'=>$userID])->rowCount();
+	}
+
+	function isEnabled2FA(int $userID): bool {
+		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_2FA_IS_ENABLED, $this->tables['auth']))
+			->execute(['user_id'=>$userID])->fetchColumn();
+	}
+
+	/** @throws AuthException */
 	function fetchUserData(int $id): array {
 		try {
 			$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_AUTHENTICATE, $this->fields, $this->tables['users']))
@@ -91,6 +105,15 @@ class PdoProvider implements ProviderInterface {
 		} catch (\Exception $Ex) {
 			throw new AuthException(103);
 		}
+	}
+
+	/** @throws \SodiumException */
+	function fetch2FA(int $userID): array {
+		$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_2FA_FETCH,$this->tables['auth']))
+			->execute(['user_id'=>$userID])->fetch(\PDO::FETCH_ASSOC);
+		$data['tfaKey'] = is_null($data['tfaKey']) ? null : Crypto::decrypt($data['tfaKey']);
+		$data['tfaRescue'] = is_null($data['tfaRescue']) ? null : Crypto::decrypt($data['tfaRescue']);
+		return $data;
 	}
 
 	function setActive(int $userID, bool $active): int {
@@ -115,6 +138,12 @@ class PdoProvider implements ProviderInterface {
 		} catch (\Exception $Ex) {
 			return AuthService::SET_PWD_EXCEPTION;
 		}
+	}
+
+	/** @throws \SodiumException */
+	function set2FA(int $userID, string $secretKey, array $rescueCodes): bool {
+		return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_2FA_SET, $this->tables['auth']))
+			->execute(['user_id'=>$userID, 'tfaKey'=>Crypto::encrypt($secretKey), 'tfaRescue'=>Crypto::encrypt($rescueCodes)])->rowCount();
 	}
 
 	function tokenCheck(string $tokenType, string $token, int $userID): bool {
