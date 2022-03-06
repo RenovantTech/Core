@@ -36,11 +36,11 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function createAction(Request $Req, Response $Res, $resource, $subset=null) {
+	function create(Request $Req, Response $Res, string $resource, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$data = (array) json_decode($Req->getRawData());
 		try {
-			$data = $Repository->insert(null, $data, true, Repository::FETCH_JSON, $subset);
+			$data = $Repository->insertOne(null, $data, true, Repository::FETCH_JSON, $subset);
 			$Res->set($this->responseData, $data);
 		} catch(Exception $Ex) {
 			switch($Ex->getCode()) {
@@ -48,7 +48,6 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 					http_response_code(500);
 					$Ex->trace();
 					trigger_error(get_class($Repository).' EXCEPTION', E_USER_ERROR);
-					break;
 				case 500:
 					http_response_code(400);
 					$Res->set($this->responseErrors, $Ex->getData());
@@ -71,7 +70,7 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function deleteAction(Response $Res, $resource, $id, $subset=null) {
+	function delete(Response $Res, string $resource, $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
 		try {
@@ -82,7 +81,6 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 			http_response_code(500);
 			$Ex->trace();
 			trigger_error(get_class($Repository).' EXCEPTION', E_USER_ERROR);
-			throw $Ex;
 		}
 	}
 
@@ -91,16 +89,15 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	 * @routing(method="GET", pattern="^<resource>$")
 	 * @param Response $Res
 	 * @param string $resource
-	 * @param string $criteriaExp
-	 * @param string $orderExp
-	 * @param integer $page
-	 * @param integer $pageSize
+	 * @param string|null $criteriaExp
+	 * @param string|null $orderExp
+	 * @param int|null $page
+	 * @param int|null $pageSize
 	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
 	 */
-	function readAllAction(Response $Res, $resource, $criteriaExp=null, $orderExp=null, $page, $pageSize, $subset=null) {
+	function fetchAll(Response $Res, string $resource, ?string $criteriaExp=null, ?string $orderExp=null, ?int $page=null, ?int $pageSize=null, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		try {
 			$data = $Repository->fetchAll($page, $pageSize, $orderExp, $criteriaExp, Repository::FETCH_JSON, $subset);
@@ -125,7 +122,7 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function readAction(Response $Res, $resource, $id, $subset=null) {
+	function fetch(Response $Res, string $resource, $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
 		try {
@@ -150,12 +147,12 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function updateAction(Request $Req, Response $Res, $resource, $id, $subset=null) {
+	function update(Request $Req, Response $Res, string $resource, $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$data = (array) json_decode($Req->getRawData());
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
 		try {
-			$data = $Repository->update($id, $data, true, Repository::FETCH_JSON, $subset);
+			$data = $Repository->updateOne($id, $data, true, Repository::FETCH_JSON, $subset);
 			$Res->set($this->responseData, $data);
 		} catch(Exception $Ex) {
 			switch($Ex->getCode()) {
