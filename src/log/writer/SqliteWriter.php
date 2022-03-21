@@ -28,10 +28,10 @@ class SqliteWriter implements \renovant\core\log\LogWriterInterface {
 	protected $table;
 
 	/**
-	 * @param string $pdo PDO instance ID
+	 * @param string|null $pdo PDO instance ID
 	 * @param string $table table name
 	 */
-	function __construct($pdo, $table='log') {
+	function __construct(?string $pdo=null, string $table='log') {
 		$this->pdo = $pdo;
 		$this->table = $table;
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize log storage [Sqlite]');

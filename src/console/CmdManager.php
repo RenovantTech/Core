@@ -26,10 +26,10 @@ class CmdManager {
 	 * @param string|null $pdo PDO instance ID, default to "master"
 	 * @param string|null $tablePrefix
 	 */
-	function __construct(?string $pdo='master', ?string $tablePrefix=null) {
+	function __construct(?string $pdo=null, ?string $tablePrefix=null) {
 		$prevTraceFn = sys::traceFn('sys.CmdManager');
 		try {
-			if ($pdo) $this->pdo = $pdo;
+			$this->pdo = $pdo;
 			if ($tablePrefix) $this->tablePrefix = $tablePrefix;
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize SQL storage');
 			$PDO = sys::pdo($this->pdo);

@@ -39,11 +39,11 @@ class OpCache implements CacheInterface {
 
 	/**
 	 * @param string $id cache ID
-	 * @param string $pdo PDO instance ID
+	 * @param string|null $pdo PDO instance ID
 	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($id, $pdo, $table='cache', $writeBuffer=false) {
+	function __construct(string $id, ?string $pdo=null, string $table='cache', bool $writeBuffer=false) {
 		$this->id = $id;
 		$DIR = CACHE_DIR.'opc-'.$id.'/';
 		$this->pdo = $pdo;

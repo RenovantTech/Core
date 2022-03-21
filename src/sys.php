@@ -31,6 +31,7 @@ class sys {
 	const INFO_PATH			= 3;
 	const INFO_PATH_DIR		= 4;
 	const INFO_PATH_FILE	= 5;
+	const PDO_DEFAULT		= 'master';
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
 	static protected $namespaces = [
@@ -415,11 +416,11 @@ class sys {
 
 	/**
 	 * PDO helper
-	 * @param string $id database ID, default "master"
+	 * @param string|null $id database ID, default "master"
 	 * @return db\PDO shared PDO instance
-	 * @throws \PDOException
 	 */
-	static function pdo($id='master') {
+	static function pdo(?string $id='master') {
+		if(is_null($id)) $id = self::PDO_DEFAULT;
 		if(!isset(self::$pdo[$id])) {
 			$traceFn = self::traceFn(__METHOD__);
 			$cnf = self::$Sys->cnfPdo[$id];

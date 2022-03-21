@@ -16,9 +16,9 @@ class Procedure {
 
 	/**
 	 * @param string $procedure
-	 * @param string|null $pdo optional PDO instance ID, default to 'master'
+	 * @param string|null $pdo optional PDO instance ID
 	 */
-	function __construct(string $procedure, ?string $pdo='master') {
+	function __construct(string $procedure, ?string $pdo=null) {
 		$this->procedure = $procedure;
 		$this->pdo = $pdo;
 	}

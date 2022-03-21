@@ -21,19 +21,19 @@ class Queue {
 
 	/** PDO instance ID
 	 * @var string */
-	protected string $pdo = 'master';
+	protected string $pdo;
 	/** DB table
 	 * @var string */
 	protected string $table = 'sys_queue';
 
 	/**
 	 * Queue constructor.
-	 * @param string $pdo PDO instance ID, default to "master"
+	 * @param string|null $pdo PDO instance ID, default to "master"
 	 * @param string $table
 	 */
-	function __construct(string $pdo='master', string $table='sys_queue') {
+	function __construct(?string $pdo=null, string $table='sys_queue') {
 		$prevTraceFn = sys::traceFn('sys.Queue');
-		if ($pdo) $this->pdo = $pdo;
+		$this->pdo = $pdo;
 		if ($table) $this->table = $table;
 		try {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize QUEUE storage');

@@ -52,9 +52,9 @@ class Query {
 	 * Create new Query object
 	 * @param string $target SQL target
 	 * @param string|null $fields SQL fields (for SELECT, COUNT)
-	 * @param string $pdo optional PDO instance ID, default to 'master'
+	 * @param string|null $pdo optional PDO instance ID
 	 */
-	function __construct(string $target, ?string $fields=null, string $pdo='master') {
+	function __construct(string $target, ?string $fields=null, ?string $pdo=null) {
 		$this->target = $target;
 		$this->fields = $fields;
 		$this->pdo = $pdo;

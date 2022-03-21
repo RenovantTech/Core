@@ -31,7 +31,7 @@ class PdoProvider implements ProviderInterface {
 	protected $fields = '*';
 	/** PDO instance ID
 	 * @var string */
-	protected $pdo = 'master';
+	protected $pdo;
 	/** DB tables
 	 * @var array */
 	protected $tables = [
@@ -42,12 +42,12 @@ class PdoProvider implements ProviderInterface {
 
 	/**
 	 * PdoProvider constructor.
-	 * @param string $pdo PDO instance ID, default to "master"
+	 * @param string|null $pdo PDO instance ID
 	 * @param array|null $tables
 	 */
-	function __construct(string $pdo='master', array $tables=null) {
+	function __construct(?string $pdo=null, array $tables=null) {
 		$prevTraceFn = sys::traceFn('sys.AuthProvider');
-		if($pdo) $this->pdo = $pdo;
+		$this->pdo = $pdo;
 		if($tables) $this->tables = array_merge($this->tables, $tables);
 		try {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTH storage');

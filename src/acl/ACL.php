@@ -41,14 +41,14 @@ class ACL {
 
 	/**
 	 * @param array $modules ACL modules to activate
-	 * @param string $pdo PDO instance ID, default to "master"
+	 * @param string|null $pdo PDO instance ID
 	 * @param array|null $tables
 	 */
-	function __construct(array $modules, $pdo='master', array $tables=null) {
+	function __construct(array $modules, ?string $pdo=null, array $tables=null) {
 		$prevTraceFn = sys::traceFn('sys.ACL');
 		try {
 			$this->modules = $modules;
-			if ($pdo) $this->pdo = $pdo;
+			$this->pdo = $pdo;
 			if ($tables) $this->tables = array_merge($this->tables, $tables);
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
 			$PDO = sys::pdo($this->pdo);

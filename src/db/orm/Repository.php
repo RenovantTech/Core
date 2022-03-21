@@ -31,15 +31,15 @@ class Repository {
 	protected $class;
 	/** PDO instance ID
 	 * @var string */
-	protected $pdo = 'master';
+	protected $pdo;
 
 	protected $OrmEvent;
 
 	/**
 	 * @param string $class Entity class
-	 * @param string|null $pdo PDO instance ID, default to "master"
+	 * @param string|null $pdo PDO instance ID
 	 */
-	function __construct(string $class, ?string $pdo='master') {
+	function __construct(string $class, ?string $pdo=null) {
 		$this->class = $class;
 		$this->pdo = $pdo;
 		$this->__wakeup();
