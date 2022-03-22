@@ -61,6 +61,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 	 * @param Context $Context
 	 * @throws ContextException
 	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	function testGet(Context $Context) {
 		$Mock = $Context->get('test.context.Mock1');
@@ -75,14 +76,14 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 
 		// sys service, no proxy
 		$this->assertInstanceOf('renovant\core\acl\ACL', $Context->get('sys.ACL'));
-		ACLTest::tearDownAfterClass();
+//		ACLTest::tearDownAfterClass();
 	}
 
 	/**
 	 * Test GET Exception inside Context
 	 * @depends testInit
 	 * @param Context $Context
-	 * @throws EventDispatcherException
+	 * @throws EventDispatcherException|\ReflectionException
 	 */
 	function testGetException1(Context $Context) {
 		try {

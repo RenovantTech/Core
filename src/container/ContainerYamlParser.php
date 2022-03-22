@@ -8,11 +8,11 @@ class ContainerYamlParser {
 
 	/**
 	 * Parse YAML namespace config
-	 * @param $namespace
+	 * @param string $namespace
 	 * @return array id2class and class2id maps
 	 * @throws ContainerException
 	 */
-	static function parseNamespace($namespace) {
+	static function parseNamespace(string $namespace) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$id2classMap = $class2idMap = $services = [];
 		try {

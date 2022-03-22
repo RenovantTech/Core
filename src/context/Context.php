@@ -54,7 +54,7 @@ class Context {
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 */
-	function init($namespace) {
+	function init(string $namespace) {
 		if(in_array($namespace, $this->namespaces)) return;
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
 		$this->namespaces[] = $namespace;
@@ -75,23 +75,23 @@ class Context {
 	/**
 	 * Return TRUE if contains object (optionally verifying class)
 	 * @param string $id object OID
-	 * @param string $class class/interface that object must extend/implement (optional)
+	 * @param string|null $class class/interface that object must extend/implement (optional)
 	 * @return boolean
 	 */
-	function has($id, $class=null): bool {
+	function has(string $id, string $class=null): bool {
 		return $this->Container->has($id, $class);
 	}
 
 	/**
 	 * Get an object Proxy
 	 * @param string $id           object identifier
-	 * @param string $class        required object class
+	 * @param string|null $class        required object class
 	 * @param integer $failureMode failure mode when the object does not exist
 	 * @return object
 	 * @throws ContextException
 	 * @throws EventDispatcherException|\ReflectionException
 	 */
-	function get($id, $class=null, $failureMode=self::FAILURE_EXCEPTION) {
+	function get(string $id, ?string $class=null, int $failureMode=self::FAILURE_EXCEPTION) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Context->get');
 		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
