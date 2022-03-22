@@ -17,6 +17,8 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS sys_acl_filters;
 			DROP TABLE IF EXISTS sys_acl_filters_sql;
 			DROP TABLE IF EXISTS sys_users_2_roles;
+			DROP TABLE IF EXISTS sys_users_tokens;
+			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
 			DROP TABLE IF EXISTS sys_roles;
 		');
@@ -33,6 +35,8 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS sys_acl_filters;
 			DROP TABLE IF EXISTS sys_acl_filters_sql;
 			DROP TABLE IF EXISTS sys_users_2_roles;
+			DROP TABLE IF EXISTS sys_users_tokens;
+			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
 			DROP TABLE IF EXISTS sys_roles;
 		');
