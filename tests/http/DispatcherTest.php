@@ -48,6 +48,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
 	 * @return Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testDoRoute(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'doRoute');
@@ -91,6 +92,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testDoRouteException11(Dispatcher $Dispatcher) {
 		$this->expectExceptionCode(11);
@@ -107,6 +109,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
@@ -156,6 +159,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends               testConstruct
 	 * @param Dispatcher $Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
 		$this->expectExceptionCode(12);

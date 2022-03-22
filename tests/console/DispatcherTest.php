@@ -27,6 +27,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
 	 * @return Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testDoRoute(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'doRoute');
@@ -56,6 +57,7 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testResolveView(Dispatcher $Dispatcher) {
 		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
@@ -89,19 +91,20 @@ class DispatcherTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param Dispatcher $Dispatcher
+	 * @throws \ReflectionException
 	 */
 	function testResolveViewException(Dispatcher $Dispatcher) {
 		$this->expectExceptionCode(12);
 		$this->expectException(\renovant\core\console\Exception::class);
-		$ReflMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
-		$ReflMethod->setAccessible(true);
+		$RefMethod = new \ReflectionMethod(Dispatcher::class, 'resolveView');
+		$RefMethod->setAccessible(true);
 
 		$_SERVER['argv'] = ['sys','mod1','indexERR'];
 		$Req = new Request;
 		$Res = new Response;
 		$Req->setAttribute('APP_MOD_URI', 'mod1 index');
 		$Req->setAttribute('APP_MOD_DIR', TEST_DIR.'/console/');
-		$ReflMethod->invoke($Dispatcher, 'xxx:index', $Req, $Res);
+		$RefMethod->invoke($Dispatcher, 'xxx:index', $Req, $Res);
 	}
 
 	/**

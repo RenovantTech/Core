@@ -25,9 +25,9 @@ class TokenServiceTest extends \PHPUnit\Framework\TestCase {
 
 	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
---			DROP TABLE IF EXISTS sys_users_auth;
---			DROP TABLE IF EXISTS sys_users_tokens;
---			DROP TABLE IF EXISTS sys_users;
+			DROP TABLE IF EXISTS sys_users_auth;
+			DROP TABLE IF EXISTS sys_users_tokens;
+			DROP TABLE IF EXISTS sys_users;
 		');
 	}
 
