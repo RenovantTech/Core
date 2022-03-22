@@ -66,14 +66,15 @@ class PdoProvider implements ProviderInterface {
 	/**
 	 * @throws \SodiumException
 	 */
-	function fetchCredentials(string $login): array {
+	function fetchCredentials(string $login): ?array {
 		$data = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_LOGIN, $this->tables['auth']))
 			->execute(['login'=>$login])->fetch(\PDO::FETCH_ASSOC);
 		if(is_array($data)) {
 			$data['tfaKey'] = is_null($data['tfaKey']) ? null : Crypto::decrypt($data['tfaKey']);
 			$data['tfaRescue'] = is_null($data['tfaRescue']) ? null : Crypto::decrypt($data['tfaRescue']);
+			return $data;
 		}
-		return $data;
+		return null;
 	}
 
 	function disable2FA(int $userID): bool {

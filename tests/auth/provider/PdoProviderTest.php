@@ -1,7 +1,6 @@
 <?php
 namespace test\auth\provider;
 use renovant\core\sys,
-	renovant\core\auth\AuthService,
 	renovant\core\auth\provider\PdoProvider;
 
 class PdoProviderTest extends \PHPUnit\Framework\TestCase {
@@ -39,22 +38,11 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param PdoProvider $PdoProvider
-	 */
-	function testCheckCredentials(PdoProvider $PdoProvider) {
-		$this->assertEquals(AuthService::LOGIN_UNKNOWN, $PdoProvider->checkCredentials('jack.green', '123456'));
-		$this->assertEquals(AuthService::LOGIN_DISABLED, $PdoProvider->checkCredentials('matt.brown', '123456'));
-		$this->assertEquals(AuthService::LOGIN_PWD_MISMATCH, $PdoProvider->checkCredentials('john.red', '123456'));
-		$this->assertEquals(1, $PdoProvider->checkCredentials('john.red', 'ABC123'));
-	}
-
-	/**
-	 * @depends testConstructor
-	 * @param PdoProvider $PdoProvider
 	 * @return PdoProvider
 	 */
 	function testSetRefreshToken(PdoProvider $PdoProvider) {
-		$this->assertNull($PdoProvider->setRefreshToken(1, 'ABC123XYZ', time()+3600));
-		$this->assertNull($PdoProvider->setRefreshToken(2, 'ABC123XYZ', time()-3600));
+		$this->assertNull($PdoProvider->tokenSet('AUTH-REFRESH', 1, 'ABC123XYZ', null, time()+3600));
+		$this->assertNull($PdoProvider->tokenSet('AUTH-REFRESH', 2, 'ABC456XYZ', null,  time()-3600));
 		return $PdoProvider;
 	}
 
@@ -63,8 +51,8 @@ class PdoProviderTest extends \PHPUnit\Framework\TestCase {
 	 * @param PdoProvider $PdoProvider
 	 */
 	function testCheckRefreshToken(PdoProvider $PdoProvider) {
-		$this->assertTrue($PdoProvider->checkRefreshToken(1, 'ABC123XYZ'));
-		$this->assertFalse($PdoProvider->checkRefreshToken(1, '___123XYZ'));
-		$this->assertFalse($PdoProvider->checkRefreshToken(2, 'ABC123XYZ'));
+		$this->assertTrue($PdoProvider->tokenCheck('AUTH-REFRESH', 'ABC123XYZ', 1));
+		$this->assertFalse($PdoProvider->tokenCheck('AUTH-REFRESH', '___123XYZ', 1));
+		$this->assertFalse($PdoProvider->tokenCheck('AUTH-REFRESH', 'ABC456XYZ', 2));
 	}
 }

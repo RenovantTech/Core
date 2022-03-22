@@ -6,10 +6,10 @@ interface ProviderInterface {
 	/**
 	 * Perform login
 	 * @param string $login
-	 * @return array
+	 * @return array|null
 	 * @throws \PDOException
 	 */
-	function fetchCredentials(string $login): array;
+	function fetchCredentials(string $login): ?array;
 
 	function disable2FA(int $userID): bool;
 
@@ -18,10 +18,10 @@ interface ProviderInterface {
 	/**
 	 * Fetch User data
 	 * @param integer $id User ID
-	 * @return array
+	 * @return array|null
 	 * @throws AuthException
 	 */
-	function fetchUserData(int $id): array;
+	function fetchUserData(int $id): ?array;
 
 	/**
 	 * @param int $userID
