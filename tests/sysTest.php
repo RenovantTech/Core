@@ -13,7 +13,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	function testConstants() {
 		$this->assertEquals('3.0.0', \renovant\core\VERSION);
-		$this->assertEquals(realpath(__DIR__.'/../src/'), \renovant\core\DIR);
+		$this->assertEquals(\renovant\core\DIR, realpath(__DIR__.'/../src/'));
 	}
 
 	/**
@@ -76,9 +76,10 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \renovant\core\util\yaml\YamlException
+	 * @throws \ReflectionException
 	 */
 	function testInit() {
-		sys::init();
+		sys::init('sys', 'system');
 		$this->assertTrue(file_exists(sys::SYS_YAML_CACHE));
 	}
 
@@ -103,20 +104,20 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		// test ID namespaces
 		$this->assertEquals('test\app', sys::info('test.app.Dispatcher', sys::INFO_NAMESPACE));
 		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_CLASS));
-		$this->assertEquals(TEST_DIR.'//app/Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH));
-		$this->assertEquals(TEST_DIR.'//app', sys::info('test.app.Dispatcher', sys::INFO_PATH_DIR));
+		$this->assertEquals(TEST_DIR.'/app/Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH));
+		$this->assertEquals(TEST_DIR.'/app', sys::info('test.app.Dispatcher', sys::INFO_PATH_DIR));
 		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH_FILE));
 		list($namespace, $className, $dir, $file) = sys::info('test.app.Dispatcher');
 		$this->assertEquals('test\app', $namespace);
 		$this->assertEquals('Dispatcher', $className);
-		$this->assertEquals(TEST_DIR.'//app', $dir);
+		$this->assertEquals(TEST_DIR.'/app', $dir);
 		$this->assertEquals('Dispatcher', $file);
 	}
 
 	/**
 	 * @depends testInit
 	 * @throws EventDispatcherException
-	 * @throws ContextException
+	 * @throws ContextException|\ReflectionException
 	 */
 	function testAcl() {
 		$ACL = sys::acl();
@@ -128,8 +129,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 	/**
 	 * @depends testInit
-	 * @throws EventDispatcherException
-	 * @throws ContextException
 	 */
 	function testAuth() {
 		$AUTH = sys::auth();
@@ -154,8 +153,12 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws \ReflectionException
 	 */
 	function testCmd() {
+		sys::cache('sys')->delete('sys.CmdManager');
 		$CmdManager = sys::cmd();
 		$this->assertInstanceOf(CmdManager::class, $CmdManager);
 	}
@@ -183,7 +186,12 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 */
-	function _testDispatchCLI() {
+	function testDispatchCLI() {
+		$routes = [
+			'CMD'			=> [ 'cmd' => 'console',		'namespace' => 'test.console' ],
+			'SYS'			=> [ 'cmd' => 'sys',			'namespace' => 'renovant.core.bin' ]
+		];
+
 		$_SERVER['argv'] = [
 			0 => \renovant\core\CLI_BOOTSTRAP,
 			1 => 'console',
@@ -192,7 +200,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			4 => '--bar=2'
 		];
 		try {
-			sys::dispatch('cli');
+			sys::dispatchCLI($routes);
 		} catch(\Exception $Ex) {
 			$msg = $Ex->getMessage();
 			$this->assertEquals('Europe/London', $msg);
@@ -202,15 +210,21 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testInit
 	 * @throws EventDispatcherException
-	 * @throws SysException
-	 * @throws ContextException
+	 * @throws ContextException|\ReflectionException
 	 */
 	function testDispatchHTTP() {
+		$routes = [
+			'MNGR'			=> [ 'url' => '/',			'namespace' => 'mngr' ],
+			'API_FOO'		=> [ 'url' => '/api/foo/',	'namespace' => 'api.foo' ],
+			'API_BAR'		=> [ 'url' => '/api/bar/',	'namespace' => 'api.bars' ],
+			'UI'			=> [ 'url' => '/',			'namespace' => 'ui' ]
+		];
+
 		try {
 			$_SERVER['SERVER_ADDR'] = 'example.com';
 			$_SERVER['SERVER_PORT'] = 8080;
 			$_SERVER['REQUEST_URI'] = '/';
-			sys::dispatch('http');
+			sys::dispatchHTTP('APP', $routes);
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/namespace mngr/', $Ex->getMessage());
@@ -220,7 +234,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$_SERVER['SERVER_ADDR'] = 'example.com';
 			$_SERVER['SERVER_PORT'] = null;
 			$_SERVER['REQUEST_URI'] = '/api/foo/123/456';
-			sys::dispatch('http');
+			sys::dispatchHTTP('APP', $routes);
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/namespace api.foo/', $Ex->getMessage());
@@ -230,7 +244,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$_SERVER['SERVER_ADDR'] = 'example.com';
 			$_SERVER['SERVER_PORT'] = 80;
 			$_SERVER['REQUEST_URI'] = '/api/bar/';
-			sys::dispatch('http');
+			sys::dispatchHTTP('APP', $routes);
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/namespace api.bar/', $Ex->getMessage());
@@ -240,7 +254,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$_SERVER['SERVER_ADDR'] = 'example.com';
 			$_SERVER['SERVER_PORT'] = 80;
 			$_SERVER['REQUEST_URI'] = '/dashboard';
-			sys::dispatch('http');
+			sys::dispatchHTTP('APP', $routes);
 		} catch (ContextException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/namespace ui/', $Ex->getMessage());
@@ -250,7 +264,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$_SERVER['SERVER_ADDR'] = 'bad-example.com';
 			$_SERVER['SERVER_PORT'] = 8080;
 			$_SERVER['REQUEST_URI'] = '/';
-			sys::dispatch('http');
+			sys::dispatchHTTP('APP', $routes);
 		} catch (SysException $Ex) {
 			$this->assertEquals(1, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/bad-example.com:8080/', $Ex->getMessage());
