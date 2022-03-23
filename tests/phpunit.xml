@@ -4,7 +4,6 @@
 		<testsuite name="base">
 			<directory>util</directory>
 			<directory>cache</directory>
-			<directory>debug</directory>
 			<directory>event</directory>
 			<directory>log/writer</directory>
 			<directory>log</directory>

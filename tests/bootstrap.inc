@@ -34,4 +34,4 @@ exec('rm -fr '.DATA_DIR);
 register_shutdown_function(function() {
 //	exec('nohup sleep 2 && rm -fr '.DATA_DIR);
 });
-sys::init();
+sys::init('sys', 'system');

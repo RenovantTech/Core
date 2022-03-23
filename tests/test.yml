@@ -1,0 +1,5 @@
+services:
+  test.Mock:
+    class: test\GlobalMock
+    properties:
+      name: SystemMock

@@ -3,34 +3,11 @@
 # =========================================================
 
 sys:
-  # -------------------------------------------------------
-  # APPs definitions ======================================
-  apps:
-    MNGR:
-      domain:     example.com
-      port:       8080
-      url:        /
-      namespace:  mngr
-    API_FOO:
-      url:        /api/foo/
-      namespace:  api.foo
-    API_BAR:
-      url:        /api/bar/
-      namespace:  api.bar
-    UI:
-      port:       80
-      url:        /
-      namespace:  ui
-
-  # -------------------------------------------------------
-  # CLI definitions ---------------------------------------
-  cli:
-    console:      test.console
 
   # -------------------------------------------------------
   # __autoload map namespace/directory --------------------
   namespaces:
-    test:           /
+    test:           /home/renovant/renovant-core/tests
     metadigit\lib:  /opt/metadigit-lib/src
 
   # -------------------------------------------------------
@@ -52,9 +29,9 @@ sys:
   # CACHE settings ----------------------------------------
   cache:
     ### System cache, override with CAUTION
-    #sys:
-      #class:       renovant\core\cache\SqliteCache
-      #constructor: ['sys', 'cache', true]
+    sys:
+      class:       renovant\core\cache\SqliteCache
+      constructor: ['sys', 'cache', true]
     #sys:
       #class:       renovant\core\cache\MemcachedCache
       #constructor: [['localhost', 11211, 0], true]
@@ -142,18 +119,14 @@ services:
   # AUTH service
   # -------------------------------------------------------
   sys.AUTH:
-    class: renovant\core\auth\AuthService
+    class: renovant\core\auth\AuthServiceJWT
     constructor:
       module: SESSION
     properties:
-      ttlAUTH:      300     # 5 min
-      ttlREFRESH:   86400   # 1 day
-      ttlRESET:     1800    # 30 min
-      ttlREMEMBER:  2592000 # 1 month
-      provider:     sys.AuthProvider
-      skipAuthApps: [ 'AUTH' ]
+      Provider:       !obj sys.AuthProvider
+      skipAuthModules: [ 'AUTH' ]
       skipAuthUrls: []
-      skipXSRFApps: [ 'RRD' ]
+      skipXSRFModules: [ 'RRD' ]
       skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
 
   sys.AuthProvider:
@@ -167,13 +140,18 @@ services:
     properties:
       fields:     '*'
 
+  sys.AuthTokenService:
+    class: renovant\core\auth\TokenService
+    properties:
+      Provider:   !obj sys.AuthProvider
+
   # =========================================================
   # CmdManager service
   # =========================================================
   sys.CmdManager:
     class: renovant\core\console\CmdManager
     constructor:
-      pdo:    sqlite
+      pdo:    mysql
       table:  sys_cmd
 
   # -------------------------------------------------------
