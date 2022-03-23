@@ -29,7 +29,9 @@
 		"ext-dom": "*",
 		"ext-libxml": "*",
 		"ext-openssl": "*",
-		"ext-bz2": "*"
+		"ext-bz2": "*",
+		"pragmarx/google2fa": "^8.0",
+		"bacon/bacon-qr-code": "^1.0"
 	},
 	"require-dev": {
 		"phptal/phptal": "1.3.*",
