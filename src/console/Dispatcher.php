@@ -1,7 +1,5 @@
 <?php
 namespace renovant\core\console;
-use renovant\core\context\ContextException;
-use renovant\core\event\EventDispatcherException;
 use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
@@ -39,6 +37,11 @@ class Dispatcher {
 //		'twig'		=> view\TwigView::class
 	];
 
+	/**
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 */
 	function dispatch(Request $Req, Response $Res) {
 		$Controller = $controllerID = $resource = null;
 		$Event = new Event($Req, $Res);
@@ -116,7 +119,7 @@ class Dispatcher {
 	protected function resolveView(string $view, Request $Req, Response $Res) {
 		try {
 			preg_match('/^([a-z-]+:)?([^:\s]+)?$/', $view, $matches);
-			@list($_, $engine, $resource) = $matches;
+			@list( , $engine, $resource) = $matches;
 			$engine = (empty($engine)) ? $this->defaultViewEngine : substr($engine,0,-1);
 			if(!empty($resource)) {
 				$resource = (substr($resource,0,1) != '/' ) ? dirname('/'.str_replace(' ','/',$Req->getAttribute('APP_MOD_URI'))).'/'.$resource : $resource;

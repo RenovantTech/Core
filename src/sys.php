@@ -12,6 +12,7 @@ use renovant\core\acl\ACL,
 	renovant\core\container\ContainerException,
 	renovant\core\context\Context,
 	renovant\core\context\ContextException,
+	renovant\core\db\PDO,
 	renovant\core\event\Event,
 	renovant\core\event\EventDispatcher,
 	renovant\core\event\EventDispatcherException,
@@ -284,12 +285,10 @@ class sys {
 
 	/**
 	 * ACL helper
-	 * @return ACL
 	 * @throws ContextException
 	 * @throws EventDispatcherException|\ReflectionException
 	 */
-	static function acl() {
-		/** @var ACL $ACL */
+	static function acl(): ACL {
 		static $ACL;
 		if(!$ACL) $ACL = self::$Context->get(self::$Sys->cnfServices['acl'], ACL::class);
 		return $ACL;
@@ -325,15 +324,13 @@ class sys {
 
 	/**
 	 * CmdManager helper
-	 * @return console\CmdManager
+	 * @throws ContextException
+	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	static function cmd() {
+	static function cmd(): CmdManager {
 		static $CmdManager;
-		if(!isset($CmdManager) && !$CmdManager = self::cache(SYS_CACHE)->get(self::$Sys->cnfServices['cmd'])) {
-			$CmdManager = self::$Container->build(self::$Sys->cnfServices['cmd'], CmdManager::class);
-			self::cache(SYS_CACHE)->set(self::$Sys->cnfServices['cmd'], $CmdManager);
-		}
+		if(!$CmdManager) $CmdManager = self::$Context->get(self::$Sys->cnfServices['cmd'], CmdManager::class);
 		return $CmdManager;
 	}
 
@@ -417,15 +414,14 @@ class sys {
 	/**
 	 * PDO helper
 	 * @param string|null $id database ID, default "master"
-	 * @return db\PDO shared PDO instance
 	 */
-	static function pdo(?string $id='master') {
+	static function pdo(?string $id): PDO {
 		if(is_null($id)) $id = self::PDO_DEFAULT;
 		if(!isset(self::$pdo[$id])) {
 			$traceFn = self::traceFn(__METHOD__);
 			$cnf = self::$Sys->cnfPdo[$id];
 			self::trace(LOG_INFO, T_DB, sprintf('open [%s] %s', $id, $cnf['dns']), null, __METHOD__);
-			$pdo = @new db\PDO($cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
+			$pdo = @new PDO((string)$cnf['dns'], $cnf['user'], $cnf['pwd'], $cnf['options'], $id);
 			self::$pdo[$id] = $pdo;
 			self::traceFn($traceFn);
 		}

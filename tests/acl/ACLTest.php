@@ -68,6 +68,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
 	function testOnRoute(ACL $ACL) {
 		$Req = new Request('/api/users/', 'GET', ['type'=>'all']);
@@ -80,6 +81,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
 	function testOnRouteException(ACL $ACL) {
 		$this->expectException('renovant\core\acl\Exception');
@@ -92,6 +94,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
 	function testOnObject(ACL $ACL) {
 		$this->assertTrue($ACL->onObject('service.Foo', 'index', 1));
@@ -100,6 +103,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
 	function testOnObjectException(ACL $ACL) {
 		$this->expectException('renovant\core\acl\Exception');
@@ -111,6 +115,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
 	function testOnOrm(ACL $ACL) {
 		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 1));
@@ -120,8 +125,9 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 * @param ACL $ACL
+	 * @throws \Exception
 	 */
-	function testOnOrmException(ACL $ACL) {
+	function __testOnOrmException(ACL $ACL) {
 		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(200);
 		$this->expectExceptionMessage('[FILTER] "data.UserRepository" value MISSING');

@@ -30,14 +30,13 @@ class PDO extends \PDO {
 	protected $_id;
 
 	/**
-	 * @param string $dsn      the Data Source Name, or DSN, contains the information required to connect to the database
-	 * @param string $username the user name for the DSN string, optional for some PDO drivers
-	 * @param string $password the password for the DSN string, optional for some PDO drivers
-	 * @param array	 $options  a key=>value array of driver-specific connection options
+	 * @param string $dsn the Data Source Name, or DSN, contains the information required to connect to the database
+	 * @param string|null $username the username for the DSN string, optional for some PDO drivers
+	 * @param string|null $password the password for the DSN string, optional for some PDO drivers
+	 * @param array|null $options a key=>value array of driver-specific connection options
 	 * @param string $id database ID, default "master"
-	 * @throws \PDOException
 	 */
-	function __construct($dsn, $username=null, $password=null, array $options=null, $id='master') {
+	function __construct(string $dsn, ?string $username=null, ?string $password=null, ?array $options=null, string $id='master') {
 		$this->_id =$id;
 		$options = (array) $options + [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
