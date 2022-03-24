@@ -4,7 +4,7 @@ use renovant\core\cache\ArrayCache;
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
 use renovant\core\acl\ACL,
-	renovant\core\auth\AUTH,
+	renovant\core\auth\Auth,
 	renovant\core\auth\AuthException,
 	renovant\core\console\CmdManager,
 	renovant\core\console\Event as ConsoleEvent,
@@ -285,13 +285,9 @@ class sys {
 
 	/**
 	 * ACL helper
-	 * @throws ContextException
-	 * @throws EventDispatcherException|\ReflectionException
 	 */
 	static function acl(): ACL {
-		static $ACL;
-		if(!$ACL) $ACL = self::$Context->get(self::$Sys->cnfServices['acl'], ACL::class);
-		return $ACL;
+		return ACL::instance();
 	}
 
 	/**
