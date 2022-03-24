@@ -6,70 +6,53 @@ INSERT INTO sys_users (id, name) VALUES
 	(4, 'Brian Special User')
 ;
 /* GROUPS */
-INSERT INTO sys_roles (id, name) VALUES
-	(1, 'ADMIN'),
-	(2, 'STAFF'),
-	(3, 'USER')
+INSERT INTO sys_acl (id, type, code) VALUES
+	(1, 'ROLE', 'ADMIN'),
+	(2, 'ROLE', 'STAFF'),
+	(3, 'ROLE', 'USER')
 ;
-/* USERS 2 GROUPS */
-INSERT INTO sys_users_2_roles (user_id, role_id) VALUES
-	(1, 1),
-	(2, 2),
-	(3, 3),
-	(4, 3)
+/* USERS <=> ROLES */
+INSERT INTO sys_acl_maps (type, user_id, acl_id) VALUES
+	('USER_ROLE', 1, 1),
+	('USER_ROLE', 2, 2),
+	('USER_ROLE', 3, 3),
+	('USER_ROLE', 4, 3)
 ;
 /* ACTION */
-INSERT INTO sys_acl_actions (id, code) VALUES
-	(1, 'api.users'),
-	(2, 'api.users.insert'),
-	(3, 'service.Foo'),
-	(4, 'service.Bar'),
-	(5, 'data.UserRepository'),
-	(6, 'data.UserRepository.FETCH')
+INSERT INTO sys_acl (id, type, code) VALUES
+	(4, 'ACTION', 'api.users'),
+	(5, 'ACTION', 'api.users.insert'),
+	(6, 'ACTION', 'service.Foo'),
+	(7, 'ACTION', 'service.Bar'),
+	(8, 'ACTION', 'data.UserRepository'),
+	(9, 'ACTION', 'data.UserRepository.FETCH')
 ;
 /* FILTERS */
-INSERT INTO sys_acl_filters (id, code) VALUES
-	(5, 'data.UserRepository'),
-	(6, 'data.UserRepository.FETCH')
-;
-/* FILTERS SQL */
-INSERT INTO sys_acl_filters_sql (id, query) VALUES
-	(5, 'SELECT 1'),
-	(6, 'SELECT 1')
+INSERT INTO sys_acl (id, type, code, query) VALUES
+	(10, 'FILTER', 'data.UserRepository', 'SELECT 1'),
+	(11, 'FILTER', 'data.UserRepository.FETCH', 'SELECT 1')
 ;
 /* ACL */
-INSERT INTO sys_acl (type, target, method, params_regex, action, filter, filter_sql) VALUES
-	('URL',		'^/api/users/',			NULL,		'', 1, NULL, NULL),
-	('URL',		'^/api/users/$',		'POST',		'', 2, NULL, NULL),
-	('OBJECT',	'service.Foo',			'index',	'', 3, NULL, NULL),
-	('OBJECT',	'service.Bar',			'index',	'', 4, NULL, NULL),
-	('ORM',		'data.UserRepository',	NULL,		'', 5, 5, 5),
-	('ORM',		'data.UserRepository',	'FETCH',	'', 6, 6, 6)
+INSERT INTO sys_acl_rules (type, target, method, params_regex, acl_id) VALUES
+	('URL',		'^/api/users/',			NULL,		'', 1),
+	('URL',		'^/api/users/$',		'POST',		'', 2),
+	('OBJECT',	'service.Foo',			'index',	'', 3),
+	('OBJECT',	'service.Bar',			'index',	'', 4),
+	('ORM',		'data.UserRepository',	NULL,		'', 5),
+	('ORM',		'data.UserRepository',	'FETCH',	'', 6)
 ;
-/* ACTION 2 USERS */
-INSERT INTO sys_acl_actions_2_users (action_id, user_id) VALUES
-	(5, 2),
-	(5, 4),
-	(6, 2),
-	(6, 4)
+/* USERS <=> ACTION */
+INSERT INTO sys_acl_maps (type, user_id, acl_id) VALUES
+	('USER_ACTION', 1, 4),
+	('USER_ACTION', 1, 6),
+	('USER_ACTION', 2, 7),
+	('USER_ACTION', 4, 7)
 ;
-INSERT INTO sys_acl_actions_2_roles (action_id, role_id) VALUES
-	(1, 1),
-	(2, 1),
-	(3, 1),
-	(4, 1),
-	(5, 1),
-	(6, 1),
-	(1, 2)
-;
-/* FILTERS 2 USERS */
-INSERT INTO sys_acl_filters_2_users (filter_id, user_id, data) VALUES
---	(5, 1, '*' ),
-	(5, 4, 123),
-	(6, 4, 123)
-;
-INSERT INTO sys_acl_filters_2_roles (filter_id, role_id, data) VALUES
---	(5, 1, 123 ),
-	(5, 1, '*' ),
-	(6, 1, '*')
+
+/* USERS <=> FILTER */
+INSERT INTO sys_acl_maps (type, user_id, acl_id) VALUES
+	('USER_FILTER', 1, 10),
+	('USER_FILTER', 1, 11),
+	('USER_FILTER', 2, 10),
+	('USER_FILTER', 4, 10)
 ;

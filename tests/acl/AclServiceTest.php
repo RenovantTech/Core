@@ -1,68 +1,70 @@
 <?php
 namespace test\acl;
 use renovant\core\sys,
-	renovant\core\acl\ACL,
+	renovant\core\acl\AclService,
+	renovant\core\auth\AuthServiceJWT,
 	renovant\core\http\Request;
 
-class ACLTest extends \PHPUnit\Framework\TestCase {
+class AclServiceTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS sys_acl_filters_2_users;
-			DROP TABLE IF EXISTS sys_acl_filters_2_roles;
-			DROP TABLE IF EXISTS sys_acl_actions_2_users;
-			DROP TABLE IF EXISTS sys_acl_actions_2_roles;
+			DROP TABLE IF EXISTS sys_acl_rules;
+			DROP TABLE IF EXISTS sys_acl_maps;
 			DROP TABLE IF EXISTS sys_acl;
-			DROP TABLE IF EXISTS sys_acl_actions;
-			DROP TABLE IF EXISTS sys_acl_filters;
-			DROP TABLE IF EXISTS sys_acl_filters_sql;
-			DROP TABLE IF EXISTS sys_users_2_roles;
-			DROP TABLE IF EXISTS sys_users_tokens;
-			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
-			DROP TABLE IF EXISTS sys_roles;
 		');
 	}
 
 	static function tearDownAfterClass():void {
+		/*
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS sys_acl_filters_2_users;
-			DROP TABLE IF EXISTS sys_acl_filters_2_roles;
-			DROP TABLE IF EXISTS sys_acl_actions_2_users;
-			DROP TABLE IF EXISTS sys_acl_actions_2_roles;
+			DROP TABLE IF EXISTS sys_acl_rules;
+			DROP TABLE IF EXISTS sys_acl_maps;
 			DROP TABLE IF EXISTS sys_acl;
-			DROP TABLE IF EXISTS sys_acl_actions;
-			DROP TABLE IF EXISTS sys_acl_filters;
-			DROP TABLE IF EXISTS sys_acl_filters_sql;
-			DROP TABLE IF EXISTS sys_users_2_roles;
-			DROP TABLE IF EXISTS sys_users_tokens;
-			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
-			DROP TABLE IF EXISTS sys_roles;
 		');
+		*/
 	}
 
+	/**
+	 * @return AclService
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\context\ContextException
+	 */
 	function testConstruct() {
-		$ACL = new ACL( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
+		$AclService = new AclService( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
 			'acl'	=> 'sys_acl',
-			'users'	=> 'sys_users',
-			'roles'	=> 'sys_roles',
-			'u2r'	=> 'sys_users_2_roles'
+			'users'	=> 'sys_users'
 		]);
-		$this->assertInstanceOf(ACL::class, $ACL);
+		$this->assertInstanceOf(AclService::class, $AclService);
+		/** @var AclService $AclService */
+		$AclService = sys::context()->get('sys.ACL');
+		$this->assertInstanceOf(AclService::class, $AclService);
 		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/init.sql'));
-		return $ACL;
+
+		$this->assertTrue(constant('SYS_ACL_ORM'));
+		$this->assertTrue(constant('SYS_ACL_ROUTING'));
+		$this->assertTrue(constant('SYS_ACL_SERVICES'));
+		return $AclService;
 	}
 
 	/**
 	 * @depends testConstruct
-	 * @param ACL $ACL
+	 * @param AclService $AclService
+	 * @throws \ReflectionException
 	 */
-	function testInit(ACL $ACL) {
-		$ACL->init();
-		$this->assertTrue(constant('SYS_ACL_ORM'));
-		$this->assertTrue(constant('SYS_ACL_ROUTING'));
-		$this->assertTrue(constant('SYS_ACL_SERVICES'));
+	function testInit(AclService $AclService) {
+		$AuthService = new AuthServiceJWT();
+
+		$AuthService->authenticate(1, null, '', '');
+		$AclService->init();
+		$ACL = sys::acl();
+		$this->assertTrue($ACL->action('api.users'));
+		$this->assertFalse($ACL->action('service.Bar'));
+		$this->assertTrue($ACL->role('ADMIN'));
+		$this->assertFalse($ACL->role('STAFF'));
 	}
 
 	/**
@@ -70,7 +72,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 * @throws \Exception
 	 */
-	function testOnRoute(ACL $ACL) {
+	function __testOnRoute(ACL $ACL) {
 		$Req = new Request('/api/users/', 'GET', ['type'=>'all']);
 		$this->assertTrue($ACL->onRoute($Req, 1));
 
@@ -83,7 +85,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 * @throws \Exception
 	 */
-	function testOnRouteException(ACL $ACL) {
+	function __testOnRouteException(ACL $ACL) {
 		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "api.users.insert" DENIED');
@@ -96,7 +98,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 * @throws \Exception
 	 */
-	function testOnObject(ACL $ACL) {
+	function __testOnObject(ACL $ACL) {
 		$this->assertTrue($ACL->onObject('service.Foo', 'index', 1));
 	}
 
@@ -105,7 +107,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 * @throws \Exception
 	 */
-	function testOnObjectException(ACL $ACL) {
+	function __testOnObjectException(ACL $ACL) {
 		$this->expectException('renovant\core\acl\Exception');
 		$this->expectExceptionCode(100);
 		$this->expectExceptionMessage('[ACTION] "service.Foo" DENIED');
@@ -117,7 +119,7 @@ class ACLTest extends \PHPUnit\Framework\TestCase {
 	 * @param ACL $ACL
 	 * @throws \Exception
 	 */
-	function testOnOrm(ACL $ACL) {
+	function __testOnOrm(ACL $ACL) {
 		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 1));
 		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 4));
 	}
