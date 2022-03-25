@@ -51,7 +51,7 @@ class AclService {
 	 * @param array|null $tables
 	 */
 	function __construct(array $modules, ?string $pdo=null, array $tables=null) {
-		$prevTraceFn = sys::traceFn('sys.ACL');
+		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$this->modules = $modules;
 			$this->pdo = $pdo;
@@ -64,53 +64,54 @@ class AclService {
 				[$this->tables['acl'], $this->tables['users']],
 				file_get_contents(__DIR__ . '/sql/init-' . $driver . '.sql')
 			));
-			$this->__wakeup();
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
 	}
 
-	function __wakeup() {
-		sys::trace(LOG_DEBUG, T_INFO, 'activating modules '.implode(', ', $this->modules), null, $this->_.'->init');
-		foreach ($this->modules as $mod)
-			define('SYS_ACL_'.strtoupper($mod), true);
-	}
-
 	/**
 	 * Initialize ACL modules & User ACL.
 	 * To be invoked via event listener before HTTP Routing execution (HTTP:INIT or HTTP:ROUTE).
-	 * @throws \ReflectionException
+	 * @throws AclException
 	 */
 	function init() {
-		$Auth = sys::auth();
-		if($Auth->UID()) {
-			if(!$ACL = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
-				$ACL = ACL::instance();
-				$actions = $filters = $roles = [];
+		$prevTraceFn = sys::traceFn($this->_.'->init');
+		try {
+			sys::trace(LOG_DEBUG, T_INFO, 'activating modules '.implode(', ', $this->modules), null, $this->_.'->init');
+			foreach ($this->modules as $mod)
+				define('SYS_ACL_'.strtoupper($mod), true);
 
-				$mapsArray = sys::pdo($this->pdo)
-					->prepare(sprintf(self::SQL_FETCH_USER_MAPS, $this->tables['acl']))
-					->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
-				$aclIds = [];
-				foreach ($mapsArray as $map) {
-					$aclIds[] = $map['acl_id'];
-				}
-				if(!empty($aclIds)) {
-					$aclArray = sys::pdo($this->pdo)
-						->prepare(sprintf(self::SQL_FETCH_USER_ACL, $this->tables['acl'], implode(',', $aclIds)))
-						->execute()->fetchAll(\PDO::FETCH_ASSOC);
-					foreach ($aclArray as $acl) {
-						switch ($acl['type']) {
-							case 'ACTION': $actions[] = $acl['code']; break;
-							case 'FILTER': $filters[$acl['code']] = $acl['query']; break;
-							case 'ROLE': $roles[] = $acl['code']; break;
+			$Auth = sys::auth();
+			if($Auth->UID()) {
+				if($data = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
+					ACL::init(...$data);
+				} else {
+					$actions = $filters = $roles = [];
+					$mapsArray = sys::pdo($this->pdo)
+						->prepare(sprintf(self::SQL_FETCH_USER_MAPS, $this->tables['acl']))
+						->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
+					$aclIds = [];
+					foreach ($mapsArray as $map)
+						$aclIds[] = $map['acl_id'];
+					if(!empty($aclIds)) {
+						$aclArray = sys::pdo($this->pdo)
+							->prepare(sprintf(self::SQL_FETCH_USER_ACL, $this->tables['acl'], implode(',', $aclIds)))
+							->execute()->fetchAll(\PDO::FETCH_ASSOC);
+						foreach ($aclArray as $acl) {
+							switch ($acl['type']) {
+								case 'ACTION': $actions[] = $acl['code']; break;
+								case 'FILTER': $filters[$acl['code']] = $acl['query']; break;
+								case 'ROLE': $roles[] = $acl['code']; break;
+							}
 						}
 					}
+					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$actions, $filters, $roles]);
+					ACL::init($actions, $filters, $roles);
 				}
-				$RConstructor = (new \ReflectionClass(ACL::class))->getConstructor();
-				$RConstructor->setAccessible(true);
-				$RConstructor->invokeArgs($ACL, [$actions, $filters, $roles]);
+				sys::trace(LOG_DEBUG, T_INFO, 'ACL initialized');
 			}
+		} finally {
+			sys::traceFn($prevTraceFn);
 		}
 	}
 

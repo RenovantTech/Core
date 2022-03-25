@@ -1,16 +1,18 @@
 <?php
 namespace test\acl;
+use const renovant\core\SYS_CACHE;
 use renovant\core\sys,
+	renovant\core\acl\ACL,
 	renovant\core\acl\AclException,
 	renovant\core\acl\AclService,
-	renovant\core\auth\AuthServiceJWT;
+	renovant\core\auth\AuthServiceJWT,
+	renovant\core\util\reflection\ReflectionClass;
 
 class AclTraitTest extends \PHPUnit\Framework\TestCase {
 
 	static $AclService;
 	static $AuthService;
 	static $MockService;
-
 
 	static function setUpBeforeClass():void {
 		sys::cache('sys')->delete('sys.ACL');
@@ -40,16 +42,26 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
+	static protected function reset($userId) {
+		$RefClass = new ReflectionClass(ACL::class);
+		$RefProp = $RefClass->getProperty('_ACL');
+		$RefProp->setAccessible(true);
+		$RefProp->setValue(null);
+		sys::cache(SYS_CACHE)->delete(AclService::CACHE_PREFIX.$userId);
+	}
+
 	/**
-	 * @throws \ReflectionException
+	 * @throws \ReflectionException|AclException
 	 */
 	function testAcl() {
 		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
 		self::$AclService->init();
 		/** @var MockService2 $MockService */
 		$this->assertEquals('foo', self::$MockService->foo());
 
 		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
 		self::$AclService->init();
 		/** @var MockService2 $MockService */
 		$this->assertEquals('bar', self::$MockService->bar());
@@ -64,6 +76,7 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[ACTION] "action.foo"');
 
 		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
 		self::$AclService->init();
 		/** @var MockService2 $MockService */
 		$this->assertEquals('foo', self::$MockService->foo());
@@ -78,6 +91,7 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[FILTER] "filter.bar"');
 
 		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
 		self::$AclService->init();
 		/** @var MockService2 $MockService */
 		$this->assertEquals('bar', self::$MockService->bar());
@@ -92,6 +106,7 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[ROLE] "role.service2"');
 
 		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
 		self::$AclService->init();
 		/** @var MockService2 $MockService */
 		$this->assertEquals('foo', self::$MockService->foo());

@@ -1,6 +1,8 @@
 <?php
 namespace renovant\core\acl;
 class AclException extends \renovant\core\Exception {
+	// INIT phase
+	const COD1 = '[INIT] initialization yet done';
 	// ACTIONS
 	const COD100 = '[ACTION] "%s" missing for %s';
 	const COD101 = '[ACTION] "%s" missing for %s->%s()';

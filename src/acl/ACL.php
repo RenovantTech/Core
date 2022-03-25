@@ -3,6 +3,9 @@ namespace renovant\core\acl;
 
 class ACL {
 
+	/** singleton instance */
+	static private $_ACL;
+
 	/** ACL actions */
 	protected array $actions = [];
 	/** ACL filters */
@@ -10,10 +13,16 @@ class ACL {
 	/** ACL roles */
 	protected array $roles = [];
 
+	/**
+	 * @throws AclException
+	 */
+	static function init(array $actions, array $filters, array $roles): ACL {
+		if(self::$_ACL) throw new AclException(1);
+		return self::$_ACL = new ACL($actions, $filters, $roles);
+	}
+
 	static function instance(): ACL {
-		static $Acl;
-		if(!isset($Acl)) $Acl = new ACL([],[],[]);
-		return $Acl;
+		return self::$_ACL;
 	}
 
 	private function __construct(array $actions, array $filters, array $roles) {

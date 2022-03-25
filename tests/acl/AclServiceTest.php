@@ -42,10 +42,6 @@ class AclServiceTest extends \PHPUnit\Framework\TestCase {
 		$AclService = sys::context()->get('sys.ACL');
 		$this->assertInstanceOf(AclService::class, $AclService);
 		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/init.sql'));
-
-		$this->assertTrue(constant('SYS_ACL_ORM'));
-		$this->assertTrue(constant('SYS_ACL_ROUTING'));
-		$this->assertTrue(constant('SYS_ACL_SERVICES'));
 		return $AclService;
 	}
 
@@ -53,6 +49,7 @@ class AclServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param AclService $AclService
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\acl\AclException
 	 */
 	function testInit(AclService $AclService) {
 		$AuthService = new AuthServiceJWT();
@@ -64,5 +61,9 @@ class AclServiceTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($ACL->action('service.Bar'));
 		$this->assertTrue($ACL->role('ADMIN'));
 		$this->assertFalse($ACL->role('STAFF'));
+
+		$this->assertTrue(constant('SYS_ACL_ORM'));
+		$this->assertTrue(constant('SYS_ACL_ROUTING'));
+		$this->assertTrue(constant('SYS_ACL_SERVICES'));
 	}
 }
