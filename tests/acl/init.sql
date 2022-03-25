@@ -5,7 +5,7 @@ INSERT INTO sys_users (id, name) VALUES
 	(3, 'Don User'),
 	(4, 'Brian Special User')
 ;
-/* GROUPS */
+/* ROLES */
 INSERT INTO sys_acl (id, type, code) VALUES
 	(1, 'ROLE', 'ADMIN'),
 	(2, 'ROLE', 'STAFF'),

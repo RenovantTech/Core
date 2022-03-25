@@ -21,6 +21,7 @@ class MockService  {
 	 * @acl-role(foo.role2, foo.role3)
 	 */
 	function foo() {
+		return 'foo';
 	}
 
 	/**
@@ -30,5 +31,6 @@ class MockService  {
 	 * @acl-role(bar.role2, bar.role3)
 	 */
 	function bar() {
+		return 'bar';
 	}
 }

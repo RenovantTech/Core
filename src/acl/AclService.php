@@ -85,6 +85,9 @@ class AclService {
 		$Auth = sys::auth();
 		if($Auth->UID()) {
 			if(!$ACL = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
+				$ACL = ACL::instance();
+				$actions = $filters = $roles = [];
+
 				$mapsArray = sys::pdo($this->pdo)
 					->prepare(sprintf(self::SQL_FETCH_USER_MAPS, $this->tables['acl']))
 					->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
@@ -92,18 +95,18 @@ class AclService {
 				foreach ($mapsArray as $map) {
 					$aclIds[] = $map['acl_id'];
 				}
-				$aclArray = sys::pdo($this->pdo)
-					->prepare(sprintf(self::SQL_FETCH_USER_ACL, $this->tables['acl'], implode(',', $aclIds)))
-					->execute()->fetchAll(\PDO::FETCH_ASSOC);
-				$actions = $filters = $roles = [];
-				foreach ($aclArray as $acl) {
-					switch ($acl['type']) {
-						case 'ACTION': $actions[] = $acl['code']; break;
-						case 'FILTER': $filters[$acl['code']] = $acl['query']; break;
-						case 'ROLE': $roles[] = $acl['code']; break;
+				if(!empty($aclIds)) {
+					$aclArray = sys::pdo($this->pdo)
+						->prepare(sprintf(self::SQL_FETCH_USER_ACL, $this->tables['acl'], implode(',', $aclIds)))
+						->execute()->fetchAll(\PDO::FETCH_ASSOC);
+					foreach ($aclArray as $acl) {
+						switch ($acl['type']) {
+							case 'ACTION': $actions[] = $acl['code']; break;
+							case 'FILTER': $filters[$acl['code']] = $acl['query']; break;
+							case 'ROLE': $roles[] = $acl['code']; break;
+						}
 					}
 				}
-				$ACL = ACL::instance();
 				$RConstructor = (new \ReflectionClass(ACL::class))->getConstructor();
 				$RConstructor->setAccessible(true);
 				$RConstructor->invokeArgs($ACL, [$actions, $filters, $roles]);

@@ -8,6 +8,7 @@ use renovant\core\sys,
 class AclServiceTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
+		sys::cache('sys')->delete('sys.ACL');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_acl_rules;
 			DROP TABLE IF EXISTS sys_acl_maps;
@@ -17,14 +18,13 @@ class AclServiceTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	static function tearDownAfterClass():void {
-		/*
+		sys::cache('sys')->delete('sys.ACL');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_acl_rules;
 			DROP TABLE IF EXISTS sys_acl_maps;
 			DROP TABLE IF EXISTS sys_acl;
 			DROP TABLE IF EXISTS sys_users;
 		');
-		*/
 	}
 
 	/**
