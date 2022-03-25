@@ -1,0 +1,3 @@
+services:
+  test.acl.MockService:
+    class: test\acl\MockService
