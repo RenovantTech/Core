@@ -104,7 +104,7 @@ services:
   # ACL service
   # -------------------------------------------------------
   sys.ACL:
-    class: renovant\core\acl\ACL
+    class: renovant\core\acl\AclService
     constructor:
       # available modules: ORM, ROUTING, SERVICES
       modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
@@ -112,8 +112,8 @@ services:
       tables:
         acl:    sys_acl
         users:  sys_users
-        roles:  sys_roles
-        u2r:    sys_users_2_roles
+    properties:
+      cache:    sys
 
   # -------------------------------------------------------
   # AUTH service
