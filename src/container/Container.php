@@ -43,6 +43,10 @@ class Container {
 		$Obj = $RClass->newInstanceWithoutConstructor();
 		$RObj = new \ReflectionObject($Obj);
 		self::setProperty('_', $id, $Obj, $RObj);
+
+		if($RClass->hasProperty('_acl_actions'))
+			\renovant\core\acl\Parser::parse($Obj);
+
 		foreach ($properties as $k=>$v)
 			self::setProperty($k, $v, $Obj, $RObj);
 		if($RConstructor = $RClass->getConstructor())
