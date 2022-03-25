@@ -1,6 +1,6 @@
 <?php
 namespace renovant\core\acl;
-class Exception extends \renovant\core\Exception {
+class AclException extends \renovant\core\Exception {
 	// ACTIONS
 	const COD100 = '[ACTION] "%s" missing for %s';
 	const COD101 = '[ACTION] "%s" missing for %s->%s()';

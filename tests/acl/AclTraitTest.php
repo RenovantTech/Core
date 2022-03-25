@@ -1,6 +1,7 @@
 <?php
 namespace test\acl;
 use renovant\core\sys,
+	renovant\core\acl\AclException,
 	renovant\core\acl\AclService,
 	renovant\core\auth\AuthServiceJWT;
 
@@ -55,10 +56,10 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 */
 	function testAclActionException() {
-		$this->expectException(\renovant\core\acl\Exception::class);
+		$this->expectException(AclException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACTION] "action.foo"');
 
@@ -69,10 +70,10 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 */
 	function testAclFilterException() {
-		$this->expectException(\renovant\core\acl\Exception::class);
+		$this->expectException(AclException::class);
 		$this->expectExceptionCode(201);
 		$this->expectExceptionMessage('[FILTER] "filter.bar"');
 
@@ -83,10 +84,10 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 */
 	function testAclRoleException() {
-		$this->expectException(\renovant\core\acl\Exception::class);
+		$this->expectException(AclException::class);
 		$this->expectExceptionCode(300);
 		$this->expectExceptionMessage('[ROLE] "role.service2"');
 

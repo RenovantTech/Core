@@ -2,6 +2,7 @@
 namespace renovant\core\http;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
+	renovant\core\acl\AclException,
 	renovant\core\auth\AuthException,
 	renovant\core\http\view\FileView,
 	renovant\core\http\view\CsvView,
@@ -78,6 +79,10 @@ class Dispatcher {
 			$DispatcherEvent->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			http_response_code(401);
+		} catch (AclException $Ex) {
+			$DispatcherEvent->setException($Ex);
+			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
+			http_response_code(403);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
