@@ -93,7 +93,7 @@ class DocComment {
 		} elseif(strpos($value, ')') === false) {
 			$this->tags[$tag][] = trim($value);
 		} else {
-			preg_match_all('/(([\w-]+)="([^"]+)" | ([\w-]+)=(\w+) | ([\w-]+))/x', $value, $matches, PREG_SET_ORDER);
+			preg_match_all('/(([\w\.-]+)="([^"]+)" | ([\w\.-]+)=(\w+) | ([\w\.-]+))/x', $value, $matches, PREG_SET_ORDER);
 			$values = [];
 			foreach($matches as $match) {
 				switch(count($match)) {
