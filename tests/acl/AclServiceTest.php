@@ -2,8 +2,7 @@
 namespace test\acl;
 use renovant\core\sys,
 	renovant\core\acl\AclService,
-	renovant\core\auth\AuthServiceJWT,
-	renovant\core\http\Request;
+	renovant\core\auth\AuthServiceJWT;
 
 class AclServiceTest extends \PHPUnit\Framework\TestCase {
 
@@ -65,74 +64,5 @@ class AclServiceTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($ACL->action('service.Bar'));
 		$this->assertTrue($ACL->role('ADMIN'));
 		$this->assertFalse($ACL->role('STAFF'));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnRoute(ACL $ACL) {
-		$Req = new Request('/api/users/', 'GET', ['type'=>'all']);
-		$this->assertTrue($ACL->onRoute($Req, 1));
-
-		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
-		$this->assertTrue($ACL->onRoute($Req, 1));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnRouteException(ACL $ACL) {
-		$this->expectException('renovant\core\acl\Exception');
-		$this->expectExceptionCode(100);
-		$this->expectExceptionMessage('[ACTION] "api.users.insert" DENIED');
-		$Req = new Request('/api/users/', 'POST', ['type'=>'all']);
-		$this->assertTrue($ACL->onRoute($Req, 2));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnObject(ACL $ACL) {
-		$this->assertTrue($ACL->onObject('service.Foo', 'index', 1));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnObjectException(ACL $ACL) {
-		$this->expectException('renovant\core\acl\Exception');
-		$this->expectExceptionCode(100);
-		$this->expectExceptionMessage('[ACTION] "service.Foo" DENIED');
-		$this->assertTrue($ACL->onObject('service.Foo', 'index', 2));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnOrm(ACL $ACL) {
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 1));
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 4));
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @param ACL $ACL
-	 * @throws \Exception
-	 */
-	function __testOnOrmException(ACL $ACL) {
-		$this->expectException('renovant\core\acl\Exception');
-		$this->expectExceptionCode(200);
-		$this->expectExceptionMessage('[FILTER] "data.UserRepository" value MISSING');
-		$this->assertTrue($ACL->onOrm('data.UserRepository', 'FETCH', 2));
 	}
 }

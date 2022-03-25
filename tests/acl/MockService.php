@@ -1,6 +1,5 @@
 <?php
 namespace test\acl;
-
 /**
  * @acl(role="mock.role1, mock.role2", action="mock.action1", filter="mock.filter1")
  * @acl-action(mock.action2, mock.action3)
@@ -9,10 +8,6 @@ namespace test\acl;
  */
 class MockService  {
 	use \renovant\core\acl\AclTrait;
-
-	protected $Child;
-
-	protected $name;
 
 	/**
 	 * @acl(role="role.foo1", action="action.foo1", filter="filter.foo1")

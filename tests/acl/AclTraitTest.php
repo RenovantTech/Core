@@ -1,10 +1,8 @@
 <?php
 namespace test\acl;
 use renovant\core\sys,
-	renovant\core\CoreProxy,
 	renovant\core\acl\AclService,
-	renovant\core\auth\AuthServiceJWT,
-	renovant\core\http\Request;
+	renovant\core\auth\AuthServiceJWT;
 
 class AclTraitTest extends \PHPUnit\Framework\TestCase {
 
@@ -26,7 +24,6 @@ class AclTraitTest extends \PHPUnit\Framework\TestCase {
 			'acl'	=> 'sys_acl',
 			'users'	=> 'sys_users'
 		]);
-//		$AclService = sys::context()->get('sys.ACL');
 		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/init2.sql'));
 		self::$AuthService = new AuthServiceJWT();
 		self::$MockService = sys::context()->get('test.acl.MockService2');
