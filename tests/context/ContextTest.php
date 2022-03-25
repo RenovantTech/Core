@@ -1,12 +1,12 @@
 <?php
 namespace test\context;
-use renovant\core\container\Container,
+use renovant\core\acl\AclService,
+	renovant\core\container\Container,
 	renovant\core\container\ContainerException,
 	renovant\core\context\Context,
 	renovant\core\context\ContextException,
 	renovant\core\event\EventDispatcher,
-	renovant\core\event\EventDispatcherException,
-	test\acl\ACLTest;
+	renovant\core\event\EventDispatcherException;
 
 class ContextTest extends \PHPUnit\Framework\TestCase {
 
@@ -75,7 +75,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
 
 		// sys service, no proxy
-		$this->assertInstanceOf('renovant\core\acl\ACL', $Context->get('sys.ACL'));
+		$this->assertInstanceOf(AclService::class, $Context->get('sys.ACL'));
 //		ACLTest::tearDownAfterClass();
 	}
 
