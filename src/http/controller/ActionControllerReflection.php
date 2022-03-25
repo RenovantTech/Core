@@ -21,11 +21,13 @@ class ActionControllerReflection {
 		foreach($refMethods as $RefMethod) {
 			$methodName = $RefMethod->getName();
 			$methodClass = $RefMethod->getDeclaringClass()->getName();
+			// skip framework methods
+			if(fnmatch('renovant\core\*', $methodClass, FNM_NOESCAPE)) continue;
 			// check signature of preHandle & postHandle hooks
 			if(in_array($methodName, ['preHandle','postHandle'])) {
 				if(!$RefMethod->isProtected()) throw new Exception(101, [$methodClass,$methodName]);
 			// check signature of handling methods (skip protected/private methods, they can't be handler!)
-			} elseif($RefMethod->isPublic() && !in_array($methodName,['handle']) && substr($methodName,0,2)!='__') {
+			} elseif($RefMethod->isPublic() && $methodName!='handle' && substr($methodName,0,1)!='_') {
 				$action = $methodName;
 				$config[$action] = [];
 				// routing
