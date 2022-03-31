@@ -411,7 +411,7 @@ class sys {
 	 * PDO helper
 	 * @param string|null $id database ID, default "master"
 	 */
-	static function pdo(?string $id): PDO {
+	static function pdo(?string $id=null): PDO {
 		if(is_null($id)) $id = self::PDO_DEFAULT;
 		if(!isset(self::$pdo[$id])) {
 			$traceFn = self::traceFn(__METHOD__);
