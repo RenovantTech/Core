@@ -3,8 +3,8 @@ namespace test;
 use renovant\core\sys,
 	renovant\core\SysBoot,
 	renovant\core\SysException,
-	renovant\core\acl\ACL,
-	renovant\core\auth\AUTH,
+	renovant\core\authz\authz,
+	renovant\core\auth\Auth,
 	renovant\core\console\CmdManager,
 	renovant\core\context\ContextException,
 	renovant\core\event\EventDispatcherException;
@@ -116,23 +116,17 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
-	 * @throws EventDispatcherException
-	 * @throws ContextException|\ReflectionException
 	 */
-	function testAcl() {
-		$ACL = sys::acl();
-		$this->assertInstanceOf(ACL::class, $ACL);
-		$RefProp = new \ReflectionProperty('renovant\core\acl\ACL', 'pdo');
-		$RefProp->setAccessible(true);
-		$pdo = $RefProp->getValue($ACL);
-		$this->assertEquals('mysql', $pdo);
+	function testAuthz() {
+		$Authz = sys::authz();
+		$this->assertInstanceOf(Authz::class, $Authz);
 	}
 	/**
 	 * @depends testInit
 	 */
 	function testAuth() {
 		$AUTH = sys::auth();
-		$this->assertInstanceOf(AUTH::class, $AUTH);
+		$this->assertInstanceOf(Auth::class, $AUTH);
 	}
 
 	/**

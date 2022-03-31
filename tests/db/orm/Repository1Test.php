@@ -1,12 +1,12 @@
 <?php
 namespace test\db\orm;
 use renovant\core\sys,
-	renovant\core\acl\ACL,
+	renovant\core\authz\Authz,
 	renovant\core\db\orm\Exception,
 	renovant\core\db\orm\OrmEvent,
 	renovant\core\db\orm\Repository,
 	renovant\core\util\DateTime,
-	test\acl\ACLTest;
+	test\authz\AuthzServiceTest;
 
 $v = 1;
 class Repository1Test extends \PHPUnit\Framework\TestCase {
@@ -66,8 +66,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 				DELETE FROM users WHERE id = p_id;
 			END;
 		');
-		ACLTest::setUpBeforeClass();
-		new ACL(['ORM'], 'mysql');
+		AuthzServiceTest::setUpBeforeClass();
 	}
 
 	static function tearDownAfterClass():void {
@@ -77,7 +76,7 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 			DROP PROCEDURE IF EXISTS sp_users_update;
 			DROP PROCEDURE IF EXISTS sp_users_delete;
 		');
-		ACLTest::tearDownAfterClass();
+		AuthzServiceTest::tearDownAfterClass();
 	}
 
 	protected function setUp():void {

@@ -1,28 +1,28 @@
 <?php
-namespace renovant\core\acl;
+namespace renovant\core\authz;
 
-class ACL {
+class Authz {
 
 	/** singleton instance */
-	static private $_ACL;
+	static private $_Authz;
 
-	/** ACL actions */
+	/** AUTHZ actions */
 	protected array $actions = [];
-	/** ACL filters */
+	/** AUTHZ filters */
 	protected array $filters = [];
-	/** ACL roles */
+	/** AUTHZ roles */
 	protected array $roles = [];
 
 	/**
-	 * @throws AclException
+	 * @throws AuthzException
 	 */
-	static function init(array $actions, array $filters, array $roles): ACL {
-		if(self::$_ACL) throw new AclException(1);
-		return self::$_ACL = new ACL($actions, $filters, $roles);
+	static function init(array $actions, array $filters, array $roles): Authz {
+		if(self::$_Authz) throw new AuthzException(1);
+		return self::$_Authz = new Authz($actions, $filters, $roles);
 	}
 
-	static function instance(): ACL {
-		return self::$_ACL;
+	static function instance(): Authz {
+		return self::$_Authz;
 	}
 
 	private function __construct(array $actions, array $filters, array $roles) {

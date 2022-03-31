@@ -1,5 +1,5 @@
 <?php
-namespace renovant\core\acl;
+namespace renovant\core\authz;
 use renovant\core\util\reflection\ReflectionClass,
 	renovant\core\util\reflection\ReflectionObject;
 /**
@@ -18,8 +18,8 @@ class Parser {
 		// class annotations
 		$DocComment = $RefClass->getDocComment();
 		$actions = $filters = $roles = [];
-		if($DocComment->hasTag('acl')) {
-			$tag = $DocComment->getTag('acl');
+		if($DocComment->hasTag('authz')) {
+			$tag = $DocComment->getTag('authz');
 			foreach ($tag as $k => $v) {
 				switch ($k) {
 					case 'action': $actions['_']=[]; array_push($actions['_'], ...explode(',', str_replace(' ','',$v))); break;
@@ -28,20 +28,20 @@ class Parser {
 				}
 			}
 		}
-		if($DocComment->hasTag('acl-action')) {
-			$tag = $DocComment->getTag('acl-action');
+		if($DocComment->hasTag('authz-action')) {
+			$tag = $DocComment->getTag('authz-action');
 			foreach ($tag as $k => $v) {
 				$actions['_'][] = $k;
 			}
 		}
-		if($DocComment->hasTag('acl-filter')) {
-			$tag = $DocComment->getTag('acl-filter');
+		if($DocComment->hasTag('authz-filter')) {
+			$tag = $DocComment->getTag('authz-filter');
 			foreach ($tag as $k => $v) {
 				$filters['_'][] = $k;
 			}
 		}
-		if($DocComment->hasTag('acl-role')) {
-			$tag = $DocComment->getTag('acl-role');
+		if($DocComment->hasTag('authz-role')) {
+			$tag = $DocComment->getTag('authz-role');
 			foreach ($tag as $k => $v) {
 				$roles['_'][] = $k;
 			}
@@ -52,8 +52,8 @@ class Parser {
 		foreach($refMethods as $RefMethod) {
 			$methodName = $RefMethod->getName();
 			$DocComment = $RefMethod->getDocComment();
-			if($DocComment->hasTag('acl')) {
-				$tag = $DocComment->getTag('acl');
+			if($DocComment->hasTag('authz')) {
+				$tag = $DocComment->getTag('authz');
 				foreach ($tag as $k => $v) {
 					switch ($k) {
 						case 'action': $actions[$methodName]=[]; array_push($actions[$methodName], ...explode(',', str_replace(' ','',$v))); break;
@@ -62,29 +62,28 @@ class Parser {
 					}
 				}
 			}
-			if($DocComment->hasTag('acl-action')) {
-				$tag = $DocComment->getTag('acl-action');
+			if($DocComment->hasTag('authz-action')) {
+				$tag = $DocComment->getTag('authz-action');
 				foreach ($tag as $k => $v) {
 					$actions[$methodName][] = $k;
 				}
 			}
-			if($DocComment->hasTag('acl-filter')) {
-				$tag = $DocComment->getTag('acl-filter');
+			if($DocComment->hasTag('authz-filter')) {
+				$tag = $DocComment->getTag('authz-filter');
 				foreach ($tag as $k => $v) {
 					$filters[$methodName][] = $k;
 				}
 			}
-			if($DocComment->hasTag('acl-role')) {
-				$tag = $DocComment->getTag('acl-role');
+			if($DocComment->hasTag('authz-role')) {
+				$tag = $DocComment->getTag('authz-role');
 				foreach ($tag as $k => $v) {
 					$roles[$methodName][] = $k;
 				}
 			}
 		}
 
-
-		$RefObj->setProperty('_acl_actions', $actions, $Obj);
-		$RefObj->setProperty('_acl_filters', $filters, $Obj);
-		$RefObj->setProperty('_acl_roles', $roles, $Obj);
+		$RefObj->setProperty('_authz_actions', $actions, $Obj);
+		$RefObj->setProperty('_authz_filters', $filters, $Obj);
+		$RefObj->setProperty('_authz_roles', $roles, $Obj);
 	}
 }

@@ -76,8 +76,8 @@ sys:
   # -------------------------------------------------------
   # sys services override ---------------------------------
   services:
-    acl:        sys.ACL
     auth:       sys.AUTH
+    authz:      sys.AUTHZ
     cmd:        sys.CmdManager
 
 # =========================================================
@@ -87,7 +87,7 @@ events:
   HTTP:ROUTE:
     - sys.HttpSession->start
     #- sys.AUTH->init
-    #- sys.ACL->init
+    #- sys.AUTHZ->init
   HTTP:VIEW:
     #- sys.AUTH->commit
     - sys.HttpSession->end
@@ -99,21 +99,6 @@ events:
 # SERVICES
 # =========================================================
 services:
-
-  # -------------------------------------------------------
-  # ACL service
-  # -------------------------------------------------------
-  sys.ACL:
-    class: renovant\core\acl\AclService
-    constructor:
-      # available modules: ORM, ROUTING, SERVICES
-      modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
-      pdo: mysql
-      tables:
-        acl:    sys_acl
-        users:  sys_users
-    properties:
-      cache:    sys
 
   # -------------------------------------------------------
   # AUTH service
@@ -144,6 +129,21 @@ services:
     class: renovant\core\auth\TokenService
     properties:
       Provider:   !obj sys.AuthProvider
+
+  # -------------------------------------------------------
+  # AUTHZ service
+  # -------------------------------------------------------
+  sys.AUTHZ:
+    class: renovant\core\authz\AuthzService
+    constructor:
+      # available modules: ORM, ROUTING, SERVICES
+      modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
+      pdo: mysql
+      tables:
+        authz:  sys_authz
+        users:  sys_users
+    properties:
+      cache:    sys
 
   # =========================================================
   # CmdManager service

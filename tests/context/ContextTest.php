@@ -1,6 +1,6 @@
 <?php
 namespace test\context;
-use renovant\core\acl\AclService,
+use renovant\core\authz\AuthzService,
 	renovant\core\container\Container,
 	renovant\core\container\ContainerException,
 	renovant\core\context\Context,
@@ -75,7 +75,7 @@ class ContextTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('Hello', $Mock->getChild()->hello());
 
 		// sys service, no proxy
-		$this->assertInstanceOf(AclService::class, $Context->get('sys.ACL'));
+		$this->assertInstanceOf(AuthzService::class, $Context->get('sys.AUTHZ'));
 //		ACLTest::tearDownAfterClass();
 	}
 

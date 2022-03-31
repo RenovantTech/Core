@@ -14,8 +14,8 @@
 		<testsuite name="context">
 			<directory>context</directory>
 		</testsuite>
-		<testsuite name="acl">
-			<directory>acl</directory>
+		<testsuite name="authz">
+			<directory>authz</directory>
 		</testsuite>
 		<testsuite name="auth">
 			<directory>auth/provider</directory>

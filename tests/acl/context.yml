@@ -1,6 +1,0 @@
-services:
-  test.acl.MockService:
-    class: test\acl\MockService
-
-  test.acl.MockService2:
-    class: test\acl\MockService2

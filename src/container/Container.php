@@ -45,7 +45,7 @@ class Container {
 		$RObj = new ReflectionObject($Obj);
 		$RObj->setProperty('_', $id, $Obj);
 
-		if(method_exists($class, '_acl')) \renovant\core\acl\Parser::parse($Obj);
+		if(method_exists($class, '_authz')) \renovant\core\authz\Parser::parse($Obj);
 
 		foreach ($properties as $k=>$v)
 			$RObj->setProperty($k, $v, $Obj);

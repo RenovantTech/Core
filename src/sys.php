@@ -3,9 +3,9 @@ namespace renovant\core;
 use renovant\core\cache\ArrayCache;
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use renovant\core\acl\ACL,
-	renovant\core\auth\Auth,
+use renovant\core\auth\Auth,
 	renovant\core\auth\AuthException,
+	renovant\core\authz\Authz,
 	renovant\core\console\CmdManager,
 	renovant\core\console\Event as ConsoleEvent,
 	renovant\core\container\Container,
@@ -109,8 +109,8 @@ class sys {
 	/** sys services
 	 * @var array */
 	protected $cnfServices = [
-		'acl'			=> 'sys.ACL',
 		'auth'			=> 'sys.AUTH',
+		'authz'			=> 'sys.AUTHZ',
 		'cmd'			=> 'sys.CmdManager'
 	];
 
@@ -284,17 +284,17 @@ class sys {
 	}
 
 	/**
-	 * ACL helper
-	 */
-	static function acl(): ACL {
-		return ACL::instance();
-	}
-
-	/**
 	 * AUTH helper
 	 */
 	static function auth(): Auth {
 		return Auth::instance();
+	}
+
+	/**
+	 * AUTHZ helper
+	 */
+	static function authz(): Authz {
+		return Authz::instance();
 	}
 
 	/**

@@ -1,6 +1,6 @@
 <?php
-namespace renovant\core\acl;
-class AclException extends \renovant\core\Exception {
+namespace renovant\core\authz;
+class AuthzException extends \renovant\core\Exception {
 	// INIT phase
 	const COD1 = '[INIT] initialization yet done';
 	// ACTIONS

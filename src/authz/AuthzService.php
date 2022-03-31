@@ -1,20 +1,16 @@
 <?php
-namespace renovant\core\acl;
+namespace renovant\core\authz;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\http\Request;
 
-class AclService {
+class AuthzService {
 	use \renovant\core\CoreTrait;
 
-	const CACHE_PREFIX	= 'sys.acl.';
+	const CACHE_PREFIX	= 'sys.authz.';
 
-	const MOD_ORM		= 'ORM';
-	const MOD_ROUTING	= 'ROUTING';
-	const MOD_SERVICES	= 'SERVICES';
-
-	const SQL_FETCH_USER_ACL = 'SELECT type, code, query FROM %s WHERE id IN (%s)';
-	const SQL_FETCH_USER_MAPS = 'SELECT type, acl_id, data FROM %s_maps WHERE user_id = :user_id';
+	const SQL_FETCH_AUTHZ = 'SELECT type, code, query FROM %s WHERE id IN (%s)';
+	const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, data FROM %s_maps WHERE user_id = :user_id';
 
 
 	const SQL_CHECK_ROUTE	= 'SELECT * FROM %s WHERE type = "URL" AND ( method IS NULL OR method = :method ) ORDER BY CHAR_LENGTH(target) DESC';
@@ -34,19 +30,19 @@ class AclService {
 	protected string $cache = 'sys';
 	/** Cache entry prefix */
 	protected string $cachePrefix = self::CACHE_PREFIX;
-	/** ACL modules to activate */
+	/** AUTHZ modules to activate */
 	protected array $modules = [];
 	/** PDO instance ID */
 	protected string $pdo;
 	/** DB tables
 	 * @var array */
 	protected $tables = [
-		'acl'	=> 'sys_acl',
+		'authz'	=> 'sys_authz',
 		'users'	=> 'sys_users'
 	];
 
 	/**
-	 * @param array $modules ACL modules to activate
+	 * @param array $modules AUTHZ modules to activate
 	 * @param string|null $pdo PDO instance ID
 	 * @param array|null $tables
 	 */
@@ -56,12 +52,12 @@ class AclService {
 			$this->modules = $modules;
 			$this->pdo = $pdo;
 			if ($tables) $this->tables = array_merge($this->tables, $tables);
-			sys::trace(LOG_DEBUG, T_INFO, 'initialize ACL storage');
+			sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTHZ storage');
 			$PDO = sys::pdo($this->pdo);
 			$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 			$PDO->exec(str_replace(
-				['t_acl', 't_users'],
-				[$this->tables['acl'], $this->tables['users']],
+				['t_authz', 't_users'],
+				[$this->tables['authz'], $this->tables['users']],
 				file_get_contents(__DIR__ . '/sql/init-' . $driver . '.sql')
 			));
 		} finally {
@@ -70,45 +66,45 @@ class AclService {
 	}
 
 	/**
-	 * Initialize ACL modules & User ACL.
+	 * Initialize AUTHZ modules & User Authz.
 	 * To be invoked via event listener before HTTP Routing execution (HTTP:INIT or HTTP:ROUTE).
-	 * @throws AclException
+	 * @throws AuthzException
 	 */
 	function init() {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
 		try {
 			sys::trace(LOG_DEBUG, T_INFO, 'activating modules '.implode(', ', $this->modules), null, $this->_.'->init');
 			foreach ($this->modules as $mod)
-				define('SYS_ACL_'.strtoupper($mod), true);
+				define('SYS_AUTHZ_'.strtoupper($mod), true);
 
 			$Auth = sys::auth();
 			if($Auth->UID()) {
 				if($data = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
-					ACL::init(...$data);
+					Authz::init(...$data);
 				} else {
 					$actions = $filters = $roles = [];
 					$mapsArray = sys::pdo($this->pdo)
-						->prepare(sprintf(self::SQL_FETCH_USER_MAPS, $this->tables['acl']))
+						->prepare(sprintf(self::SQL_FETCH_AUTHZ_MAPS, $this->tables['authz']))
 						->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
-					$aclIds = [];
+					$authzIds = [];
 					foreach ($mapsArray as $map)
-						$aclIds[] = $map['acl_id'];
-					if(!empty($aclIds)) {
-						$aclArray = sys::pdo($this->pdo)
-							->prepare(sprintf(self::SQL_FETCH_USER_ACL, $this->tables['acl'], implode(',', $aclIds)))
+						$authzIds[] = $map['authz_id'];
+					if(!empty($authzIds)) {
+						$authzArray = sys::pdo($this->pdo)
+							->prepare(sprintf(self::SQL_FETCH_AUTHZ, $this->tables['authz'], implode(',', $authzIds)))
 							->execute()->fetchAll(\PDO::FETCH_ASSOC);
-						foreach ($aclArray as $acl) {
-							switch ($acl['type']) {
-								case 'ACTION': $actions[] = $acl['code']; break;
-								case 'FILTER': $filters[$acl['code']] = $acl['query']; break;
-								case 'ROLE': $roles[] = $acl['code']; break;
+						foreach ($authzArray as $authz) {
+							switch ($authz['type']) {
+								case 'ACTION': $actions[] = $authz['code']; break;
+								case 'FILTER': $filters[$authz['code']] = $authz['query']; break;
+								case 'ROLE': $roles[] = $authz['code']; break;
 							}
 						}
 					}
 					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$actions, $filters, $roles]);
-					ACL::init($actions, $filters, $roles);
+					Authz::init($actions, $filters, $roles);
 				}
-				sys::trace(LOG_DEBUG, T_INFO, 'ACL initialized');
+				sys::trace(LOG_DEBUG, T_INFO, 'Authz initialized');
 			}
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -116,7 +112,7 @@ class AclService {
 	}
 
 	/**
-	 * Apply ACL checks during HTTP routing
+	 * Apply AUTHZ checks during HTTP routing
 	 * @param Request $Req
 	 * @param integer $userId User ID
 	 * @return bool
@@ -128,10 +124,10 @@ class AclService {
 			$target = $Req->URI();
 			$method = $Req->getMethod();
 			$matches = [];
-			$aclArray = sys::pdo($this->pdo)
-				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['acl']))
+			$authzArray = sys::pdo($this->pdo)
+				->prepare(sprintf(self::SQL_CHECK_ROUTE, $this->tables['authz']))
 				->execute(['method'=>$method])->fetchAll(\PDO::FETCH_ASSOC);
-			foreach($aclArray as $item) {
+			foreach($authzArray as $item) {
 				$item['target'] = str_replace('/', '\\/', $item['target']);
 				if(preg_match('/'.$item['target'].'/', $target)) {
 					$matches[] = $item;

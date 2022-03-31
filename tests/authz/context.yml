@@ -1,0 +1,7 @@
+services:
+
+  test.authz.AuthzTraitMockService:
+    class: test\authz\AuthzTraitMockService
+
+  test.authz.ParserMockService:
+    class: test\authz\ParserMockService
