@@ -1,6 +1,7 @@
 <?php
 namespace renovant\core\authz;
 
+use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
 class Authz {
 
 	/** singleton instance */
@@ -12,6 +13,8 @@ class Authz {
 	protected array $filters = [];
 	/** AUTHZ roles */
 	protected array $roles = [];
+
+	protected int $verified = 0;
 
 	/**
 	 * @throws AuthzException
@@ -36,7 +39,11 @@ class Authz {
 	 * @return bool
 	 */
 	function action(string $code): bool {
-		return in_array($code, $this->actions);
+		if(in_array($code, $this->actions)) {
+			$this->verified = 1; return true;
+		} else {
+			$this->verified = 2; return false;
+		}
 	}
 
 	/**
@@ -44,7 +51,11 @@ class Authz {
 	 * @return bool
 	 */
 	function filter(string $code): bool {
-		return isset($this->filters[$code]);
+		if(isset($this->filters[$code])) {
+			$this->verified = 1; return true;
+		} else {
+			$this->verified = 2; return false;
+		}
 	}
 
 	/**
@@ -52,6 +63,21 @@ class Authz {
 	 * @return bool
 	 */
 	function role(string $role): bool {
-		return in_array($role, $this->roles);
+		if(in_array($role, $this->roles)) {
+			$this->verified = 1; return true;
+		} else {
+			$this->verified = 2; return false;
+		}
+	}
+
+	function verified(): int {
+		return $this->verified;
+	}
+	function dump(): array {
+		return [
+			'ACTIONS' => $this->actions,
+			'FILTERS' => $this->filters,
+			'ROLES' => $this->roles
+		];
 	}
 }

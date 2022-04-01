@@ -104,7 +104,7 @@ class AuthzService {
 					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$actions, $filters, $roles]);
 					Authz::init($actions, $filters, $roles);
 				}
-				sys::trace(LOG_DEBUG, T_INFO, 'Authz initialized');
+				sys::trace(LOG_DEBUG, T_INFO, 'AUTHZ initialized');
 			}
 		} finally {
 			sys::traceFn($prevTraceFn);
