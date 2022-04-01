@@ -19,4 +19,11 @@ class AuthzTraitMockService {
 	function bar() {
 		return 'bar';
 	}
+
+	/**
+	 * @authz-role(role.zoo)
+	 */
+	function zoo() {
+		return 'zoo';
+	}
 }

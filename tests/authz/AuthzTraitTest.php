@@ -129,4 +129,19 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 		self::$AuthzService->init();
 		$this->assertEquals('foo', $AuthzTraitMockService->foo());
 	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzMethodRoleException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(301);
+		$this->expectExceptionMessage('[ROLE] "role.zoo"');
+
+		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
+		self::$AuthzService->init();
+		$this->assertEquals('zoo', $AuthzTraitMockService->zoo());
+	}
 }
