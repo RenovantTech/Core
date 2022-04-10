@@ -14,37 +14,12 @@ class Parser {
 	static function parse($Obj) {
 		$RefClass = new ReflectionClass($Obj);
 		$RefObj = new ReflectionObject($Obj);
+		$_authz = [];
 
 		// class annotations
 		$DocComment = $RefClass->getDocComment();
-		$actions = $filters = $roles = [];
-		if($DocComment->hasTag('authz')) {
-			$tag = $DocComment->getTag('authz');
-			foreach ($tag as $k => $v) {
-				switch ($k) {
-					case 'action': $actions['_']=[]; array_push($actions['_'], ...explode(',', str_replace(' ','',$v))); break;
-					case 'filter': $filters['_']=[]; array_push($filters['_'], ...explode(',', str_replace(' ','',$v))); break;
-					case 'role': $roles['_']=[]; array_push($roles['_'], ...explode(',', str_replace(' ','',$v))); break;
-				}
-			}
-		}
-		if($DocComment->hasTag('authz-action')) {
-			$tag = $DocComment->getTag('authz-action');
-			foreach ($tag as $k => $v) {
-				$actions['_'][] = $k;
-			}
-		}
-		if($DocComment->hasTag('authz-filter')) {
-			$tag = $DocComment->getTag('authz-filter');
-			foreach ($tag as $k => $v) {
-				$filters['_'][] = $k;
-			}
-		}
-		if($DocComment->hasTag('authz-role')) {
-			$tag = $DocComment->getTag('authz-role');
-			foreach ($tag as $k => $v) {
-				$roles['_'][] = $k;
-			}
+		if($data = self::_parse($DocComment)) {
+			$_authz['_'] = $data;
 		}
 
 		// methods annotations
@@ -52,38 +27,86 @@ class Parser {
 		foreach($refMethods as $RefMethod) {
 			$methodName = $RefMethod->getName();
 			$DocComment = $RefMethod->getDocComment();
-			if($DocComment->hasTag('authz')) {
-				$tag = $DocComment->getTag('authz');
-				foreach ($tag as $k => $v) {
-					switch ($k) {
-						case 'action': $actions[$methodName]=[]; array_push($actions[$methodName], ...explode(',', str_replace(' ','',$v))); break;
-						case 'filter': $filters[$methodName]=[]; array_push($filters[$methodName], ...explode(',', str_replace(' ','',$v))); break;
-						case 'role': $roles[$methodName]=[]; array_push($roles[$methodName], ...explode(',', str_replace(' ','',$v))); break;
-					}
-				}
-			}
-			if($DocComment->hasTag('authz-action')) {
-				$tag = $DocComment->getTag('authz-action');
-				foreach ($tag as $k => $v) {
-					$actions[$methodName][] = $k;
-				}
-			}
-			if($DocComment->hasTag('authz-filter')) {
-				$tag = $DocComment->getTag('authz-filter');
-				foreach ($tag as $k => $v) {
-					$filters[$methodName][] = $k;
-				}
-			}
-			if($DocComment->hasTag('authz-role')) {
-				$tag = $DocComment->getTag('authz-role');
-				foreach ($tag as $k => $v) {
-					$roles[$methodName][] = $k;
-				}
+			if($data = self::_parse($DocComment)) {
+				$_authz[$methodName] = $data;
 			}
 		}
 
-		$RefObj->setProperty('_authz_actions', $actions, $Obj);
-		$RefObj->setProperty('_authz_filters', $filters, $Obj);
-		$RefObj->setProperty('_authz_roles', $roles, $Obj);
+		$RefObj->setProperty('_authz', $_authz, $Obj);
+	}
+
+	static protected function _parse($DocComment): ?array {
+		$data = null;
+
+		// === RBAC roles ========================================
+
+		if($DocComment->hasTag('authz-role')) {
+			$tag = $DocComment->getTag('authz-role');
+			foreach ($tag as $k => $v) {
+				$data['roles'][] = $k;
+			}
+		}
+		if($DocComment->hasTag('authz-roles-all')) {
+			$data['roles_op'] = 'ALL';
+			$tag = $DocComment->getTag('authz-roles-all');
+			foreach ($tag as $k => $v) {
+				$data['roles'][] = $k;
+			}
+		}
+		if($DocComment->hasTag('authz-roles-any')) {
+			$data['roles_op'] = 'ANY';
+			$tag = $DocComment->getTag('authz-roles-any');
+			foreach ($tag as $k => $v) {
+				$data['roles'][] = $k;
+			}
+		}
+
+		// === RBAC permissions ==================================
+
+		if($DocComment->hasTag('authz-permission')) {
+			$tag = $DocComment->getTag('authz-permission');
+			foreach ($tag as $k => $v) {
+				$data['permissions'][] = $k;
+			}
+		}
+		if($DocComment->hasTag('authz-permissions-all')) {
+			$data['permissions_op'] = 'ALL';
+			$tag = $DocComment->getTag('authz-permissions-all');
+			foreach ($tag as $k => $v) {
+				$data['permissions'][] = $k;
+			}
+		}
+		if($DocComment->hasTag('authz-permissions-any')) {
+			$data['permissions_op'] = 'ANY';
+			$tag = $DocComment->getTag('authz-permissions-any');
+			foreach ($tag as $k => $v) {
+				$data['permissions'][] = $k;
+			}
+		}
+
+		// === ACL ==================================
+
+		if($DocComment->hasTag('authz-acl')) {
+			$tag = $DocComment->getTag('authz-acl');
+			foreach ($tag as $k => $v) {
+				$data['acl'][][$k] = $v;
+			}
+		}
+		if($DocComment->hasTag('authz-acl-all')) {
+			$data['acl_op'] = 'ALL';
+			$tag = $DocComment->getTag('authz-acl-all');
+			foreach ($tag as $k => $v) {
+				$data['acl'][][$k] = $v;
+			}
+		}
+		if($DocComment->hasTag('authz-acl-any')) {
+			$data['acl_op'] = 'ANY';
+			$tag = $DocComment->getTag('authz-acl-any');
+			foreach ($tag as $k => $v) {
+				$data['acl'][][$k] = $v;
+			}
+		}
+
+		return $data;
 	}
 }
