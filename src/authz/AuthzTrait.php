@@ -6,6 +6,8 @@ use renovant\core\sys;
 trait AuthzTrait {
 	use \renovant\core\CoreTrait;
 
+	protected $_authz;
+
 	/** AUTHZ actions */
 	protected $_authz_actions;
 	/** AUTHZ filters */
@@ -19,16 +21,11 @@ trait AuthzTrait {
 		$checked = [];
 		try {
 			// check roles
-			if(!empty($this->_authz_roles) && isset($this->_authz_roles['_'])) {
-				foreach ($this->_authz_roles['_'] as $role)
-					if(!$Authz->role($role)) throw new AuthzException(300, [$role, $this->_]);
-					else $checked['ROLES'][] = $role;
-			}
-			if(!empty($this->_authz_roles) && isset($this->_authz_roles[$method])) {
-				foreach ($this->_authz_roles[$method] as $role)
-					if(!$Authz->role($role)) throw new AuthzException(301, [$role, $this->_, $method]);
-					else $checked['ROLES'][] = $role;
-			}
+			if(isset($this->_authz['_']['roles']))
+				$this->_auth_roles($Authz, $checked);
+			if(isset($this->_authz[$method]['roles']))
+				$this->_auth_roles($Authz, $checked, $method);
+
 			// check actions
 			if(!empty($this->_authz_actions) && isset($this->_authz_actions['_'])) {
 				foreach ($this->_authz_actions['_'] as $action)
@@ -56,6 +53,28 @@ trait AuthzTrait {
 			sys::trace(LOG_WARNING, T_INFO, '[AUTHZ] check FAILED');
 			throw $Ex;
 		}
+	}
 
+
+	/** @throws AuthzException */
+	protected function _auth_roles($Authz, &$checked, $method=null) {
+		$exCode = $method ? 301 : 300;
+		$method = $method ?? '_';
+		switch ($this->_authz[$method]['roles_op']) {
+			case 'ANY':
+				foreach ($this->_authz[$method]['roles'] as $role) {
+					if ($Authz->role($role)) {
+						$checked['ROLES'][] = $role;
+						continue;
+					}
+					throw new AuthzException($exCode, [$role, $this->_, $method]);
+				}
+				break;
+			default:
+				foreach ($this->_authz[$method]['roles'] as $role) {
+					if (!$Authz->role($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
+					else $checked['ROLES'][] = $role;
+				}
+		}
 	}
 }

@@ -1,29 +1,29 @@
 <?php
 namespace test\authz;
 /**
- * @authz-role(role.service2)
+ * @authz-role(role.service)
  */
 class AuthzTraitMockService {
 	use \renovant\core\authz\AuthzTrait;
 
 	/**
-	 * @authz-action(action.foo)
+	 * @authz-role(role.service.foo)
 	 */
-	function foo() {
-		return 'foo';
+	function role() {
+		return 'role';
 	}
 
 	/**
-	 * @authz-filter(filter.bar)
+	 * @authz-roles-all(role.service.foo, role.service.bar )
 	 */
-	function bar() {
-		return 'bar';
+	function rolesAll() {
+		return 'roles-all';
 	}
 
 	/**
-	 * @authz-role(role.zoo)
+	 * @authz-roles-any(role.service.foo, role.service.bar )
 	 */
-	function zoo() {
-		return 'zoo';
+	function rolesAny() {
+		return 'roles-any';
 	}
 }

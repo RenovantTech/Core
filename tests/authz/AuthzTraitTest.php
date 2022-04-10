@@ -73,46 +73,21 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthz($AuthzTraitMockService) {
+	function testAuthzRole($AuthzTraitMockService) {
 		self::$AuthService->authenticate(1, null, '', '');
 		self::reset(1);
 		self::$AuthzService->init();
-		$this->assertEquals('foo', $AuthzTraitMockService->foo());
+		$this->assertEquals('role', $AuthzTraitMockService->role());
 
-		self::$AuthService->authenticate(2, null, '', '');
-		self::reset(2);
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
 		self::$AuthzService->init();
-		$this->assertEquals('bar', $AuthzTraitMockService->bar());
-	}
+		$this->assertEquals('roles-all', $AuthzTraitMockService->rolesAll());
 
-	/**
-	 * @depends testConstruct
-	 * @throws \ReflectionException
-	 */
-	function testAuthzActionException($AuthzTraitMockService) {
-		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(101);
-		$this->expectExceptionMessage('[ACTION] "action.foo"');
-
-		self::$AuthService->authenticate(2, null, '', '');
-		self::reset(2);
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
 		self::$AuthzService->init();
-		$this->assertEquals('foo', $AuthzTraitMockService->foo());
-	}
-
-	/**
-	 * @depends testConstruct
-	 * @throws \ReflectionException
-	 */
-	function testAuthzFilterException($AuthzTraitMockService) {
-		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(201);
-		$this->expectExceptionMessage('[FILTER] "filter.bar"');
-
-		self::$AuthService->authenticate(1, null, '', '');
-		self::reset(1);
-		self::$AuthzService->init();
-		$this->assertEquals('bar', $AuthzTraitMockService->bar());
+		$this->assertEquals('roles-any', $AuthzTraitMockService->rolesAny());
 	}
 
 	/**
@@ -122,26 +97,41 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	function testAuthzRoleException($AuthzTraitMockService) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(300);
-		$this->expectExceptionMessage('[ROLE] "role.service2"');
+		$this->expectExceptionMessage('[ROLE] "role.service"');
 
-		self::$AuthService->authenticate(3, null, '', '');
-		self::reset(3);
+		self::$AuthService->authenticate(4, null, '', '');
+		self::reset(4);
 		self::$AuthzService->init();
-		$this->assertEquals('foo', $AuthzTraitMockService->foo());
+		$this->assertEquals('role', $AuthzTraitMockService->role());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzMethodRoleException($AuthzTraitMockService) {
+	function testAuthzRoleAllException($AuthzTraitMockService) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
-		$this->expectExceptionMessage('[ROLE] "role.zoo"');
+		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
 
-		self::$AuthService->authenticate(1, null, '', '');
-		self::reset(1);
+		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
 		self::$AuthzService->init();
-		$this->assertEquals('zoo', $AuthzTraitMockService->zoo());
+		$this->assertEquals('roles-all', $AuthzTraitMockService->rolesAll());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzRoleAnyException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(301);
+		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
+
+		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
+		self::$AuthzService->init();
+		$this->assertEquals('roles-any', $AuthzTraitMockService->rolesAny());
 	}
 }
