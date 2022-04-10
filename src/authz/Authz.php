@@ -7,10 +7,6 @@ class Authz {
 	/** singleton instance */
 	static private $_Authz;
 
-	/** AUTHZ actions */
-	protected array $actions = [];
-	/** AUTHZ filters */
-	protected array $filters = [];
 	/** AUTHZ roles */
 	protected array $roles = [];
 	/** AUTHZ permissions */
@@ -21,44 +17,18 @@ class Authz {
 	/**
 	 * @throws AuthzException
 	 */
-	static function init(array $actions, array $filters, array $roles, array $permissions): Authz {
+	static function init(array $roles, array $permissions): Authz {
 		if(self::$_Authz) throw new AuthzException(1);
-		return self::$_Authz = new Authz($actions, $filters, $roles, $permissions);
+		return self::$_Authz = new Authz($roles, $permissions);
 	}
 
 	static function instance(): Authz {
 		return self::$_Authz;
 	}
 
-	private function __construct(array $actions, array $filters, array $roles, array $permissions) {
-		$this->actions = $actions;
-		$this->filters = $filters;
+	private function __construct(array $roles, array $permissions) {
 		$this->roles = $roles;
 		$this->permissions = $permissions;
-	}
-
-	/**
-	 * @param string $code
-	 * @return bool
-	 */
-	function action(string $code): bool {
-		if(in_array($code, $this->actions)) {
-			$this->verified = 1; return true;
-		} else {
-			$this->verified = 2; return false;
-		}
-	}
-
-	/**
-	 * @param string $code
-	 * @return bool
-	 */
-	function filter(string $code): bool {
-		if(isset($this->filters[$code])) {
-			$this->verified = 1; return true;
-		} else {
-			$this->verified = 2; return false;
-		}
 	}
 
 	/**
@@ -90,8 +60,6 @@ class Authz {
 	}
 	function dump(): array {
 		return [
-			'ACTIONS' => $this->actions,
-			'FILTERS' => $this->filters,
 			'ROLES' => $this->roles,
 			'PERMISSIONS' => $this->permissions
 		];

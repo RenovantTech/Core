@@ -70,8 +70,6 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 		$AuthzService->init();
 		$Authz = sys::authz();
 
-		$this->assertTrue($Authz->action('api.users'));
-		$this->assertFalse($Authz->action('service.Bar'));
 		$this->assertTrue($Authz->role('ADMIN'));
 		$this->assertFalse($Authz->role('STAFF'));
 
