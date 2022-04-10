@@ -82,7 +82,7 @@ class AuthzService {
 				if($data = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
 					Authz::init(...$data);
 				} else {
-					$actions = $filters = $roles = [];
+					$actions = $filters = $roles = $permissions = [];
 					$mapsArray = sys::pdo($this->pdo)
 						->prepare(sprintf(self::SQL_FETCH_AUTHZ_MAPS, $this->tables['authz']))
 						->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
@@ -98,11 +98,12 @@ class AuthzService {
 								case 'ACTION': $actions[] = $authz['code']; break;
 								case 'FILTER': $filters[$authz['code']] = $authz['query']; break;
 								case 'ROLE': $roles[] = $authz['code']; break;
+								case 'PERMISSION': $permissions[] = $authz['code']; break;
 							}
 						}
 					}
-					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$actions, $filters, $roles]);
-					Authz::init($actions, $filters, $roles);
+					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$actions, $filters, $roles, $permissions]);
+					Authz::init($actions, $filters, $roles, $permissions);
 				}
 				sys::trace(LOG_DEBUG, T_INFO, 'AUTHZ initialized');
 			}

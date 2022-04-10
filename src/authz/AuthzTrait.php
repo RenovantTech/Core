@@ -20,11 +20,17 @@ trait AuthzTrait {
 		$Authz = sys::authz();
 		$checked = [];
 		try {
-			// check roles
+			// check RBAC roles
 			if(isset($this->_authz['_']['roles']))
 				$this->_auth_roles($Authz, $checked);
 			if(isset($this->_authz[$method]['roles']))
 				$this->_auth_roles($Authz, $checked, $method);
+
+			// check RBAC permissions
+			if(isset($this->_authz['_']['permissions']))
+				$this->_auth_permissions($Authz, $checked);
+			if(isset($this->_authz[$method]['permissions']))
+				$this->_auth_permissions($Authz, $checked, $method);
 
 			// check actions
 			if(!empty($this->_authz_actions) && isset($this->_authz_actions['_'])) {
@@ -55,7 +61,6 @@ trait AuthzTrait {
 		}
 	}
 
-
 	/** @throws AuthzException */
 	protected function _auth_roles($Authz, &$checked, $method=null) {
 		$exCode = $method ? 301 : 300;
@@ -74,6 +79,28 @@ trait AuthzTrait {
 				foreach ($this->_authz[$method]['roles'] as $role) {
 					if (!$Authz->role($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
 					else $checked['ROLES'][] = $role;
+				}
+		}
+	}
+
+	/** @throws AuthzException */
+	protected function _auth_permissions($Authz, &$checked, $method=null) {
+		$exCode = $method ? 401 : 400;
+		$method = $method ?? '_';
+		switch ($this->_authz[$method]['permissions_op']) {
+			case 'ANY':
+				foreach ($this->_authz[$method]['permissions'] as $role) {
+					if ($Authz->permissions($role)) {
+						$checked['PERMISSIONS'][] = $role;
+						continue;
+					}
+					throw new AuthzException($exCode, [$role, $this->_, $method]);
+				}
+				break;
+			default:
+				foreach ($this->_authz[$method]['permissions'] as $role) {
+					if (!$Authz->permissions($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
+					else $checked['PERMISSIONS'][] = $role;
 				}
 		}
 	}

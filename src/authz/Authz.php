@@ -13,25 +13,28 @@ class Authz {
 	protected array $filters = [];
 	/** AUTHZ roles */
 	protected array $roles = [];
+	/** AUTHZ permissions */
+	protected array $permissions = [];
 
 	protected int $verified = 0;
 
 	/**
 	 * @throws AuthzException
 	 */
-	static function init(array $actions, array $filters, array $roles): Authz {
+	static function init(array $actions, array $filters, array $roles, array $permissions): Authz {
 		if(self::$_Authz) throw new AuthzException(1);
-		return self::$_Authz = new Authz($actions, $filters, $roles);
+		return self::$_Authz = new Authz($actions, $filters, $roles, $permissions);
 	}
 
 	static function instance(): Authz {
 		return self::$_Authz;
 	}
 
-	private function __construct(array $actions, array $filters, array $roles) {
+	private function __construct(array $actions, array $filters, array $roles, array $permissions) {
 		$this->actions = $actions;
 		$this->filters = $filters;
 		$this->roles = $roles;
+		$this->permissions = $permissions;
 	}
 
 	/**
@@ -70,6 +73,18 @@ class Authz {
 		}
 	}
 
+	/**
+	 * @param string $permission
+	 * @return bool
+	 */
+	function permissions(string $permission): bool {
+		if(in_array($permission, $this->permissions)) {
+			$this->verified = 1; return true;
+		} else {
+			$this->verified = 2; return false;
+		}
+	}
+
 	function verified(): int {
 		return $this->verified;
 	}
@@ -77,7 +92,8 @@ class Authz {
 		return [
 			'ACTIONS' => $this->actions,
 			'FILTERS' => $this->filters,
-			'ROLES' => $this->roles
+			'ROLES' => $this->roles,
+			'PERMISSIONS' => $this->permissions
 		];
 	}
 }

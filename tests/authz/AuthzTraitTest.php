@@ -109,7 +109,7 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRoleAllException($AuthzTraitMockService) {
+	function testAuthzRolesAllException($AuthzTraitMockService) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
@@ -124,7 +124,7 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRoleAnyException($AuthzTraitMockService) {
+	function testAuthzRolesAnyException($AuthzTraitMockService) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
@@ -133,5 +133,72 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 		self::reset(2);
 		self::$AuthzService->init();
 		$this->assertEquals('roles-any', $AuthzTraitMockService->rolesAny());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 * @throws \ReflectionException
+	 */
+	function testAuthzPermission($AuthzTraitMockService) {
+		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
+		self::$AuthzService->init();
+		$this->assertEquals('permission', $AuthzTraitMockService->permission());
+
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
+		self::$AuthzService->init();
+		$this->assertEquals('permissions-all', $AuthzTraitMockService->permissionsAll());
+
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
+		self::$AuthzService->init();
+		$this->assertEquals('permissions-any', $AuthzTraitMockService->permissionsAny());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzPermissionException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(401);
+		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
+
+		self::$AuthService->authenticate(5, null, '', '');
+		self::reset(5);
+		self::$AuthzService->init();
+		$this->assertEquals('permission', $AuthzTraitMockService->permission());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzPermissionsAllException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(401);
+		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
+
+		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
+		self::$AuthzService->init();
+		$this->assertEquals('permissions-all', $AuthzTraitMockService->permissionsAll());
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzPermissionsAnyException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(401);
+		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
+
+		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
+		self::$AuthzService->init();
+		$this->assertEquals('permissions-any', $AuthzTraitMockService->permissionsAny());
 	}
 }

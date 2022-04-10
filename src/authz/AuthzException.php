@@ -9,7 +9,10 @@ class AuthzException extends \renovant\core\Exception {
 	// FILTERS
 	const COD200 = '[FILTER] "%s" missing for %s';
 	const COD201 = '[FILTER] "%s" missing for %s->%s()';
-	// ROLES
+	// RBAC roles
 	const COD300 = '[ROLE] "%s" missing for %s';
 	const COD301 = '[ROLE] "%s" missing for %s->%s()';
+	// RBAC permissions
+	const COD400 = '[PERMISSION] "%s" missing for %s';
+	const COD401 = '[PERMISSION] "%s" missing for %s->%s()';
 }
