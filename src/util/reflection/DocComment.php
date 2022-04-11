@@ -1,7 +1,8 @@
 <?php
 namespace renovant\core\util\reflection;
-
 class DocComment {
+
+	const TAG_REGEX = '/(([\w\:\.-]+)="([^"]+)" | ([\w\:\.-]+)=(\w+) | ([\w\:\.-]+))/x';
 
 	/** @var string The description as found in the doc comment */
 	protected $description = '';
@@ -9,11 +10,10 @@ class DocComment {
 	protected $tags = [];
 
 	/**
-	 * Parses the given doc comment and saves the result (description and
-	 * tags) in the object properties.
+	 * Parses the given doc comment and saves the result (description and tags) in the object properties.
 	 * @param string $docComment A doc comment as returned by the reflection getDocComment() method
 	 */
-	function __construct($docComment) {
+	function __construct(string $docComment) {
 		$lines = explode(chr(10), $docComment);
 		foreach ($lines as $line) {
 			if (strlen($line) > 0 && strpos($line, '@') !== FALSE) {
@@ -29,7 +29,7 @@ class DocComment {
 	 * Returns the description which has been previously parsed
 	 * @return string The description which has been parsed
 	 */
-	function getDescription() {
+	function getDescription(): string {
 		return $this->description;
 	}
 
@@ -37,26 +37,22 @@ class DocComment {
 	 * Returns all tags which have been previously parsed
 	 * @return array Array of tag names and their (multiple) values
 	 */
-	function getAllTags() {
+	function getAllTags(): array {
 		return $this->tags;
 	}
 
 	/**
 	 * Return number of tag values
-	 * @param string $tagName
-	 * @return int n° of tag values
 	 */
-	function countTag($tagName) {
+	function countTag(string $tagName): int {
 		return (isset($this->tags[$tagName])) ? count($this->tags[$tagName]) : 0;
 	}
 
 	/**
 	 * Return tag values at specified index, can be NULL if not exists
-	 * @param $tagName
-	 * @param int $index index of tag values array
 	 * @return mixed|null
 	 */
-	function getTag($tagName, $index=0) {
+	function getTag(string $tagName, int $index=0) {
 		return (isset($this->tags[$tagName][$index])) ? $this->tags[$tagName][$index] : null;
 	}
 
@@ -66,17 +62,15 @@ class DocComment {
 	 * @return array The tag's values
 	 * @throws \Exception
 	 */
-	function getTagValues($tagName) {
+	function getTagValues(string $tagName): array {
 		if (!$this->hasTag($tagName)) throw new \Exception('Tag "' . $tagName . '" does not exist.', 1169128255);
 		return $this->tags[$tagName];
 	}
 
 	/**
 	 * Checks if a tag with the given name exists
-	 * @param string $tagName The tag name to check for
-	 * @return boolean TRUE the tag exists, otherwise FALSE
 	 */
-	function hasTag($tagName) {
+	function hasTag(string $tagName): bool {
 		return (isset($this->tags[$tagName]));
 	}
 
@@ -85,7 +79,7 @@ class DocComment {
 	 * @param string $line A line of a doc comment which starts with an @-sign
 	 * @return void
 	 */
-	protected function parseTag($line) {
+	protected function parseTag(string $line) {
 		list($tag, $value) = preg_split('/[\s\(]/', $line.' ', 2);
 		$tag = substr($tag, 1);
 		if (empty($value)) {
@@ -93,7 +87,7 @@ class DocComment {
 		} elseif(strpos($value, ')') === false) {
 			$this->tags[$tag][] = trim($value);
 		} else {
-			preg_match_all('/(([\w\.-]+)="([^"]+)" | ([\w\.-]+)=(\w+) | ([\w\.-]+))/x', $value, $matches, PREG_SET_ORDER);
+			preg_match_all(self::TAG_REGEX, $value, $matches, PREG_SET_ORDER);
 			$values = [];
 			foreach($matches as $match) {
 				switch(count($match)) {
