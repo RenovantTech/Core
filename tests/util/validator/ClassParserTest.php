@@ -4,6 +4,9 @@ use renovant\core\util\validator\ClassParser;
 
 class ClassParserTest extends \PHPUnit\Framework\TestCase {
 
+	/**
+	 * @throws \ReflectionException
+	 */
 	function testParse() {
 		$metadata = (new ClassParser)->parse('test\util\validator\Class1');
 		$this->assertCount(3, $metadata);

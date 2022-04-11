@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS t_authz_maps (
 	CONSTRAINT fk_t_authz_maps__user_id FOREIGN KEY (user_id) REFERENCES t_users (id),
 	CONSTRAINT fk_t_authz_maps__authz_id FOREIGN KEY (authz_id) REFERENCES t_authz (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+/*
 CREATE TABLE IF NOT EXISTS t_authz_rules (
 	type		ENUM('URL', 'OBJECT', 'ORM') NOT NULL,
 	target		VARCHAR(100) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS t_authz_rules (
 	UNIQUE KEY uk_t_authz_rules (type, target, method),
 	CONSTRAINT fk_t_authz_rules__authz_id FOREIGN KEY (authz_id) REFERENCES t_authz (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+*/
 DROP VIEW IF EXISTS vw_t_authz_maps;
 CREATE VIEW vw_t_authz_maps AS
 	SELECT
