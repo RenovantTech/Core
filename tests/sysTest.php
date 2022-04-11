@@ -11,6 +11,13 @@ use renovant\core\sys,
 
 class sysTest extends \PHPUnit\Framework\TestCase {
 
+	const HTTP_ROUTES = [
+		'MNGR'			=> [ 'url' => '/',			'namespace' => 'mngr' ],
+		'API_FOO'		=> [ 'url' => '/api/foo/',	'namespace' => 'api.foo' ],
+		'API_BAR'		=> [ 'url' => '/api/bar/',	'namespace' => 'api.bars' ],
+		'UI'			=> [ 'url' => '/',			'namespace' => 'ui' ]
+	];
+
 	function testConstants() {
 		$this->assertEquals('3.0.0', \renovant\core\VERSION);
 		$this->assertEquals(\renovant\core\DIR, realpath(__DIR__.'/../src/'));
@@ -142,7 +149,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testCache() {
 		$this->assertInstanceOf('renovant\core\cache\CacheInterface', sys::cache('sys'));
-		$this->assertInstanceOf('renovant\core\cache\CacheInterface', sys::cache('main'));
+		$this->assertInstanceOf('renovant\core\cache\CacheInterface', sys::cache());
 	}
 
 	/**
@@ -179,6 +186,10 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testInit
+	 * @throws ContextException
+	 * @throws EventDispatcherException
+	 * @throws SysException
+	 * @throws \ReflectionException
 	 */
 	function testDispatchCLI() {
 		$routes = [
@@ -193,12 +204,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			3 => 'foo',
 			4 => '--bar=2'
 		];
-		try {
-			sys::dispatchCLI($routes);
-		} catch(\Exception $Ex) {
-			$msg = $Ex->getMessage();
-			$this->assertEquals('Europe/London', $msg);
-		}
+		$this->assertNull(sys::dispatchCLI($routes));
 	}
 
 	/**
@@ -207,61 +213,9 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @throws ContextException|\ReflectionException
 	 */
 	function testDispatchHTTP() {
-		$routes = [
-			'MNGR'			=> [ 'url' => '/',			'namespace' => 'mngr' ],
-			'API_FOO'		=> [ 'url' => '/api/foo/',	'namespace' => 'api.foo' ],
-			'API_BAR'		=> [ 'url' => '/api/bar/',	'namespace' => 'api.bars' ],
-			'UI'			=> [ 'url' => '/',			'namespace' => 'ui' ]
-		];
-
-		try {
-			$_SERVER['SERVER_ADDR'] = 'example.com';
-			$_SERVER['SERVER_PORT'] = 8080;
-			$_SERVER['REQUEST_URI'] = '/';
-			sys::dispatchHTTP('APP', $routes);
-		} catch (ContextException $Ex) {
-			$this->assertEquals(11, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/namespace mngr/', $Ex->getMessage());
-		}
-
-		try {
-			$_SERVER['SERVER_ADDR'] = 'example.com';
-			$_SERVER['SERVER_PORT'] = null;
-			$_SERVER['REQUEST_URI'] = '/api/foo/123/456';
-			sys::dispatchHTTP('APP', $routes);
-		} catch (ContextException $Ex) {
-			$this->assertEquals(11, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/namespace api.foo/', $Ex->getMessage());
-		}
-
-		try {
-			$_SERVER['SERVER_ADDR'] = 'example.com';
-			$_SERVER['SERVER_PORT'] = 80;
-			$_SERVER['REQUEST_URI'] = '/api/bar/';
-			sys::dispatchHTTP('APP', $routes);
-		} catch (ContextException $Ex) {
-			$this->assertEquals(11, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/namespace api.bar/', $Ex->getMessage());
-		}
-
-		try {
-			$_SERVER['SERVER_ADDR'] = 'example.com';
-			$_SERVER['SERVER_PORT'] = 80;
-			$_SERVER['REQUEST_URI'] = '/dashboard';
-			sys::dispatchHTTP('APP', $routes);
-		} catch (ContextException $Ex) {
-			$this->assertEquals(11, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/namespace ui/', $Ex->getMessage());
-		}
-
-		try {
-			$_SERVER['SERVER_ADDR'] = 'bad-example.com';
-			$_SERVER['SERVER_PORT'] = 8080;
-			$_SERVER['REQUEST_URI'] = '/';
-			sys::dispatchHTTP('APP', $routes);
-		} catch (SysException $Ex) {
-			$this->assertEquals(1, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/bad-example.com:8080/', $Ex->getMessage());
-		}
+		$_SERVER['SERVER_ADDR'] = 'example.com';
+		$_SERVER['SERVER_PORT'] = 443;
+		$_SERVER['REQUEST_URI'] = '/api/bar/';
+		$this->assertNull(sys::dispatchHTTP('APP', self::HTTP_ROUTES));
 	}
 }
