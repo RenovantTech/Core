@@ -136,8 +136,6 @@ services:
   sys.AUTHZ:
     class: renovant\core\authz\AuthzService
     constructor:
-      # available modules: ORM, ROUTING, SERVICES
-      modules: [ 'ORM', 'ROUTING', 'SERVICES' ]
       pdo: mysql
       tables:
         authz:  sys_authz

@@ -28,7 +28,7 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS sys_users;
 		');
 
-		self::$AuthzService = new AuthzService( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
+		self::$AuthzService = new AuthzService('mysql', [
 			'authz'	=> 'sys_authz',
 			'users'	=> 'sys_users'
 		]);

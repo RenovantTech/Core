@@ -44,7 +44,7 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \renovant\core\context\ContextException
 	 */
 	function testConstruct() {
-		$AuthzService = new AuthzService( ['ORM', 'ROUTING', 'SERVICES'], 'mysql', [
+		$AuthzService = new AuthzService('mysql', [
 			'authz'	=> 'sys_authz',
 			'users'	=> 'sys_users'
 		]);
@@ -80,9 +80,5 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($Authz->acl('blog.author', 123));
 		$this->assertTrue($Authz->acl('blog.author', 456));
 		$this->assertFalse($Authz->acl('blog.author', 789));
-
-		$this->assertTrue(constant('SYS_AUTHZ_ORM'));
-		$this->assertTrue(constant('SYS_AUTHZ_ROUTING'));
-		$this->assertTrue(constant('SYS_AUTHZ_SERVICES'));
 	}
 }
