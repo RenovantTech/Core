@@ -42,6 +42,8 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
 	('USER_PERMISSION', 3, 5,	NULL),	-- perm.service.foo
 	('USER_PERMISSION', 3, 6,	NULL),	-- perm.service.bar
 
+	('USER_PERMISSION', 5, 4,	NULL),	-- role.service
+
 
 	('USER_ACL', 1, 7,	'123,456'),			-- acl.foo
 

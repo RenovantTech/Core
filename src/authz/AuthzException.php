@@ -6,9 +6,6 @@ class AuthzException extends \renovant\core\Exception {
 	// ACL
 	const COD100 = '[ACL] "%s" missing for %s';
 	const COD101 = '[ACL] "%s" missing for %s->%s()';
-	// FILTERS
-	const COD200 = '[FILTER] "%s" missing for %s';
-	const COD201 = '[FILTER] "%s" missing for %s->%s()';
 	// RBAC roles
 	const COD300 = '[ROLE] "%s" missing for %s';
 	const COD301 = '[ROLE] "%s" missing for %s->%s()';

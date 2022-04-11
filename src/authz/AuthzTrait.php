@@ -43,14 +43,15 @@ trait AuthzTrait {
 		$method = $method ?? '_';
 		switch ($this->_authz[$method]['roles_op']) {
 			case 'ANY':
+				$exRoles = [];
 				foreach ($this->_authz[$method]['roles'] as $role) {
 					if ($Authz->role($role)) {
 						$checked['ROLES'][] = $role;
-						continue;
+						break 2;
 					}
-					throw new AuthzException($exCode, [$role, $this->_, $method]);
+					$exRoles[] = $role;
 				}
-				break;
+				throw new AuthzException($exCode, [implode(', ', $exRoles), $this->_, $method]);
 			default:
 				foreach ($this->_authz[$method]['roles'] as $role) {
 					if (!$Authz->role($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
@@ -65,14 +66,15 @@ trait AuthzTrait {
 		$method = $method ?? '_';
 		switch ($this->_authz[$method]['permissions_op']) {
 			case 'ANY':
+				$exPerms = [];
 				foreach ($this->_authz[$method]['permissions'] as $perm) {
 					if ($Authz->permissions($perm)) {
 						$checked['PERMISSIONS'][] = $perm;
-						continue;
+						break 2;
 					}
-					throw new AuthzException($exCode, [$perm, $this->_, $method]);
+					$exPerms[] = $perm;
 				}
-				break;
+				throw new AuthzException($exCode, [implode(', ', $exPerms), $this->_, $method]);
 			default:
 				foreach ($this->_authz[$method]['permissions'] as $perm) {
 					if (!$Authz->permissions($perm)) throw new AuthzException($exCode, [$perm, $this->_, $method]);
