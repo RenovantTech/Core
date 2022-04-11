@@ -1,12 +1,12 @@
 <?php
 namespace renovant\core\authz;
-
-use phpDocumentor\Reflection\DocBlock\Tags\BaseTag;
 class Authz {
 
 	/** singleton instance */
 	static private $_Authz;
 
+	/** AUTHZ ACL */
+	protected array $acl = [];
 	/** AUTHZ roles */
 	protected array $roles = [];
 	/** AUTHZ permissions */
@@ -17,24 +17,29 @@ class Authz {
 	/**
 	 * @throws AuthzException
 	 */
-	static function init(array $roles, array $permissions): Authz {
+	static function init(array $roles, array $permissions, array $acl): Authz {
 		if(self::$_Authz) throw new AuthzException(1);
-		return self::$_Authz = new Authz($roles, $permissions);
+		return self::$_Authz = new Authz($roles, $permissions, $acl);
 	}
 
 	static function instance(): Authz {
 		return self::$_Authz;
 	}
 
-	private function __construct(array $roles, array $permissions) {
+	private function __construct(array $roles, array $permissions, array $acl) {
+		$this->acl = $acl;
 		$this->roles = $roles;
 		$this->permissions = $permissions;
 	}
 
-	/**
-	 * @param string $role
-	 * @return bool
-	 */
+	function acl(string $acl, $val): bool {
+		if(in_array($val, $this->acl[$acl])) {
+			$this->verified = 1; return true;
+		} else {
+			$this->verified = 2; return false;
+		}
+	}
+
 	function role(string $role): bool {
 		if(in_array($role, $this->roles)) {
 			$this->verified = 1; return true;
@@ -43,10 +48,6 @@ class Authz {
 		}
 	}
 
-	/**
-	 * @param string $permission
-	 * @return bool
-	 */
 	function permissions(string $permission): bool {
 		if(in_array($permission, $this->permissions)) {
 			$this->verified = 1; return true;
@@ -57,11 +58,5 @@ class Authz {
 
 	function verified(): int {
 		return $this->verified;
-	}
-	function dump(): array {
-		return [
-			'ROLES' => $this->roles,
-			'PERMISSIONS' => $this->permissions
-		];
 	}
 }

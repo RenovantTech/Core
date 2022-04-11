@@ -41,14 +41,14 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals([
 			'acl' => [
-				[ 'reboot' => '$id' ]
+				'reboot' => '$id'
 			],
 		], $_authz['reboot']);
 
 		$this->assertEquals([
 			'acl' => [
-				[ 'area' => '$area' ],
-				[ 'district' => '$district' ]
+				'area' => '$area',
+				'district' => '$district'
 			],
 			'acl_op' => 'ALL'
 		], $_authz['query']);

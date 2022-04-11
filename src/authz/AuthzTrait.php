@@ -8,8 +8,8 @@ trait AuthzTrait {
 
 	protected $_authz;
 
-	/** @throws AuthzException */
-	function _authz(string $method) {
+	/** @throws AuthzException|\ReflectionException */
+	function _authz(string $method, $args) {
 		$Authz = sys::authz();
 		$checked = [];
 		try {
@@ -24,6 +24,11 @@ trait AuthzTrait {
 				$this->_auth_permissions($Authz, $checked);
 			if(isset($this->_authz[$method]['permissions']))
 				$this->_auth_permissions($Authz, $checked, $method);
+
+			// check ACL
+			if(isset($this->_authz['_']['acl']) || isset($this->_authz[$method]['acl']))
+				$this->_auth_acl($Authz, $checked, $method, $args);
+
 
 			sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
 		} catch (AuthzException $Ex) {
@@ -60,18 +65,54 @@ trait AuthzTrait {
 		$method = $method ?? '_';
 		switch ($this->_authz[$method]['permissions_op']) {
 			case 'ANY':
-				foreach ($this->_authz[$method]['permissions'] as $role) {
-					if ($Authz->permissions($role)) {
-						$checked['PERMISSIONS'][] = $role;
+				foreach ($this->_authz[$method]['permissions'] as $perm) {
+					if ($Authz->permissions($perm)) {
+						$checked['PERMISSIONS'][] = $perm;
 						continue;
 					}
-					throw new AuthzException($exCode, [$role, $this->_, $method]);
+					throw new AuthzException($exCode, [$perm, $this->_, $method]);
 				}
 				break;
 			default:
-				foreach ($this->_authz[$method]['permissions'] as $role) {
-					if (!$Authz->permissions($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
-					else $checked['PERMISSIONS'][] = $role;
+				foreach ($this->_authz[$method]['permissions'] as $perm) {
+					if (!$Authz->permissions($perm)) throw new AuthzException($exCode, [$perm, $this->_, $method]);
+					else $checked['PERMISSIONS'][] = $perm;
+				}
+		}
+	}
+
+	/** @throws AuthzException|\ReflectionException */
+	protected function _auth_acl($Authz, &$checked, $methodName, $args) {
+
+		$params = [];
+		$RefMethod = new \ReflectionMethod($this, $methodName);
+		foreach($RefMethod->getParameters() as $i => $RefParam) {
+			$name = $RefParam->getName();
+			$params[$name]['index'] = $i;
+			$params[$name]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
+			$params[$name]['type'] = $RefParam->getType();
+			$params[$name]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
+		}
+
+		$exCode = $methodName ? 101 : 100;
+		$method = $methodName ?? '_';
+		switch ($this->_authz[$method]['acl_op']) {
+			case 'ANY':
+				$exKeys = [];
+				foreach ($this->_authz[$method]['acl'] as $aclKey => $aclParam) {
+					$index = $params[substr($aclParam, 1)]['index'];
+					if ($Authz->acl($aclKey, $args[$index])) {
+						$checked['ACL'][] = $aclKey;
+						break 2;
+					}
+					$exKeys[] = $aclKey;
+				}
+				throw new AuthzException($exCode, [implode(', ', $exKeys), $this->_, $method]);
+			default:
+				foreach ($this->_authz[$method]['acl'] as $aclKey => $aclParam) {
+					$index = $params[substr($aclParam, 1)]['index'];
+					if (!$Authz->acl($aclKey, $args[$index])) throw new AuthzException($exCode, [$aclKey, $this->_, $method]);
+					else $checked['ACL'][] = $aclKey;
 				}
 		}
 	}

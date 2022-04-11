@@ -201,4 +201,88 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 		self::$AuthzService->init();
 		$this->assertEquals('permissions-any', $AuthzTraitMockService->permissionsAny());
 	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAcl($AuthzTraitMockService) {
+		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-12-34-123', $AuthzTraitMockService->acl(12, 34, 123));
+		$this->assertEquals('acl-12-34-456', $AuthzTraitMockService->acl(12, 34, 456));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAclAll($AuthzTraitMockService) {
+		self::$AuthService->authenticate(2, null, '', '');
+		self::reset(2);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-all-A1-D1-123', $AuthzTraitMockService->aclAll('A1', 'D1', 123));
+		$this->assertEquals('acl-all-A2-D2-123', $AuthzTraitMockService->aclAll('A2', 'D2', 123));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAclAny($AuthzTraitMockService) {
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-any-A1-D9-123', $AuthzTraitMockService->aclAny('A1', 'D9', 123));
+		$this->assertEquals('acl-any-A2-D9-123', $AuthzTraitMockService->aclAny('A2', 'D9', 123));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAclException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(101);
+		$this->expectExceptionMessage('[ACL] "acl.foo"');
+
+		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-12-34-789', $AuthzTraitMockService->acl(12, 34, 789));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAclAllException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(101);
+		$this->expectExceptionMessage('[ACL] "acl.district"');
+
+		self::$AuthService->authenticate(3, null, '', '');
+		self::reset(3);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-all-A1-D9-123', $AuthzTraitMockService->aclAll('A1', 'D9', 123));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testAuthzAclAnyException($AuthzTraitMockService) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(101);
+		$this->expectExceptionMessage('[ACL] "acl.area, acl.district"');
+
+		self::$AuthService->authenticate(1, null, '', '');
+		self::reset(1);
+		self::$AuthzService->init();
+		$this->assertEquals('acl-any-A1-D1-123', $AuthzTraitMockService->aclAny('A1', 'D1', 123));
+	}
 }

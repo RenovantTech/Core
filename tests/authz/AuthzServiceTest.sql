@@ -7,20 +7,23 @@ INSERT INTO sys_users (id, name) VALUES
 ;
 
 INSERT INTO sys_authz (id, type, code, query) VALUES
-	(1, 'ROLE', 'ADMIN', null),
-	(2, 'ROLE', 'STAFF', null),
-	(3, 'ROLE', 'USER', null)
+	(1, 'ROLE', 		'ADMIN',		NULL),
+	(2, 'ROLE', 		'STAFF',		NULL),
+	(3, 'ROLE', 		'USER',			NULL),
+	(4,	'PERMISSION',	'blog.edit',	NULL),
+	(5,	'PERMISSION',	'blog.delete',	NULL),
+	(6,	'PERMISSION',	'blog.master',	NULL),
+	(7,	'ACL',			'blog.author',	NULL)
 ;
 
-INSERT INTO sys_authz_maps (type, user_id, authz_id) VALUES
-	('USER_ROLE', 1, 1),
-	('USER_ROLE', 2, 2),
-	('USER_ROLE', 3, 3),
-	('USER_ROLE', 4, 3)
-;
+INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
+	('USER_ROLE', 1, 1,	NULL),	-- ADMIN
+	('USER_ROLE', 2, 2,	NULL),	-- STAFF
+	('USER_ROLE', 3, 3,	NULL),	-- USER
+	('USER_ROLE', 4, 3,	NULL),	-- USER
 
-INSERT INTO sys_authz_rules (type, target, method, params_regex, authz_id) VALUES
-	('URL',		'^/api/users/',			NULL,		'', 1),
-	('URL',		'^/api/users/$',		'POST',		'', 2),
-	('OBJECT',	'service.Foo',			'index',	'', 3)
+	('USER_PERMISSION', 1, 4,	NULL),	-- blog.edit
+	('USER_PERMISSION', 1, 5,	NULL),	-- blog.delete
+
+	('USER_ACL', 1, 7, '123,456')	-- blog.author
 ;

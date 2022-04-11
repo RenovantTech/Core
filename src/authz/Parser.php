@@ -89,21 +89,21 @@ class Parser {
 		if($DocComment->hasTag('authz-acl')) {
 			$tag = $DocComment->getTag('authz-acl');
 			foreach ($tag as $k => $v) {
-				$data['acl'][][$k] = $v;
+				$data['acl'][$k] = $v;
 			}
 		}
 		if($DocComment->hasTag('authz-acl-all')) {
 			$data['acl_op'] = 'ALL';
 			$tag = $DocComment->getTag('authz-acl-all');
 			foreach ($tag as $k => $v) {
-				$data['acl'][][$k] = $v;
+				$data['acl'][$k] = $v;
 			}
 		}
 		if($DocComment->hasTag('authz-acl-any')) {
 			$data['acl_op'] = 'ANY';
 			$tag = $DocComment->getTag('authz-acl-any');
 			foreach ($tag as $k => $v) {
-				$data['acl'][][$k] = $v;
+				$data['acl'][$k] = $v;
 			}
 		}
 

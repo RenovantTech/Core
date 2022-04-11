@@ -47,4 +47,25 @@ class AuthzTraitMockService {
 	function permissionsAny() {
 		return 'permissions-any';
 	}
+
+	/**
+	 * @authz-acl(acl.foo="$id")
+	 */
+	function acl($area, $district, $id) {
+		return 'acl-'.$area.'-'.$district.'-'.$id;
+	}
+
+	/**
+	 * @authz-acl-all(acl.area="$area", acl.district="$district" )
+	 */
+	function aclAll($area, $district, $id) {
+		return 'acl-all-'.$area.'-'.$district.'-'.$id;
+	}
+
+	/**
+	 * @authz-acl-any(acl.area="$area", acl.district="$district" )
+	 */
+	function aclAny($area, $district, $id) {
+		return 'acl-any-'.$area.'-'.$district.'-'.$id;
+	}
 }
