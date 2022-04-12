@@ -143,6 +143,16 @@ services:
     properties:
       cache:    sys
 
+  sys.AuthzManager:
+    class: renovant\core\authz\AuthzManager
+    constructor:
+      pdo: mysql
+      tables:
+        authz:  sys_authz
+        users:  sys_users
+    properties:
+      cache:    sys
+
   # =========================================================
   # CmdManager service
   # =========================================================

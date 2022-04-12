@@ -23,7 +23,9 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals([
 			'roles' => [ 'mock.role1' ],
-			'permissions' => [ 'mock.perm1' ]
+			'permissions' => [ 'mock.perm1' ],
+			'roles_op' => 'ONE',
+			'permissions_op' => 'ONE'
 		], $_authz['_']);
 
 
@@ -43,6 +45,7 @@ class ParserTest extends \PHPUnit\Framework\TestCase {
 			'acl' => [
 				'reboot' => '$id'
 			],
+			'acl_op' => 'ONE'
 		], $_authz['reboot']);
 
 		$this->assertEquals([

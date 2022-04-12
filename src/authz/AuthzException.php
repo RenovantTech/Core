@@ -12,4 +12,6 @@ class AuthzException extends \renovant\core\Exception {
 	// RBAC permissions
 	const COD400 = '[PERMISSION] "%s" missing for %s';
 	const COD401 = '[PERMISSION] "%s" missing for %s->%s()';
+	// def & maps invalid
+	const COD500 = 'VALIDATION error: %s';
 }
