@@ -83,7 +83,7 @@ class AuthzService {
 							}
 						}
 					}
-					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$roles, $permissions, $acl]);
+					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$roles, $permissions, $acl], 0, 'authz');
 					Authz::init($roles, $permissions, $acl);
 				}
 				sys::trace(LOG_DEBUG, T_INFO, 'AUTHZ initialized');

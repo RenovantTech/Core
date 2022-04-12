@@ -59,4 +59,11 @@ class Authz {
 	function verified(): int {
 		return $this->verified;
 	}
+	function dump(): array {
+		return [
+			'ROLE' => $this->roles,
+			'PERMISSION' => $this->permissions,
+			'ACL' => $this->acl
+		];
+	}
 }

@@ -41,6 +41,7 @@ class Parser {
 		// === RBAC roles ========================================
 
 		if($DocComment->hasTag('authz-role')) {
+			$data['roles_op'] = 'ONE';
 			$tag = $DocComment->getTag('authz-role');
 			foreach ($tag as $k => $v) {
 				$data['roles'][] = $k;
@@ -64,6 +65,7 @@ class Parser {
 		// === RBAC permissions ==================================
 
 		if($DocComment->hasTag('authz-permission')) {
+			$data['permissions_op'] = 'ONE';
 			$tag = $DocComment->getTag('authz-permission');
 			foreach ($tag as $k => $v) {
 				$data['permissions'][] = $k;
@@ -87,6 +89,7 @@ class Parser {
 		// === ACL ==================================
 
 		if($DocComment->hasTag('authz-acl')) {
+			$data['acl_op'] = 'ONE';
 			$tag = $DocComment->getTag('authz-acl');
 			foreach ($tag as $k => $v) {
 				$data['acl'][$k] = $v;
