@@ -11,6 +11,41 @@ class ArraySql {
 		$this->data =& $data;
 	}
 
+	function criteriaExp($criteriaExp=null) {
+		if(empty($criteriaExp)) return $this;
+		$expArray = explode('|', $criteriaExp);
+		foreach ($expArray as $cExp) {
+			$cExpTokens = explode(',', $cExp);
+			list($field, $op) = $cExpTokens;
+			$values = array_slice($cExpTokens, 2);
+			switch($op) {
+				case 'EQ':
+					$this->data = array_values(array_filter($this->data, function ($data) use ($field, $values) {
+						return ($data[$field] == $values[0]);
+					}, ARRAY_FILTER_USE_BOTH));
+					break;
+				case '!EQ':
+					$this->data = array_values(array_filter($this->data, function ($data) use ($field, $values) {
+						return ($data[$field] != $values[0]);
+					}, ARRAY_FILTER_USE_BOTH));
+					break;
+				case 'LIKEHAS':
+					$this->data = array_values(array_filter($this->data, function ($data) use ($field, $values) {
+						return (strpos($data[$field], $values[0]) !== false);
+					}, ARRAY_FILTER_USE_BOTH));
+					break;
+				case '!LIKEHAS':
+					$this->data = array_values(array_filter($this->data, function ($data) use ($field, $values) {
+						return (strpos($data[$field], $values[0]) === false);
+					}, ARRAY_FILTER_USE_BOTH));
+					break;
+				default:
+					trigger_error(__METHOD__.' - invalid criteriaExp: '.$cExp, E_USER_ERROR);
+			}
+		}
+		return $this;
+	}
+
 	function orderExp($orderExp=null) {
 		if(empty($orderExp)) return $this;
 		$expArray = explode('|', $orderExp);
