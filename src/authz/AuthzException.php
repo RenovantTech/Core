@@ -22,4 +22,5 @@ class AuthzException extends \renovant\core\Exception {
 	const COD621 = '[REVOKE] role "%s" NOT DEFINED';
 	const COD622 = '[REVOKE] permission "%s" NOT DEFINED';
 	const COD623 = '[REVOKE] acl "%s" NOT DEFINED';
+	const COD633 = '[REPLACE] acl "%s" NOT DEFINED';
 }

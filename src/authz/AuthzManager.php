@@ -144,7 +144,7 @@ class AuthzManager {
 		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
 			throw new AuthzException(613, [$acl]);
 		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		if($data) $data = explode(',', $data);
+		$data = ($data) ? explode(',', $data) : [];
 		$data[] = (string)$dataId;
 		$data = array_unique($data, SORT_NUMERIC);
 		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
@@ -160,6 +160,15 @@ class AuthzManager {
 		$data = array_unique($data, SORT_NUMERIC);
 		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
 	}
+
+	/** @throws AuthzException */
+	function replaceAcl(string $acl, int $userId, array $dataIds): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
+			throw new AuthzException(633, [$acl]);
+		$data = array_unique($dataIds, SORT_NUMERIC);
+		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
+	}
+
 
 	/** @throws AuthzException */
 	protected function updateRBAC($code, $userId, $exCode, $sqlFetch, $sqlUpdate) {

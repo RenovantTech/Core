@@ -277,4 +277,37 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[REVOKE] acl "XXXXXXX" NOT DEFINED');
 		$this->assertTrue($AuthzManager->revokeAcl('XXXXXXX', 1, 123));
 	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testReplaceAcl(AuthzManager $AuthzManager) {
+		$AuthzManager->setAcl('blog.author', 1, 123);
+		$AuthzManager->setAcl('blog.author', 1, 456);
+		$AuthzManager->setAcl('blog.author', 1, 789);
+		self::authenticate(1);
+		$this->assertTrue(sys::authz()->acl('blog.author', 123));
+		$this->assertTrue(sys::authz()->acl('blog.author', 456));
+		$this->assertTrue(sys::authz()->acl('blog.author', 789));
+
+		$this->assertTrue($AuthzManager->replaceAcl('blog.author', 1, [321, 654, 987]));
+		self::authenticate(1);
+		$this->assertFalse(sys::authz()->acl('blog.author', 123));
+		$this->assertFalse(sys::authz()->acl('blog.author', 456));
+		$this->assertFalse(sys::authz()->acl('blog.author', 789));
+		$this->assertTrue(sys::authz()->acl('blog.author', 321));
+		$this->assertTrue(sys::authz()->acl('blog.author', 654));
+		$this->assertTrue(sys::authz()->acl('blog.author', 987));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testReplaceAclException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(633);
+		$this->expectExceptionMessage('[REPLACE] acl "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->replaceAcl('XXXXXXX', 1, [123, 456]));
+	}
 }
