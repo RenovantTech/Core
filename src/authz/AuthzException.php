@@ -14,4 +14,12 @@ class AuthzException extends \renovant\core\Exception {
 	const COD401 = '[PERMISSION] "%s" missing for %s->%s()';
 	// def & maps invalid
 	const COD500 = 'VALIDATION error: %s';
+
+	// set/revoke
+	const COD611 = '[SET] role "%s" NOT DEFINED';
+	const COD612 = '[SET] permission "%s" NOT DEFINED';
+	const COD613 = '[SET] acl "%s" NOT DEFINED';
+	const COD621 = '[REVOKE] role "%s" NOT DEFINED';
+	const COD622 = '[REVOKE] permission "%s" NOT DEFINED';
+	const COD623 = '[REVOKE] acl "%s" NOT DEFINED';
 }

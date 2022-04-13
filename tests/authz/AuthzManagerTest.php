@@ -11,7 +11,7 @@ use renovant\core\sys,
 class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
-		sys::cache('sys')->delete('sys.AUTHZ');
+		sys::cache('sys')->delete('sys.AuthzManager');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_authz_rules;
 			DROP TABLE IF EXISTS sys_authz_maps;
@@ -21,7 +21,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	static function _tearDownAfterClass():void {
-		sys::cache('sys')->delete('sys.AUTHZ');
+		sys::cache('sys')->delete('sys.AuthzManager');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_authz_rules;
 			DROP TABLE IF EXISTS sys_authz_maps;
@@ -30,12 +30,21 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	static protected function reset($userId) {
+	static protected function authenticate($userId) {
 		$RefClass = new ReflectionClass(Authz::class);
 		$RefProp = $RefClass->getProperty('_Authz');
 		$RefProp->setAccessible(true);
 		$RefProp->setValue(null);
 		sys::cache(SYS_CACHE)->delete(AuthzService::CACHE_PREFIX.$userId);
+
+		try {
+			$AuthService = sys::context()->get('sys.AUTH');
+			$AuthService->authenticate(1, null, '', '');
+			$AuthzService = sys::context()->get('sys.AUTHZ');
+			$AuthzService->init();
+		} catch (\Exception $Ex) {
+
+		}
 	}
 
 	/**
@@ -53,6 +62,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		/** @var AuthzManager $AuthzManager */
 		$AuthzManager = sys::context()->get('sys.AuthzManager');
 		$this->assertInstanceOf(AuthzManager::class, $AuthzManager);
+		sys::pdo('mysql')->exec(file_get_contents(__DIR__.'/AuthzManagerTest.sql'));
 		return $AuthzManager;
 	}
 
@@ -94,7 +104,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testUpdateDef(AuthzManager $AuthzManager) {
 		$this->assertTrue($AuthzManager->updateDef([
-			'id' => 1,
+			'id' => 8,
 			'type' => 'ROLE',
 			'code' => 'admin',
 			'label' => 'Administrator',
@@ -112,7 +122,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('VALIDATION error: code');
 
 		$AuthzManager->updateDef([
-			'id' => 1,
+			'id' => 8,
 			'type' => 'ROLE',
 			'code' => 'admin foo',
 			'label' => 'Administrator',
@@ -124,6 +134,147 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 */
 	function testDeleteDef(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->deleteDef(1));
+		$this->assertTrue($AuthzManager->deleteDef(8));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testSetRole(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setRole('ADMIN', 1));
+		$this->assertFalse($AuthzManager->setRole('ADMIN', 1));
+
+		self::authenticate(1);
+		$this->assertTrue(sys::authz()->role('ADMIN'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testSetRoleException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(611);
+		$this->expectExceptionMessage('[SET] role "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->setRole('XXXXXXX', 1));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testRevokeRole(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokeRole('ADMIN', 1));
+		$this->assertFalse($AuthzManager->revokeRole('ADMIN', 1));
+
+		self::authenticate(1);
+		$this->assertFalse(sys::authz()->role('ADMIN'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testRevokeRoleException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(621);
+		$this->expectExceptionMessage('[REVOKE] role "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->revokeRole('XXXXXXX', 1));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testSetPermission(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setPermission('blog.edit', 1));
+		$this->assertFalse($AuthzManager->setPermission('blog.edit', 1));
+
+		self::authenticate(1);
+		$this->assertTrue(sys::authz()->permissions('blog.edit'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testSetPermissionException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(612);
+		$this->expectExceptionMessage('[SET] permission "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->setPermission('XXXXXXX', 1));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testRevokePermission(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokePermission('blog.edit', 1));
+		$this->assertFalse($AuthzManager->revokePermission('blog.edit', 1));
+
+		self::authenticate(1);
+		$this->assertFalse(sys::authz()->permissions('blog.edit'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testRevokePermissionException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(622);
+		$this->expectExceptionMessage('[REVOKE] permission "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->revokePermission('XXXXXXX', 1));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testSetAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setAcl('blog.author', 1, 123));
+		$this->assertFalse($AuthzManager->setAcl('blog.author', 1, 123));
+		self::authenticate(1);
+		$this->assertTrue(sys::authz()->acl('blog.author', 123));
+
+		$this->assertTrue($AuthzManager->setAcl('blog.author', 1, 456));
+		self::authenticate(1);
+		$this->assertTrue(sys::authz()->acl('blog.author', 123));
+		$this->assertTrue(sys::authz()->acl('blog.author', 456));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testSetAclException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(613);
+		$this->expectExceptionMessage('[SET] acl "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->setAcl('XXXXXXX', 1, 123));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testRevokeAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokeAcl('blog.author', 1, 123));
+		$this->assertFalse($AuthzManager->revokeAcl('blog.author', 1, 123));
+		self::authenticate(1);
+		$this->assertFalse(sys::authz()->acl('blog.author', 123));
+		$this->assertTrue(sys::authz()->acl('blog.author', 456));
+
+		$this->assertTrue($AuthzManager->revokeAcl('blog.author', 1, 456));
+		self::authenticate(1);
+		$this->assertFalse(sys::authz()->acl('blog.author', 123));
+		$this->assertFalse(sys::authz()->acl('blog.author', 456));
+	}
+
+	/**
+	 * @depends testConstruct
+	 */
+	function testRevokeAclException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(623);
+		$this->expectExceptionMessage('[REVOKE] acl "XXXXXXX" NOT DEFINED');
+		$this->assertTrue($AuthzManager->revokeAcl('XXXXXXX', 1, 123));
 	}
 }
