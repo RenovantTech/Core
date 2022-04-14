@@ -5,48 +5,35 @@ class Query {
 	use \renovant\core\CoreTrait;
 
 	const EXP_DELIMITER = '|';
-	/** criteria params
-	 * @var array */
-	protected $criteria = [];
-	/** SQL criteria
-	 * @var array */
-	protected $criteriaSql = [];
-	/** SQL criteria exp
-	 * @var array */
-	protected $criteriaExp = [];
-	/** Criteria Expression dictionary
-	 * @var array */
-	protected $dictionary = [];
-	/** SQL fields (for SELECT)
-	 * @var string */
-	protected $fields;
-	/** PDO instance ID
-	 * @var string */
-	protected $pdo;
+	/** criteria params */
+	protected array $criteria = [];
+	/** SQL criteria */
+	protected array $criteriaSql = [];
+	/** SQL criteria exp */
+	protected array $criteriaExp = [];
+	/** Criteria Expression dictionary */
+	protected array $dictionary = [];
+	/** SQL fields (for SELECT) */
+	protected ?string $fields;
+	/** PDO instance ID */
+	protected string $pdo;
 	/** PDOStatement
 	 * @var \PDOStatement */
 	protected $PDOStatement;
-	/** SQL target (table or tables join, aka the FROM/INTO clause)
-	 * @var string */
-	protected $target;
-	/** SQL GROUP BY
-	 * @var string */
-	protected $groupBy;
-	/** SQL HAVING
-	 * @var string */
-	protected $having;
-	/** SQL OFFSET
-	 * @var string */
-	protected $offset;
-	/** SQL ORDER BY
-	 * @var string */
-	protected $orderBy;
-	/** SQL LIMIT
-	 * @var string */
-	protected $limit;
-	/** SQL WITH ROLLUP
-	 * @var boolean */
-	protected $withRollup = false;
+	/** SQL target (table or tables join, aka the FROM/INTO clause) */
+	protected string $target;
+	/** SQL GROUP BY */
+	protected string $groupBy;
+	/** SQL HAVING */
+	protected string $having;
+	/** SQL OFFSET */
+	protected string $offset;
+	/** SQL ORDER BY */
+	protected string $orderBy;
+	/** SQL LIMIT */
+	protected string $limit;
+	/** SQL WITH ROLLUP */
+	protected bool $withRollup = false;
 
 	/**
 	 * Create new Query object
