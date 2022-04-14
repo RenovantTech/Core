@@ -13,10 +13,6 @@ class Procedure {
 	/** SQL procedure */
 	protected string $procedure;
 
-	/**
-	 * @param string $procedure
-	 * @param string|null $pdo optional PDO instance ID
-	 */
 	function __construct(string $procedure, ?string $pdo=null) {
 		$this->procedure = $procedure;
 		$this->pdo = $pdo;
@@ -27,7 +23,7 @@ class Procedure {
 	 * @param array $params
 	 * @return array|true|null output params if any
 	 */
-	function exec(array $params=[]) {
+	function exec(array $params=[]): array|bool|null {
 		if(is_null($this->PDOStatement)) {
 			$sql = '';
 			$outputParams = [];
