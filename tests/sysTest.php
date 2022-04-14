@@ -180,7 +180,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(0, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/invalid data source name/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/valid data source name/', $Ex->getMessage());
 		}
 	}
 

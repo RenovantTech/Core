@@ -33,7 +33,7 @@ class Authz {
 	}
 
 	function acl(string $acl, $val): bool {
-		if(in_array($val, $this->acl[$acl])) {
+		if(isset($this->acl[$acl]) && in_array($val, $this->acl[$acl])) {
 			$this->verified = 1; return true;
 		} else {
 			$this->verified = 2; return false;
