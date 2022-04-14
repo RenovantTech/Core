@@ -16,7 +16,7 @@ class Query {
 	/** SQL fields (for SELECT) */
 	protected ?string $fields;
 	/** PDO instance ID */
-	protected string $pdo;
+	protected ?string $pdo;
 	/** PDOStatement
 	 * @var \PDOStatement */
 	protected $PDOStatement;
