@@ -44,8 +44,8 @@ CREATE VIEW vw_t_authz_maps AS
 	SELECT
 		maps.*,
 		CONCAT(u.name, ' ', u.surname) AS userName,
-		authz.code		AS authzCode,
-		authz.label		AS authzLabel
+		authz.code,
+		authz.label
 	FROM t_authz_maps maps
 		 LEFT JOIN t_authz authz ON maps.authz_id = authz.id
 		 LEFT JOIN t_users u ON maps.user_id = u.id
