@@ -14,13 +14,13 @@ class Tracer extends sys {
 	/**
 	 * Error handler
 	 * @param integer $n       contains the level of the error raised
-	 * @param string  $str     contains the error message
-	 * @param string  $file    contains the filename that the error was raised in
+	 * @param string $str     contains the error message
+	 * @param string $file    contains the filename that the error was raised in
 	 * @param integer $line    contains the file line that the error was raised in
 	 * @param array   $context contain an array of every variable that existed in the scope the error was triggered in
 	 * @return void
 	 */
-	static function onError($n, $str, $file, $line, $context) {
+	static function onError(int $n, string $str, string $file, int $line, array $context=[]) {
 //		if(error_reporting()===0) return;
 		// get trace array, w/o first 2 elements (this function call)
 		require_once __DIR__.'/functions.inc';
@@ -45,7 +45,7 @@ class Tracer extends sys {
 	 * Set TRACE ERROR level
 	 * @param integer $level E_* constant
 	 */
-	static function setErrorLevel($level) {
+	static function setErrorLevel(int $level) {
 		switch($level) {
 			case E_NOTICE:
 			case E_USER_NOTICE:

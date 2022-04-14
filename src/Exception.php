@@ -15,7 +15,8 @@ class Exception extends \Exception {
 	 */
 	final function __construct($code=0, $message=null, $data=null) {
 		$this->data = $data;
-		if($tpl = @constant(get_class($this)."::COD$code")) {
+		if(defined(get_class($this)."::COD$code")) {
+			$tpl = constant(get_class($this)."::COD$code");
 			if(is_array($message)) {
 				array_unshift($message, $tpl);
 				$message = call_user_func_array('sprintf', $message);

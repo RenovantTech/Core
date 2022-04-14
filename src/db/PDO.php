@@ -7,12 +7,11 @@ class PDO extends \PDO {
 
 	/**
 	 * @param string $id database ID
-	 * @param integer|false $level trace level, use a LOG_? constant value, default LOG_INFO
+	 * @param integer $level trace level, use a LOG_? constant value, default LOG_INFO
 	 * @param string $statement the SQL statement
 	 * @param array|null $params
 	 */
-	static function trace(string $id, $level=LOG_INFO, string $statement, ?array $params = null) {
-		if($level===false) return;
+	static function trace(string $id, int $level=LOG_INFO, string $statement, ?array $params = null) {
 		if(!empty($params)) {
 			$keys = $values = [];
 			foreach($params as $k=>$v) {
@@ -72,10 +71,10 @@ class PDO extends \PDO {
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
 	 * @param string $statement the SQL statement to prepare and execute
-	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
+	 * @param integer $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return int the number of rows that were modified or deleted by the SQL statement
 	 */
-	function exec($statement, $traceLevel=LOG_INFO) {
+	function exec(string $statement, int $traceLevel=LOG_INFO) {
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
 		sys::trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
@@ -83,27 +82,22 @@ class PDO extends \PDO {
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.prepare.php
-	 * @param string $statement a valid SQL statement template
-	 * @param array $options holds one or more key=>value pairs to set attribute values for the PDOStatement object
-	 * @return bool|PDOStatement
 	 * @throws \PDOException
 	 */
-	function prepare($statement, $options = null) {
-		return parent::prepare($statement, (array)$options);
+	function prepare(string $query, array $options=[]) {
+		return parent::prepare($query, $options);
 	}
 
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
-	 * @param string $statement the SQL statement to prepare and execute.
-	 * @param integer|false $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
-	 * @return PDOStatement
 	 */
-	function query($statement, $traceLevel=LOG_INFO) {
-		sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] %s', $this->_id, $statement));
-		$st = parent::query($statement);
+	function query(string $query, ?int $fetchMode=null, mixed ...$fetchModeArgs) {
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] %s', $this->_id, $query));
+		$st = parent::query($query, $fetchMode);
 		if(func_num_args()>1) {
-			$args = array_shift(func_get_args());
-			call_user_func_array([$st,'setFetchMode'], $args);
+			$array = func_get_args();
+			$args = array_shift($array);
+			call_user_func_array([$st,'setFetchMode'], $array);
 		}
 		/** @var PDOStatement $st */
 		return $st;

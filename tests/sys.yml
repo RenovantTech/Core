@@ -105,8 +105,6 @@ services:
   # -------------------------------------------------------
   sys.AUTH:
     class: renovant\core\auth\AuthServiceJWT
-    constructor:
-      module: SESSION
     properties:
       Provider:       !obj sys.AuthProvider
       skipAuthModules: [ 'AUTH' ]
@@ -159,8 +157,8 @@ services:
   sys.CmdManager:
     class: renovant\core\console\CmdManager
     constructor:
-      pdo:    mysql
-      table:  sys_cmd
+      pdo:          mysql
+      tablePrefix:  sys_cmd
 
   # -------------------------------------------------------
   # SESSION service

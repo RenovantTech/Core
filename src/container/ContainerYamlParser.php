@@ -27,8 +27,8 @@ class ContainerYamlParser {
 					return true;
 				};
 				foreach($yaml as $id => $objYAML) {
-					$parents = array_values(class_parents($objYAML['class']));
-					$interfaces = array_values(class_implements($objYAML['class']));
+					$parents = array_values((array)class_parents($objYAML['class']));
+					$interfaces = array_values((array)class_implements($objYAML['class']));
 					$all_classes = array_merge([$objYAML['class']], $parents, $interfaces);
 					$all_classes = array_filter($all_classes, $filter);
 					$id2classMap[$id] = $all_classes;

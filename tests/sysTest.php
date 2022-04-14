@@ -3,8 +3,8 @@ namespace test;
 use renovant\core\sys,
 	renovant\core\SysBoot,
 	renovant\core\SysException,
-	renovant\core\authz\authz,
 	renovant\core\auth\Auth,
+	renovant\core\authz\authz,
 	renovant\core\console\CmdManager,
 	renovant\core\context\ContextException,
 	renovant\core\event\EventDispatcherException;
