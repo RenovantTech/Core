@@ -11,7 +11,7 @@ class PDO extends \PDO {
 	 * @param string $statement the SQL statement
 	 * @param array|null $params
 	 */
-	static function trace(string $id, int $level=LOG_INFO, string $statement, ?array $params = null) {
+	static function trace(string $id, int $level, string $statement, ?array $params=null) {
 		if(!empty($params)) {
 			$keys = $values = [];
 			foreach($params as $k=>$v) {

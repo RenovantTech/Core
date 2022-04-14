@@ -6,13 +6,12 @@ class Procedure {
 
 	/** PDO instance ID
 	 * @var string */
-	protected $pdo;
+	protected string $pdo;
 	/** PDOStatement
 	 * @var \PDOStatement */
 	protected $PDOStatement;
-	/** SQL procedure
-	 * @var string */
-	protected $procedure;
+	/** SQL procedure */
+	protected string $procedure;
 
 	/**
 	 * @param string $procedure
