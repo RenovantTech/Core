@@ -61,18 +61,22 @@ class SqliteCache implements CacheInterface {
 	 * @param string $table table name
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($filename, $table='cache', $writeBuffer=false) {
+	function __construct(string $filename, string $table='cache', bool $writeBuffer=false) {
 		$this->filename = $filename;
 		$this->table = $table;
 		$this->writeBuffer = (boolean) $writeBuffer;
-		$this->__wakeup('INIT');
+		$this->__init('INIT');
 	}
 
 	function __sleep() {
 		return ['_', 'filename', 'table', 'writeBuffer'];
 	}
 
-	function __wakeup($mode='R') {
+	function __wakeup() {
+		$this->__init();
+	}
+
+	protected function __init($mode='R') {
 		$file = CACHE_DIR.$this->filename.self::FILE_EXT;
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] SQLite3 ('.$mode.'): '.$file.', table: '.$this->table, null, $this->_);
 		try {
@@ -162,7 +166,7 @@ class SqliteCache implements CacheInterface {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
 				self::$buffer[$this->filename.':'.$this->table][$id] = [serialize($value), $expire, $tags];
 			} else {
-				if(is_null($this->SqlSET)) $this->__wakeup('RW');
+				if(is_null($this->SqlSET)) $this->__init('RW');
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
 				if(is_array($tags)) $tags = implode('|', $tags);
 				$this->SqlSET->bindValue('id', $id);
@@ -187,7 +191,7 @@ class SqliteCache implements CacheInterface {
 			unset($this->cache[$id]);
 		}
 		try {
-			if(is_null($this->SqlDEL)) $this->__wakeup('RW');
+			if(is_null($this->SqlDEL)) $this->__init('RW');
 			sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 			$this->SqlDEL->bindValue('id', $id);
 			if(false === $this->SqlDEL->execute())
@@ -200,7 +204,7 @@ class SqliteCache implements CacheInterface {
 	}
 
 	function clean($mode=self::CLEAN_ALL, $tags=null) {
-		if(is_null($this->SqlDEL)) $this->__wakeup('RW');
+		if(is_null($this->SqlDEL)) $this->__init('RW');
 		sys::trace(LOG_DEBUG, T_CACHE, '[CLEAN]', null, $this->_);
 		$this->cache = [];
 		switch($mode) {

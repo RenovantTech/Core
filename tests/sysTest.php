@@ -4,7 +4,7 @@ use renovant\core\sys,
 	renovant\core\SysBoot,
 	renovant\core\SysException,
 	renovant\core\acl\ACL,
-	renovant\core\auth\AUTH,
+	renovant\core\auth\Auth,
 	renovant\core\console\CmdManager,
 	renovant\core\context\ContextException,
 	renovant\core\event\EventDispatcherException;
@@ -132,7 +132,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testAuth() {
 		$AUTH = sys::auth();
-		$this->assertInstanceOf(AUTH::class, $AUTH);
+		$this->assertInstanceOf(Auth::class, $AUTH);
 	}
 
 	/**
@@ -179,7 +179,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$this->fail('Expected PDOException not thrown');
 		} catch(\PDOException $Ex) {
 			$this->assertEquals(0, $Ex->getCode());
-			$this->assertMatchesRegularExpression('/invalid data source name/', $Ex->getMessage());
+			$this->assertMatchesRegularExpression('/valid data source name/', $Ex->getMessage());
 		}
 	}
 
