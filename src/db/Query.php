@@ -23,15 +23,15 @@ class Query {
 	/** SQL target (table or tables join, aka the FROM/INTO clause) */
 	protected string $target;
 	/** SQL GROUP BY */
-	protected string $groupBy;
+	protected ?string $groupBy;
 	/** SQL HAVING */
-	protected string $having;
+	protected ?string $having;
 	/** SQL OFFSET */
-	protected int $offset;
+	protected ?int $offset;
 	/** SQL ORDER BY */
-	protected string $orderBy;
+	protected ?string $orderBy;
 	/** SQL LIMIT */
-	protected int $limit;
+	protected ?int $limit;
 	/** SQL WITH ROLLUP */
 	protected bool $withRollup = false;
 
