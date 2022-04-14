@@ -18,18 +18,14 @@ class OrmEvent extends \renovant\core\event\Event {
 	const EVENT_POST_INSERT		= 'orm:post-insert';
 	const EVENT_POST_UPDATE		= 'orm:post-update';
 
-	/** SQL criteria exp
-	 * @var array */
-	protected $criteriaExp = [];
-	/** Entity
-	 * @var object */
-	protected $Entity;
-	/** Entity array
-	 * @var array */
-	protected $entities;
-	/** ORM Repository
-	 * @var Repository */
-	protected $Repository;
+	/** SQL criteria exp */
+	protected array $criteriaExp = [];
+	/** Entity */
+	protected object $Entity;
+	/** Entity array*/
+	protected array $entities;
+	/** ORM Repository */
+	protected Repository $Repository;
 	/** Exception, if any
 	 * @var \Exception */
 	protected $Exception;
@@ -39,44 +35,33 @@ class OrmEvent extends \renovant\core\event\Event {
 	}
 
 	/**
-	 * Add Criteria Expression
-	 * @param string $criteriaExp
-	 * @return $this
-	 */
-	function criteriaExp($criteriaExp) {
+	 * Add Criteria Expression */
+	function criteriaExp(?string $criteriaExp): self {
 		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(Query::EXP_DELIMITER, $criteriaExp));
 		return $this;
 	}
 
 	/**
-	 * Get current Repository
-	 * @return Repository
-	 */
-	function getRepository() {
+	 * Get current Repository */
+	function getRepository(): Repository {
 		return $this->Repository;
 	}
 
 	/**
-	 * Get current Entity
-	 * @return object
-	 */
-	function getEntity() {
+	 * Get current Entity */
+	function getEntity(): object {
 		return $this->Entity;
 	}
 
 	/**
-	 * Get current Entity
-	 * @return object
-	 */
-	function getEntities() {
+	 * Get current Entity */
+	function getEntities(): array {
 		return $this->entities;
 	}
 
 	/**
-	 * Get criteria expression
-	 * @return string
-	 */
-	function getCriteriaExp() {
+	 * Get criteria expression */
+	function getCriteriaExp(): string {
 		return implode(Query::EXP_DELIMITER, $this->criteriaExp);
 	}
 
@@ -88,29 +73,17 @@ class OrmEvent extends \renovant\core\event\Event {
 		return $this->Exception;
 	}
 
-	/**
-	 * @param object $Entity
-	 * @return $this
-	 */
-	function setEntity($Entity) {
+	function setEntity(object $Entity): self {
 		$this->Entity = $Entity;
 		return $this;
 	}
 
-	/**
-	 * @param array $entities
-	 * @return $this
-	 */
-	function setEntities(array $entities) {
+	function setEntities(array $entities): self {
 		$this->entities = $entities;
 		return $this;
 	}
 
-	/**
-	 * @param \Exception $Exception
-	 * @return $this
-	 */
-	function setException(\Exception $Exception) {
+	function setException(\Exception $Exception): self {
 		$this->Exception = $Exception;
 		return $this;
 	}

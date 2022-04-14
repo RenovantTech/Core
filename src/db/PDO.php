@@ -96,7 +96,7 @@ class PDO extends \PDO {
 		$st = parent::query($query, $fetchMode);
 		if(func_num_args()>1) {
 			$array = func_get_args();
-			$args = array_shift($array);
+			array_shift($array);
 			call_user_func_array([$st,'setFetchMode'], $array);
 		}
 		/** @var PDOStatement $st */

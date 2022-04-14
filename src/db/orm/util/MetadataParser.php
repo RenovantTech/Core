@@ -6,13 +6,11 @@ use renovant\core\db\orm\Exception,
 class MetadataParser {
 
 	/**
-	 * @param $entityClass
-	 * @return array
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 * @throws \Exception
 	 */
-	static function parse($entityClass): array {
+	static function parse(string $entityClass): array {
 
 		$metadata = [];
 

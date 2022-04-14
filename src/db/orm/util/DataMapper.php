@@ -11,11 +11,8 @@ class DataMapper {
 
 	/**
 	 * Convert Entity from PHP object to data array.
-	 * @param object $Entity
-	 * @param string|null $fetchSubset
-	 * @return array
 	 */
-	static function object2array(object $Entity, $fetchSubset=null) {
+	static function object2array(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
 		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
 			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset), $k)===false) continue;
@@ -26,11 +23,8 @@ class DataMapper {
 
 	/**
 	 * Convert Entity from PHP object to data array ready to JSON.
-	 * @param object $Entity
-	 * @param string|null $fetchSubset
-	 * @return array
 	 */
-	static function object2json(object $Entity, $fetchSubset=null) {
+	static function object2json(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
 		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
 			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset),$k)===false) continue;
@@ -54,11 +48,8 @@ class DataMapper {
 
 	/**
 	 * Convert Entity from PHP object to proper SQL types array.
-	 * @param object $Entity
-	 * @param array $changes changed values on update
-	 * @return array
 	 */
-	static function object2sql(object $Entity, array $changes=[]) {
+	static function object2sql(object $Entity, array $changes=[]): array {
 		$data = [];
 		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
 			if($changes && !in_array($k, $changes)) continue;
@@ -83,12 +74,9 @@ class DataMapper {
 
 	/**
 	 * Inject SQL types into array data, converting to proper PHP types.
-	 * @param array $data
-	 * @param string $class
-	 * @return array
 	 * @throws \Exception
 	 */
-	static function sql2array(array $data, string $class) {
+	static function sql2array(array $data, string $class): array {
 		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
 		foreach($data as $k=>&$v) {
 			if(!isset($props[$k])) continue;
@@ -111,11 +99,8 @@ class DataMapper {
 
 	/**
 	 * Inject SQL types into array data ready for JSON conversion, converting to proper PHP types.
-	 * @param array $data
-	 * @param string $class
-	 * @return array
 	 */
-	static function sql2json(array $data, string $class) {
+	static function sql2json(array $data, string $class): array {
 		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
 		foreach($data as $k=>&$v) {
 			if(!isset($props[$k])) continue;

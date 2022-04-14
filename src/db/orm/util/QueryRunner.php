@@ -6,13 +6,7 @@ use renovant\core\sys,
 	renovant\core\db\orm\Repository;
 class QueryRunner {
 
-	/**
-	 * @param string|null $pdo
-	 * @param string $class
-	 * @param string|null $criteriaExp
-	 * @return int
-	 */
-	static function count(?string $pdo, string $class, ?string $criteriaExp=null) {
+	static function count(?string $pdo, string $class, ?string $criteriaExp=null): int {
 		$Query = (new Query(call_user_func($class.'::metadata', Repository::META_SQL, 'source'), null, $pdo))
 			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
 			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
@@ -20,14 +14,7 @@ class QueryRunner {
 		return $Query->execCount();
 	}
 
-	/**
-	 * @param string|null $pdo
-	 * @param string $class
-	 * @param object $Entity
-	 * @param string|null $criteriaExp
-	 * @return boolean
-	 */
-	static function deleteOne(?string $pdo, string $class, object $Entity, ?string $criteriaExp=null) {
+	static function deleteOne(?string $pdo, string $class, object $Entity, ?string $criteriaExp=null): bool {
 		if($deleteFn = call_user_func($class.'::metadata', Repository::META_SQL, 'deleteFn')) {
 			self::execCall($pdo, $deleteFn, $Entity);
 			return true;
@@ -39,15 +26,7 @@ class QueryRunner {
 		}
 	}
 
-	/**
-	 * @param string|null $pdo
-	 * @param string $class
-	 * @param integer|null $limit
-	 * @param string|null $orderExp
-	 * @param string|null $criteriaExp
-	 * @return integer
-	 */
-	static function deleteAll(?string $pdo, string $class, ?int $limit, ?string $orderExp, ?string $criteriaExp) {
+	static function deleteAll(?string $pdo, string $class, ?int $limit, ?string $orderExp, ?string $criteriaExp): int {
 		$Query = (new Query(call_user_func($class.'::metadata', Repository::META_SQL, 'target'), null, $pdo))
 			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
 			->setOrderByDictionary(call_user_func($class.'::metadata', Repository::META_FETCH_ORDERBY))
@@ -58,17 +37,9 @@ class QueryRunner {
 	}
 
 	/**
-	 * @param string|null $pdo
-	 * @param string $class
-	 * @param int|null $offset
-	 * @param string|null $orderExp
-	 * @param string|null $criteriaExp
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object|array|false
 	 * @throws \Exception
 	 */
-	static function fetchOne(?string $pdo, string $class, ?int $offset, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
+	static function fetchOne(?string $pdo, string $class, ?int $offset, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		$subset = ($fetchSubset) ? call_user_func($class.'::metadata', Repository::META_FETCH_SUBSETS, $fetchSubset) : '*';
 		$Query = (new Query(call_user_func($class.'::metadata', Repository::META_SQL, 'source'), $subset, $pdo))
 			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
@@ -93,18 +64,9 @@ class QueryRunner {
 	}
 
 	/**
-	 * @param string|null $pdo
-	 * @param string $class
-	 * @param int|null $offset
-	 * @param integer|null $limit
-	 * @param string|null $orderExp
-	 * @param string|null $criteriaExp
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_RAW
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return array
 	 * @throws \Exception
 	 */
-	static function fetchAll(?string $pdo, string $class, ?int $offset, ?int $limit, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null) {
+	static function fetchAll(?string $pdo, string $class, ?int $offset, ?int $limit, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$subset = ($fetchSubset) ? call_user_func($class.'::metadata', Repository::META_FETCH_SUBSETS, $fetchSubset) : '*';
 		$Query = (new Query(call_user_func($class.'::metadata', Repository::META_SQL, 'source'), $subset, $pdo))
 			->setCriteriaDictionary(call_user_func($class.'::metadata', Repository::META_CRITERIA))
@@ -130,12 +92,7 @@ class QueryRunner {
 		return $entities;
 	}
 
-	/**
-	 * @param string|null $pdo
-	 * @param object $Entity
-	 * @return boolean
-	 */
-	static function insert(?string $pdo, object $Entity) {
+	static function insert(?string $pdo, object $Entity): bool {
 		$data = DataMapper::object2sql($Entity);
 		if($insertFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'insertFn')) {
 			$pkeys = self::execCall($pdo, $insertFn, $Entity);
@@ -158,13 +115,7 @@ class QueryRunner {
 		}
 	}
 
-	/**
-	 * @param string|null $pdo
-	 * @param object $Entity
-	 * @param array $changes
-	 * @return boolean
-	 */
-	static function update(?string $pdo, object $Entity, array $changes) {
+	static function update(?string $pdo, object $Entity, array $changes): bool {
 		if($updateFn = call_user_func(get_class($Entity).'::metadata', Repository::META_SQL, 'updateFn')) {
 			self::execCall($pdo, $updateFn, $Entity);
 			return true;

@@ -32,8 +32,6 @@ trait EntityTrait {
 
 	/**
 	 * @internal
-	 * @param object $Obj
-	 * @return array
 	 */
 	static function changes(object $Obj): array {
 		$changes = [];
@@ -43,14 +41,10 @@ trait EntityTrait {
 	}
 
 	/**
-	 * @internal
-	 * @param string|null $k
-	 * @param mixed|null $param
-	 * @return mixed|void
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 */
-	static function metadata(?string $k=null, $param=null) {
+	static function metadata(?string $k=null, mixed $param=null) {
 		if(empty(self::$_metadata)) self::$_metadata = metadataFetch(__CLASS__);
 
 		switch ($k) {

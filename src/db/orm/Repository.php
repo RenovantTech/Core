@@ -55,11 +55,8 @@ class Repository {
 
 	/**
 	 * Convert entities objects to array
-	 * @param object|array $entities one or more Entities
-	 * @param string|null $subset
-	 * @return array
 	 */
-	function toArray($entities, ?string $subset=null): array {
+	function toArray(object|array $entities, ?string $subset=null): array {
 		$data = [];
 		if(is_array($entities)) {
 			foreach($entities as $Entity) {
@@ -73,11 +70,8 @@ class Repository {
 
 	/**
 	 * Convert entities objects to JSON array
-	 * @param object|array $entities one or more Entities
-	 * @param string|null $subset
-	 * @return array
 	 */
-	function toJson($entities, ?string $subset=null): array {
+	function toJson(object|array $entities, ?string $subset=null): array {
 		$data = [];
 		if(is_array($entities)) {
 			foreach($entities as $Entity) {
@@ -91,19 +85,15 @@ class Repository {
 
 	/**
 	 * Count entities by a set of Criteria
-	 * @param string|null $criteriaExp CRITERIA expression
-	 * @return integer
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function count($criteriaExp=null): int {
+	function count(?string $criteriaExp=null): int {
 		return $this->execCount($criteriaExp);
 	}
 
 	/**
 	 * Create new Entity instance
-	 * @param array $data Entity data
-	 * @return object Entity
 	 */
 	function create(array $data=[]): object {
 		return new $this->class($data);
@@ -112,12 +102,12 @@ class Repository {
 	/**
 	 * Delete Entity from DB
 	 * @param mixed $EntityOrKey object or its primary keys
-	 * @param int|null $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch before delete
+	 * @param int|false|null $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch before delete
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function delete($EntityOrKey, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function delete(mixed $EntityOrKey, int|false|null $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
@@ -128,15 +118,11 @@ class Repository {
 	}
 
 	/**
-	 * Fetch an Entity by a set of Criteria and ORDER BY
-	 * @param integer|null $limit LIMIT
-	 * @param string|null $orderExp ORDER BY expression
-	 * @param string|null $criteriaExp CRITERIA expression
-	 * @return integer n° of deleted entities
+	 * Delete entities by a set of Criteria and ORDER BY
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null) {
+	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
 	}
 
@@ -145,11 +131,10 @@ class Repository {
 	 * @param mixed $id Entity primary key (single or array)
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object|false Entity, false if not found
+	 * @return object|array|false Entity, false if not found
 	 * @throws Exception
-	 * @throws \Exception
 	 */
-	function fetch($id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function fetch(mixed $id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
 		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -165,7 +150,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|null {
 		if($offset) $offset--;
 		return $this->execFetchOne($offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -182,7 +167,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
 		return $this->execFetchAll($offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -197,7 +182,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function insert(object $Entity, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function insert(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -211,7 +196,7 @@ class Repository {
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function insertOne($id, array $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function insertOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
 
 	}
@@ -226,7 +211,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function update(object $Entity, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function update(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -236,10 +221,10 @@ class Repository {
 	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return array Entity objects or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return array|bool Entity objects or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 */
-	function updateAll(array $entities, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function updateAll(array $entities, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array|bool {
 		$data = [];
 		foreach ($entities as $Entity)
 			$data[] = $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
@@ -257,7 +242,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function updateOne($id, array $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	function updateOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -268,18 +253,16 @@ class Repository {
 	 * @param string|null $validateMode
 	 * @return array map of properties & error codes, empty if VALID
 	 */
-	function validate(object $Entity, ?string $validateMode) {
+	function validate(object $Entity, ?string $validateMode): array {
 		return [];
 	}
 
 	/**
 	 * Count entities using a Query.
-	 * @param string|null $criteriaExp CRITERIA expression
-	 * @return integer
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execCount(?string $criteriaExp=null) {
+	protected function execCount(?string $criteriaExp=null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
@@ -295,11 +278,13 @@ class Repository {
 	 * @param mixed $Entity object or its primary keys
 	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return mixed $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
+	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execDeleteOne($Entity, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execDeleteOne(mixed $Entity, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
@@ -331,7 +316,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null) {
+	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
@@ -345,17 +330,12 @@ class Repository {
 	}
 
 	/**
-	 * Fetch an Entity using a Query.
-	 * @param int|null $offset OFFSET
-	 * @param string|null $orderExp ORDER BY expression
-	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object Entity
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
@@ -370,18 +350,10 @@ class Repository {
 	}
 
 	/**
-	 * Fetch entities using a Query.
-	 * @param int|null $offset OFFSET
-	 * @param int|null $limit LIMIT
-	 * @param string|null $orderExp ORDER BY expression
-	 * @param string|null $criteriaExp CRITERIA expression
-	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return array entities
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
@@ -396,17 +368,10 @@ class Repository {
 	}
 
 	/**
-	 * Insert Entity using a Query.
-	 * @param mixed $id primary key(s)
-	 * @param array|object $data new Entity data, or Entity object
-	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execInsertOne($id, $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execInsertOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
@@ -435,17 +400,10 @@ class Repository {
 	}
 
 	/**
-	 * Update Entity using a Query.
-	 * @param mixed $id primary key(s)
-	 * @param array|object $data new Entity data, or Entity object
-	 * @param bool|string $validate TRUE to validate all, a named @orm-validate-subset, or FALSE to skip validation
-	 * @param int $fetchMode fetch mode (FETCH_OBJ, FETCH_ARRAY, FETCH_JSON), FALSE to skip fetch after insert
-	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	protected function execUpdateOne($id, $data, $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null) {
+	protected function execUpdateOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
 			if(is_object($data)) {
 				$Entity = $data;
@@ -482,12 +440,10 @@ class Repository {
 	}
 
 	/**
-	 * @param object $Entity
-	 * @param bool|string $validateMode TRUE or a named @orm-validate-subset
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 */
-	protected function doValidate(object $Entity, $validateMode) {
+	protected function doValidate(object $Entity, string|bool $validateMode) {
 		$validateSubset = (is_string($validateMode)) ? $Entity::metadata(self::META_VALIDATE_SUBSETS, $validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
@@ -497,13 +453,11 @@ class Repository {
 	}
 
 	/**
-	 * @param $eventName
-	 * @param mixed $param
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function triggerEvent($eventName, $param=null) {
+	protected function triggerEvent(string $eventName, mixed $param=null) {
 		if($name = call_user_func($this->class.'::metadata', self::META_EVENTS, $eventName)) {
 			if(is_object($param)) $this->OrmEvent->setEntity($param);
 			elseif(is_array($param)) $this->OrmEvent->setEntities($param);

@@ -27,11 +27,11 @@ class Query {
 	/** SQL HAVING */
 	protected string $having;
 	/** SQL OFFSET */
-	protected string $offset;
+	protected int $offset;
 	/** SQL ORDER BY */
 	protected string $orderBy;
 	/** SQL LIMIT */
-	protected string $limit;
+	protected int $limit;
 	/** SQL WITH ROLLUP */
 	protected bool $withRollup = false;
 
@@ -52,7 +52,7 @@ class Query {
 	 * @param array $params PDO params
 	 * @return integer count result
 	 */
-	function execCount(array $params=[]) {
+	function execCount(array $params=[]): int {
 		if(is_null($this->PDOStatement)) {
 			$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
 			if(!empty($this->groupBy)) {
@@ -71,7 +71,7 @@ class Query {
 	 * @param array $params PDO params
 	 * @return int n° of deleted rows
 	 */
-	function execDelete(array $params=[]) {
+	function execDelete(array $params=[]): int {
 		if(is_null($this->PDOStatement)) {
 			$sql = sprintf('DELETE FROM `%s` %s', $this->target, $this->parseCriteria());
 			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
@@ -86,7 +86,7 @@ class Query {
 	 * @param array $data
 	 * @return int n° of inserted rows
 	 */
-	function execInsert(array $data) {
+	function execInsert(array $data): int {
 		if(is_null($this->PDOStatement)) {
 			$sql1 = $sql2 = '';
 			foreach($data as $k=>$v) {
@@ -96,7 +96,7 @@ class Query {
 			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
-		return (int) $this->doExec($data)->rowCount();
+		return $this->doExec($data)->rowCount();
 	}
 
 	/**
@@ -105,7 +105,7 @@ class Query {
 	 * @param array $keys table PRIMARY/UNIQUE keys
 	 * @return int n° of inserted rows
 	 */
-	function execInsertUpdate(array $data, array $keys) {
+	function execInsertUpdate(array $data, array $keys): int {
 		if(is_null($this->PDOStatement)) {
 			$sql1 = $sql2 = $sql3 = '';
 			foreach($data as $k=>$v) {
@@ -369,7 +369,7 @@ class Query {
 					$transExp[] = str_replace($search, $replace, $newExp);
 				} else {
 					preg_match_all('/\?(\d+)/', $newExp, $matches);
-					foreach ($matches[1] as $idx => $match) {
+					foreach ($matches[1] as $match) {
 						$i++;
 						$addParam('_', $expValues[$match-1]);
 						$newExp = preg_replace('/\?'.$match.'/', ':__'.$i, $newExp, 1);
