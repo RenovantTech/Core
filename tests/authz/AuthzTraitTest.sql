@@ -45,12 +45,12 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
 	('USER_PERMISSION', 5, 4,	NULL),	-- role.service
 
 
-	('USER_ACL', 1, 7,	'123,456'),			-- acl.foo
+	('USER_ACL', 1, 7,	'[123,456]'),		-- acl.foo
 
-	('USER_ACL', 2, 8,	'A1,A2'),			-- acl.area
-	('USER_ACL', 2, 9,	'D1,D2'),			-- acl.district
+	('USER_ACL', 2, 8,	'["A1","A2"]'),		-- acl.area
+	('USER_ACL', 2, 9,	'["D1","D2"]'),		-- acl.district
 
-	('USER_ACL', 3, 8,	'A1,A2'),			-- acl.area
+	('USER_ACL', 3, 8,	'["A1","A2"]'),		-- acl.area
 
-	('USER_ACL', 4, 9,	'D1,D2')			-- acl.district
+	('USER_ACL', 4, 9,	'["D1","D2"]')		-- acl.district
 ;

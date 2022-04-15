@@ -26,7 +26,7 @@ class AuthzManager {
 
 	const SQL_REVOKE_ROLE		= 'DELETE FROM %table%_maps WHERE type = "USER_ROLE" AND user_id = :user_id AND authz_id = :authz_id';
 	const SQL_REVOKE_PERMISSION	= 'DELETE FROM %table%_maps WHERE type = "USER_PERMISSION" AND user_id = :user_id AND authz_id = :authz_id';
-	const SQL_REVOKE_ACL		= 'UPDATE %table%_maps SET data = :data WHERE type = "USER_ACL" AND user_id = :user_id AND authz_id = :authz_id';
+	const SQL_REVOKE_ACL		= 'DELETE FROM %table%_maps WHERE type = "USER_ACL" AND user_id = :user_id AND authz_id = :authz_id';
 
 	/** Cache ID */
 	protected string $cache = 'sys';
@@ -140,35 +140,44 @@ class AuthzManager {
 	}
 
 	/** @throws AuthzException */
-	function setAcl(string $acl, int $userId, int $dataId): bool {
+	function setAcl(string $acl, int $userId, array $items): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
+			throw new AuthzException(613, [$acl]);
+		$items = array_unique($items, SORT_NUMERIC);
+		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($items)])->rowCount();
+	}
+
+	/** @throws AuthzException */
+	function setAclItem(string $acl, int $userId, int|string $item): bool {
 		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
 			throw new AuthzException(613, [$acl]);
 		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		$data = ($data) ? explode(',', $data) : [];
-		$data[] = (string)$dataId;
+		$data = ($data) ? (array)json_decode($data) : [];
+		$data[] = $item;
 		$data = array_unique($data, SORT_NUMERIC);
-		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
+		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
 	}
 
 	/** @throws AuthzException */
-	function revokeAcl(string $acl, int $userId, int $dataId): bool {
+	function revokeAcl(string $acl, int $userId): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
+			throw new AuthzException(623, [$acl]);
+		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
+	}
+
+	/** @throws AuthzException */
+	function revokeAclItem(string $acl, int $userId, int|string $item): bool {
 		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
 			throw new AuthzException(623, [$acl]);
 		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		if($data) $data = explode(',', $data);
-		$data = array_diff($data, [$dataId]);
+		$data = ($data) ? (array)json_decode($data) : [];
+		$data = array_diff($data, [$item]);
 		$data = array_unique($data, SORT_NUMERIC);
-		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
+		if(empty($data))
+			return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
+		else
+			return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
 	}
-
-	/** @throws AuthzException */
-	function replaceAcl(string $acl, int $userId, array $dataIds): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
-			throw new AuthzException(633, [$acl]);
-		$data = array_unique($dataIds, SORT_NUMERIC);
-		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>implode(',', $data)])->rowCount();
-	}
-
 
 	/** @throws AuthzException */
 	protected function updateRBAC($code, $userId, $exCode, $sqlFetch, $sqlUpdate) {
@@ -177,7 +186,7 @@ class AuthzManager {
 		return (bool) $this->pdo($sqlUpdate)->execute([ 'authz_id'=>$authzId, 'user_id'=>$userId ])->rowCount();
 
 	}
-	protected function pdo($sql): PDOStatement {
+	protected function pdo($sql): \PDOStatement {
 		return sys::pdo($this->pdo)->prepare(str_replace('%table%', $this->tables['authz'], $sql));
 	}
 }

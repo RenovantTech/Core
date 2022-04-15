@@ -1,7 +1,8 @@
 <?php
 namespace renovant\core\authz;
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys;
+use renovant\core\sys,
+	renovant\core\util\reflection\ReflectionClass;
 
 trait AuthzTrait {
 	use \renovant\core\CoreTrait;
@@ -91,8 +92,8 @@ trait AuthzTrait {
 		foreach($RefMethod->getParameters() as $i => $RefParam) {
 			$name = $RefParam->getName();
 			$params[$name]['index'] = $i;
-			$params[$name]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
-			$params[$name]['type'] = $RefParam->getType();
+			$params[$name]['class'] = ($RefParam->getType() && !$RefParam->getType()->isBuiltin()) ? (new ReflectionClass($RefParam->getType()->getName()))->getName() : null;
+			$params[$name]['type'] = ($RefParam->getType() && $RefParam->getType()->isBuiltin()) ? $RefParam->getType()->getName() : null;
 			$params[$name]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 		}
 

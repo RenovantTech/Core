@@ -25,5 +25,5 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
 	('USER_PERMISSION', 1, 4,	NULL),	-- blog.edit
 	('USER_PERMISSION', 1, 5,	NULL),	-- blog.delete
 
-	('USER_ACL', 1, 7, '123,456')	-- blog.author
+	('USER_ACL', 1, 7, '[123,456]')	-- blog.author
 ;

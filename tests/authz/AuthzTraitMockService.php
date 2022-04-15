@@ -51,21 +51,21 @@ class AuthzTraitMockService {
 	/**
 	 * @authz-acl(acl.foo="$id")
 	 */
-	function acl($area, $district, $id) {
+	function acl(string $area, string $district, int $id) {
 		return 'acl-'.$area.'-'.$district.'-'.$id;
 	}
 
 	/**
 	 * @authz-acl-all(acl.area="$area", acl.district="$district" )
 	 */
-	function aclAll($area, $district, $id) {
+	function aclAll(string $area, string $district, int $id) {
 		return 'acl-all-'.$area.'-'.$district.'-'.$id;
 	}
 
 	/**
 	 * @authz-acl-any(acl.area="$area", acl.district="$district" )
 	 */
-	function aclAny($area, $district, $id) {
+	function aclAny(string $area, string $district, int $id) {
 		return 'acl-any-'.$area.'-'.$district.'-'.$id;
 	}
 }

@@ -76,7 +76,7 @@ class AuthzService {
 									$data = array_values(array_filter($mapsArray, function ($map) use ($authz) {
 										return ($map['authz_id'] == $authz['id']);
 									}, ARRAY_FILTER_USE_BOTH))[0]['data'];
-									$acl[$authz['code']] = explode(',', $data);
+									$acl[$authz['code']] = (array)json_decode($data);
 									break;
 								case 'ROLE': $roles[] = $authz['code']; break;
 								case 'PERMISSION': $permissions[] = $authz['code']; break;
