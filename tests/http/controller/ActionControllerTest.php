@@ -57,6 +57,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param \test\http\controller\ActionController $ActionController
 	 * @return \test\http\controller\ActionController
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionMethod(\test\http\controller\ActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
@@ -82,6 +83,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionException() {
 		$this->expectExceptionCode(111);
@@ -99,8 +101,6 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\ActionController $ActionController
-	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \renovant\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\ActionController $ActionController) {
