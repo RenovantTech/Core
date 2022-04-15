@@ -39,7 +39,7 @@ class PDO extends \PDO {
 		$this->_id =$id;
 		$options = (array) $options + [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_STATEMENT_CLASS => ['renovant\core\db\PDOStatement', [ $id ]]
+			\PDO::ATTR_STATEMENT_CLASS => [PDOStatement::class, [ $id ]]
 		];
 		parent::__construct($dsn, $username, $password, $options);
 		// SqLite specific settings
@@ -71,12 +71,11 @@ class PDO extends \PDO {
 	/**
 	 * @see http://www.php.net/manual/en/pdo.exec.php
 	 * @param string $statement the SQL statement to prepare and execute
-	 * @param integer $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return int the number of rows that were modified or deleted by the SQL statement
 	 */
-	function exec(string $statement, int $traceLevel=LOG_INFO) {
+	function exec(string $statement) {
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
-		sys::trace($traceLevel, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
+		sys::trace(LOG_INFO, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
 	}
 
