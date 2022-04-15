@@ -43,9 +43,8 @@ class Tracer extends sys {
 
 	/**
 	 * Set TRACE ERROR level
-	 * @param integer $level E_* constant
 	 */
-	static function setErrorLevel(int $level) {
+	static function setErrorLevel(?int $level) {
 		switch($level) {
 			case E_NOTICE:
 			case E_USER_NOTICE:
