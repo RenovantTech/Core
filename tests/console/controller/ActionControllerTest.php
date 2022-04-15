@@ -74,6 +74,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionException() {
 		$this->expectExceptionCode(111);
