@@ -40,8 +40,10 @@ class AbstractControllerReflection {
 				// parameters
 				foreach($RefMethod->getParameters() as $i => $RefParam) {
 					$config['params'][$i]['name'] = $RefParam->getName();
-					$config['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
-					$config['params'][$i]['type'] = $RefParam->getType();
+//					$config['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
+					$config['params'][$i]['class'] = ($RefParam->getType() && !$RefParam->getType()->isBuiltin()) ? (new ReflectionClass($RefParam->getType()->getName()))->getName() : null;
+//					$config['params'][$i]['type'] = $RefParam->getType();
+					$config['params'][$i]['type'] = ($RefParam->getType() && $RefParam->getType()->isBuiltin()) ? $RefParam->getType()->getName() : null;
 					$config['params'][$i]['optional'] = $RefParam->isOptional();
 					$config['params'][$i]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 				}

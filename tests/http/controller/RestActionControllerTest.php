@@ -18,7 +18,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertArrayHasKey('destroy', $_config);
 		$this->assertEquals('id', $_config['destroy']['params'][3]['name']);
 		$this->assertNull($_config['destroy']['params'][3]['class']);
-		$this->assertEquals('integer', $_config['destroy']['params'][3]['type']);
+		$this->assertEquals('int', $_config['destroy']['params'][3]['type']);
 		$this->assertFalse($_config['destroy']['params'][3]['optional']);
 		$this->assertNull($_config['destroy']['params'][3]['default']);
 
@@ -29,6 +29,7 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param \test\http\controller\RestActionController $ActionController
 	 * @return \test\http\controller\RestActionController
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionMethod(\test\http\controller\RestActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
@@ -85,8 +86,6 @@ class RestActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\RestActionController $ActionController
-	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \renovant\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\RestActionController $ActionController) {

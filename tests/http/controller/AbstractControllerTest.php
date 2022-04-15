@@ -17,6 +17,11 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 		$RefProp->setAccessible(true);
 		$_config = $RefProp->getValue($AbstractController);
 
+		$this->assertEquals('Req', $_config['params'][0]['name']);
+		$this->assertEquals(Request::class, $_config['params'][0]['class']);
+		$this->assertNull($_config['params'][0]['type']);
+		$this->assertFalse($_config['params'][0]['optional']);
+
 		$this->assertEquals('categ', $_config['params'][2]['name']);
 		$this->assertNull($_config['params'][2]['class']);
 		$this->assertEquals('string', $_config['params'][2]['type']);
@@ -24,7 +29,7 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertEquals('id', $_config['params'][4]['name']);
 		$this->assertNull($_config['params'][4]['class']);
-		$this->assertEquals('integer', $_config['params'][4]['type']);
+		$this->assertEquals('int', $_config['params'][4]['type']);
 		$this->assertTrue($_config['params'][4]['optional']);
 		$this->assertEquals(1, $_config['params'][4]['default']);
 
@@ -34,8 +39,6 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstructor
 	 * @param \test\http\controller\AbstractController $AbstractController
-	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testHandle(AbstractController $AbstractController) {
 		$_SERVER['REQUEST_URI'] = '/catalog/books/history+math/32';

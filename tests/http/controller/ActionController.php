@@ -17,36 +17,20 @@ class ActionController extends \renovant\core\http\controller\ActionController {
 		$Res->setView('bar');
 	}
 
-	/**
-	 * @param \renovant\core\http\Request $Req
-	 * @param \renovant\core\http\Response $Res
-	 * @param integer $id
-	 */
-	function action2(Request $Req, Response $Res, $id) {
+	function action2(Request $Req, Response $Res, int $id) {
 		$Res->set('id', $id)
 			->setView('id-'.$id);
 	}
 
-	/**
-	 * @param \renovant\core\http\Request $Req
-	 * @param \renovant\core\http\Response $Res
-	 * @param string $name
-	 */
-	function action3(Request $Req, Response $Res, $name='Tom') {
+	function action3(Request $Req, Response $Res, string $name='Tom') {
 		$Res->set('name', $name)
 			->setView('view3');
 	}
 
 	/**
 	 * @routing(pattern="<day:\d{1,2}>/<month>/<year>/details-<format>")
-	 * @param \renovant\core\http\Request $Req
-	 * @param \renovant\core\http\Response $Res
-	 * @param integer $year
-	 * @param integer $month
-	 * @param integer $day
-	 * @param string $format
 	 */
-	function details(Request $Req, Response $Res, $year, $month, $day, $format) {
+	function details(Request $Req, Response $Res, int $year, int $month, int $day, string $format) {
 		$Res->set([
 			'year' => $year,
 			'month' => $month,
