@@ -27,7 +27,6 @@ class DocComment {
 
 	/**
 	 * Returns the description which has been previously parsed
-	 * @return string The description which has been parsed
 	 */
 	function getDescription(): string {
 		return $this->description;
@@ -35,7 +34,6 @@ class DocComment {
 
 	/**
 	 * Returns all tags which have been previously parsed
-	 * @return array Array of tag names and their (multiple) values
 	 */
 	function getAllTags(): array {
 		return $this->tags;
@@ -58,8 +56,6 @@ class DocComment {
 
 	/**
 	 * Returns the values of the specified tag.
-	 * @param string $tagName The tag name to retrieve the values for
-	 * @return array The tag's values
 	 * @throws \Exception
 	 */
 	function getTagValues(string $tagName): array {
@@ -76,10 +72,8 @@ class DocComment {
 
 	/**
 	 * Parses a line of a doc comment for a tag and its value.
-	 * @param string $line A line of a doc comment which starts with an @-sign
-	 * @return void
 	 */
-	protected function parseTag(string $line) {
+	protected function parseTag(string $line): void {
 		list($tag, $value) = preg_split('/[\s\(]/', $line.' ', 2);
 		$tag = substr($tag, 1);
 		if (empty($value)) {

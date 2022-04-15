@@ -62,7 +62,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 				} elseif (isset($param['type'])) {
 					switch($param['type']) {
 						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
-						case 'integer': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
+						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
 						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
 						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
 						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null: $v;

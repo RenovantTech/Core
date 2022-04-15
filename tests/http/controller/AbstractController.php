@@ -7,13 +7,8 @@ class AbstractController extends \renovant\core\http\controller\AbstractControll
 
 	/**
 	 * @routing <categ>/<tags>/<id>
-	 * @param \renovant\core\http\Request $Req
-	 * @param \renovant\core\http\Response $Res
-	 * @param string $categ
-	 * @param string $tags
-	 * @param integer $id
 	 */
-	function doHandle(Request $Req, Response $Res, $categ, $tags, $id=1) {
+	function doHandle(Request $Req, Response $Res, string $categ, string $tags, int $id=1) {
 		$Res->set([
 			'categ' => $categ,
 			'tags' => $tags,

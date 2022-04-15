@@ -11,13 +11,11 @@ class ReflectionClass extends \ReflectionClass {
 	 * Replacement for the original getMethods() method which makes sure
 	 * that org\renovant\util\reflection\ReflectionMethod objects are returned instead of the
 	 * original ReflectionMethod instances.
-	 * @param integer $filter A filter mask
-	 * @return ReflectionMethod[] Method reflection objects of the methods in this class
 	 * @throws \ReflectionException
 	 */
-	function getMethods($filter = NULL) {
+	function getMethods(?int $filter = NULL): array {
 		$extendedMethods = [];
-		$methods = ($filter === NULL ? parent::getMethods() : parent::getMethods($filter));
+		$methods = parent::getMethods($filter);
 		foreach ($methods as $method) {
 			$extendedMethods[] = new ReflectionMethod($this->getName(), $method->getName());
 		}
@@ -28,11 +26,9 @@ class ReflectionClass extends \ReflectionClass {
 	 * Replacement for the original getMethod() method which makes sure
 	 * that renovant\core\util\reflection\ReflectionMethod objects are returned instead of the
 	 * original ReflectionMethod instances.
-	 * @param string $name
-	 * @return ReflectionMethod Method reflection object of the named method
 	 * @throws \ReflectionException
 	 */
-	function getMethod($name) {
+	function getMethod(string $name): ReflectionMethod {
 		$parentMethod = parent::getMethod($name);
 		return new ReflectionMethod($this->getName(), $parentMethod->getName());
 	}
@@ -41,13 +37,11 @@ class ReflectionClass extends \ReflectionClass {
 	 * Replacement for the original getProperties() method which makes sure
 	 * that org\renovant\util\reflection\ReflectionProperty objects are returned instead of the
 	 * original ReflectionProperty instances.
-	 * @param integer $filter A filter mask
-	 * @return ReflectionProperty[] Property reflection objects of the properties in this class
 	 * @throws \ReflectionException
 	 */
-	function getProperties($filter = NULL) {
+	function getProperties(?int $filter = NULL): array {
 		$extendedProperties = [];
-		$properties = ($filter === NULL ? parent::getProperties() : parent::getProperties($filter));
+		$properties = parent::getProperties($filter);
 		foreach ($properties as $property) {
 			$extendedProperties[] = new ReflectionProperty($this->getName(), $property->getName());
 		}
@@ -56,46 +50,38 @@ class ReflectionClass extends \ReflectionClass {
 
 	/**
 	 * Checks if the doc comment of this method is tagged with the specified tag
-	 * @param string $tagName Tag name to check for
-	 * @return boolean TRUE if such a tag has been defined, otherwise FALSE
 	 */
-	function hasTag($tagName) {
+	function hasTag(string $tagName): bool {
 		return $this->getDocComment()->hasTag($tagName);
 	}
 
 	/**
 	 * Returns an array of tags and their values
-	 * @return array Tags and values
 	 */
-	function getAllTags() {
+	function getAllTags(): array {
 		return $this->getDocComment()->getAllTags();
 	}
 
 	/**
 	 * Return tag values at specified index, can be NULL if not exists
-	 * @param $tagName
-	 * @param int $index index of tag values array
 	 * @return mixed|null
 	 */
-	function getTag($tagName, $index) {
+	function getTag(string$tagName, ?int $index=0) {
 		return $this->getDocComment()->getTag($tagName, $index);
 	}
 
 	/**
 	 * Returns the values of the specified tag
-	 * @param string $tagName Tag name to check for
-	 * @return array Values of the given tag
 	 * @throws \Exception
 	 */
-	function getTagValues($tagName) {
+	function getTagValues(string $tagName): array {
 		return $this->getDocComment()->getTagValues($tagName);
 	}
 
 	/**
 	 * Returns an instance of the DocComment
-	 * @return DocComment
 	 */
-	function getDocComment() {
+	function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());
 		}

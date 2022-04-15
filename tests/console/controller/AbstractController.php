@@ -5,12 +5,7 @@ use renovant\core\console\Request,
 
 class AbstractController extends \renovant\core\console\controller\AbstractController {
 
-	/**
-	 * @param Request $Req
-	 * @param Response $Res
-	 * @param string $name
-	 */
-	function doHandle(Request $Req, Response $Res, $name='Tom') {
+	function doHandle(Request $Req, Response $Res, string $name='Tom') {
 		$Res->set('name', $name)
 			->setView('view');
 	}

@@ -9,10 +9,10 @@ class ReflectionParameter extends \ReflectionParameter {
 
 	/**
 	 * Return Parameter type as defined in DocComment @param, if available
-	 * @return mixed Parameter type (boolean, string, array, object), FALSE if unavailable
+	 * @return string|bool Parameter type (boolean, string, array, object), FALSE if unavailable
 	 * @throws \ReflectionException
 	 */
-	function getType() {
+	function getDocType(): string|bool {
 		if($tag = $this->getDocComment()->getTag('param', $this->getPosition())) {
 			$exploded = explode(' ', $tag);
 			if (count($exploded) >= 2) return ltrim($exploded[0], '\\');
@@ -22,13 +22,12 @@ class ReflectionParameter extends \ReflectionParameter {
 
 	/**
 	 * Returns an instance of the DocComment
-	 * @return DocComment
 	 * @throws \ReflectionException
 	 */
-	function getDocComment() {
+	function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
-			$ReflMethod = new ReflectionMethod($this->getDeclaringClass()->getName(), $this->getDeclaringFunction()->getName());
-			$this->DocComment = $ReflMethod->getDocComment();
+			$RefMethod = new ReflectionMethod($this->getDeclaringClass()->getName(), $this->getDeclaringFunction()->getName());
+			$this->DocComment = $RefMethod->getDocComment();
 		}
 		return $this->DocComment;
 	}

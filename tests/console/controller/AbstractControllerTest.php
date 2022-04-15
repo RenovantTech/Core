@@ -16,6 +16,10 @@ class AbstractControllerTest extends \PHPUnit\Framework\TestCase {
 		$RefProp->setAccessible(true);
 		$_config = $RefProp->getValue($AbstractController);
 
+		$this->assertEquals('Req', $_config['params'][0]['name']);
+		$this->assertEquals(Request::class, $_config['params'][0]['class']);
+		$this->assertNull($_config['params'][0]['type']);
+
 		$this->assertEquals('name', $_config['params'][2]['name']);
 		$this->assertNull($_config['params'][2]['class']);
 		$this->assertEquals('string', $_config['params'][2]['type']);

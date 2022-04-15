@@ -49,8 +49,8 @@ class ActionControllerReflection {
 				// parameters
 				foreach($RefMethod->getParameters() as $i => $RefParam) {
 					$config[$action]['params'][$i]['name'] = $RefParam->getName();
-					$config[$action]['params'][$i]['class'] = !is_null($RefParam->getClass()) ? $RefParam->getClass()->getName() : null;
-					$config[$action]['params'][$i]['type'] = $RefParam->getType();
+					$config[$action]['params'][$i]['class'] = ($RefParam->getType() && !$RefParam->getType()->isBuiltin()) ? (new ReflectionClass($RefParam->getType()->getName()))->getName() : null;
+					$config[$action]['params'][$i]['type'] = ($RefParam->getType() && $RefParam->getType()->isBuiltin()) ? $RefParam->getType()->getName() : null;
 					$config[$action]['params'][$i]['optional'] = $RefParam->isOptional();
 					$config[$action]['params'][$i]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 				}

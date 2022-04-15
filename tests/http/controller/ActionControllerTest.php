@@ -15,25 +15,34 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_config = $RefProp->getValue($ActionController);
 		$this->assertCount(7, $_config);
 
+		// index()
 		$this->assertArrayHasKey('index', $_config);
 		$this->assertEquals('*', $_config['index']['method']);
 		$this->assertEquals('/^$/', $_config['index']['pattern']);
+		$this->assertEquals('Req', $_config['index']['params'][0]['name']);
+		$this->assertEquals(Request::class, $_config['index']['params'][0]['class']);
+		$this->assertNull($_config['index']['params'][0]['type']);
+		$this->assertFalse($_config['index']['params'][0]['optional']);
 
+		// foo()
 		$this->assertArrayHasKey('foo', $_config);
 		$this->assertEquals('*', $_config['foo']['method']);
 		$this->assertEquals('/^foo$/', $_config['foo']['pattern']);
 
+		// bar()
 		$this->assertArrayHasKey('bar', $_config);
 		$this->assertEquals('*', $_config['bar']['method']);
 		$this->assertEquals('/^bar$/', $_config['bar']['pattern']);
 
+		// action2()
 		$this->assertArrayHasKey('action2', $_config);
 		$this->assertEquals('id', $_config['action2']['params'][2]['name']);
 		$this->assertNull($_config['action2']['params'][2]['class']);
-		$this->assertEquals('integer', $_config['action2']['params'][2]['type']);
+		$this->assertEquals('int', $_config['action2']['params'][2]['type']);
 		$this->assertFalse($_config['action2']['params'][2]['optional']);
 		$this->assertNull($_config['action2']['params'][2]['default']);
 
+		// action3()
 		$this->assertArrayHasKey('action3', $_config);
 		$this->assertEquals('name', $_config['action3']['params'][2]['name']);
 		$this->assertNull($_config['action3']['params'][2]['class']);
@@ -48,6 +57,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param \test\http\controller\ActionController $ActionController
 	 * @return \test\http\controller\ActionController
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionMethod(\test\http\controller\ActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod('renovant\core\http\controller\ActionController', 'resolveActionMethod');
@@ -73,6 +83,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testResolveActionMethod
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionException() {
 		$this->expectExceptionCode(111);
@@ -90,8 +101,6 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testResolveActionMethod
 	 * @param \test\http\controller\ActionController $ActionController
-	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \renovant\core\http\Exception
 	 */
 	function testHandle(\test\http\controller\ActionController $ActionController) {
