@@ -17,16 +17,26 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$_config = $RefProp->getValue($ActionController);
 		$this->assertCount(6, $_config);
 
+		// index()
+		$this->assertArrayHasKey('index', $_config);
+		$this->assertEquals('Res', $_config['index']['params'][0]['name']);
+		$this->assertEquals(Response::class, $_config['index']['params'][0]['class']);
+		$this->assertNull($_config['index']['params'][0]['type']);
+		$this->assertFalse($_config['index']['params'][0]['optional']);
+
+		// bar()
 		$this->assertArrayHasKey('bar', $_config);
 		$this->assertCount(1, $_config['bar']['params']);
 
+		// action2()
 		$this->assertArrayHasKey('action2', $_config);
 		$this->assertEquals('id', $_config['action2']['params'][1]['name']);
 		$this->assertNull($_config['action2']['params'][1]['class']);
-		$this->assertEquals('integer', $_config['action2']['params'][1]['type']);
+		$this->assertEquals('int', $_config['action2']['params'][1]['type']);
 		$this->assertFalse($_config['action2']['params'][1]['optional']);
 		$this->assertNull($_config['action2']['params'][1]['default']);
 
+		// action3()
 		$this->assertArrayHasKey('action3', $_config);
 		$this->assertEquals('name', $_config['action3']['params'][1]['name']);
 		$this->assertNull($_config['action3']['params'][1]['class']);
@@ -41,6 +51,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param \test\console\controller\ActionController $ActionController
 	 * @return \test\console\controller\ActionController
+	 * @throws \ReflectionException
 	 */
 	function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
