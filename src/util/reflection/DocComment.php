@@ -13,7 +13,7 @@ class DocComment {
 	 * tags) in the object properties.
 	 * @param string $docComment A doc comment as returned by the reflection getDocComment() method
 	 */
-	function __construct($docComment) {
+	function __construct(string $docComment) {
 		$lines = explode(chr(10), $docComment);
 		foreach ($lines as $line) {
 			if (strlen($line) > 0 && strpos($line, '@') !== FALSE) {
@@ -27,65 +27,53 @@ class DocComment {
 
 	/**
 	 * Returns the description which has been previously parsed
-	 * @return string The description which has been parsed
 	 */
-	function getDescription() {
+	function getDescription(): string {
 		return $this->description;
 	}
 
 	/**
 	 * Returns all tags which have been previously parsed
-	 * @return array Array of tag names and their (multiple) values
 	 */
-	function getAllTags() {
+	function getAllTags(): array {
 		return $this->tags;
 	}
 
 	/**
 	 * Return number of tag values
-	 * @param string $tagName
-	 * @return int n° of tag values
 	 */
-	function countTag($tagName) {
+	function countTag(string $tagName): int {
 		return (isset($this->tags[$tagName])) ? count($this->tags[$tagName]) : 0;
 	}
 
 	/**
 	 * Return tag values at specified index, can be NULL if not exists
-	 * @param $tagName
-	 * @param int $index index of tag values array
 	 * @return mixed|null
 	 */
-	function getTag($tagName, $index=0) {
+	function getTag(string $tagName, int $index=0) {
 		return (isset($this->tags[$tagName][$index])) ? $this->tags[$tagName][$index] : null;
 	}
 
 	/**
 	 * Returns the values of the specified tag.
-	 * @param string $tagName The tag name to retrieve the values for
-	 * @return array The tag's values
 	 * @throws \Exception
 	 */
-	function getTagValues($tagName) {
+	function getTagValues(string $tagName): array {
 		if (!$this->hasTag($tagName)) throw new \Exception('Tag "' . $tagName . '" does not exist.', 1169128255);
 		return $this->tags[$tagName];
 	}
 
 	/**
 	 * Checks if a tag with the given name exists
-	 * @param string $tagName The tag name to check for
-	 * @return boolean TRUE the tag exists, otherwise FALSE
 	 */
-	function hasTag($tagName) {
+	function hasTag(string $tagName): bool {
 		return (isset($this->tags[$tagName]));
 	}
 
 	/**
 	 * Parses a line of a doc comment for a tag and its value.
-	 * @param string $line A line of a doc comment which starts with an @-sign
-	 * @return void
 	 */
-	protected function parseTag($line) {
+	protected function parseTag(string $line): void {
 		list($tag, $value) = preg_split('/[\s\(]/', $line.' ', 2);
 		$tag = substr($tag, 1);
 		if (empty($value)) {
