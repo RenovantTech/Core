@@ -137,6 +137,18 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @depends testConstruct
+	 * @throws \renovant\core\authz\AuthzException
+	 */
+	function testFetchAclConfig(AuthzManager $AuthzManager) {
+		$this->assertEquals([
+			'queryBase' => 'SELECT id, name FROM blogs',
+			'filterQuery' => 'name LIKE :q',
+			'filterValues' => 'id IN (:ids)'
+		], $AuthzManager->fetchAclConfig('blog:author'));
+	}
+
+	/**
+	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
 	 */
@@ -312,12 +324,12 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testFetchUserAcl(AuthzManager $AuthzManager) {
+	function testFetchUserAclData(AuthzManager $AuthzManager) {
 		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
-		$this->assertEquals([123,456], $AuthzManager->fetchUserAcl('blog.author', 1));
+		$this->assertEquals([123,456], $AuthzManager->fetchUserAclData('blog.author', 1));
 
 		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456,789]));
-		$this->assertEquals([123,456,789], $AuthzManager->fetchUserAcl('blog.author', 1));
+		$this->assertEquals([123,456,789], $AuthzManager->fetchUserAclData('blog.author', 1));
 	}
 
 	/**

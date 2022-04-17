@@ -16,6 +16,7 @@ class AuthzManager {
 	const SQL_DEF_RENAME = 'UPDATE %table% SET code = :code WHERE id = :id';
 
 	const SQL_FETCH_ID			= 'SELECT id FROM %table% WHERE type = :type AND code = :code';
+	const SQL_FETCH_CONFIG		= 'SELECT config FROM %table% WHERE type = :type AND code = :code';
 	const SQL_FETCH_ACL_DATA	= 'SELECT data FROM %table%_maps WHERE user_id = :user_id AND authz_id = :authz_id';
 
 	const SQL_SET_ROLE			= 'INSERT IGNORE INTO %table%_maps (type, user_id, authz_id) VALUES ("USER_ROLE", :user_id, :authz_id)';
@@ -81,7 +82,7 @@ class AuthzManager {
 	function defineAcl(string $acl, $description, $queryBase, $filterQuery, $filterValues): bool {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			return $this->_define(new Def(['type'=>Authz::TYPE_ACL, 'code'=>$acl, 'label'=>$description, 'config'=>serialize([
+			return $this->_define(new Def(['type'=>Authz::TYPE_ACL, 'code'=>$acl, 'label'=>$description, 'config'=>json_encode([
 				'queryBase' => $queryBase,
 				'filterQuery' => $filterQuery,
 				'filterValues' => $filterValues
@@ -99,6 +100,16 @@ class AuthzManager {
 			'config'=>$Def->config
 		])->rowCount();
 		else throw new AuthzException(500, [implode(', ',array_keys($errors))], $errors);
+	}
+
+	/** @throws AuthzException */
+	function fetchAclConfig(string $code): array {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$config = $this->pdo(self::SQL_FETCH_CONFIG)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$code])->fetchColumn())
+				throw new AuthzException(501, [Authz::TYPE_ACL, $code]);
+			return (array) json_decode($config);
+		} finally { sys::traceFn($prevTraceFn); }
 	}
 
 	/** @throws AuthzException */
@@ -181,6 +192,14 @@ class AuthzManager {
 		$data[] = $item;
 		$data = array_unique($data, SORT_NUMERIC);
 		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
+	}
+
+	/** @throws AuthzException */
+	function fetchUserAclData(string $acl, int $userId): array {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+			throw new AuthzException(623, [$acl]);
+		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
+		return ($data) ? (array)json_decode($data) : [];
 	}
 
 	/** @throws AuthzException */
