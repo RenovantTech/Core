@@ -7,7 +7,7 @@ INSERT INTO sys_users (id, name) VALUES
 	(5, 'Dick Blue')
 ;
 
-INSERT INTO sys_authz (id, type, code, query) VALUES
+INSERT INTO sys_authz (id, type, code, config) VALUES
 	(1,	'ROLE',			'role.service',		NULL),
 	(2,	'ROLE',			'role.service.foo',	NULL),
 	(3,	'ROLE',			'role.service.bar',	NULL),

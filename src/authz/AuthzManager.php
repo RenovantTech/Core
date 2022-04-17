@@ -11,14 +11,12 @@ class AuthzManager {
 
 	const CACHE_PREFIX	= 'sys.authz.';
 
-	const SQL_DEF_INSERT = 'INSERT INTO %s (type, code, label, query) VALUES (:type, :code, :label, :query)';
-	const SQL_DEF_UPDATE = 'UPDATE `%s` SET type = :type, code = :code, label = :label, query = :query WHERE id = :id';
-	const SQL_DEF_DELETE = 'DELETE FROM `%s` WHERE id = :id';
+	const SQL_DEF_INSERT = 'INSERT INTO %table% (type, code, label, config) VALUES (:type, :code, :label, :config) ON DUPLICATE KEY UPDATE label = :label, config = :config';
+	const SQL_DEF_DELETE = 'DELETE FROM %table% WHERE id = :id';
+	const SQL_DEF_RENAME = 'UPDATE %table% SET code = :code WHERE id = :id';
 
-	const SQL_FETCH_ROLE_ID			= 'SELECT id FROM %table% WHERE type = "ROLE" AND code = :code';
-	const SQL_FETCH_PERMISSION_ID	= 'SELECT id FROM %table% WHERE type = "PERMISSION" AND code = :code';
-	const SQL_FETCH_ACL_ID			= 'SELECT id FROM %table% WHERE type = "ACL" AND code = :code';
-	const SQL_FETCH_ACL_DATA		= 'SELECT data FROM %table%_maps WHERE user_id = :user_id AND authz_id = :authz_id';
+	const SQL_FETCH_ID			= 'SELECT id FROM %table% WHERE type = :type AND code = :code';
+	const SQL_FETCH_ACL_DATA	= 'SELECT data FROM %table%_maps WHERE user_id = :user_id AND authz_id = :authz_id';
 
 	const SQL_SET_ROLE			= 'INSERT IGNORE INTO %table%_maps (type, user_id, authz_id) VALUES ("USER_ROLE", :user_id, :authz_id)';
 	const SQL_SET_PERMISSION	= 'INSERT IGNORE INTO %table%_maps (type, user_id, authz_id) VALUES ("USER_PERMISSION", :user_id, :authz_id)';
@@ -63,93 +61,120 @@ class AuthzManager {
 		}
 	}
 
-	/**
-	 * @throws \ReflectionException|AuthzException
-	 */
-	function createDef(array $data): bool {
+	/** @throws \ReflectionException|AuthzException */
+	function defineRole(string $role, $description): bool {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			$Def = new Def($data);
+			return $this->_define(new Def(['type' => Authz::TYPE_ROLE, 'code' => $role, 'label' => $description]));
+		} finally { sys::traceFn($prevTraceFn); }
+	}
+
+	/** @throws \ReflectionException|AuthzException */
+	function definePermission(string $permission, $description): bool {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			return $this->_define(new Def(['type'=>Authz::TYPE_PERMISSION, 'code'=>$permission, 'label'=>$description]));
+		} finally { sys::traceFn($prevTraceFn); }
+	}
+
+	/** @throws \ReflectionException|AuthzException */
+	function defineAcl(string $acl, $description, $queryBase, $filterQuery, $filterValues): bool {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			return $this->_define(new Def(['type'=>Authz::TYPE_ACL, 'code'=>$acl, 'label'=>$description, 'config'=>serialize([
+				'queryBase' => $queryBase,
+				'filterQuery' => $filterQuery,
+				'filterValues' => $filterValues
+			]) ]));
+		} finally { sys::traceFn($prevTraceFn); }
+	}
+
+	/** @throws \ReflectionException|AuthzException */
+	protected function _define(Def $Def): bool {
+		$errors = Validator::validate($Def);
+		if(empty($errors)) return (bool) $this->pdo(self::SQL_DEF_INSERT)->execute([
+			'type'=>$Def->type,
+			'code'=>$Def->code,
+			'label'=>$Def->label,
+			'config'=>$Def->config
+		])->rowCount();
+		else throw new AuthzException(500, [implode(', ',array_keys($errors))], $errors);
+	}
+
+	/** @throws AuthzException */
+	function delete(string $type, string $code): bool {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>$type, 'code'=>$code])->fetchColumn())
+				throw new AuthzException(501, [$type, $code]);
+			return (bool) $this->pdo(self::SQL_DEF_DELETE)->execute(['id'=>$authzId])->rowCount();
+		} finally { sys::traceFn($prevTraceFn); }
+	}
+
+	/** @throws \ReflectionException|AuthzException */
+	function rename(string $type, string $code, $newCode): bool {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>$type, 'code'=>$code])->fetchColumn())
+				throw new AuthzException(502, [$type, $code]);
+			$Def = new Def(['type'=>$type, 'code'=>$newCode]);
 			$errors = Validator::validate($Def);
-			if(empty($errors)) return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DEF_INSERT, $this->tables['authz']))
-				->execute([ 'type'=>$Def->type, 'code'=>$Def->code, 'label'=>$Def->label, 'query'=>$Def->query ])->rowCount();
+			if(empty($errors)) return (bool) $this->pdo(self::SQL_DEF_RENAME)->execute(['id'=>$authzId, 'code'=>$newCode])->rowCount();
 			else throw new AuthzException(500, [implode(', ',array_keys($errors))], $errors);
-		} finally {
-			sys::traceFn($prevTraceFn);
-		}
-	}
-
-	/**
-	 * @throws \ReflectionException|AuthzException
-	 */
-	function updateDef(array $data): bool {
-		$prevTraceFn = sys::traceFn($this->_);
-		try {
-			$Def = new Def($data);
-			$errors = Validator::validate($Def);
-			if(empty($errors)) return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DEF_UPDATE, $this->tables['authz']))
-				->execute([ 'id'=>$Def->id, 'type'=>$Def->type, 'code'=>$Def->code, 'label'=>$Def->label, 'query'=>$Def->query ])->rowCount();
-			else throw new AuthzException(500, [implode(', ',array_keys($errors))], $errors);
-		} finally {
-			sys::traceFn($prevTraceFn);
-		}
-	}
-
-	function deleteDef(int $id): bool {
-		$prevTraceFn = sys::traceFn($this->_);
-		try {
-			return (bool) sys::pdo($this->pdo)->prepare(sprintf(self::SQL_DEF_DELETE, $this->tables['authz']))
-				->execute([ 'id'=>$id ])->rowCount();
-		} finally {
-			sys::traceFn($prevTraceFn);
-		}
-	}
-
-	/** @throws AuthzException */
-	function setRole(string $role, int $userId): bool {
-		$prevTraceFn = sys::traceFn($this->_);
-		try {
-			return $this->updateRBAC($role, $userId, 611, self::SQL_FETCH_ROLE_ID, self::SQL_SET_ROLE);
 		} finally { sys::traceFn($prevTraceFn); }
 	}
 
 	/** @throws AuthzException */
-	function revokeRole(string $role, int $userId): bool {
+	function setUserRole(string $role, int $userId): bool {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			return $this->updateRBAC($role, $userId, 621, self::SQL_FETCH_ROLE_ID, self::SQL_REVOKE_ROLE);
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ROLE, 'code'=>$role])->fetchColumn())
+				throw new AuthzException(611, [$role]);
+			return (bool) $this->pdo(self::SQL_SET_ROLE)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
 		} finally { sys::traceFn($prevTraceFn); }
 	}
 
 	/** @throws AuthzException */
-	function setPermission(string $permission, int $userId): bool {
+	function revokeUserRole(string $role, int $userId): bool {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			return $this->updateRBAC($permission, $userId, 612, self::SQL_FETCH_PERMISSION_ID, self::SQL_SET_PERMISSION);
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ROLE, 'code'=>$role])->fetchColumn())
+				throw new AuthzException(631, [$role]);
+			return (bool) $this->pdo(self::SQL_REVOKE_ROLE)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
 		} finally { sys::traceFn($prevTraceFn); }
-
 	}
 
 	/** @throws AuthzException */
-	function revokePermission(string $permission, int $userId): bool {
+	function setUserPermission(string $permission, int $userId): bool {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
-			return $this->updateRBAC($permission, $userId, 622, self::SQL_FETCH_PERMISSION_ID, self::SQL_REVOKE_PERMISSION);
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_PERMISSION, 'code'=>$permission])->fetchColumn())
+				throw new AuthzException(612, [$permission]);
+			return (bool) $this->pdo(self::SQL_SET_PERMISSION)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
 		} finally { sys::traceFn($prevTraceFn); }
-
 	}
 
 	/** @throws AuthzException */
-	function setAcl(string $acl, int $userId, array $items): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
+	function revokeUserPermission(string $permission, int $userId): bool {
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_PERMISSION, 'code'=>$permission])->fetchColumn())
+				throw new AuthzException(632, [$permission]);
+			return (bool) $this->pdo(self::SQL_REVOKE_PERMISSION)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
+		} finally { sys::traceFn($prevTraceFn); }
+	}
+
+	/** @throws AuthzException */
+	function setUserAcl(string $acl, int $userId, array $items): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
 			throw new AuthzException(613, [$acl]);
 		$items = array_unique($items, SORT_NUMERIC);
 		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($items)])->rowCount();
 	}
 
 	/** @throws AuthzException */
-	function setAclItem(string $acl, int $userId, int|string $item): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
+	function setUserAclItem(string $acl, int $userId, int|string $item): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
 			throw new AuthzException(613, [$acl]);
 		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
 		$data = ($data) ? (array)json_decode($data) : [];
@@ -159,16 +184,16 @@ class AuthzManager {
 	}
 
 	/** @throws AuthzException */
-	function revokeAcl(string $acl, int $userId): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
-			throw new AuthzException(623, [$acl]);
+	function revokeUserAcl(string $acl, int $userId): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+			throw new AuthzException(633, [$acl]);
 		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
 	}
 
 	/** @throws AuthzException */
-	function revokeAclItem(string $acl, int $userId, int|string $item): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ACL_ID)->execute(['code'=>$acl])->fetchColumn())
-			throw new AuthzException(623, [$acl]);
+	function revokeUserAclItem(string $acl, int $userId, int|string $item): bool {
+		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+			throw new AuthzException(633, [$acl]);
 		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
 		$data = ($data) ? (array)json_decode($data) : [];
 		$data = array_diff($data, [$item]);
@@ -179,14 +204,7 @@ class AuthzManager {
 			return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
 	}
 
-	/** @throws AuthzException */
-	protected function updateRBAC($code, $userId, $exCode, $sqlFetch, $sqlUpdate) {
-		if(!$authzId = $this->pdo($sqlFetch)->execute(['code'=>$code])->fetchColumn())
-			throw new AuthzException($exCode, [$code]);
-		return (bool) $this->pdo($sqlUpdate)->execute([ 'authz_id'=>$authzId, 'user_id'=>$userId ])->rowCount();
-
-	}
-	protected function pdo($sql): \PDOStatement {
+	protected function pdo($sql): PDOStatement {
 		return sys::pdo($this->pdo)->prepare(str_replace('%table%', $this->tables['authz'], $sql));
 	}
 }

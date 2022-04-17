@@ -2,6 +2,10 @@
 namespace renovant\core\authz;
 class Authz {
 
+	const TYPE_ROLE			= 'ROLE';
+	const TYPE_PERMISSION	= 'PERMISSION';
+	const TYPE_ACL			= 'ACL';
+
 	/** singleton instance */
 	static private $_Authz;
 

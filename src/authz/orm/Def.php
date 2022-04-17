@@ -11,13 +11,13 @@ class Def {
 	/** @validate(minLength=0) */
 	public string $label = '';
 	/** @validate(minLength=0, null) */
-	public ?string $query = null;
+	public ?string $config = null;
 
 	function __construct(array $data) {
 		$this->id = (int) ($data['id'] ?? 0);
 		$this->type = $data['type'];
 		$this->code = $data['code'];
 		$this->label = $data['label'] ?? '';
-		$this->query = $data['query'] ?? null;
+		$this->config = $data['config'] ?? null;
 	}
 }

@@ -71,30 +71,20 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function testCreateDef(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->createDef([
-			'type' => 'ROLE',
-			'code' => 'admin',
-			'label' => 'Admin',
-			'query' => null
-		]));
+	function testDefineRole(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->defineRole('admin', 'Admin'));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testCreateDefException(AuthzManager $AuthzManager) {
+	function testDefineRoleException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(500);
 		$this->expectExceptionMessage('VALIDATION error: code');
 
-		$AuthzManager->createDef([
-			'type' => 'ROLE',
-			'code' => 'admin foo',
-			'label' => 'Admin',
-			'query' => null
-		]);
+		$this->assertTrue($AuthzManager->defineRole('admin foo', 'Admin'));
 	}
 
 	/**
@@ -102,48 +92,87 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function testUpdateDef(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->updateDef([
-			'id' => 8,
-			'type' => 'ROLE',
-			'code' => 'admin',
-			'label' => 'Administrator',
-			'query' => null
-		]));
+	function testDefinePermission(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->definePermission('reboot', 'lorem ipsum'));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testUpdateDefException(AuthzManager $AuthzManager) {
+	function testDefinePermissionException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(500);
 		$this->expectExceptionMessage('VALIDATION error: code');
 
-		$AuthzManager->updateDef([
-			'id' => 8,
-			'type' => 'ROLE',
-			'code' => 'admin foo',
-			'label' => 'Administrator',
-			'query' => null
-		]);
+		$this->assertTrue($AuthzManager->definePermission('can write', 'lorem ipsum'));
 	}
 
 	/**
 	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function testDeleteDef(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->deleteDef(8));
+	function testDefineAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->defineAcl(
+			'blog:author',
+			'lorem ipsum',
+			'SELECT id, name FROM blogs',
+			'name LIKE :q',
+			'id IN (:ids)'
+		));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testDefineAclException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(500);
+		$this->expectExceptionMessage('VALIDATION error: code');
+
+		$this->assertTrue($AuthzManager->defineAcl('blog author', 'lorem ipsum', '', '', ''));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 */
+	function testRename(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->rename('ROLE', 'ADMIN', 'ADMIN-2'));
+		$this->assertTrue($AuthzManager->rename('ROLE', 'ADMIN-2', 'ADMIN'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws \ReflectionException
+	 */
+	function testRenameException(AuthzManager $AuthzManager) {
+		$this->expectException(AuthzException::class);
+		$this->expectExceptionCode(502);
+		$this->expectExceptionMessage('[RENAME] ROLE "XXXX" NOT DEFINED');
+
+		$this->assertTrue($AuthzManager->rename('ROLE', 'XXXX', 'XXXXX-2'));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException|\ReflectionException
+	 */
+	function testDelete(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->defineRole('new-role', 'new role'));
+		$this->assertTrue($AuthzManager->delete('ROLE', 'new-role'));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testSetRole(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->setRole('ADMIN', 1));
-		$this->assertFalse($AuthzManager->setRole('ADMIN', 1));
+	function testSetUserRole(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setUserRole('ADMIN', 1));
+		$this->assertFalse($AuthzManager->setUserRole('ADMIN', 1));
 
 		self::authenticate(1);
 		$this->assertTrue(sys::authz()->role('ADMIN'));
@@ -152,20 +181,20 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testSetRoleException(AuthzManager $AuthzManager) {
+	function testSetUserRoleException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(611);
 		$this->expectExceptionMessage('[SET] role "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->setRole('XXXXXXX', 1));
+		$this->assertTrue($AuthzManager->setUserRole('XXXXXXX', 1));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testRevokeRole(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->revokeRole('ADMIN', 1));
-		$this->assertFalse($AuthzManager->revokeRole('ADMIN', 1));
+	function testRevokeUserRole(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokeUserRole('ADMIN', 1));
+		$this->assertFalse($AuthzManager->revokeUserRole('ADMIN', 1));
 
 		self::authenticate(1);
 		$this->assertFalse(sys::authz()->role('ADMIN'));
@@ -174,20 +203,20 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testRevokeRoleException(AuthzManager $AuthzManager) {
+	function testRevokeUserRoleException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(621);
+		$this->expectExceptionCode(631);
 		$this->expectExceptionMessage('[REVOKE] role "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->revokeRole('XXXXXXX', 1));
+		$this->assertTrue($AuthzManager->revokeUserRole('XXXXXXX', 1));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testSetPermission(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->setPermission('blog.edit', 1));
-		$this->assertFalse($AuthzManager->setPermission('blog.edit', 1));
+	function testSetUserPermission(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setUserPermission('blog.edit', 1));
+		$this->assertFalse($AuthzManager->setUserPermission('blog.edit', 1));
 
 		self::authenticate(1);
 		$this->assertTrue(sys::authz()->permissions('blog.edit'));
@@ -196,20 +225,20 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testSetPermissionException(AuthzManager $AuthzManager) {
+	function testSetUserPermissionException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(612);
 		$this->expectExceptionMessage('[SET] permission "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->setPermission('XXXXXXX', 1));
+		$this->assertTrue($AuthzManager->setUserPermission('XXXXXXX', 1));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testRevokePermission(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->revokePermission('blog.edit', 1));
-		$this->assertFalse($AuthzManager->revokePermission('blog.edit', 1));
+	function testRevokeUserPermission(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokeUserPermission('blog.edit', 1));
+		$this->assertFalse($AuthzManager->revokeUserPermission('blog.edit', 1));
 
 		self::authenticate(1);
 		$this->assertFalse(sys::authz()->permissions('blog.edit'));
@@ -218,25 +247,25 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testRevokePermissionException(AuthzManager $AuthzManager) {
+	function testRevokeUserPermissionException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(622);
+		$this->expectExceptionCode(632);
 		$this->expectExceptionMessage('[REVOKE] permission "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->revokePermission('XXXXXXX', 1));
+		$this->assertTrue($AuthzManager->revokeUserPermission('XXXXXXX', 1));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testSetAcl(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->setAcl('blog.author', 1, [123,456]));
-		$this->assertFalse($AuthzManager->setAcl('blog.author', 1, [123,456]));
+	function testSetUserAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
+		$this->assertFalse($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
 		self::authenticate(1);
 		$this->assertTrue(sys::authz()->acl('blog.author', 123));
 		$this->assertTrue(sys::authz()->acl('blog.author', 456));
 
-		$this->assertTrue($AuthzManager->setAcl('blog.author', 1, [123,456,789]));
+		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456,789]));
 		self::authenticate(1);
 		$this->assertTrue(sys::authz()->acl('blog.author', 123));
 		$this->assertTrue(sys::authz()->acl('blog.author', 456));
@@ -246,24 +275,24 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testSetAclException(AuthzManager $AuthzManager) {
+	function testSetUserAclException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(613);
 		$this->expectExceptionMessage('[SET] acl "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->setAcl('XXXXXXX', 1, [123,234]));
+		$this->assertTrue($AuthzManager->setUserAcl('XXXXXXX', 1, [123,234]));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testSetAclItem(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->setAclItem('blog.author', 2, 123));
-		$this->assertFalse($AuthzManager->setAclItem('blog.author', 2, 123));
+	function testSetUserAclItem(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setUserAclItem('blog.author', 2, 123));
+		$this->assertFalse($AuthzManager->setUserAclItem('blog.author', 2, 123));
 		self::authenticate(2);
 		$this->assertTrue(sys::authz()->acl('blog.author', 123));
 
-		$this->assertTrue($AuthzManager->setAclItem('blog.author', 2, 456));
+		$this->assertTrue($AuthzManager->setUserAclItem('blog.author', 2, 456));
 		self::authenticate(2);
 		$this->assertTrue(sys::authz()->acl('blog.author', 123));
 		$this->assertTrue(sys::authz()->acl('blog.author', 456));
@@ -272,25 +301,37 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testSetAclItemException(AuthzManager $AuthzManager) {
+	function testSetUserAclItemException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(613);
 		$this->expectExceptionMessage('[SET] acl "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->setAclItem('XXXXXXX', 1, 123));
+		$this->assertTrue($AuthzManager->setUserAclItem('XXXXXXX', 1, 123));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testRevokeAcl(AuthzManager $AuthzManager) {
-		$this->assertTrue($AuthzManager->revokeAcl('blog.author', 1));
-		$this->assertFalse($AuthzManager->revokeAcl('blog.author', 1));
+	function testFetchUserAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
+		$this->assertEquals([123,456], $AuthzManager->fetchUserAcl('blog.author', 1));
+
+		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456,789]));
+		$this->assertEquals([123,456,789], $AuthzManager->fetchUserAcl('blog.author', 1));
+	}
+
+	/**
+	 * @depends testConstruct
+	 * @throws AuthzException
+	 */
+	function testRevokeUserAcl(AuthzManager $AuthzManager) {
+		$this->assertTrue($AuthzManager->revokeUserAcl('blog.author', 1));
+		$this->assertFalse($AuthzManager->revokeUserAcl('blog.author', 1));
 		self::authenticate(1);
 		$this->assertFalse(sys::authz()->acl('blog.author', 123));
 		$this->assertFalse(sys::authz()->acl('blog.author', 456));
 
-		$this->assertTrue($AuthzManager->revokeAcl('blog.author', 2));
+		$this->assertTrue($AuthzManager->revokeUserAcl('blog.author', 2));
 		self::authenticate(2);
 		$this->assertFalse(sys::authz()->acl('blog.author', 123));
 		$this->assertFalse(sys::authz()->acl('blog.author', 456));
@@ -299,26 +340,26 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testRevokeAclException(AuthzManager $AuthzManager) {
+	function testRevokeUserAclException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(623);
+		$this->expectExceptionCode(633);
 		$this->expectExceptionMessage('[REVOKE] acl "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->revokeAcl('XXXXXXX', 1));
+		$this->assertTrue($AuthzManager->revokeUserAcl('XXXXXXX', 1));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws AuthzException
 	 */
-	function testRevokeAclItem(AuthzManager $AuthzManager) {
-		$AuthzManager->setAcl('blog.author', 1, [123,456,789]);
-		$this->assertTrue($AuthzManager->revokeAclItem('blog.author', 1, 123));
-		$this->assertFalse($AuthzManager->revokeAclItem('blog.author', 1, 123));
+	function testRevokeUserAclItem(AuthzManager $AuthzManager) {
+		$AuthzManager->setUserAcl('blog.author', 1, [123,456,789]);
+		$this->assertTrue($AuthzManager->revokeUserAclItem('blog.author', 1, 123));
+		$this->assertFalse($AuthzManager->revokeUserAclItem('blog.author', 1, 123));
 		self::authenticate(1);
 		$this->assertFalse(sys::authz()->acl('blog.author', 123));
 		$this->assertTrue(sys::authz()->acl('blog.author', 456));
 
-		$this->assertTrue($AuthzManager->revokeAclItem('blog.author', 1, 456));
+		$this->assertTrue($AuthzManager->revokeUserAclItem('blog.author', 1, 456));
 		self::authenticate(1);
 		$this->assertFalse(sys::authz()->acl('blog.author', 123));
 		$this->assertFalse(sys::authz()->acl('blog.author', 456));
@@ -327,10 +368,10 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testRevokeAclItemException(AuthzManager $AuthzManager) {
+	function testRevokeUserAclItemException(AuthzManager $AuthzManager) {
 		$this->expectException(AuthzException::class);
-		$this->expectExceptionCode(623);
+		$this->expectExceptionCode(633);
 		$this->expectExceptionMessage('[REVOKE] acl "XXXXXXX" NOT DEFINED');
-		$this->assertTrue($AuthzManager->revokeAclItem('XXXXXXX', 1, 123));
+		$this->assertTrue($AuthzManager->revokeUserAclItem('XXXXXXX', 1, 123));
 	}
 }

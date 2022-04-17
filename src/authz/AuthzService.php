@@ -8,7 +8,7 @@ class AuthzService {
 
 	const CACHE_PREFIX	= 'sys.authz.';
 
-	const SQL_FETCH_AUTHZ = 'SELECT id, type, code, query FROM %s WHERE id IN (%s)';
+	const SQL_FETCH_AUTHZ = 'SELECT id, type, code, config FROM %s WHERE id IN (%s)';
 	const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, data FROM %s_maps WHERE user_id = :user_id';
 
 	/** Cache ID */
@@ -72,14 +72,14 @@ class AuthzService {
 							->execute()->fetchAll(\PDO::FETCH_ASSOC);
 						foreach ($authzArray as $authz) {
 							switch ($authz['type']) {
-								case 'ACL':
+								case Authz::TYPE_ROLE: $roles[] = $authz['code']; break;
+								case Authz::TYPE_PERMISSION: $permissions[] = $authz['code']; break;
+								case Authz::TYPE_ACL:
 									$data = array_values(array_filter($mapsArray, function ($map) use ($authz) {
 										return ($map['authz_id'] == $authz['id']);
 									}, ARRAY_FILTER_USE_BOTH))[0]['data'];
 									$acl[$authz['code']] = (array)json_decode($data);
 									break;
-								case 'ROLE': $roles[] = $authz['code']; break;
-								case 'PERMISSION': $permissions[] = $authz['code']; break;
 							}
 						}
 					}

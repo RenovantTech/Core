@@ -6,7 +6,7 @@ INSERT INTO sys_users (id, name) VALUES
 	(4, 'Brian Special User')
 ;
 
-INSERT INTO sys_authz (id, type, code, query) VALUES
+INSERT INTO sys_authz (id, type, code, config) VALUES
 	(1, 'ROLE', 		'ADMIN',		NULL),
 	(2, 'ROLE', 		'STAFF',		NULL),
 	(3, 'ROLE', 		'USER',			NULL),
