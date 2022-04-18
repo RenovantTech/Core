@@ -3,6 +3,7 @@ namespace renovant\core\http;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\auth\AuthException,
+	renovant\core\authz\AuthzException,
 	renovant\core\http\view\FileView,
 	renovant\core\http\view\CsvView,
 	renovant\core\http\view\ExcelView,
@@ -57,7 +58,6 @@ class Dispatcher {
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
 			if (!sys::event(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
-				defined('SYS_ACL_ROUTING') and sys::acl()->onRoute($Req, sys::auth()->UID());
 				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
@@ -79,6 +79,10 @@ class Dispatcher {
 			$DispatcherEvent->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			http_response_code(401);
+		} catch (AuthzException $Ex) {
+			$DispatcherEvent->setException($Ex);
+			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
+			http_response_code(403);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
 			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);

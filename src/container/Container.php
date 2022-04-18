@@ -2,7 +2,8 @@
 namespace renovant\core\container;
 use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_DEPINJ;
-use renovant\core\sys;
+use renovant\core\sys,
+	renovant\core\util\reflection\ReflectionObject;
 class Container {
 	use \renovant\core\CoreTrait;
 	const ACL_SKIP = true;
@@ -41,10 +42,13 @@ class Container {
 	function build(string $id, string $class, array $args=[], array $properties=[]) {
 		$RClass = new \ReflectionClass($class);
 		$Obj = $RClass->newInstanceWithoutConstructor();
-		$RObj = new \ReflectionObject($Obj);
-		self::setProperty('_', $id, $Obj, $RObj);
+		$RObj = new ReflectionObject($Obj);
+		$RObj->setProperty('_', $id, $Obj);
+
+		if(method_exists($class, '_authz')) \renovant\core\authz\Parser::parse($Obj);
+
 		foreach ($properties as $k=>$v)
-			self::setProperty($k, $v, $Obj, $RObj);
+			$RObj->setProperty($k, $v, $Obj);
 		if($RConstructor = $RClass->getConstructor())
 			$RConstructor->invokeArgs($Obj, $args);
 		return $Obj;
@@ -139,21 +143,5 @@ class Container {
 	 */
 	function has(string $id, ?string $class=null) {
 		return isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) );
-	}
-
-	/**
-	 * Set Object property using reflection
-	 * @param string $k property name
-	 * @param mixed $v property value
-	 * @param object $Obj
-	 * @param \ReflectionObject $RObject
-	 */
-	static protected function setProperty(string $k, $v, object $Obj, \ReflectionObject $RObject) {
-		if($RObject->hasProperty($k)) {
-			$RProperty = $RObject->getProperty($k);
-			$RProperty->setAccessible(true);
-			$RProperty->setValue($Obj, $v);
-			$RProperty->setAccessible(false);
-		}
 	}
 }

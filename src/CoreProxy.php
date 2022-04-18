@@ -39,7 +39,8 @@ class CoreProxy {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache(SYS_CACHE)->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
 			}
-			defined('SYS_ACL_SERVICES') and !defined(get_class($this->Obj).'::ACL_SKIP') and sys::acl()->onObject($this->_, $method, sys::auth()->UID());
+			// AUTHZ check
+			method_exists($this->Obj, '_authz') and ($this->Obj)->_authz($method, $args);
 			if($this->Obj instanceof Repository) sys::trace(LOG_DEBUG, T_INFO, $this->_.'->'.$method, null, $prevTraceFn);
 			else sys::trace();
 			return call_user_func_array([$this->Obj, $method], $args);

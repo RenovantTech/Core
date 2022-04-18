@@ -3,9 +3,9 @@ namespace renovant\core;
 use renovant\core\cache\ArrayCache;
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\{T_AUTOLOAD, T_DB, T_INFO};
-use renovant\core\acl\ACL,
-	renovant\core\auth\Auth,
+use renovant\core\auth\Auth,
 	renovant\core\auth\AuthException,
+	renovant\core\authz\Authz,
 	renovant\core\console\CmdManager,
 	renovant\core\console\Event as ConsoleEvent,
 	renovant\core\container\Container,
@@ -109,8 +109,8 @@ class sys {
 	/** sys services
 	 * @var array */
 	protected $cnfServices = [
-		'acl'			=> 'sys.ACL',
 		'auth'			=> 'sys.AUTH',
+		'authz'			=> 'sys.AUTHZ',
 		'cmd'			=> 'sys.CmdManager'
 	];
 
@@ -284,21 +284,17 @@ class sys {
 	}
 
 	/**
-	 * ACL helper
-	 * @throws ContextException
-	 * @throws EventDispatcherException|\ReflectionException
-	 */
-	static function acl(): ACL {
-		static $ACL;
-		if(!$ACL) $ACL = self::$Context->get(self::$Sys->cnfServices['acl'], ACL::class);
-		return $ACL;
-	}
-
-	/**
 	 * AUTH helper
 	 */
 	static function auth(): Auth {
 		return Auth::instance();
+	}
+
+	/**
+	 * AUTHZ helper
+	 */
+	static function authz(): Authz {
+		return Authz::instance();
 	}
 
 	/**
@@ -415,7 +411,7 @@ class sys {
 	 * PDO helper
 	 * @param string|null $id database ID, default "master"
 	 */
-	static function pdo(?string $id): PDO {
+	static function pdo(?string $id=null): PDO {
 		if(is_null($id)) $id = self::PDO_DEFAULT;
 		if(!isset(self::$pdo[$id])) {
 			$traceFn = self::traceFn(__METHOD__);

@@ -8,18 +8,18 @@
 			<directory>log/writer</directory>
 			<directory>log</directory>
 		</testsuite>
-		<testsuite name="acl">
-			<directory>acl</directory>
-		</testsuite>
-		<testsuite name="auth">
-			<directory>auth/provider</directory>
-			<directory>auth</directory>
-		</testsuite>
 		<testsuite name="container">
 			<directory>container</directory>
 		</testsuite>
 		<testsuite name="context">
 			<directory>context</directory>
+		</testsuite>
+		<testsuite name="authz">
+			<directory>authz</directory>
+		</testsuite>
+		<testsuite name="auth">
+			<directory>auth/provider</directory>
+			<directory>auth</directory>
 		</testsuite>
 		<testsuite name="db">
 			<file>db/ProcedureTest.php</file>

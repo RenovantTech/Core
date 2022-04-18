@@ -12,18 +12,19 @@ class ClassParser {
 	 * @param string $class Entity class
 	 * @return array
 	 * @throws \ReflectionException
+	 * @throws \Exception
 	 */
-	function parse($class) {
+	function parse(string $class) {
 		$metadata = [
 			'properties' => [],
 			'null' => [],
 			'empty' => []
 		];
-		$ReflClass = new ReflectionClass($class);
+		$RefClass = new ReflectionClass($class);
 		// properties constraints
-		foreach($ReflClass->getProperties() as $ReflProperty) {
-			$prop = $ReflProperty->getName();
-			$DocComment = $ReflProperty->getDocComment();
+		foreach($RefClass->getProperties() as $RefProperty) {
+			$prop = $RefProperty->getName();
+			$DocComment = $RefProperty->getDocComment();
 			if($DocComment->hasTag('validate')) {
 				$metadata['properties'][$prop] = [];
 				$values = $DocComment->getTagValues('validate');

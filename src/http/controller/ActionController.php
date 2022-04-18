@@ -63,6 +63,8 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 		}
 		$prevTraceFn = sys::traceFn($this->_.'->'.$action);
 		try {
+			// AUTHZ check
+			method_exists($this, '_authz') and $this->_authz($action, $args);
 			sys::trace(LOG_DEBUG, T_INFO);
 			call_user_func_array([$this, $action], $args);
 			$this->postHandle($Req, $Res);

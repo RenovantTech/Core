@@ -1,9 +1,8 @@
 <?php
 namespace test\db\orm;
 use renovant\core\sys,
-	renovant\core\acl\ACL,
 	renovant\core\db\orm\Repository,
-	test\acl\ACLTest;
+	test\authz\AuthzServiceTest;
 
 class Repository2Test extends \PHPUnit\Framework\TestCase {
 
@@ -19,15 +18,14 @@ class Repository2Test extends \PHPUnit\Framework\TestCase {
 				PRIMARY KEY(code, year)
 			) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 		');
-		ACLTest::setUpBeforeClass();
-		new ACL(['ORM'], 'mysql');
+		AuthzServiceTest::setUpBeforeClass();
 	}
 
 	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS `stats`;
 		');
-		ACLTest::tearDownAfterClass();
+		AuthzServiceTest::tearDownAfterClass();
 	}
 
 	protected function setUp():void {

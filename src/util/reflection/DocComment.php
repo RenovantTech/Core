@@ -1,7 +1,8 @@
 <?php
 namespace renovant\core\util\reflection;
-
 class DocComment {
+
+	const TAG_REGEX = '/(([\w\:\.-]+)="([^"]+)" | ([\w\:\.-]+)=(\w+) | ([\w\:\.-]+))/x';
 
 	/** @var string The description as found in the doc comment */
 	protected $description = '';
@@ -9,8 +10,7 @@ class DocComment {
 	protected $tags = [];
 
 	/**
-	 * Parses the given doc comment and saves the result (description and
-	 * tags) in the object properties.
+	 * Parses the given doc comment and saves the result (description and tags) in the object properties.
 	 * @param string $docComment A doc comment as returned by the reflection getDocComment() method
 	 */
 	function __construct(string $docComment) {
@@ -81,7 +81,7 @@ class DocComment {
 		} elseif(strpos($value, ')') === false) {
 			$this->tags[$tag][] = trim($value);
 		} else {
-			preg_match_all('/(([\w-]+)="([^"]+)" | ([\w-]+)=(\w+) | ([\w-]+))/x', $value, $matches, PREG_SET_ORDER);
+			preg_match_all(self::TAG_REGEX, $value, $matches, PREG_SET_ORDER);
 			$values = [];
 			foreach($matches as $match) {
 				switch(count($match)) {

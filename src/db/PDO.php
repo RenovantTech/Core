@@ -24,9 +24,8 @@ class PDO extends \PDO {
 		sys::trace($level, T_DB, sprintf('[%s] %s', $id, $msg), preg_replace('/(FROM|LEFT JOIN|RIGHT JOIN|JOIN|WHERE|SET|VALUES|ORDER BY)/', "\n$1", $statement));
 	}
 
-	/** database ID
-	 * @var string */
-	protected $_id;
+	/** database ID */
+	protected string $_id;
 
 	/**
 	 * @param string $dsn the Data Source Name, or DSN, contains the information required to connect to the database
@@ -36,7 +35,7 @@ class PDO extends \PDO {
 	 * @param string $id database ID, default "master"
 	 */
 	function __construct(string $dsn, ?string $username=null, ?string $password=null, ?array $options=null, string $id='master') {
-		$this->_id =$id;
+		$this->_id = $id;
 		$options = (array) $options + [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
 			\PDO::ATTR_STATEMENT_CLASS => [PDOStatement::class, [ $id ]]
@@ -50,47 +49,30 @@ class PDO extends \PDO {
 		}
 	}
 
-	/**
-	 * @see http://www.php.net/manual/en/pdo.begintransaction.php
-	 * @return boolean TRUE on success
-	 */
-	function beginTransaction() {
+	function beginTransaction(): bool {
 		sys::trace(LOG_INFO, T_DB, sprintf('[%s] beginTransaction()', $this->_id));
 		return parent::beginTransaction();
 	}
 
-	/**
-	 * @see http://www.php.net/manual/en/pdo.commit.php
-	 * @return boolean TRUE on success
-	 */
-	function commit() {
+	function commit(): bool {
 		sys::trace(LOG_INFO, T_DB, sprintf('[%s] commit()', $this->_id));
 		return parent::commit();
 	}
 
-	/**
-	 * @see http://www.php.net/manual/en/pdo.exec.php
-	 * @param string $statement the SQL statement to prepare and execute
-	 * @return int the number of rows that were modified or deleted by the SQL statement
-	 */
-	function exec(string $statement) {
+	function exec(string $statement): int {
 		$msg = (strlen($statement)>100) ? substr($statement,0,100).'...' : $statement;
 		sys::trace(LOG_INFO, T_DB, sprintf('[%s] %s', $this->_id, $msg), $statement);
 		return parent::exec($statement);
 	}
 
 	/**
-	 * @see http://www.php.net/manual/en/pdo.prepare.php
 	 * @throws \PDOException
 	 */
-	function prepare(string $query, array $options=[]) {
+	function prepare(string $query, array $options=[]): PDOStatement {
 		return parent::prepare($query, $options);
 	}
 
-	/**
-	 * @see http://www.php.net/manual/en/pdo.exec.php
-	 */
-	function query(string $query, ?int $fetchMode=null, mixed ...$fetchModeArgs) {
+	function query(string $query, ?int $fetchMode=null, mixed ...$fetchModeArgs): PDOStatement {
 		sys::trace(LOG_INFO, T_DB, sprintf('[%s] %s', $this->_id, $query));
 		$st = parent::query($query, $fetchMode);
 		if(func_num_args()>1) {
@@ -98,15 +80,10 @@ class PDO extends \PDO {
 			array_shift($array);
 			call_user_func_array([$st,'setFetchMode'], $array);
 		}
-		/** @var PDOStatement $st */
 		return $st;
 	}
 
-	/**
-	 * @see http://www.php.net/manual/en/pdo.rollback.php
-	 * @return boolean TRUE on success
-	 */
-	function rollBack() {
+	function rollBack(): bool {
 		sys::trace(LOG_INFO, T_DB, sprintf('[%s] rollBack()', $this->_id));
 		return parent::rollBack();
 	}
