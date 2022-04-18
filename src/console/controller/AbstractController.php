@@ -12,7 +12,6 @@ use renovant\core\sys,
  */
 abstract class AbstractController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** Controller handle method configuration
 	 * @var array */

@@ -6,7 +6,6 @@ use renovant\core\sys,
 	renovant\core\http\SessionException;
 class Manager {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	const EVENT_START	= 'http.session:start';
 	const EVENT_END		= 'http.session:end';

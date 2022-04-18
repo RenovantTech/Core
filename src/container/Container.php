@@ -6,7 +6,6 @@ use renovant\core\sys,
 	renovant\core\util\reflection\ReflectionObject;
 class Container {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;

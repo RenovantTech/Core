@@ -8,7 +8,6 @@ use renovant\core\sys,
 	renovant\core\util\str;
 abstract class ActionController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** Default action method to invoke. */
 	const DEFAULT_ACTION = 'index';

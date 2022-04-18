@@ -2,7 +2,6 @@
 namespace test\container;
 
 class Mock1  {
-	const ACL_SKIP = true;
 
 	protected $Child;
 

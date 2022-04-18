@@ -12,7 +12,6 @@ use renovant\core\sys,
 	renovant\core\event\EventYamlParser;
 class Context {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;

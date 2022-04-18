@@ -2,7 +2,6 @@
 namespace test;
 
 class GlobalMock  {
-	const ACL_SKIP = true;
 
 	protected $Child;
 
