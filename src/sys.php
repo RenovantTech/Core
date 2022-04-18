@@ -283,17 +283,13 @@ class sys {
 		trigger_error('FAILED loading '.$class, E_USER_ERROR);
 	}
 
-	/**
-	 * AUTH helper
-	 */
+	/** AUTH helper */
 	static function auth(): Auth {
 		return Auth::instance();
 	}
 
-	/**
-	 * AUTHZ helper
-	 */
-	static function authz(): Authz {
+	/** AUTHZ helper */
+	static function authz(): ?Authz {
 		return Authz::instance();
 	}
 
@@ -303,7 +299,7 @@ class sys {
 	 * @param string $id Cache ID, default "main"
 	 * @return cache\CacheInterface
 	 */
-	static function cache($id='main') {
+	static function cache(string $id='main') {
 		static $c = [];
 		if($id==SYS_CACHE) return self::$Cache;
 		try {

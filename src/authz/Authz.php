@@ -7,7 +7,7 @@ class Authz {
 	const TYPE_ACL			= 'ACL';
 
 	/** singleton instance */
-	static private $_Authz;
+	static private $_Authz = null;
 
 	/** AUTHZ ACL */
 	protected array $acl = [];
@@ -26,7 +26,7 @@ class Authz {
 		return self::$_Authz = new Authz($roles, $permissions, $acl);
 	}
 
-	static function instance(): Authz {
+	static function instance(): ?Authz {
 		return self::$_Authz;
 	}
 
