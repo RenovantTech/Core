@@ -56,7 +56,8 @@ class ObjAuthz {
 			if(isset($this->acls['_']) || isset($this->acls[$method]))
 				$this->checkAcls($Authz, $checked, $method, $args);
 
-			sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+			if(empty($checked)) sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
+			else sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
 		} catch (AuthzException $Ex) {
 			sys::trace(LOG_WARNING, T_INFO, '[AUTHZ] check FAILED');
 			throw $Ex;
