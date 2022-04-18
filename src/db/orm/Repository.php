@@ -26,12 +26,10 @@ class Repository {
 	const META_SQL				= 'SQL';
 	const META_VALIDATE_SUBSETS	= 'VALIDATE_SUBSETS';
 
-	/** Entity class
-	 * @var string */
-	protected $class;
-	/** PDO instance ID
-	 * @var string */
-	protected $pdo;
+	/** Entity class */
+	protected string $class;
+	/** PDO instance ID */
+	protected ?string $pdo;
 
 	protected $OrmEvent;
 
@@ -106,6 +104,9 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function delete(mixed $EntityOrKey, int|false|null $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		if(is_object($EntityOrKey)) {
@@ -133,6 +134,9 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|false Entity, false if not found
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function fetch(mixed $id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);

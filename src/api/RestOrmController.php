@@ -26,12 +26,7 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	protected $routes = [];
 
 	/**
-	 * CREATE action (HTTP POST)
 	 * @routing(method="POST", pattern="^<resource>$")
-	 * @param Request $Req
-	 * @param Response $Res
-	 * @param string $resource
-	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
@@ -60,17 +55,12 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	}
 
 	/**
-	 * DELETE action (HTTP DELETE)
 	 * @routing(method="DELETE", pattern="^<resource>/<id>$")
-	 * @param Response $Res
-	 * @param string $resource
-	 * @param mixed $id
-	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function delete(Response $Res, string $resource, $id, ?string $subset=null) {
+	function delete(Response $Res, string $resource, mixed $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
 		try {
@@ -85,17 +75,11 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	}
 
 	/**
-	 * READ action (HTTP GET)
 	 * @routing(method="GET", pattern="^<resource>$")
-	 * @param Response $Res
-	 * @param string $resource
-	 * @param string|null $criteriaExp
-	 * @param string|null $orderExp
-	 * @param int|null $page
-	 * @param int|null $pageSize
-	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \ReflectionException
+	 * @throws \Exception
 	 */
 	function fetchAll(Response $Res, string $resource, ?string $criteriaExp=null, ?string $orderExp=null, ?int $page=null, ?int $pageSize=null, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
@@ -112,17 +96,12 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	}
 
 	/**
-	 * READ action (HTTP GET)
 	 * @routing(method="GET", pattern="^<resource>/<id>$")
-	 * @param Response $Res
-	 * @param string $resource
-	 * @param mixed $id Entity id
-	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 */
-	function fetch(Response $Res, string $resource, $id, ?string $subset=null) {
+	function fetch(Response $Res, string $resource, mixed $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
 		try {
@@ -136,18 +115,12 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	}
 
 	/**
-	 * UPDATE action (HTTP PUT)
 	 * @routing(method="PUT", pattern="^<resource>/<id>$")
-	 * @param Request $Req
-	 * @param Response $Res
-	 * @param string $resource
-	 * @param mixed $id Entity id
-	 * @param string|null $subset
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws \Exception
 	 */
-	function update(Request $Req, Response $Res, string $resource, $id, ?string $subset=null) {
+	function update(Request $Req, Response $Res, string $resource, mixed $id, ?string $subset=null) {
 		$Repository = $this->getRepository($resource);
 		$data = (array) json_decode($Req->getRawData());
 		$id = (strpos($id,'+')>0) ? explode('+',$id) : $id;
@@ -173,12 +146,10 @@ class RestOrmController extends \renovant\core\http\controller\ActionController 
 	}
 
 	/**
-	 * @param string $resource mapped URL
-	 * @return \renovant\core\db\orm\Repository
 	 * @throws \renovant\core\context\ContextException
-	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \renovant\core\event\EventDispatcherException|\ReflectionException
 	 */
-	private function getRepository($resource) {
+	private function getRepository(string $resource) {
 		$repositoryID = $this->routes[$resource];
 		sys::trace(LOG_DEBUG, T_INFO, 'ORM Repository: '.$repositoryID);
 		/** @var \renovant\core\db\orm\Repository $Repository */
