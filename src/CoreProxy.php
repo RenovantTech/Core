@@ -1,22 +1,21 @@
 <?php
 namespace renovant\core;
-use renovant\core\db\orm\Repository;
 use const renovant\core\trace\T_INFO;
-use renovant\core\container\Container,
-	renovant\core\container\ContainerException;
+use renovant\core\authz\ObjAuthz,
+	renovant\core\authz\ObjAuthzInterface,
+	renovant\core\authz\ObjTagsParser,
+	renovant\core\container\Container,
+	renovant\core\db\orm\Repository;
 class CoreProxy {
 
-	/** Object OID
-	 * @var string */
-	protected $_;
-	/** Proxy-ed Object instance
-	 * @var Object */
-	protected $Obj = null;
+	/** Object OID */
+	protected string $_;
+	/** Proxy-ed Object instance */
+	protected ?object $Obj = null;
+	/** AUTHZ verifier  */
+	protected ?ObjAuthz $ObjAuthz;
 
-	/**
-	 * @param string $id proxy-ed object OID
-	 */
-	function __construct($id) {
+	function __construct(string $id) {
 		$this->_ = $id;
 	}
 
@@ -24,23 +23,25 @@ class CoreProxy {
 		return ['_'];
 	}
 
-	/**
-	 * @param $method
-	 * @param $args
-	 * @return mixed
-	 * @throws ContainerException
-	 * @throws \Exception
-	 */
-	function __call($method, $args) {
+	/** @throws \Exception */
+	function __call(string $method, mixed $args): mixed {
 		pcntl_signal_dispatch();
 		$prevTraceFn = sys::traceFn($this->_.'->'.$method);
 		try {
+			// Obj & AUTHZ initialize
 			if(!$this->Obj) {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache(SYS_CACHE)->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
+				if($this->Obj instanceof ObjAuthzInterface) {
+					if(!$ObjAuthz = sys::cache(SYS_CACHE)->get($this->_.ObjAuthz::CACHE_SUFFIX)) {
+						sys::cache(SYS_CACHE)->set($this->_.ObjAuthz::CACHE_SUFFIX, $ObjAuthz = ObjTagsParser::parse($this->Obj), 0, 'authz');
+					}
+					$this->ObjAuthz = $ObjAuthz;
+				}
 			}
 			// AUTHZ check
-			method_exists($this->Obj, '_authz') and ($this->Obj)->_authz($method, $args);
+			if($this->Obj instanceof ObjAuthzInterface) $this->ObjAuthz->check($method, $args);
+
 			if($this->Obj instanceof Repository) sys::trace(LOG_DEBUG, T_INFO, $this->_.'->'.$method, null, $prevTraceFn);
 			else sys::trace();
 			return call_user_func_array([$this->Obj, $method], $args);

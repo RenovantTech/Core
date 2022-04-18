@@ -6,7 +6,6 @@ use renovant\core\sys,
 	renovant\core\util\reflection\ReflectionObject;
 class Container {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	const FAILURE_EXCEPTION	= 1;
 	const FAILURE_SILENT	= 2;
@@ -31,22 +30,14 @@ class Container {
 
 	/**
 	 * Build an Object using reflection
-	 * @param string $id Object ID
-	 * @param string $class Object class
-	 * @param array|null $args constructor args
-	 * @param array $properties Object properties
-	 * @return object
 	 * @throws \ReflectionException
 	 * @internal
 	 */
-	function build(string $id, string $class, array $args=[], array $properties=[]) {
+	function build(string $id, string $class, array $args=[], array $properties=[]): object {
 		$RClass = new \ReflectionClass($class);
 		$Obj = $RClass->newInstanceWithoutConstructor();
 		$RObj = new ReflectionObject($Obj);
 		$RObj->setProperty('_', $id, $Obj);
-
-		if(method_exists($class, '_authz')) \renovant\core\authz\Parser::parse($Obj);
-
 		foreach ($properties as $k=>$v)
 			$RObj->setProperty($k, $v, $Obj);
 		if($RConstructor = $RClass->getConstructor())
@@ -56,11 +47,9 @@ class Container {
 
 	/**
 	 * Initialize namespace
-	 * @param string $namespace Container namespace
-	 * @param array|null $containerMaps
 	 * @throws ContainerException
 	 */
-	function init(string $namespace, array $containerMaps=null) {
+	function init(string $namespace, ?array $containerMaps=null): void {
 		if(in_array($namespace, $this->namespaces)) return;
 		//sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
 		$this->namespaces[] = $namespace;
@@ -72,14 +61,10 @@ class Container {
 
 	/**
 	 * Get an object
-	 * @param string $id object OID
-	 * @param string|null $class required object class
-	 * @param integer $failureMode failure mode when the object does not exist
-	 * @return object
 	 * @throws ContainerException
 	 * @throws \ReflectionException
 	 */
-	function get(string $id, ?string $class=null, int $failureMode=self::FAILURE_EXCEPTION) {
+	function get(string $id, ?string $class=null, int $failureMode=self::FAILURE_EXCEPTION): object|null {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $id, null, 'sys.Container->get');
 		if(isset($this->services[$id]) && (is_null($class) || $this->services[$id] instanceof $class)) return $this->services[$id];
 		try {
@@ -120,17 +105,15 @@ class Container {
 	 * @param string $class desired class/interface
 	 * @return array[string] services IDs (can be empty)
 	 */
-	function getListByType(string $class) {
+	function getListByType(string $class): array {
 		return $this->class2idMap[$class] ?: [];
 	}
 
 	/**
 	 * Get the class of a defined object.
-	 * @param string $id object OID
-	 * @return string object class
 	 * @throws ContainerException
 	 */
-	function getType(string $id) {
+	function getType(string $id): string {
 		if(isset($this->id2classMap[$id])) return $this->id2classMap[$id][0];
 		throw new ContainerException(1, [$this->_, $id]);
 	}
@@ -141,7 +124,7 @@ class Container {
 	 * @param string|null $class class/interface that object must extend/implement (optional)
 	 * @return bool
 	 */
-	function has(string $id, ?string $class=null) {
+	function has(string $id, ?string $class=null): bool {
 		return isset($this->id2classMap[$id]) && ( is_null($class) || (in_array($class,$this->id2classMap[$id])) );
 	}
 }

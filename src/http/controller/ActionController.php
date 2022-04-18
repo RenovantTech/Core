@@ -1,14 +1,16 @@
 <?php
 namespace renovant\core\http\controller;
+use const renovant\core\SYS_CACHE;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\auth\Auth,
+	renovant\core\authz\ObjAuthz,
+	renovant\core\authz\ObjAuthzInterface,
 	renovant\core\http\Request,
 	renovant\core\http\Response,
 	renovant\core\http\Exception;
 abstract class ActionController implements \renovant\core\http\ControllerInterface {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** Default action method to invoke. */
 	const DEFAULT_ACTION = 'index';
@@ -64,7 +66,8 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 		$prevTraceFn = sys::traceFn($this->_.'->'.$action);
 		try {
 			// AUTHZ check
-			method_exists($this, '_authz') and $this->_authz($action, $args);
+			if($this instanceof ObjAuthzInterface) sys::cache(SYS_CACHE)->get($this->_.ObjAuthz::CACHE_SUFFIX)->check($action, $args);
+
 			sys::trace(LOG_DEBUG, T_INFO);
 			call_user_func_array([$this, $action], $args);
 			$this->postHandle($Req, $Res);

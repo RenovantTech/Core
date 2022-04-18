@@ -13,7 +13,6 @@ use renovant\core\sys,
  */
 abstract class AbstractController implements \renovant\core\http\ControllerInterface {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** Controller handle method metadata (routing, params)
 	 * @var array */

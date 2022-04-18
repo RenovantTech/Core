@@ -7,7 +7,6 @@ use renovant\core\sys,
 	renovant\core\util\validator\Validator;
 class Repository {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** FETCH MODE as objects */
 	const FETCH_OBJ		= 1;

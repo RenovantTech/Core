@@ -2,13 +2,12 @@
 namespace test\authz;
 use const renovant\core\SYS_CACHE;
 use renovant\core\sys,
-	renovant\core\auth\AuthServiceJWT,
 	renovant\core\authz\Authz,
 	renovant\core\authz\AuthzException,
 	renovant\core\authz\AuthzService,
 	renovant\core\util\reflection\ReflectionClass;
 
-class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
+class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 
 	static $AuthService;
 	static $AuthzService;
@@ -27,7 +26,7 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 			'authz'	=> 'sys_authz',
 			'users'	=> 'sys_users'
 		]);
-		sys::pdo('mysql')->exec(file_get_contents(__DIR__ . '/AuthzTraitTest.sql'));
+		sys::pdo('mysql')->exec(file_get_contents(__DIR__ . '/ObjAuthzTest.sql'));
 	}
 
 	static function tearDownAfterClass():void {
@@ -58,16 +57,16 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @return AuthzTraitMockService
+	 * @return ObjAuthzMock
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testConstruct() {
-		/** @var AuthzTraitMockService $AuthzTraitMockService */
-		$AuthzTraitMockService = sys::context()->get('test.authz.AuthzTraitMockService');
-		$this->assertInstanceOf(\renovant\core\CoreProxy::class, $AuthzTraitMockService);
-		return $AuthzTraitMockService;
+		/** @var ObjAuthzMock $ObjAuthzMock */
+		$ObjAuthzMock = sys::context()->get('test.authz.ObjAuthzMock');
+		$this->assertInstanceOf(\renovant\core\CoreProxy::class, $ObjAuthzMock);
+		return $ObjAuthzMock;
 	}
 
 	/**
@@ -75,54 +74,56 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRole($AuthzTraitMockService) {
+	function testAuthzRole($ObjAuthzMock) {
 		self::authenticate(1);
-		$this->assertEquals('role', $AuthzTraitMockService->role());
+		$this->assertEquals(0, sys::authz()->verified());
+		$this->assertEquals('role', $ObjAuthzMock->role());
+		$this->assertEquals(1, sys::authz()->verified());
 
 		self::authenticate(3);
-		$this->assertEquals('roles-all', $AuthzTraitMockService->rolesAll());
+		$this->assertEquals('roles-all', $ObjAuthzMock->rolesAll());
 
 		self::authenticate(2);
-		$this->assertEquals('roles-any', $AuthzTraitMockService->rolesAny());
+		$this->assertEquals('roles-any', $ObjAuthzMock->rolesAny());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRoleException($AuthzTraitMockService) {
+	function testAuthzRoleException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(300);
 		$this->expectExceptionMessage('[ROLE] "role.service"');
 
 		self::authenticate(4);
-		$this->assertEquals('role', $AuthzTraitMockService->role());
+		$this->assertEquals('role', $ObjAuthzMock->role());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRolesAllException($AuthzTraitMockService) {
+	function testAuthzRolesAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
 
 		self::authenticate(2);
-		$this->assertEquals('roles-all', $AuthzTraitMockService->rolesAll());
+		$this->assertEquals('roles-all', $ObjAuthzMock->rolesAll());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRolesAnyException($AuthzTraitMockService) {
+	function testAuthzRolesAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo, role.service.bar"');
 
 		self::authenticate(5);
-		$this->assertEquals('roles-any', $AuthzTraitMockService->rolesAny());
+		$this->assertEquals('roles-any', $ObjAuthzMock->rolesAny());
 	}
 
 	/**
@@ -130,54 +131,54 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermission($AuthzTraitMockService) {
+	function testAuthzPermission($ObjAuthzMock) {
 		self::authenticate(1);
-		$this->assertEquals('permission', $AuthzTraitMockService->permission());
+		$this->assertEquals('permission', $ObjAuthzMock->permission());
 
 		self::authenticate(3);
-		$this->assertEquals('permissions-all', $AuthzTraitMockService->permissionsAll());
+		$this->assertEquals('permissions-all', $ObjAuthzMock->permissionsAll());
 
 		self::authenticate(2);
-		$this->assertEquals('permissions-any', $AuthzTraitMockService->permissionsAny());
+		$this->assertEquals('permissions-any', $ObjAuthzMock->permissionsAny());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionException($AuthzTraitMockService) {
+	function testAuthzPermissionException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
 
 		self::authenticate(5);
-		$this->assertEquals('permission', $AuthzTraitMockService->permission());
+		$this->assertEquals('permission', $ObjAuthzMock->permission());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionsAllException($AuthzTraitMockService) {
+	function testAuthzPermissionsAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
 
 		self::authenticate(2);
-		$this->assertEquals('permissions-all', $AuthzTraitMockService->permissionsAll());
+		$this->assertEquals('permissions-all', $ObjAuthzMock->permissionsAll());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionsAnyException($AuthzTraitMockService) {
+	function testAuthzPermissionsAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo, perm.service.bar"');
 
 		self::authenticate(5);
-		$this->assertEquals('permissions-any', $AuthzTraitMockService->permissionsAny());
+		$this->assertEquals('permissions-any', $ObjAuthzMock->permissionsAny());
 	}
 
 	/**
@@ -185,56 +186,56 @@ class AuthzTraitTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAcl($AuthzTraitMockService) {
+	function testAuthzAcl($ObjAuthzMock) {
 		self::authenticate(1);
-		$this->assertEquals('acl-12-34-123', $AuthzTraitMockService->acl(12, 34, 123));
-		$this->assertEquals('acl-12-34-456', $AuthzTraitMockService->acl(12, 34, 456));
+		$this->assertEquals('acl-12-34-123', $ObjAuthzMock->acl(12, 34, 123));
+		$this->assertEquals('acl-12-34-456', $ObjAuthzMock->acl(12, 34, 456));
 
 		self::authenticate(2);
-		$this->assertEquals('acl-all-A1-D1-123', $AuthzTraitMockService->aclAll('A1', 'D1', 123));
-		$this->assertEquals('acl-all-A2-D2-123', $AuthzTraitMockService->aclAll('A2', 'D2', 123));
+		$this->assertEquals('acl-all-A1-D1-123', $ObjAuthzMock->aclAll('A1', 'D1', 123));
+		$this->assertEquals('acl-all-A2-D2-123', $ObjAuthzMock->aclAll('A2', 'D2', 123));
 
 		self::authenticate(3);
-		$this->assertEquals('acl-any-A1-D9-123', $AuthzTraitMockService->aclAny('A1', 'D9', 123));
-		$this->assertEquals('acl-any-A2-D9-123', $AuthzTraitMockService->aclAny('A2', 'D9', 123));
+		$this->assertEquals('acl-any-A1-D9-123', $ObjAuthzMock->aclAny('A1', 'D9', 123));
+		$this->assertEquals('acl-any-A2-D9-123', $ObjAuthzMock->aclAny('A2', 'D9', 123));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclException($AuthzTraitMockService) {
+	function testAuthzAclException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.foo"');
 
 		self::authenticate(1);
-		$this->assertEquals('acl-12-34-789', $AuthzTraitMockService->acl(12, 34, 789));
+		$this->assertEquals('acl-12-34-789', $ObjAuthzMock->acl(12, 34, 789));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclAllException($AuthzTraitMockService) {
+	function testAuthzAclAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.district"');
 
 		self::authenticate(3);
-		$this->assertEquals('acl-all-A1-D9-123', $AuthzTraitMockService->aclAll('A1', 'D9', 123));
+		$this->assertEquals('acl-all-A1-D9-123', $ObjAuthzMock->aclAll('A1', 'D9', 123));
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclAnyException($AuthzTraitMockService) {
+	function testAuthzAclAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.area, acl.district"');
 
 		self::authenticate(1);
-		$this->assertEquals('acl-any-A1-D1-123', $AuthzTraitMockService->aclAny('A1', 'D1', 123));
+		$this->assertEquals('acl-any-A1-D1-123', $ObjAuthzMock->aclAny('A1', 'D1', 123));
 	}
 }

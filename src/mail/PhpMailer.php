@@ -14,7 +14,6 @@ use renovant\core\sys;
  */
 class PhpMailer {
 	use \renovant\core\CoreTrait;
-	const ACL_SKIP = true;
 
 	/** default transport type to be used */
 	const DEFAULT_TRANSPORT = 'smtp';

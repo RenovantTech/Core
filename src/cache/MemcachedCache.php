@@ -75,6 +75,36 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
+	function getMulti(array $keys) {
+		$data = [];
+		foreach ($keys as $i => $k) {
+			if(isset($this->cache[$k]))
+				$data[$i] = $this->cache[$k];
+		}
+		if(count($keys) == count($data)) {
+			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] ' . implode(',', $keys), null, $this->_);
+			return $data;
+		}
+		try {
+			if($this->Memcached) {
+				$data = $this->Memcached->getMulti($keys, \Memcached::GET_PRESERVE_ORDER);
+				if($data) {
+					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.implode(',', $keys), null, $this->_);
+					foreach ($keys as $i => $k) {
+						$this->cache[$k] = $data[$i]['v'];
+						$data[$i] =$data[$i]['v'];
+					}
+					return $data;
+				}
+			}
+			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.implode(',', $keys), null, $this->_);
+			return false;
+		} catch(\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[GET] '.implode(',', $keys).' FAILURE', null, $this->_);
+			return false;
+		}
+	}
+
 	function has($id) {
 		if(isset($this->cache[$id]))
 			return true;

@@ -48,6 +48,17 @@ class MemcachedCacheTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testSet
 	 * @param MemcachedCache $Cache
 	 */
+	function testGetMulti(MemcachedCache $Cache) {
+		$Cache->set('aaa', 'HelloWorld AAA');
+		$Cache->set('bbb', 'HelloWorld BBB');
+		$this->assertEquals(['HelloWorld AAA','HelloWorld BBB'], $Cache->getMulti(['aaa','bbb']));
+		$this->assertFalse($Cache->get('test2'));
+	}
+
+	/**
+	 * @depends testSet
+	 * @param MemcachedCache $Cache
+	 */
 	function testHas(MemcachedCache $Cache) {
 		$this->assertTrue($Cache->has('test1'));
 		$this->assertFalse($Cache->has('test2'));
