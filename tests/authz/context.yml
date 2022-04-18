@@ -1,7 +1,7 @@
 services:
 
-  test.authz.AuthzTraitMockService:
-    class: test\authz\AuthzTraitMockService
+  test.authz.ObjAuthzMock:
+    class: test\authz\ObjAuthzMock
 
-  test.authz.ParserMockService:
-    class: test\authz\ParserMockService
+  test.authz.ObjTagParserMock:
+    class: test\authz\ObjTagParserMock

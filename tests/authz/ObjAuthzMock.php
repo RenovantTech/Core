@@ -1,10 +1,11 @@
 <?php
 namespace test\authz;
+use renovant\core\authz\ObjAuthzInterface;
 /**
  * @authz-role(role.service)
  */
-class AuthzTraitMockService {
-	use \renovant\core\authz\AuthzTrait;
+class ObjAuthzMock implements ObjAuthzInterface {
+	use \renovant\core\CoreTrait;
 
 	/**
 	 * @authz-role(role.service.foo)
