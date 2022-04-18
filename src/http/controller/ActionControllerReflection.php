@@ -1,7 +1,8 @@
 <?php
 namespace renovant\core\http\controller;
 use renovant\core\http\Exception,
-	renovant\core\util\reflection\ReflectionClass;
+	renovant\core\util\reflection\ReflectionClass,
+	renovant\core\util\reflection\ReflectionMethod;
 /**
  * @internal
  */
@@ -18,11 +19,12 @@ class ActionControllerReflection {
 		$config = [];
 		$RefClass = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();
+		/** @var ReflectionMethod $RefMethod */
 		foreach($refMethods as $RefMethod) {
 			$methodName = $RefMethod->getName();
 			$methodClass = $RefMethod->getDeclaringClass()->getName();
 			// skip framework methods
-			if(fnmatch('renovant\core\*', $methodClass, FNM_NOESCAPE)) continue;
+			if(fnmatch('renovant\core\*', $methodClass, FNM_NOESCAPE) && !$RefMethod->getDocComment()->hasTag('routing')) continue;
 			// check signature of preHandle & postHandle hooks
 			if(in_array($methodName, ['preHandle','postHandle'])) {
 				if(!$RefMethod->isProtected()) throw new Exception(101, [$methodClass,$methodName]);
