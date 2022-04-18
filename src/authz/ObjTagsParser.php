@@ -1,6 +1,7 @@
 <?php
 namespace renovant\core\authz;
 use renovant\core\util\reflection\ReflectionClass,
+	renovant\core\util\reflection\ReflectionMethod,
 	renovant\core\util\reflection\ReflectionObject;
 /**
  * @internal
@@ -54,16 +55,22 @@ class ObjTagsParser {
 			}
 		}
 
-		// methods params
+		// ACL methods params
 		$methodsParams = null;
+		/** @var ReflectionMethod $RefMethod */
 		foreach($RefClass->getMethods() as $RefMethod) {
+			$DocComment = $RefMethod->getDocComment();
+			if(
+				!$DocComment->hasTag('authz-acl') &&
+				!$DocComment->hasTag('authz-acl-all') &&
+				!$DocComment->hasTag('authz-acl-any')
+			) continue;
 			$methodName = $RefMethod->getName();
 			foreach($RefMethod->getParameters() as $i => $RefParam) {
 				$parmaName = $RefParam->getName();
 				$methodsParams[$methodName][$parmaName]['index'] = $i;
 				$methodsParams[$methodName][$parmaName]['class'] = ($RefParam->getType() && !$RefParam->getType()->isBuiltin()) ? (new ReflectionClass($RefParam->getType()->getName()))->getName() : null;
 				$methodsParams[$methodName][$parmaName]['type'] = ($RefParam->getType() && $RefParam->getType()->isBuiltin()) ? $RefParam->getType()->getName() : null;
-				$methodsParams[$methodName][$parmaName]['default'] = $RefParam->isDefaultValueAvailable() ? $RefParam->getDefaultValue() : null;
 			}
 		}
 

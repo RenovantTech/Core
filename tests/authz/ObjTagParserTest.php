@@ -79,28 +79,24 @@ class ObjTagParserTest extends \PHPUnit\Framework\TestCase {
 				'region' => [
 					'index' => 0,
 					'class' => null,
-					'type' => 'string',
-					'default' => null
+					'type' => 'string'
 				],
 				'id' => [
 					'index' => 1,
 					'class' => null,
 					'type' => 'int',
-					'default' => null
 				]
 			],
 			'query' => [
 				'area' => [
 					'index' => 0,
 					'class' => null,
-					'type' => 'string',
-					'default' => null
+					'type' => 'string'
 				],
 				'district' => [
 					'index' => 1,
 					'class' => null,
-					'type' => 'string',
-					'default' => null
+					'type' => 'string'
 				]
 			]
 		], $RefProp->getValue($ObjAuthz));

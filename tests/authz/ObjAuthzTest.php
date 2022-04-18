@@ -76,7 +76,9 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testAuthzRole($ObjAuthzMock) {
 		self::authenticate(1);
+		$this->assertEquals(0, sys::authz()->verified());
 		$this->assertEquals('role', $ObjAuthzMock->role());
+		$this->assertEquals(1, sys::authz()->verified());
 
 		self::authenticate(3);
 		$this->assertEquals('roles-all', $ObjAuthzMock->rolesAll());
