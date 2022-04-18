@@ -33,8 +33,8 @@ class CoreProxy {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache(SYS_CACHE)->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
 				if($this->Obj instanceof ObjAuthzInterface) {
-					if(!$ObjAuthz = sys::cache(SYS_CACHE)->get($this->_.':authz')) {
-						sys::cache(SYS_CACHE)->set($this->_.':authz', $ObjAuthz = ObjTagsParser::parse($this->Obj));
+					if(!$ObjAuthz = sys::cache(SYS_CACHE)->get($this->_.ObjAuthz::CACHE_SUFFIX)) {
+						sys::cache(SYS_CACHE)->set($this->_.ObjAuthz::CACHE_SUFFIX, $ObjAuthz = ObjTagsParser::parse($this->Obj), 0, 'authz');
 					}
 					$this->ObjAuthz = $ObjAuthz;
 				}

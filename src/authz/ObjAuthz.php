@@ -5,6 +5,8 @@ use renovant\core\sys;
 
 class ObjAuthz {
 
+	const CACHE_SUFFIX = ':authz';
+
 	const OP_ONE = 1;
 	const OP_ALL = 2;
 	const OP_ANY = 3;
@@ -33,7 +35,7 @@ class ObjAuthz {
 
 	}
 
-	/** @throws AuthzException|\ReflectionException */
+	/** @throws AuthzException */
 	function check(string $method, $args): void {
 		$Authz = sys::authz();
 		$checked = [];
@@ -62,7 +64,7 @@ class ObjAuthz {
 	}
 
 	/** @throws AuthzException */
-	protected function checkRoles($Authz, &$checked, $method=null): void {
+	protected function checkRoles(Authz $Authz, array &$checked, ?string $method=null): void {
 		$exCode = $method ? 301 : 300;
 		$method = $method ?? '_';
 		switch ($this->op_roles[$method]) {
@@ -85,7 +87,7 @@ class ObjAuthz {
 	}
 
 	/** @throws AuthzException */
-	protected function checkPermissions($Authz, &$checked, $method=null): void {
+	protected function checkPermissions(Authz $Authz, array &$checked, ?string $method=null): void {
 		$exCode = $method ? 401 : 400;
 		$method = $method ?? '_';
 		switch ($this->op_perms[$method]) {
@@ -107,8 +109,8 @@ class ObjAuthz {
 		}
 	}
 
-	/** @throws AuthzException|\ReflectionException */
-	protected function checkAcls($Authz, &$checked, $methodName, $args): void {
+	/** @throws AuthzException */
+	protected function checkAcls(Authz $Authz, array &$checked, ?string $methodName, $args): void {
 		$exCode = $methodName ? 101 : 100;
 		$method = $methodName ?? '_';
 		switch ($this->op_acls[$method]) {
