@@ -1,6 +1,6 @@
 <?php
 namespace renovant\core\db\orm\util;
-use renovant\core\db\orm\Repository,
+use renovant\core\db\orm\EntityTrait,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
 /**
@@ -14,8 +14,9 @@ class DataMapper {
 	 */
 	static function object2array(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
-		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
-			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset), $k)===false) continue;
+		/** @var object|EntityTrait $Entity */
+		foreach($Entity::metadata()->properties() as $k=>$v) {
+			if($fetchSubset && !str_contains($Entity::metadata()->fetchSubset($fetchSubset), $k)) continue;
 			$data[$k] = $Entity->$k;
 		}
 		return $data;
@@ -26,8 +27,9 @@ class DataMapper {
 	 */
 	static function object2json(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
-		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
-			if($fetchSubset && strstr($Entity::metadata(Repository::META_FETCH_SUBSETS, $fetchSubset),$k)===false) continue;
+		/** @var object|EntityTrait $Entity */
+		foreach($Entity::metadata()->properties() as $k=>$v) {
+			if($fetchSubset && !str_contains($Entity::metadata()->fetchSubset($fetchSubset), $k)) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':
@@ -51,9 +53,10 @@ class DataMapper {
 	 */
 	static function object2sql(object $Entity, array $changes=[]): array {
 		$data = [];
-		foreach($Entity::metadata(Repository::META_PROPS) as $k=>$v) {
+		/** @var object|EntityTrait $Entity */
+		foreach($Entity::metadata()->properties() as $k=>$v) {
 			if($changes && !in_array($k, $changes)) continue;
-			if($Entity::metadata(Repository::META_PROPS)[$k]['readonly']) continue;
+			if($Entity::metadata()->property($k)['readonly']) continue;
 			switch($v['type']) {
 				case 'string':
 				case 'integer':
@@ -77,7 +80,7 @@ class DataMapper {
 	 * @throws \Exception
 	 */
 	static function sql2array(array $data, string $class): array {
-		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
+		$props = call_user_func($class.'::metadata')->properties();
 		foreach($data as $k=>&$v) {
 			if(!isset($props[$k])) continue;
 			if($props[$k]['null'] && is_null($v)) continue;
@@ -101,7 +104,7 @@ class DataMapper {
 	 * Inject SQL types into array data ready for JSON conversion, converting to proper PHP types.
 	 */
 	static function sql2json(array $data, string $class): array {
-		$props = call_user_func($class.'::metadata', Repository::META_PROPS);
+		$props = call_user_func($class.'::metadata')->properties();
 		foreach($data as $k=>&$v) {
 			if(!isset($props[$k])) continue;
 			if($props[$k]['null'] && is_null($v)) continue;

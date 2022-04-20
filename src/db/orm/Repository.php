@@ -15,16 +15,6 @@ class Repository {
 	/** FETCH MODE as array for JSON output (with data type mapping) */
 	const FETCH_JSON	= 3;
 
-	const META_CRITERIA			= 'CRITERIA';
-	const META_EVENTS			= 'EVENTS';
-	const META_FETCH_ORDERBY	= 'FETCH_ORDERBY';
-	const META_FETCH_SUBSETS	= 'FETCH_SUBSETS';
-	const META_PROPS			= 'PROPS';
-	const META_PKEYS			= 'PKEYS';
-	const META_PKCRITERIA		= 'PKCRITERIA';
-	const META_SQL				= 'SQL';
-	const META_VALIDATE_SUBSETS	= 'VALIDATE_SUBSETS';
-
 	/** Entity class */
 	protected string $class;
 	/** PDO instance ID */
@@ -111,7 +101,7 @@ class Repository {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
-			$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $EntityOrKey);
+			$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(0, null, $criteriaExp);
 		}
 		return $this->execDeleteOne($Entity, $fetchMode, $fetchSubset);
@@ -138,7 +128,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function fetch(mixed $id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
-		$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
+		$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($id);
 		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
@@ -337,6 +327,7 @@ class Repository {
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
+	 * @throws \Exception
 	 */
 	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -379,7 +370,7 @@ class Repository {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
 			if($id) {
-				$Entity->__construct(array_combine(call_user_func($this->class.'::metadata', self::META_PKEYS), (array)$id));
+				$Entity->__construct(array_combine(call_user_func($this->class.'::metadata')->pKeys(), (array)$id));
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
@@ -391,7 +382,7 @@ class Repository {
 			if(!QueryRunner::insert($this->pdo, $Entity))
 				$response = false;
 			elseif($fetchMode) {
-				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
+				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
 				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
@@ -411,7 +402,7 @@ class Repository {
 			if(is_object($data)) {
 				$Entity = $data;
 			} else {
-				$criteriaExp = call_user_func($this->class.'::metadata', self::META_PKCRITERIA, $id);
+				$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($id);
 				$Entity = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp);
 				$Entity($data);
 			}
@@ -427,12 +418,12 @@ class Repository {
 			// run UPDATE & build response
 			$response = false;
 			if(empty($changes)) {
-				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $Entity::metadata(self::META_SQL, 'target'), $Entity::metadata(self::META_PKCRITERIA, $Entity)));
+				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $Entity::metadata()->sql('target'), $Entity::metadata()->pkCriteria($Entity)));
 				$response = true;
 			} elseif(QueryRunner::update($this->pdo, $Entity, $changes))
 				$response = true;
 			if($response && $fetchMode) {
-				$criteriaExp = $Entity::metadata(self::META_PKCRITERIA, $Entity);
+				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
 				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			}
 			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
@@ -447,7 +438,7 @@ class Repository {
 	 * @throws \ReflectionException
 	 */
 	protected function doValidate(object $Entity, string|bool $validateMode) {
-		$validateSubset = (is_string($validateMode)) ? $Entity::metadata(self::META_VALIDATE_SUBSETS, $validateMode) : null;
+		$validateSubset = (is_string($validateMode)) ? $Entity::metadata()->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
 		$errorsByFn = $this->validate($Entity, $validateMode);
@@ -461,7 +452,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function triggerEvent(string $eventName, mixed $param=null) {
-		if($name = call_user_func($this->class.'::metadata', self::META_EVENTS, $eventName)) {
+		if($name = call_user_func($this->class.'::metadata')->event($eventName)) {
 			if(is_object($param)) $this->OrmEvent->setEntity($param);
 			elseif(is_array($param)) $this->OrmEvent->setEntities($param);
 			sys::event(is_string($name) ? $name : $eventName, $this->OrmEvent);
