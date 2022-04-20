@@ -120,6 +120,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testDelete(Repository $UsersRepository) {
 		// passing Entity
@@ -150,6 +153,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testDeleteAll(Repository $UsersRepository) {
 		$this->assertSame(2, $UsersRepository->deleteAll(null, null, 'age,EQ,21'));
@@ -167,6 +173,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testFetch(Repository $UsersRepository) {
 		// FETCH_OBJ
@@ -334,6 +343,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testToArray(Repository $UsersRepository) {
 		// no subset
@@ -353,6 +365,37 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 		// array of entities
 		$users = $UsersRepository->fetchAll(1, 20, 'name ASC', 'age,EQ,21');
 		$data = $UsersRepository->toArray($users);
+		$this->assertCount(2, $data);
+		$this->assertSame(1, $data[0]['id']);
+		$this->assertSame(3, $data[1]['id']);
+	}
+
+	/**
+	 * @depends testConstructor
+	 * @param Repository $UsersRepository
+	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
+	 */
+	function testToJson(Repository $UsersRepository) {
+		// no subset
+		$User = $UsersRepository->fetch(1);
+		$data = $UsersRepository->toJson($User);
+		$this->assertCount(10, $data);
+		$this->assertSame(1, $data['id']);
+		$this->assertSame('Albert', $data['name']);
+		$this->assertSame(6.5, $data['score']);
+
+		// with subset
+		$User = $UsersRepository->fetch(1, Repository::FETCH_OBJ, 'mini');
+		$data = $UsersRepository->toJson($User, 'mini');
+		$this->assertCount(3, $data);
+		$this->assertSame(['id','name','score'], array_keys($data));
+
+		// array of entities
+		$users = $UsersRepository->fetchAll(1, 20, 'name ASC', 'age,EQ,21');
+		$data = $UsersRepository->toJson($users);
 		$this->assertCount(2, $data);
 		$this->assertSame(1, $data[0]['id']);
 		$this->assertSame(3, $data[1]['id']);
@@ -401,6 +444,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testInsert(Repository $UsersRepository) {
 		$lastTime = new DateTime();
@@ -433,6 +479,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testInsertOne(Repository $UsersRepository) {
 		$lastTime = new DateTime();
@@ -517,6 +566,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testUpdate(Repository $UsersRepository) {
 		$User1 = $UsersRepository->fetch(1);
@@ -535,6 +587,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testUpdateEvents(Repository $UsersRepository) {
 		global $v;
@@ -562,6 +617,9 @@ class Repository1Test extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param Repository $UsersRepository
 	 * @throws Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function testUpdateOne(Repository $UsersRepository) {
 
