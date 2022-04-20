@@ -5,41 +5,40 @@ use renovant\core\sys,
 	renovant\core\db\orm\util\Metadata,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
-
 /**
  * Entity trait class must use to make ORM Repository work.
  */
 trait EntityTrait {
 
 	static protected array $_data;
-	static protected ?Metadata $_metadata = null;
+	static protected ?Metadata $Metadata = null;
 
 	/**
 	 * @internal
 	 */
 	static function changes(object $Obj): array {
 		$changes = [];
-		foreach (self::$_metadata->properties() as $k => $meta)
+		foreach (self::$Metadata->properties() as $k => $meta)
 			if(!$meta['readonly'] && $Obj->$k !== self::$_data[spl_object_id($Obj)][$k]) $changes[] = $k;
 		return $changes;
 	}
 
 	static function metadata(): Metadata {
-		if(!self::$_metadata) {
+		if(!self::$Metadata) {
 			$k = str_replace('\\','.',__CLASS__).':'.Metadata::CACHE_TAG;
 			if(!$data = sys::cache(SYS_CACHE)->get($k)) {
 				$data = new Metadata(__CLASS__);
 				sys::cache(SYS_CACHE)->set($k, $data, null, Metadata::CACHE_TAG);
 			}
-			self::$_metadata = $data;
+			self::$Metadata = $data;
 		}
-		return self::$_metadata;
+		return self::$Metadata;
 	}
 
 	function __construct(array $data=[]) {
 		$this->__invoke($data);
 		if(method_exists($this, 'onInit')) $this->onInit();
-		foreach (self::$_metadata->properties() as $k => $meta) {
+		foreach (self::$Metadata->properties() as $k => $meta) {
 			self::$_data[spl_object_id($this)][$k] = $this->$k;
 		}
 	}
@@ -54,7 +53,7 @@ trait EntityTrait {
 
 	function __invoke(array $data=[]) {
 		foreach($data as $k=>$v) {
-			$prop = self::$_metadata->property($k);
+			$prop = self::$Metadata->property($k);
 			if(!isset($prop)) {
 				trigger_error('Undefined ORM metadata for property "'.$k.'", must have tag @orm', E_USER_ERROR);
 			} elseif ($prop['null'] && (is_null($v) || $v==='')) {

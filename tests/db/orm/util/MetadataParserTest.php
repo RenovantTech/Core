@@ -1,9 +1,7 @@
 <?php
 namespace test\db\orm\util;
 use renovant\core\db\orm\OrmEvent,
-	renovant\core\db\orm\Repository,
-	renovant\core\db\orm\util\Metadata,
-	renovant\core\db\orm\util\MetadataParser;
+	renovant\core\db\orm\util\Metadata;
 
 class MetadataParserTest extends \PHPUnit\Framework\TestCase {
 
@@ -13,6 +11,9 @@ class MetadataParserTest extends \PHPUnit\Framework\TestCase {
 		// data sources
 		$this->assertEquals('users', $Metadata->sql('source'));
 		$this->assertEquals('users', $Metadata->sql('target'));
+		$this->assertNull($Metadata->sql('insertFn'));
+		$this->assertNull($Metadata->sql('updateFn'));
+		$this->assertNull($Metadata->sql('deleteFn'));
 
 		// primary keys
 		$pKeys = $Metadata->pKeys();

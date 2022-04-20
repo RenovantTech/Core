@@ -4,14 +4,11 @@ use renovant\core\db\orm\EntityTrait,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
 /**
- * ORM data hydrate helper
- * Helper class that hydrate/dehydrate Entity data.
+ * ORM data hydrate
+ * @internal
  */
 class DataMapper {
 
-	/**
-	 * Convert Entity from PHP object to data array.
-	 */
 	static function object2array(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
 		/** @var object|EntityTrait $Entity */
@@ -22,9 +19,6 @@ class DataMapper {
 		return $data;
 	}
 
-	/**
-	 * Convert Entity from PHP object to data array ready to JSON.
-	 */
 	static function object2json(object $Entity, ?string $fetchSubset=null): array {
 		$data = [];
 		/** @var object|EntityTrait $Entity */
@@ -48,9 +42,6 @@ class DataMapper {
 		return $data;
 	}
 
-	/**
-	 * Convert Entity from PHP object to proper SQL types array.
-	 */
 	static function object2sql(object $Entity, array $changes=[]): array {
 		$data = [];
 		/** @var object|EntityTrait $Entity */
@@ -76,7 +67,6 @@ class DataMapper {
 	}
 
 	/**
-	 * Inject SQL types into array data, converting to proper PHP types.
 	 * @throws \Exception
 	 */
 	static function sql2array(array $data, string $class): array {

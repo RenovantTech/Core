@@ -83,7 +83,7 @@ class Metadata {
 	}
 
 	function sql(string $conf): ?string {
-		return $this->sql[$conf];
+		return $this->sql[$conf] ?? null;
 	}
 
 	function validateSubset($subset): array {

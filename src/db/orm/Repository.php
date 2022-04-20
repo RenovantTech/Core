@@ -3,6 +3,7 @@ namespace renovant\core\db\orm;
 use const renovant\core\trace\T_DB;
 use renovant\core\sys,
 	renovant\core\db\orm\util\DataMapper,
+	renovant\core\db\orm\util\Metadata,
 	renovant\core\db\orm\util\QueryRunner,
 	renovant\core\util\validator\Validator;
 class Repository {
@@ -20,7 +21,11 @@ class Repository {
 	/** PDO instance ID */
 	protected ?string $pdo;
 
+	protected ?Metadata $Metadata = null;
+
 	protected $OrmEvent;
+
+	protected ?QueryRunner $QueryRunner = null;
 
 	/**
 	 * @param string $class Entity class
@@ -38,6 +43,8 @@ class Repository {
 
 	function __wakeup() {
 		class_exists($this->class);
+		$this->Metadata = call_user_func($this->class.'::metadata');
+		$this->QueryRunner = new QueryRunner($this->pdo, $this->Metadata);
 	}
 
 	/**
@@ -101,7 +108,7 @@ class Repository {
 		if(is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
-			$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($EntityOrKey);
+			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
 			$Entity = $this->execFetchOne(0, null, $criteriaExp);
 		}
 		return $this->execDeleteOne($Entity, $fetchMode, $fetchSubset);
@@ -128,7 +135,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function fetch(mixed $id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
-		$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($id);
+		$criteriaExp = $this->Metadata->pkCriteria($id);
 		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
@@ -260,7 +267,7 @@ class Repository {
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
 //			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'COUNT', sys::auth()->UID());
-			return QueryRunner::count($this->pdo, $this->class, $this->OrmEvent->getCriteriaExp());
+			return $this->QueryRunner->count($this->OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -282,16 +289,16 @@ class Repository {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
 //			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
-			if(!QueryRunner::deleteOne($this->pdo, $this->class, $Entity, $this->OrmEvent->getCriteriaExp()))
+			if(!$this->QueryRunner->deleteOne($Entity, $this->OrmEvent->getCriteriaExp()))
 				return false;
 			if(method_exists($Entity, 'onDelete')) $Entity->onDelete();
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE);
-			switch($fetchMode) {
-				case self::FETCH_OBJ: return $Entity;
-				case self::FETCH_ARRAY: return DataMapper::object2array($Entity, $fetchSubset);
-				case self::FETCH_JSON: return DataMapper::object2json($Entity, $fetchSubset);
-				default: return true;
-			}
+			return match ($fetchMode) {
+				self::FETCH_OBJ => $Entity,
+				self::FETCH_ARRAY => DataMapper::object2array($Entity, $fetchSubset),
+				self::FETCH_JSON => DataMapper::object2json($Entity, $fetchSubset),
+				default => true,
+			};
 		} catch(\PDOException $Ex) {
 			throw new Exception(400, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
@@ -314,7 +321,7 @@ class Repository {
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
 //			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
-			$n = QueryRunner::deleteAll($this->pdo, $this->class, $limit, $orderExp, $this->OrmEvent->getCriteriaExp());
+			$n = $this->QueryRunner->deleteAll($limit, $orderExp, $this->OrmEvent->getCriteriaExp());
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE_ALL);
 			return $n;
 		} catch(\PDOException $Ex) {
@@ -334,7 +341,7 @@ class Repository {
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
 //			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
-			if($Entity = QueryRunner::fetchOne($this->pdo, $this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if($Entity = $this->QueryRunner->fetchOne($this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH, $Entity);
 			}
 			return $Entity;
@@ -352,7 +359,7 @@ class Repository {
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
 //			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
-			if($entities = QueryRunner::fetchAll($this->pdo, $this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if($entities = $this->QueryRunner->fetchAll($this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH_ALL, $entities);
 			}
 			return $entities;
@@ -370,7 +377,7 @@ class Repository {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
 			if($id) {
-				$Entity->__construct(array_combine(call_user_func($this->class.'::metadata')->pKeys(), (array)$id));
+				$Entity->__construct(array_combine($this->Metadata->pKeys(), (array)$id));
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
@@ -379,11 +386,11 @@ class Repository {
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
 			// run INSERT & build response
-			if(!QueryRunner::insert($this->pdo, $Entity))
+			if(!$this->QueryRunner->insert($Entity))
 				$response = false;
 			elseif($fetchMode) {
 				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
-				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
 			if($response) $this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
@@ -402,8 +409,8 @@ class Repository {
 			if(is_object($data)) {
 				$Entity = $data;
 			} else {
-				$criteriaExp = call_user_func($this->class.'::metadata')->pkCriteria($id);
-				$Entity = QueryRunner::fetchOne($this->pdo, $this->class, 0, null, $criteriaExp);
+				$criteriaExp = $this->Metadata->pkCriteria($id);
+				$Entity = $this->QueryRunner->fetchOne($this->class, 0, null, $criteriaExp);
 				$Entity($data);
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
@@ -420,11 +427,11 @@ class Repository {
 			if(empty($changes)) {
 				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $Entity::metadata()->sql('target'), $Entity::metadata()->pkCriteria($Entity)));
 				$response = true;
-			} elseif(QueryRunner::update($this->pdo, $Entity, $changes))
+			} elseif($this->QueryRunner->update($Entity, $changes))
 				$response = true;
 			if($response && $fetchMode) {
 				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
-				$response = $Entity = QueryRunner::fetchOne($this->pdo, $this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			}
 			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
 			return $response;
@@ -452,7 +459,7 @@ class Repository {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function triggerEvent(string $eventName, mixed $param=null) {
-		if($name = call_user_func($this->class.'::metadata')->event($eventName)) {
+		if($name = $this->Metadata->event($eventName)) {
 			if(is_object($param)) $this->OrmEvent->setEntity($param);
 			elseif(is_array($param)) $this->OrmEvent->setEntities($param);
 			sys::event(is_string($name) ? $name : $eventName, $this->OrmEvent);
@@ -464,5 +471,5 @@ class_exists('renovant\core\db\PDOStatement');
 class_exists('renovant\core\db\Query');
 class_exists('renovant\core\db\orm\OrmEvent');
 class_exists('renovant\core\db\orm\util\DataMapper');
-class_exists('renovant\core\db\orm\util\DataMapper');
+class_exists('renovant\core\db\orm\util\Metadata');
 class_exists('renovant\core\db\orm\util\QueryRunner');
