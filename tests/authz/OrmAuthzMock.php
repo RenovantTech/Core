@@ -5,10 +5,10 @@ namespace test\authz;
  * @authz-role(admin)
  * @authz-permission(users:manage)
  * @authz-insert-permission(users:insert)
- * @authz-select-acl(schools="id")
+ * @authz-select-acl(schools="school_id")
  * @authz-update-roles-any(admin, manager)
  * @authz-update-permission(users:update)
- * @authz-delete-acl(schools="id")
+ * @authz-delete-acl(schools="school_id")
  *
  * @orm(source="classes")
  */

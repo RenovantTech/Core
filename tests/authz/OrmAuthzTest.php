@@ -73,9 +73,6 @@ class OrmAuthzTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testAuthzRole(Repository $OrmRepository) {
 		self::authenticate(1);
-
-		var_dump(sys::authz());
-
 		$OrmAuthzMock = $OrmRepository->fetch(1);
 		$this->assertInstanceOf('test\authz\OrmAuthzMock', $OrmAuthzMock);
 		$this->assertSame(1, $OrmAuthzMock->id);
