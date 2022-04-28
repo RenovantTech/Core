@@ -2,6 +2,7 @@
 namespace renovant\core\db\orm;
 use const renovant\core\SYS_CACHE;
 use renovant\core\sys,
+	renovant\core\authz\OrmAuthz,
 	renovant\core\db\orm\util\Metadata,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
@@ -11,11 +12,10 @@ use renovant\core\sys,
 trait EntityTrait {
 
 	static protected array $_data;
+	static protected ?OrmAuthz $Authz = null;
 	static protected ?Metadata $Metadata = null;
 
-	/**
-	 * @internal
-	 */
+	/** @internal */
 	static function changes(object $Obj): array {
 		$changes = [];
 		foreach (self::$Metadata->properties() as $k => $meta)
@@ -23,6 +23,20 @@ trait EntityTrait {
 		return $changes;
 	}
 
+	/** @internal */
+	static function authz(): OrmAuthz {
+		if(!self::$Authz) {
+			$k = str_replace('\\','.',__CLASS__).':'.OrmAuthz::CACHE_TAG;
+			if(!$data = sys::cache(SYS_CACHE)->get($k)) {
+				$data = new OrmAuthz(__CLASS__);
+				sys::cache(SYS_CACHE)->set($k, $data, null, OrmAuthz::CACHE_TAG);
+			}
+			self::$Authz = $data;
+		}
+		return self::$Authz;
+	}
+
+	/** @internal */
 	static function metadata(): Metadata {
 		if(!self::$Metadata) {
 			$k = str_replace('\\','.',__CLASS__).':'.Metadata::CACHE_TAG;
