@@ -44,6 +44,14 @@ class Authz {
 		}
 	}
 
+	function aclValues(string $acl): ?array {
+		if(isset($this->acl[$acl])) {
+			$this->verified = 1; return $this->acl[$acl];
+		} else {
+			$this->verified = 2; return null;
+		}
+	}
+
 	function role(string $role): bool {
 		if(in_array($role, $this->roles)) {
 			$this->verified = 1; return true;

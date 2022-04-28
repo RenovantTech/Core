@@ -5,3 +5,7 @@ services:
 
   test.authz.ObjTagParserMock:
     class: test\authz\ObjTagParserMock
+
+  test.authz.SchoolsRepository:
+    class: renovant\core\db\orm\Repository
+    constructor: [ 'test\authz\OrmAuthzMock', mysql ]
