@@ -421,15 +421,16 @@ class Repository {
 			$this->OrmEvent = (new OrmEvent($this));
 			if(is_object($data)) {
 				$Entity = $data;
+				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($Entity));
+				$this->OrmAuthz->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 			} else {
 				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($id));
-				$this->OrmAuthz->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
+				$this->OrmAuthz->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 				$Entity = $this->QueryRunner->fetchOne($this->class, 0, null, $this->OrmEvent->getCriteriaExp());
 				$Entity($data);
 			}
 			$this->OrmEvent->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_UPDATE);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 			// onSave callback
 			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// detect changes after onSave()
@@ -441,11 +442,13 @@ class Repository {
 			if(empty($changes)) {
 				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $this->Metadata->sql('target'), $this->Metadata->pkCriteria($Entity)));
 				$response = true;
-			} elseif($this->QueryRunner->update($Entity, $changes))
-				$response = true;
+			} else {
+				if($this->QueryRunner->update($Entity, $changes, $this->OrmEvent->getCriteriaExp()))
+					$response = true;
+			}
 			if($response && $fetchMode) {
-				$criteriaExp = $this->Metadata->pkCriteria($Entity);
-				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+//				$criteriaExp = $this->Metadata->pkCriteria($Entity);
+				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset);
 			}
 			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
 			return $response;

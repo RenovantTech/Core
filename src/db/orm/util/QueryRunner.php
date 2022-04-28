@@ -113,7 +113,7 @@ class QueryRunner {
 		}
 	}
 
-	function update(object $Entity, array $changes): bool {
+	function update(object $Entity, array $changes, ?string $criteriaExp): bool {
 		/** @var object|EntityTrait $Entity */
 		if($updateFn = $this->Metadata->sql('updateFn')) {
 			$this->execCall($updateFn, $Entity);
@@ -121,7 +121,7 @@ class QueryRunner {
 		} else {
 			$data = DataMapper::object2sql($Entity, $changes);
 			$Query = (new Query($this->Metadata->sql('target'), null, $this->pdo))
-				->criteriaExp($this->Metadata->pkCriteria($Entity));
+				->criteriaExp($criteriaExp);
 			return in_array($Query->execUpdate($data), [0,1]) && $Query->errorCode()=='000000';
 		}
 	}
