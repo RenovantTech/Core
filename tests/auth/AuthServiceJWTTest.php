@@ -13,8 +13,9 @@ class AuthServiceJWTTest extends \PHPUnit\Framework\TestCase {
 
 	static function setUpBeforeClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS sys_acl_actions_2_users;
-			DROP TABLE IF EXISTS sys_acl_filters_2_users;
+			DROP TABLE IF EXISTS sys_authz_rules;
+			DROP TABLE IF EXISTS sys_authz_maps;
+			DROP TABLE IF EXISTS sys_authz;
 			DROP TABLE IF EXISTS sys_users_2_roles;
 			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users_tokens;
@@ -33,8 +34,9 @@ class AuthServiceJWTTest extends \PHPUnit\Framework\TestCase {
 
 	static function tearDownAfterClass():void {
 		sys::pdo('mysql')->exec('
-			DROP TABLE IF EXISTS sys_acl_actions_2_users;
-			DROP TABLE IF EXISTS sys_acl_filters_2_users;
+			DROP TABLE IF EXISTS sys_authz_rules;
+			DROP TABLE IF EXISTS sys_authz_maps;
+			DROP TABLE IF EXISTS sys_authz;
 			DROP TABLE IF EXISTS sys_users_2_roles;
 			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users_tokens;
