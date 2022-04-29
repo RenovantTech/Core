@@ -45,24 +45,24 @@ class OrmTagsParser {
 
 	static protected function parseRoles(DocComment $DocComment, ?string $action): array {
 		$roles = $op = null;
-		$tag = ($action=='_') ? '': '-'.strtolower($action);
-		if ($DocComment->hasTag('authz'.$tag.'-role')) {
+		$docTag = ($action=='_') ? '': '-'.strtolower($action);
+		if ($DocComment->hasTag('authz'.$docTag.'-role')) {
 			$op = OrmAuthz::OP_ONE;
-			$tag = $DocComment->getTag('authz'.$tag.'-role');
+			$tag = $DocComment->getTag('authz'.$docTag.'-role');
 			foreach ($tag as $k => $v) {
 				$roles[] = $k;
 			}
 		}
-		if ($DocComment->hasTag('authz'.$tag.'-roles-all')) {
+		if ($DocComment->hasTag('authz'.$docTag.'-roles-all')) {
 			$op = OrmAuthz::OP_ALL;
-			$tag = $DocComment->getTag('authz'.$tag.'-roles-all');
+			$tag = $DocComment->getTag('authz'.$docTag.'-roles-all');
 			foreach ($tag as $k => $v) {
 				$roles[] = $k;
 			}
 		}
-		if ($DocComment->hasTag('authz'.$tag.'-roles-any')) {
+		if ($DocComment->hasTag('authz'.$docTag.'-roles-any')) {
 			$op = OrmAuthz::OP_ANY;
-			$tag = $DocComment->getTag('authz'.$tag.'-roles-any');
+			$tag = $DocComment->getTag('authz'.$docTag.'-roles-any');
 			foreach ($tag as $k => $v) {
 				$roles[] = $k;
 			}
@@ -72,24 +72,24 @@ class OrmTagsParser {
 
 	static protected function parsePermissions(DocComment $DocComment, ?string $action): array {
 		$perms = $op = null;
-		$tag = ($action=='_') ? '': '-'.strtolower($action);
-		if($DocComment->hasTag('authz'.$tag.'-permission')) {
+		$docTag = ($action=='_') ? '': '-'.strtolower($action);
+		if($DocComment->hasTag('authz'.$docTag.'-permission')) {
 			$op = OrmAuthz::OP_ONE;
-			$tag = $DocComment->getTag('authz'.$tag.'-permission');
+			$tag = $DocComment->getTag('authz'.$docTag.'-permission');
 			foreach ($tag as $k => $v) {
 				$perms[] = $k;
 			}
 		}
-		if($DocComment->hasTag('authz'.$tag.'-permissions-all')) {
+		if($DocComment->hasTag('authz'.$docTag.'-permissions-all')) {
 			$op = OrmAuthz::OP_ALL;
-			$tag = $DocComment->getTag('authz'.$tag.'-permissions-all');
+			$tag = $DocComment->getTag('authz'.$docTag.'-permissions-all');
 			foreach ($tag as $k => $v) {
 				$perms[] = $k;
 			}
 		}
-		if($DocComment->hasTag('authz'.$tag.'-permissions-any')) {
+		if($DocComment->hasTag('authz'.$docTag.'-permissions-any')) {
 			$op = OrmAuthz::OP_ANY;
-			$tag = $DocComment->getTag('authz'.$tag.'-permissions-any');
+			$tag = $DocComment->getTag('authz'.$docTag.'-permissions-any');
 			foreach ($tag as $k => $v) {
 				$perms[] = $k;
 			}
@@ -99,24 +99,24 @@ class OrmTagsParser {
 
 	static protected function parseAcls(DocComment $DocComment, ?string $action): array {
 		$acls = $op = null;
-		$tag = ($action=='_') ? '': '-'.strtolower($action);
-		if($DocComment->hasTag('authz'.$tag.'-acl')) {
+		$docTag = ($action=='_') ? '': '-'.strtolower($action);
+		if($DocComment->hasTag('authz'.$docTag.'-acl')) {
 			$op = OrmAuthz::OP_ONE;
-			$tag = $DocComment->getTag('authz'.$tag.'-acl');
+			$tag = $DocComment->getTag('authz'.$docTag.'-acl');
 			foreach ($tag as $k => $v) {
 				$acls[$k] = $v;
 			}
 		}
-		if($DocComment->hasTag('authz'.$tag.'-acl-all')) {
+		if($DocComment->hasTag('authz'.$docTag.'-acl-all')) {
 			$op = OrmAuthz::OP_ALL;
-			$tag = $DocComment->getTag('authz'.$tag.'-acl-all');
+			$tag = $DocComment->getTag('authz'.$docTag.'-acl-all');
 			foreach ($tag as $k => $v) {
 				$acls[$k] = $v;
 			}
 		}
-		if($DocComment->hasTag('authz'.$tag.'-acl-any')) {
+		if($DocComment->hasTag('authz'.$docTag.'-acl-any')) {
 			$op = OrmAuthz::OP_ANY;
-			$tag = $DocComment->getTag('authz'.$tag.'-acl-any');
+			$tag = $DocComment->getTag('authz'.$docTag.'-acl-any');
 			foreach ($tag as $k => $v) {
 				$acls[$k] = $v;
 			}
