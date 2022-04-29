@@ -1,7 +1,8 @@
 <?php
 namespace test\authz;
 /**
- * @authz
+ * @authz-allow-roles(super-admin, sys-admin)
+ * @authz-allow-permissions(super-perm, sys-perm)
  * @authz-role(admin)
  * @authz-permission(users:manage)
  * @authz-insert-permission(users:insert)

@@ -11,7 +11,7 @@ class OrmTagsParser {
 		try {
 			$RefClass = new ReflectionClass($entityClass);
 			$DocComment = $RefClass->getDocComment();
-			$roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
+			$allows = $roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
 			$actions = [
 				OrmAuthz::ACTION_ALL,
 				OrmAuthz::ACTION_INSERT,
@@ -20,6 +20,10 @@ class OrmTagsParser {
 				OrmAuthz::ACTION_DELETE
 			];
 			foreach ($actions as $action) {
+				$a = self::parseAllows($DocComment, $action);
+				if(!empty($a)) {
+					$allows[$action] = $a;
+				}
 				list($r, $op) = self::parseRoles($DocComment, $action);
 				if(!empty($r)) {
 					$roles[$action] = $r;
@@ -37,10 +41,28 @@ class OrmTagsParser {
 				}
 			}
 			if(empty($roles) && empty($perms) && empty($acls)) return null;
-			else return new OrmAuthz($entityClass, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls);
+			else return new OrmAuthz($entityClass, $allows, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls);
 		} catch (\ReflectionException) {
 			return null;
 		}
+	}
+
+	static protected function parseAllows(DocComment $DocComment, ?string $action): ?array {
+		$allows = null;
+		$docTag = ($action=='_') ? '': '-'.strtolower($action);
+		if ($DocComment->hasTag('authz-allow'.$docTag.'-roles')) {
+			$tag = $DocComment->getTag('authz-allow'.$docTag.'-roles');
+			foreach ($tag as $k => $v) {
+				$allows['roles'][] = $k;
+			}
+		}
+		if ($DocComment->hasTag('authz-allow'.$docTag.'-permissions')) {
+			$tag = $DocComment->getTag('authz-allow'.$docTag.'-permissions');
+			foreach ($tag as $k => $v) {
+				$allows['permissions'][] = $k;
+			}
+		}
+		return $allows;
 	}
 
 	static protected function parseRoles(DocComment $DocComment, ?string $action): array {

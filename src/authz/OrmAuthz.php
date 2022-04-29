@@ -8,6 +8,7 @@ class OrmAuthz {
 
 	const CACHE_TAG = 'orm:authz';
 
+	const OP_ALLOW = 'ALLOW';
 	const OP_ONE = 'ONE';
 	const OP_ALL = 'ALL';
 	const OP_ANY = 'ANY';
@@ -21,6 +22,7 @@ class OrmAuthz {
 	/** OID (Object Identifier) */
 	protected string $_;
 
+	protected ?array $allows;
 	protected ?array $roles;
 	protected ?array $perms;
 	protected ?array $acls;
@@ -29,8 +31,9 @@ class OrmAuthz {
 	protected ?array $op_perms;
 	protected ?array $op_acls;
 
-	function __construct(string $entityClass, ?array $roles, ?array $perms, ?array $acls, ?array $op_roles, ?array $op_perms, ?array $op_acls) {
+	function __construct(string $entityClass, ?array $allows, ?array $roles, ?array $perms, ?array $acls, ?array $op_roles, ?array $op_perms, ?array $op_acls) {
 		$this->_ = $entityClass;
+		$this->allows = $allows;
 		$this->roles = $roles;
 		$this->perms = $perms;
 		$this->acls = $acls;
@@ -44,30 +47,56 @@ class OrmAuthz {
 		$Authz = sys::authz();
 		$checked = [];
 		try {
-			// check RBAC roles
-			if(isset($this->roles[self::ACTION_ALL]))
-				$this->checkRoles($Authz, $checked);
-			if(isset($this->roles[$action]))
-				$this->checkRoles($Authz, $checked, $action);
+			// check ALLOWS
+			if(
+				(isset($this->allows[self::ACTION_ALL]) && $this->checkAllows($Authz, $checked, self::ACTION_ALL))
+				||
+				(isset($this->allows[$action]) && $this->checkAllows($Authz, $checked, $action))
+			) sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] allow OK', $checked);
+			else {
+				// check RBAC roles
+				if(isset($this->roles[self::ACTION_ALL]))
+					$this->checkRoles($Authz, $checked);
+				if(isset($this->roles[$action]))
+					$this->checkRoles($Authz, $checked, $action);
 
-			// check RBAC permissions
-			if(isset($this->perms[self::ACTION_ALL]))
-				$this->checkPermissions($Authz, $checked);
-			if(isset($this->perms[$action]))
-				$this->checkPermissions($Authz, $checked, $action);
+				// check RBAC permissions
+				if(isset($this->perms[self::ACTION_ALL]))
+					$this->checkPermissions($Authz, $checked);
+				if(isset($this->perms[$action]))
+					$this->checkPermissions($Authz, $checked, $action);
 
-			// check ACL
-			if(isset($this->acls[self::ACTION_ALL]))
-				$this->checkAcls($Authz, $checked, null, $OrmEvent);
-			if(isset($this->acls[$action]))
-				$this->checkAcls($Authz, $checked, $action, $OrmEvent);
+				// check ACL
+				if(isset($this->acls[self::ACTION_ALL]))
+					$this->checkAcls($Authz, $checked, null, $OrmEvent);
+				if(isset($this->acls[$action]))
+					$this->checkAcls($Authz, $checked, $action, $OrmEvent);
 
-			if(empty($checked)) sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
-			else sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+				if(empty($checked)) sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
+				else sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+			}
 		} catch (AuthzException $Ex) {
 			sys::trace(LOG_WARNING, T_INFO, '[AUTHZ] check FAILED');
 			throw $Ex;
 		}
+	}
+
+	protected function checkAllows(Authz $Authz, array &$checked, string $action): bool {
+		if(isset($this->allows[$action]['roles']))
+			foreach ($this->allows[$action]['roles'] as $role) {
+				if ($Authz->role($role)) {
+					$checked['ROLES'][] = $role;
+					return true;
+				}
+			}
+		if(isset($this->allows[$action]['permissions']))
+			foreach ($this->allows[$action]['permissions'] as $perm) {
+				if ($Authz->permission($perm)) {
+					$checked['PERMISSIONS'][] = $perm;
+					return true;
+				}
+			}
+		return false;
 	}
 
 	/** @throws AuthzException */
@@ -101,7 +130,7 @@ class OrmAuthz {
 			case self::OP_ANY:
 				$exPerms = [];
 				foreach ($this->perms[$action] as $perm) {
-					if ($Authz->permissions($perm)) {
+					if ($Authz->permission($perm)) {
 						$checked['PERMISSIONS'][] = $perm;
 						break 2;
 					}
@@ -110,7 +139,7 @@ class OrmAuthz {
 				throw new AuthzException($exCode, [implode(', ', $exPerms), $this->_, $action]);
 			default:
 				foreach ($this->perms[$action] as $perm) {
-					if (!$Authz->permissions($perm)) throw new AuthzException($exCode, [$perm, $this->_, $action]);
+					if (!$Authz->permission($perm)) throw new AuthzException($exCode, [$perm, $this->_, $action]);
 					else $checked['PERMISSIONS'][] = $perm;
 				}
 		}
@@ -124,10 +153,12 @@ class OrmAuthz {
 		switch ($this->op_acls[$action]) {
 			default:
 				foreach ($this->acls[$action] as $aclKey => $aclProp) {
-					$criteriaExp = $aclProp.',IN,'.implode(',', $Authz->aclValues($aclKey));
-					sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] ACL "'.$aclKey.'": add $criteriaExp '.$criteriaExp);
-					$OrmEvent->criteriaExp($criteriaExp);
-					$checked['ACL'][] = $aclKey;
+					if($values = $Authz->aclValues($aclKey)) {
+						$criteriaExp = $aclProp.',IN,'.implode(',', $values);
+						sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] ACL "'.$aclKey.'": add $criteriaExp '.$criteriaExp);
+						$OrmEvent->criteriaExp($criteriaExp);
+						$checked['ACL'][] = $aclKey;
+					} else throw new AuthzException($exCode, [$aclKey, $this->_, $action]);
 				}
 		}
 	}

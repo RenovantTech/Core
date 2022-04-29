@@ -11,6 +11,16 @@ class OrmTagParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf(OrmAuthz::class, $ObjAuthz);
 		$RefObj = new ReflectionObject($ObjAuthz);
 
+		// allows
+		$RefProp = $RefObj->getProperty('allows');
+		$RefProp->setAccessible(true);
+		$this->assertEquals([
+			'_' => [
+				'roles' => [ 'super-admin', 'sys-admin' ],
+				'permissions' => [ 'super-perm', 'sys-perm' ]
+			]
+		], $RefProp->getValue($ObjAuthz));
+
 		// roles
 		$RefProp = $RefObj->getProperty('roles');
 		$RefProp->setAccessible(true);
