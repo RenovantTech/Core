@@ -104,6 +104,7 @@ class Repository {
 	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
@@ -121,6 +122,7 @@ class Repository {
 	 * Delete entities by a set of Criteria and ORDER BY
 	 * @throws Exception
 	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
@@ -134,6 +136,7 @@ class Repository {
 	 * @return object|array|false Entity, false if not found
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
@@ -151,7 +154,10 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|null Entity, NULL if not found
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|null {
 		if($offset) $offset--;
@@ -168,7 +174,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
@@ -183,7 +189,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function insert(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
@@ -198,10 +204,10 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function insertOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
-
 	}
 
 	/**
@@ -212,7 +218,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function update(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
@@ -226,6 +232,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool Entity objects or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function updateAll(array $entities, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array|bool {
 		$data = [];
@@ -243,7 +250,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function updateOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
