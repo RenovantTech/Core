@@ -279,7 +279,7 @@ class Repository {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			return $this->QueryRunner->count($this->OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -302,7 +302,7 @@ class Repository {
 		try {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
 			if(!$this->QueryRunner->deleteOne($Entity, $this->OrmEvent->getCriteriaExp()))
 				return false;
 			if(method_exists($Entity, 'onDelete')) $Entity->onDelete();
@@ -334,7 +334,7 @@ class Repository {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
 			$n = $this->QueryRunner->deleteAll($limit, $orderExp, $this->OrmEvent->getCriteriaExp());
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE_ALL);
 			return $n;
@@ -354,7 +354,7 @@ class Repository {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			if($Entity = $this->QueryRunner->fetchOne($this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH, $Entity);
 			}
@@ -375,7 +375,7 @@ class Repository {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			if($entities = $this->QueryRunner->fetchAll($this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH_ALL, $entities);
 			}
@@ -401,7 +401,7 @@ class Repository {
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
-			$this->OrmAuthz->check(OrmAuthz::ACTION_INSERT, $this->OrmEvent);
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_INSERT, $this->OrmEvent);
 			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
@@ -433,10 +433,10 @@ class Repository {
 			if(is_object($data)) {
 				$Entity = $data;
 				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($Entity));
-				$this->OrmAuthz->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
+				$this->OrmAuthz?->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 			} else {
 				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($id));
-				$this->OrmAuthz->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
+				$this->OrmAuthz?->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 				$Entity = $this->QueryRunner->fetchOne($this->class, 0, null, $this->OrmEvent->getCriteriaExp());
 				$Entity($data);
 			}

@@ -1,12 +1,13 @@
 <?php
 namespace test\authz;
 use renovant\core\authz\OrmAuthz,
+	renovant\core\authz\OrmTagsParser,
 	renovant\core\util\reflection\ReflectionObject;
 
 class OrmTagParserTest extends \PHPUnit\Framework\TestCase {
 
 	function testParse() {
-		$ObjAuthz = new OrmAuthz(OrmTagParserMock::class);
+		$ObjAuthz = OrmTagsParser::parse(OrmTagParserMock::class);
 		$this->assertInstanceOf(OrmAuthz::class, $ObjAuthz);
 		$RefObj = new ReflectionObject($ObjAuthz);
 

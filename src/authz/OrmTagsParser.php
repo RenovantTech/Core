@@ -7,39 +7,40 @@ use renovant\core\util\reflection\DocComment,
  */
 class OrmTagsParser {
 
-	/**
-	 * @throws \ReflectionException
-	 * @throws \Exception
-	 */
-	static function parse(string $entityClass): array {
-		$RefClass = new ReflectionClass($entityClass);
-		$DocComment = $RefClass->getDocComment();
-		$roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
-		$actions = [
-			OrmAuthz::ACTION_ALL,
-			OrmAuthz::ACTION_INSERT,
-			OrmAuthz::ACTION_SELECT,
-			OrmAuthz::ACTION_UPDATE,
-			OrmAuthz::ACTION_DELETE
-		];
-		foreach ($actions as $action) {
-			list($r, $op) = self::parseRoles($DocComment, $action);
-			if(!empty($r)) {
-				$roles[$action] = $r;
-				$op_roles[$action] = $op;
+	static function parse(string $entityClass): ?OrmAuthz {
+		try {
+			$RefClass = new ReflectionClass($entityClass);
+			$DocComment = $RefClass->getDocComment();
+			$roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
+			$actions = [
+				OrmAuthz::ACTION_ALL,
+				OrmAuthz::ACTION_INSERT,
+				OrmAuthz::ACTION_SELECT,
+				OrmAuthz::ACTION_UPDATE,
+				OrmAuthz::ACTION_DELETE
+			];
+			foreach ($actions as $action) {
+				list($r, $op) = self::parseRoles($DocComment, $action);
+				if(!empty($r)) {
+					$roles[$action] = $r;
+					$op_roles[$action] = $op;
+				}
+				list($p, $op) = self::parsePermissions($DocComment, $action);
+				if(!empty($p)) {
+					$perms[$action] = $p;
+					$op_perms[$action] = $op;
+				}
+				list($a, $op) = self::parseAcls($DocComment, $action);
+				if(!empty($a)) {
+					$acls[$action] = $a;
+					$op_acls[$action] = $op;
+				}
 			}
-			list($p, $op) = self::parsePermissions($DocComment, $action);
-			if(!empty($p)) {
-				$perms[$action] = $p;
-				$op_perms[$action] = $op;
-			}
-			list($a, $op) = self::parseAcls($DocComment, $action);
-			if(!empty($a)) {
-				$acls[$action] = $a;
-				$op_acls[$action] = $op;
-			}
+			if(empty($roles) && empty($perms) && empty($acls)) return null;
+			else return new OrmAuthz($entityClass, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls);
+		} catch (\ReflectionException) {
+			return null;
 		}
-		return [$roles, $perms, $acls, $op_roles, $op_perms, $op_acls];
 	}
 
 	static protected function parseRoles(DocComment $DocComment, ?string $action): array {

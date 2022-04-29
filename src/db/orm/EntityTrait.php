@@ -3,6 +3,7 @@ namespace renovant\core\db\orm;
 use const renovant\core\SYS_CACHE;
 use renovant\core\sys,
 	renovant\core\authz\OrmAuthz,
+	renovant\core\authz\OrmTagsParser,
 	renovant\core\db\orm\util\Metadata,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
@@ -12,7 +13,7 @@ use renovant\core\sys,
 trait EntityTrait {
 
 	static protected array $_data;
-	static protected ?OrmAuthz $Authz = null;
+	static protected OrmAuthz|false|null $OrmAuthz = false;
 	static protected ?Metadata $Metadata = null;
 
 	/** @internal */
@@ -24,16 +25,16 @@ trait EntityTrait {
 	}
 
 	/** @internal */
-	static function authz(): OrmAuthz {
-		if(!self::$Authz) {
+	static function authz(): ?OrmAuthz {
+		if(self::$OrmAuthz === false) {
 			$k = str_replace('\\','.',__CLASS__).':'.OrmAuthz::CACHE_TAG;
-			if(!$data = sys::cache(SYS_CACHE)->get($k)) {
-				$data = new OrmAuthz(__CLASS__);
+			if(false === $data = sys::cache(SYS_CACHE)->get($k)) {
+				$data = OrmTagsParser::parse(__CLASS__);
 				sys::cache(SYS_CACHE)->set($k, $data, null, OrmAuthz::CACHE_TAG);
 			}
-			self::$Authz = $data;
+			self::$OrmAuthz = $data;
 		}
-		return self::$Authz;
+		return self::$OrmAuthz;
 	}
 
 	/** @internal */

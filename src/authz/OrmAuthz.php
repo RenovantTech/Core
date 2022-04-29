@@ -29,9 +29,14 @@ class OrmAuthz {
 	protected ?array $op_perms;
 	protected ?array $op_acls;
 
-	function __construct(string $entityClass) {
+	function __construct(string $entityClass, ?array $roles, ?array $perms, ?array $acls, ?array $op_roles, ?array $op_perms, ?array $op_acls) {
 		$this->_ = $entityClass;
-		list($this->roles, $this->perms, $this->acls, $this->op_roles, $this->op_perms, $this->op_acls) = OrmTagsParser::parse($entityClass);
+		$this->roles = $roles;
+		$this->perms = $perms;
+		$this->acls = $acls;
+		$this->op_roles = $op_roles;
+		$this->op_perms = $op_perms;
+		$this->op_acls = $op_acls;
 	}
 
 	/** @throws AuthzException */
