@@ -95,7 +95,7 @@ class ObjAuthz {
 			case self::OP_ANY:
 				$exPerms = [];
 				foreach ($this->perms[$method] as $perm) {
-					if ($Authz->permissions($perm)) {
+					if ($Authz->permission($perm)) {
 						$checked['PERMISSIONS'][] = $perm;
 						break 2;
 					}
@@ -104,7 +104,7 @@ class ObjAuthz {
 				throw new AuthzException($exCode, [implode(', ', $exPerms), $this->_, $method]);
 			default:
 				foreach ($this->perms[$method] as $perm) {
-					if (!$Authz->permissions($perm)) throw new AuthzException($exCode, [$perm, $this->_, $method]);
+					if (!$Authz->permission($perm)) throw new AuthzException($exCode, [$perm, $this->_, $method]);
 					else $checked['PERMISSIONS'][] = $perm;
 				}
 		}

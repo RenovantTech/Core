@@ -231,7 +231,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($AuthzManager->setUserPermission('blog.edit', 1));
 
 		self::authenticate(1);
-		$this->assertTrue(sys::authz()->permissions('blog.edit'));
+		$this->assertTrue(sys::authz()->permission('blog.edit'));
 	}
 
 	/**
@@ -253,7 +253,7 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertFalse($AuthzManager->revokeUserPermission('blog.edit', 1));
 
 		self::authenticate(1);
-		$this->assertFalse(sys::authz()->permissions('blog.edit'));
+		$this->assertFalse(sys::authz()->permission('blog.edit'));
 	}
 
 	/**

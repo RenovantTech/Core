@@ -60,7 +60,7 @@ class Authz {
 		}
 	}
 
-	function permissions(string $permission): bool {
+	function permission(string $permission): bool {
 		if(in_array($permission, $this->permissions)) {
 			$this->verified = 1; return true;
 		} else {
