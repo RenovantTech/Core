@@ -11,16 +11,8 @@ class Tracer extends sys {
 	 * @var integer */
 	static protected $errorLevel = 0;
 
-	/**
-	 * Error handler
-	 * @param integer $n       contains the level of the error raised
-	 * @param string $str     contains the error message
-	 * @param string $file    contains the filename that the error was raised in
-	 * @param integer $line    contains the file line that the error was raised in
-	 * @param array   $context contain an array of every variable that existed in the scope the error was triggered in
-	 * @return void
-	 */
-	static function onError(int $n, string $str, string $file, int $line, array $context=[]) {
+	/** @see set_error_handler() */
+	static function onError(int $n, string $str, string $file, int $line): void {
 //		if(error_reporting()===0) return;
 		// get trace array, w/o first 2 elements (this function call)
 		require_once __DIR__.'/functions.inc';
@@ -29,10 +21,7 @@ class Tracer extends sys {
 		self::setErrorLevel($n);
 	}
 
-	/**
-	 * Exception handler
-	 * @param \Throwable $Ex the Error/Exception raised
-	 */
+	/** @see set_exception_handler() */
 	static function onException(\Throwable $Ex) {
 		$level = ($Ex instanceof \renovant\core\Exception) ? constant(get_class($Ex).'::LEVEL') : null;
 		require_once __DIR__.'/functions.inc';
