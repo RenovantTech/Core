@@ -46,9 +46,6 @@ class QueryRunner {
 		return $Query->execDelete();
 	}
 
-	/**
-	 * @throws \Exception
-	 */
 	function fetchOne(string $class, ?int $offset, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		$subset = ($fetchSubset) ? $this->Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($this->Metadata->sql('source'), $subset, $this->pdo))
@@ -67,9 +64,6 @@ class QueryRunner {
 		} else return false;
 	}
 
-	/**
-	 * @throws \Exception
-	 */
 	function fetchAll(string $class, ?int $offset, ?int $limit, ?string $orderExp, ?string $criteriaExp, int $fetchMode=Repository::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$subset = ($fetchSubset) ? $this->Metadata->fetchSubset($fetchSubset) : '*';
 		$Query = (new Query($this->Metadata->sql('source'), $subset, $this->pdo))

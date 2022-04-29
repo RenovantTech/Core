@@ -329,7 +329,6 @@ class Repository {
 	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
 	 */
 	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -350,7 +349,6 @@ class Repository {
 	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
 	 */
 	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -368,8 +366,10 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
@@ -387,8 +387,10 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execInsertOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
@@ -420,8 +422,10 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execUpdateOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
