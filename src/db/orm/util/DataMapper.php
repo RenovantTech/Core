@@ -3,10 +3,7 @@ namespace renovant\core\db\orm\util;
 use renovant\core\db\orm\EntityTrait,
 	renovant\core\util\Date,
 	renovant\core\util\DateTime;
-/**
- * ORM data hydrate
- * @internal
- */
+/** @internal */
 class DataMapper {
 
 	static function object2array(object $Entity, ?string $fetchSubset=null): array {
@@ -66,9 +63,6 @@ class DataMapper {
 		return $data;
 	}
 
-	/**
-	 * @throws \Exception
-	 */
 	static function sql2array(array $data, string $class): array {
 		$props = call_user_func($class.'::metadata')->properties();
 		foreach($data as $k=>&$v) {
@@ -90,9 +84,6 @@ class DataMapper {
 		return $data;
 	}
 
-	/**
-	 * Inject SQL types into array data ready for JSON conversion, converting to proper PHP types.
-	 */
 	static function sql2json(array $data, string $class): array {
 		$props = call_user_func($class.'::metadata')->properties();
 		foreach($data as $k=>&$v) {

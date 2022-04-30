@@ -73,9 +73,9 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($Authz->role('ADMIN'));
 		$this->assertFalse($Authz->role('STAFF'));
 
-		$this->assertTrue($Authz->permissions('blog.edit'));
-		$this->assertTrue($Authz->permissions('blog.delete'));
-		$this->assertFalse($Authz->permissions('blog.master'));
+		$this->assertTrue($Authz->permission('blog.edit'));
+		$this->assertTrue($Authz->permission('blog.delete'));
+		$this->assertFalse($Authz->permission('blog.master'));
 
 		$this->assertTrue($Authz->acl('blog.author', 123));
 		$this->assertTrue($Authz->acl('blog.author', 456));

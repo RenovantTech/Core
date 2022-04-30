@@ -2,6 +2,7 @@
 namespace renovant\core\db\orm;
 use const renovant\core\trace\T_DB;
 use renovant\core\sys,
+	renovant\core\authz\OrmAuthz,
 	renovant\core\db\orm\util\DataMapper,
 	renovant\core\db\orm\util\Metadata,
 	renovant\core\db\orm\util\QueryRunner,
@@ -21,6 +22,7 @@ class Repository {
 	/** PDO instance ID */
 	protected ?string $pdo;
 
+	protected ?OrmAuthz $OrmAuthz = null;
 	protected ?Metadata $Metadata = null;
 
 	protected $OrmEvent;
@@ -43,6 +45,7 @@ class Repository {
 
 	function __wakeup() {
 		class_exists($this->class);
+		$this->OrmAuthz = call_user_func($this->class.'::authz');
 		$this->Metadata = call_user_func($this->class.'::metadata');
 		$this->QueryRunner = new QueryRunner($this->pdo, $this->Metadata);
 	}
@@ -101,6 +104,7 @@ class Repository {
 	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
@@ -118,6 +122,7 @@ class Repository {
 	 * Delete entities by a set of Criteria and ORDER BY
 	 * @throws Exception
 	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
@@ -131,6 +136,7 @@ class Repository {
 	 * @return object|array|false Entity, false if not found
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
@@ -148,7 +154,10 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return object|array|null Entity, NULL if not found
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|null {
 		if($offset) $offset--;
@@ -165,7 +174,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
@@ -180,7 +189,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function insert(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
@@ -195,10 +204,10 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function insertOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
-
 	}
 
 	/**
@@ -209,7 +218,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function update(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
@@ -223,6 +232,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool Entity objects or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function updateAll(array $entities, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array|bool {
 		$data = [];
@@ -240,7 +250,7 @@ class Repository {
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
 	 * @return array|bool|object $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \renovant\core\authz\AuthzException
 	 */
 	function updateOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
@@ -260,13 +270,16 @@ class Repository {
 	/**
 	 * Count entities using a Query.
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execCount(?string $criteriaExp=null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'COUNT', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			return $this->QueryRunner->count($this->OrmEvent->getCriteriaExp());
 		} catch(\PDOException $Ex){
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
@@ -281,6 +294,7 @@ class Repository {
 	 * @return object|array|bool $Entity object or array if $fetchMode, TRUE if not $fetchMode, FALSE on failure
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
@@ -288,7 +302,7 @@ class Repository {
 		try {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
 			if(!$this->QueryRunner->deleteOne($Entity, $this->OrmEvent->getCriteriaExp()))
 				return false;
 			if(method_exists($Entity, 'onDelete')) $Entity->onDelete();
@@ -312,15 +326,15 @@ class Repository {
 	 * @return integer n° of deleted entities
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
 	 */
 	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'DELETE', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
 			$n = $this->QueryRunner->deleteAll($limit, $orderExp, $this->OrmEvent->getCriteriaExp());
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE_ALL);
 			return $n;
@@ -332,15 +346,15 @@ class Repository {
 	/**
 	 * @throws Exception
 	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
-	 * @throws \Exception
 	 */
 	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			if($Entity = $this->QueryRunner->fetchOne($this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH, $Entity);
 			}
@@ -352,13 +366,16 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'FETCH', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			if($entities = $this->QueryRunner->fetchAll($this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH_ALL, $entities);
 			}
@@ -370,7 +387,10 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execInsertOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
@@ -381,7 +401,7 @@ class Repository {
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'INSERT', sys::auth()->UID());
+			$this->OrmAuthz?->check(OrmAuthz::ACTION_INSERT, $this->OrmEvent);
 			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// validate
 			if($validate) $this->doValidate($Entity, $validate);
@@ -389,7 +409,7 @@ class Repository {
 			if(!$this->QueryRunner->insert($Entity))
 				$response = false;
 			elseif($fetchMode) {
-				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
+				$criteriaExp = $this->Metadata->pkCriteria($Entity);
 				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
 			} else
 				$response = true;
@@ -402,20 +422,26 @@ class Repository {
 
 	/**
 	 * @throws Exception
-	 * @throws \Exception
+	 * @throws \ReflectionException
+	 * @throws \renovant\core\authz\AuthzException
+	 * @throws \renovant\core\context\ContextException
+	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	protected function execUpdateOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
 		try {
+			$this->OrmEvent = (new OrmEvent($this));
 			if(is_object($data)) {
 				$Entity = $data;
+				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($Entity));
+				$this->OrmAuthz?->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
 			} else {
-				$criteriaExp = $this->Metadata->pkCriteria($id);
-				$Entity = $this->QueryRunner->fetchOne($this->class, 0, null, $criteriaExp);
+				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($id));
+				$this->OrmAuthz?->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
+				$Entity = $this->QueryRunner->fetchOne($this->class, 0, null, $this->OrmEvent->getCriteriaExp());
 				$Entity($data);
 			}
-			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
+			$this->OrmEvent->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_UPDATE);
-//			defined('SYS_ACL_ORM') and sys::acl()->onOrm($this->_, 'UPDATE', sys::auth()->UID());
 			// onSave callback
 			if(method_exists($Entity, 'onSave')) $Entity->onSave();
 			// detect changes after onSave()
@@ -425,13 +451,15 @@ class Repository {
 			// run UPDATE & build response
 			$response = false;
 			if(empty($changes)) {
-				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $Entity::metadata()->sql('target'), $Entity::metadata()->pkCriteria($Entity)));
+				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $this->Metadata->sql('target'), $this->Metadata->pkCriteria($Entity)));
 				$response = true;
-			} elseif($this->QueryRunner->update($Entity, $changes))
-				$response = true;
+			} else {
+				if($this->QueryRunner->update($Entity, $changes, $this->OrmEvent->getCriteriaExp()))
+					$response = true;
+			}
 			if($response && $fetchMode) {
-				$criteriaExp = $Entity::metadata()->pkCriteria($Entity);
-				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+//				$criteriaExp = $this->Metadata->pkCriteria($Entity);
+				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset);
 			}
 			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
 			return $response;
@@ -445,7 +473,7 @@ class Repository {
 	 * @throws \ReflectionException
 	 */
 	protected function doValidate(object $Entity, string|bool $validateMode) {
-		$validateSubset = (is_string($validateMode)) ? $Entity::metadata()->validateSubset($validateMode) : null;
+		$validateSubset = (is_string($validateMode)) ? $this->Metadata->validateSubset($validateMode) : null;
 		$validateMode = (is_string($validateMode)) ? $validateMode : null;
 		$errorsByTags = Validator::validate($Entity, $validateSubset);
 		$errorsByFn = $this->validate($Entity, $validateMode);
