@@ -1,18 +1,16 @@
 <?php
-namespace test\authz;
+namespace test\authz\orm;
 /**
- * @authz
- * @authz-role(admin)
- * @authz-permission(users:manage)
- * @authz-insert-permission(users:insert)
- * @authz-select-acl(schools="school_id")
- * @authz-update-roles-any(admin, manager)
- * @authz-update-permission(users:update)
- * @authz-delete-acl(schools="school_id")
+ * @authz-allow-permissions(perm:all)
+ * @authz-insert-permission(perm:insert)
+ * @authz-select-permissions-any(perm:select1, perm:select2)
+ * @authz-update-permissions-all(perm:update1, perm:update2)
  *
  * @orm(source="classes")
+ *
+ * @property $id
  */
-class OrmAuthzMock {
+class Entity2 {
 	use \renovant\core\db\orm\EntityTrait;
 
 	/** @orm(type="integer", primarykey, autoincrement) */
@@ -32,10 +30,4 @@ class OrmAuthzMock {
 	protected $name;
 	/** @orm(null) */
 	protected $level;
-	/** @orm(type="date")
-	 * @validate(date) */
-	protected $dateStart;
-	/** @orm(type="date")
-	 * @validate(date) */
-	protected $dateEnd;
 }

@@ -1,0 +1,13 @@
+services:
+
+  test.authz.orm.Entity1Repository:
+    class: renovant\core\db\orm\Repository
+    constructor: [ 'test\authz\orm\Entity1', mysql ]
+
+  test.authz.orm.Entity2Repository:
+    class: renovant\core\db\orm\Repository
+    constructor: [ 'test\authz\orm\Entity2', mysql ]
+
+  test.authz.orm.Entity3Repository:
+    class: renovant\core\db\orm\Repository
+    constructor: [ 'test\authz\orm\Entity3', mysql ]
