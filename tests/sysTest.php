@@ -120,6 +120,13 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(TEST_DIR.'/app', $dir);
 		$this->assertEquals('Dispatcher', $file);
 	}
+	/**
+	 * @depends testInit
+	 */
+	function testAuth() {
+		$AUTH = sys::auth();
+		$this->assertInstanceOf(Auth::class, $AUTH);
+	}
 
 	/**
 	 * @depends testInit
@@ -127,13 +134,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	function testAuthz() {
 		$Authz = sys::authz();
 		$this->assertInstanceOf(Authz::class, $Authz);
-	}
-	/**
-	 * @depends testInit
-	 */
-	function testAuth() {
-		$AUTH = sys::auth();
-		$this->assertInstanceOf(Auth::class, $AUTH);
 	}
 
 	/**
