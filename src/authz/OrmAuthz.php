@@ -1,5 +1,6 @@
 <?php
 namespace renovant\core\authz;
+use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys,
 	renovant\core\db\orm\OrmEvent;
@@ -44,6 +45,7 @@ class OrmAuthz {
 
 	/** @throws AuthzException */
 	function check(string $action, OrmEvent $OrmEvent): void {
+		if(PHP_SAPI == 'cli' && ENVIRONMENT !== 'PHPUNIT') return;
 		$Authz = sys::authz();
 		$checked = [];
 		try {

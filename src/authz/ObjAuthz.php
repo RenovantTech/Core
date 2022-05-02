@@ -1,5 +1,6 @@
 <?php
 namespace renovant\core\authz;
+use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 use renovant\core\sys;
 
@@ -37,6 +38,7 @@ class ObjAuthz {
 
 	/** @throws AuthzException */
 	function check(string $method, $args): void {
+		if(PHP_SAPI == 'cli' && ENVIRONMENT !== 'PHPUNIT') return;
 		$Authz = sys::authz();
 		$checked = [];
 		try {
