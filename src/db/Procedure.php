@@ -4,9 +4,8 @@ use renovant\core\sys;
 class Procedure {
 	use \renovant\core\CoreTrait;
 
-	/** PDO instance ID
-	 * @var string */
-	protected string $pdo;
+	/** PDO instance ID */
+	protected ?string $pdo;
 	/** PDOStatement
 	 * @var \PDOStatement */
 	protected $PDOStatement;
