@@ -63,7 +63,7 @@ class Response {
 	 * @return int
 	 */
 	function getSize() {
-		return ($this->outputBuffer) ? ob_get_length() : filesize($this->STDOUT);
+		return ($this->outputBuffer) ? ob_get_length() : 0;
 	}
 
 	/**
