@@ -22,10 +22,10 @@ CREATE TABLE IF NOT EXISTS t_authz (
 
 CREATE TABLE IF NOT EXISTS t_authz_maps (
 	type		ENUM('USER_ROLE', 'USER_PERMISSION', 'USER_ACL') NOT NULL,
-	user_id		INTEGER UNSIGNED NULL DEFAULT NULL,
-	authz_id	INTEGER UNSIGNED NULL DEFAULT NULL,
+	user_id		INTEGER UNSIGNED NOT NULL,
+	authz_id	INTEGER UNSIGNED NOT NULL,
 	data		VARCHAR(1024) NULL DEFAULT NULL,
-	UNIQUE KEY uk_t_authz_maps (type, user_id, authz_id),
+	PRIMARY KEY (user_id, authz_id),
 	CONSTRAINT fk_t_authz_maps__user_id FOREIGN KEY (user_id) REFERENCES t_users (id),
 	CONSTRAINT fk_t_authz_maps__authz_id FOREIGN KEY (authz_id) REFERENCES t_authz (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
