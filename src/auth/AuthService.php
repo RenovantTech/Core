@@ -131,7 +131,7 @@ abstract class AuthService {
 				} else return self::LOGIN_2FA_INVALID;
 			}
 			return $data['user_id'];
-		} catch (\Exception $Ex) {
+		} catch (\Exception) {
 			return self::LOGIN_EXCEPTION;
 		}
 	}
@@ -139,7 +139,6 @@ abstract class AuthService {
 	/**
 	 * Initialize AUTH module, perform Authentication & Security checks
 	 * To be invoked via event listener before HTTP Controller execution (HTTP:INIT, HTTP:ROUTE or HTTP:CONTROLLER).
-	 * @param HttpEvent $Event
 	 * @throws AuthException
 	 * @throws \Exception
 	 */
@@ -191,7 +190,7 @@ abstract class AuthService {
 		if(!isset($_COOKIE[$this->cookieXSRF])) {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
 			$this->_XSRF_TOKEN = TokenService::generateToken();
-			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
+			setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, ['expires'=>0, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>false, 'samesite'=>'Lax']);
 			header(self::XSRF_HEADER.': '.$this->_XSRF_TOKEN);
 		}
 	}
@@ -208,7 +207,7 @@ abstract class AuthService {
 		// regenerate XSRF-TOKEN
 		sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
 		$this->_XSRF_TOKEN = TokenService::generateToken();
-		setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, 0, '/', null, true, false);
+		setcookie($this->cookieXSRF, $this->_XSRF_TOKEN, ['expires'=>0, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>false, 'samesite'=>'Lax']);
 
 		// erase data
 		$this->doAuthenticate();
