@@ -38,7 +38,6 @@ class Response {
 
 	/**
 	 * Get all Response data (array)
-	 * @return array
 	 */
 	function getData(): array {
 		return $this->data;
@@ -46,7 +45,6 @@ class Response {
 
 	/**
 	 * Get HTTP Status Code
-	 * @return integer
 	 */
 	function getCode(): int {
 		return http_response_code();
@@ -54,7 +52,6 @@ class Response {
 
 	/**
 	 * Get current Response output
-	 * @return string
 	 */
 	function getContent(): string {
 		return ob_get_contents();
@@ -62,7 +59,6 @@ class Response {
 
 	/**
 	 * Get HTTP header "Content-Type"
-	 * @return string
 	 */
 	function getContentType(): string {
 		return $this->contentType;
@@ -70,7 +66,6 @@ class Response {
 
 	/**
 	 * Returns the actual buffer size used for this Response. If no buffering is used, this method returns 0.
-	 * @return int
 	 */
 	function getSize(): int {
 		return ($this->size) ?: ob_get_length();
@@ -109,10 +104,8 @@ class Response {
 
 	/**
 	 * Set HTTP header "Content-Type"
-	 * @param string $contentType
-	 * @return Response (fluent interface)
 	 */
-	function contentType($contentType): Response {
+	function contentType(string $contentType): Response {
 		if(!$this->contentType) $this->contentType = $contentType;
 		return $this;
 	}
@@ -120,17 +113,16 @@ class Response {
 	/**
 	 * Set HTTP Cookie
 	 * wrapper for native setcookie() function, @see http://php.net/manual/en/function.setcookie.php
-	 * @param string $name
-	 * @param string $value
-	 * @param int $expire
-	 * @param string $path
-	 * @param string $domain
-	 * @param bool $secure
-	 * @param bool $httpOnly
-	 * @return Response (fluent interface)
 	 */
-	function cookie(string $name, string $value='', int $expire=0, string $path='', string $domain='', bool $secure=false, bool $httpOnly=false): Response {
-		setcookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
+	function cookie(string $name, string $value='', int $expire=0, string $path='', string $domain='', bool $secure=true, bool $httpOnly=false, string $sameSite='Lax'): Response {
+		setcookie($name, $value, [
+			'expires'	=> $expire,
+			'path'		=> $path,
+			'domain'	=> $domain,
+			'secure'	=> $secure,
+			'httponly'	=> $httpOnly,
+			'samesite'	=> $sameSite
+		]);
 		return $this;
 	}
 

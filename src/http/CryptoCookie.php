@@ -9,45 +9,35 @@ class CryptoCookie {
 
 	const KEY_FILE = DATA_DIR.'cookie.key';
 
-	/** Encryption KEY
-	 * @var string|null */
-	protected $_key = null;
-	/** Cookie domain
-	 * @var string */
-	protected $domain;
-	/** Cookie expire time
-	 * @var int */
-	protected $expire;
-	/** Cookie HTTP flag
-	 * @var string */
-	protected $httpOnly;
-	/** Cookie name
-	 * @var string */
-	protected $name;
-	/** Cookie path
-	 * @var string */
-	protected $path;
-	/** Cookie secure flag
-	 * @var string */
-	protected $secure;
+	/** Encryption KEY */
+	protected ?string $_key = null;
+	/** Cookie domain */
+	protected string $domain;
+	/** Cookie expire time */
+	protected int $expire;
+	/** Cookie HTTP flag */
+	protected bool $httpOnly;
+	/** Cookie name */
+	protected string $name;
+	/** Cookie path */
+	protected string $path;
+	/** Cookie secure flag */
+	protected bool $secure;
+	/** Cookie sameSite flag */
+	protected string $sameSite='Lax';
 
 	/**
 	 * CryptoCookie constructor.
-	 * @param string $name
-	 * @param int $expire
-	 * @param string $path
-	 * @param string|null $domain
-	 * @param bool $secure
-	 * @param bool $httpOnly
 	 * @throws \Exception
 	 */
-	function __construct(string $name, int $expire=0, string $path='', ?string $domain='', bool $secure=false, bool $httpOnly=false) {
+	function __construct(string $name, int $expire=0, string $path='', ?string $domain='', bool $secure=true, bool $httpOnly=false, string $sameSite='Lax') {
 		$this->name = $name;
 		$this->expire = $expire;
 		$this->path = $path;
 		$this->domain = (string) $domain;
 		$this->secure = $secure;
 		$this->httpOnly = $httpOnly;
+		$this->sameSite = $sameSite;
 		if(file_exists(self::KEY_FILE))
 			$this->_key = file_get_contents(self::KEY_FILE);
 		else {
@@ -80,18 +70,16 @@ class CryptoCookie {
 				sodium_memzero($encKey);
 			}
 			throw new Exception(401);
-		} catch (\SodiumException $Ex) {
+		} catch (\SodiumException) {
 			throw new Exception(402);
 		}
 	}
 
 	/**
 	 * Writes an encrypted cookie
-	 * @param mixed $data
-	 * @return bool
 	 * @throws \Exception
 	 */
-	function write($data) {
+	function write(mixed $data): bool {
 		$data = serialize($data);
 		$nonce = random_bytes(SODIUM_CRYPTO_STREAM_NONCEBYTES);
 		list($encKey, $authKey) = $this->splitKeys();
@@ -102,7 +90,7 @@ class CryptoCookie {
 		sodium_memzero($authKey);
 		$cryptData = sodium_bin2hex($mac.$nonce.$cipherText);
 		$_COOKIE[$this->name] = $cryptData;
-		return setcookie($this->name, $cryptData, $this->expire, $this->path, $this->domain, $this->secure, $this->httpOnly);
+		return setcookie($this->name, $cryptData, ['expires'=>$this->expire, 'path'=>$this->path, 'domain'=>$this->domain, 'secure'=>$this->secure, 'httponly'=>$this->httpOnly, 'samesite'=>$this->sameSite]);
 	}
 
 	/**
@@ -111,7 +99,7 @@ class CryptoCookie {
 	 * @return array(2) [encryption key, authentication key]
 	 * @throws \SodiumException
 	 */
-	private function splitKeys() {
+	private function splitKeys(): array {
 		$encKey = sodium_crypto_generichash(
 			sodium_crypto_generichash('encryption', str_pad($this->name, 16, '_')),
 			$this->_key,
