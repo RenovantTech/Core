@@ -152,14 +152,14 @@ class Repository {
 	 * @param string|null $criteriaExp CRITERIA expression
 	 * @param int $fetchMode fetch mode: FETCH_OBJ, FETCH_ARRAY, FETCH_JSON
 	 * @param string|null $fetchSubset optional fetch subset as defined in @orm-subset
-	 * @return object|array|null Entity, NULL if not found
+	 * @return object|array|false Entity, FALSE if not found
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\authz\AuthzException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|null {
+	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		if($offset) $offset--;
 		return $this->execFetchOne($offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -350,7 +350,7 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
