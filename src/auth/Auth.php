@@ -2,19 +2,17 @@
 namespace renovant\core\auth;
 class Auth {
 
+	const EVENT_LOGIN = 'auth:login';
+
 	/** User custom data */
 	protected array $data = [];
-	/** Group ID
-	 * @var integer|null */
+	/** Group ID */
 	protected ?int $GID = null;
-	/** Group name
-	 * @var string|null */
+	/** Group name */
 	protected ?string $GROUP = null;
-	/** Username (full-name)
-	 * @var string|null */
+	/** Username (full-name) */
 	protected ?string $NAME = null;
-	/** User ID
-	 * @var integer|null */
+	/** User ID */
 	protected ?int $UID = null;
 
 	static function instance(): Auth {
@@ -40,34 +38,22 @@ class Auth {
 		return (is_null($key)) ? $this->data : ($this->data[$key] ?? null);
 	}
 
-	/**
-	 * Get group ID
-	 * @return integer|null
-	 */
+	/** Get group ID */
 	function GID(): ?int {
 		return $this->GID;
 	}
 
-	/**
-	 * Get group name
-	 * @return string|null
-	 */
+	/** Get group name */
 	function GROUP(): ?string {
 		return $this->GROUP;
 	}
 
-	/**
-	 * Get Username
-	 * @return string|null
-	 */
+	/** Get Username */
 	function NAME(): ?string {
 		return $this->NAME;
 	}
 
-	/**
-	 * Get User ID
-	 * @return integer|null
-	 */
+	/** Get User ID */
 	function UID(): ?int {
 		return $this->UID;
 	}

@@ -21,36 +21,28 @@ abstract class AuthService {
 	const SET_PWD_MISMATCH	= -1;
 	const SET_PWD_EXCEPTION	= -2;
 
-	/** Pending commit  flag
-	 * @var bool */
-	protected $_commit = false;
-	/** XSRF-TOKEN value
-	 * @var string|null */
-	protected $_XSRF_TOKEN = null;
+	/** Pending commit  flag */
+	protected bool $_commit = false;
+	/** XSRF-TOKEN value */
+	protected ?string $_XSRF_TOKEN = null;
 
-	/** Cookie XSRF-TOKEN
-	 * @var int */
-	protected $cookieXSRF = self::XSRF_COOKIE;
+	/** Cookie XSRF-TOKEN */
+	protected string $cookieXSRF = self::XSRF_COOKIE;
 
 	/** Auth Provider
 	 * @var \renovant\core\auth\provider\ProviderInterface */
 	protected $Provider;
 
-	/** REMEMBER flag
-	 * @var boolean */
-	protected $rememberFlag = false;
-	/** APP modules to be skipped by checkAUTH()
-	 * @var array */
-	protected $skipAuthModules = [ 'AUTH' ];
-	/** URLs to be skipped by checkAUTH()
-	 * @var array */
-	protected $skipAuthUrls = [];
-	/** APP modules to be skipped by checkXSRF()
-	 * @var array */
-	protected $skipXSRFModules = [];
-	/** URLs to be skipped by checkXSRF()
-	 * @var array */
-	protected $skipXSRFUrls = [];
+	/** REMEMBER flag */
+	protected bool $rememberFlag = false;
+	/** APP modules to be skipped by checkAUTH() */
+	protected array $skipAuthModules = [ 'AUTH' ];
+	/** URLs to be skipped by checkAUTH() */
+	protected array $skipAuthUrls = [];
+	/** APP modules to be skipped by checkXSRF() */
+	protected array $skipXSRFModules = [];
+	/** URLs to be skipped by checkXSRF() */
+	protected array $skipXSRFUrls = [];
 
 	function __sleep() {
 		return ['_', 'cookieXSRF', 'Provider', 'skipAuthModules', 'skipAuthUrls', 'skipXSRFModules', 'skipXSRFUrls'];
@@ -71,37 +63,29 @@ abstract class AuthService {
 	/**
 	 * @throws AuthException|\ReflectionException
 	 */
-	function authenticateById(int $id) {
-		$this->doAuthenticate($this->Provider->fetchUserData($id));
+	function authenticateById(int $id): Auth {
+		return $this->doAuthenticate($this->Provider->fetchUserData($id));
 	}
 
 	/**
 	 * @throws \ReflectionException
 	 * @internal
 	 */
-	protected function doAuthenticate(array $data=[]) {
+	protected function doAuthenticate(array $data=[]): Auth {
 		$UID = $data['UID'] ?? null; unset($data['UID']);
 		$GID = $data['GID'] ?? null; unset($data['GID']);
 		$name = $data['NAME'] ?? null; unset($data['NAME']);
 		$group = $data['GROUP'] ?? null; unset($data['GROUP']);
-		$this->authenticate($UID, $GID, $name, $group, $data);
+		return $this->authenticate($UID, $GID, $name, $group, $data);
 	}
 
-	/**
-	 * @param $URI
-	 * @return boolean
-	 */
-	protected function checkAUTH($URI) {
+	protected function checkAUTH(string $URI): bool {
 		foreach ($this->skipAuthUrls as $url)
 			if(preg_match($url, $URI)) return true;
 		return false;
 	}
 
-	/**
-	 * @param $URI
-	 * @return boolean
-	 */
-	protected function checkXSRF($URI) {
+	protected function checkXSRF(string $URI): bool {
 		foreach ($this->skipXSRFUrls as $url)
 			if(preg_match($url, $URI)) return true;
 		return false;
@@ -145,7 +129,7 @@ abstract class AuthService {
 	abstract function init(HttpEvent $Event);
 
 	/** @throws AuthException */
-	final protected function doInit(HttpEvent $Event) {
+	final protected function doInit(HttpEvent $Event): void {
 		$prevTraceFn = sys::traceFn($this->_.'->init');
 		try {
 			$Req = $Event->getRequest();
@@ -185,7 +169,7 @@ abstract class AuthService {
 	 */
 	abstract function commit();
 
-	final protected function doCommit() {
+	final protected function doCommit(): void {
 		// XSRF-TOKEN (cookie + header)
 		if(!isset($_COOKIE[$this->cookieXSRF])) {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize XSRF-TOKEN');
@@ -203,7 +187,7 @@ abstract class AuthService {
 	abstract function erase();
 
 	/** @throws \ReflectionException */
-	final protected function doErase() {
+	final protected function doErase(): void {
 		// regenerate XSRF-TOKEN
 		sys::trace(LOG_DEBUG, T_INFO, 're-initialize XSRF-TOKEN');
 		$this->_XSRF_TOKEN = TokenService::generateToken();

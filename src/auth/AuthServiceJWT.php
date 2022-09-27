@@ -87,7 +87,7 @@ class AuthServiceJWT extends AuthService {
 				try {
 					$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 					if($this->Provider->tokenCheck(TokenService::TOKEN_AUTH_REMEMBER, $rememberToken['TOKEN'], $rememberToken['UID'])) {
-						$this->doAuthenticate($this->Provider->fetchUserData($rememberToken['UID']));
+						$Auth = $this->doAuthenticate($this->Provider->fetchUserData($rememberToken['UID']));
 						$this->_commit = true;
 						sys::trace(LOG_DEBUG, T_INFO, 'JWT REMEMBER-TOKEN OK');
 					}

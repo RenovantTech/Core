@@ -10,17 +10,14 @@ class CmdManager {
 	const SQL_ON_END	= 'UPDATE %s SET runningPID = NULL, lastTime = runningAt, runningAt = NULL, lastStatus = :lastStatus WHERE id = :id';
 	const SQL_ON_LOG	= 'INSERT INTO %s_logs (id, startedAt, execTime, status, log) VALUES (:id, :startedAt, :execTime, :status, :log)';
 
-	static protected $buffer = [];
+	static protected array $buffer = [];
 
-	/** PDO instance ID
-	 * @var string */
-	protected $pdo;
-	/** PDO tables prefix
-	 * @var string */
-	protected $tablePrefix = 'sys_cmd';
-	/** Timestamps of running batches
-	 * @var array */
-	protected $timestamps = [];
+	/** PDO instance ID */
+	protected ?string $pdo;
+	/** PDO tables prefix */
+	protected string $tablePrefix = 'sys_cmd';
+	/** Timestamps of running batches */
+	protected array $timestamps = [];
 
 	/**
 	 * @param string|null $pdo PDO instance ID, default to "master"
@@ -43,8 +40,6 @@ class CmdManager {
 
 	/**
 	 * Before event CONSOLE:CONTROLLER
-	 * @param Request $Req
-	 * @param Response $Res
 	 * @throws Exception
 	 */
 	function onStart(Request $Req, Response $Res) {
@@ -60,26 +55,17 @@ class CmdManager {
 		}
 	}
 
-	/**
-	 * After event CONSOLE:RESPONSE
-	 * @param string $cmd
-	 */
+	/** After event CONSOLE:RESPONSE */
 	function onEnd(string $cmd) {
 		$this->_onEnd($cmd, 'OK');
 	}
 
-	/**
-	 * After event CONSOLE:EXCEPTION
-	 * @param string $cmd
-	 */
+	/** After event CONSOLE:EXCEPTION */
 	function onException(string $cmd) {
 		$this->_onEnd($cmd, 'ERROR');
 	}
 
-	/**
-	 * After event CONSOLE:SIGTERM
-	 * @param string $cmd
-	 */
+	/** After event CONSOLE:SIGTERM */
 	function onSIGTERM(string $cmd) {
 		$this->_onEnd($cmd, 'SIGTERM');
 	}
