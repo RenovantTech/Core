@@ -257,15 +257,15 @@ class sys {
 		} catch (AuthException $Ex) {
 			http_response_code(401);
 			$HttpEvent->setException($Ex);
-			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
 		} catch (SysException $Ex) {
 			http_response_code(404);
 			$HttpEvent->setException($Ex);
-			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
 		} catch (\Exception $Ex) {
 			http_response_code(500);
 			$HttpEvent->setException($Ex);
-			sys::event(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
 		}
 	}
 
@@ -336,15 +336,9 @@ class sys {
 
 	/**
 	 * EventDispatcher helper
-	 * @param string $eventName the name of the event
-	 * @param Event|array|null $EventOrParams custom Event object or params array
-	 * @return Event the Event object
-	 * @throws ContextException
-	 * @throws EventDispatcherException
-	 * @throws \ReflectionException
 	 */
-	static function event(string $eventName, $EventOrParams=null): Event {
-		return self::$EventDispatcher->trigger($eventName, $EventOrParams);
+	static function event(): EventDispatcher {
+		return self::$EventDispatcher;
 	}
 
 	/**

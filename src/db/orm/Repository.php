@@ -490,7 +490,7 @@ class Repository {
 		if($name = $this->Metadata->event($eventName)) {
 			if(is_object($param)) $this->OrmEvent->setEntity($param);
 			elseif(is_array($param)) $this->OrmEvent->setEntities($param);
-			sys::event(is_string($name) ? $name : $eventName, $this->OrmEvent);
+			sys::event()->trigger(is_string($name) ? $name : $eventName, $this->OrmEvent);
 		}
 	}
 }

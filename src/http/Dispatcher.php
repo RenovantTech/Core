@@ -56,35 +56,35 @@ class Dispatcher {
 		$Controller = null;
 		$DispatcherEvent = new Event($Req, $Res);
 		try {
-			if (!sys::event(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
+			if (!sys::event()->trigger(Event::EVENT_ROUTE, $DispatcherEvent)->isPropagationStopped()) {
 				$Controller = sys::context()->get($this->doRoute($Req), ControllerInterface::class);
 				$DispatcherEvent->setController($Controller);
 			}
 			if ($Controller) {
 				$Res->setView(null, null, $this->viewEngine);
-				if (!sys::event(Event::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
+				if (!sys::event()->trigger(Event::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
 			list($View, $viewResource, $viewOptions) = $this->resolveView($Req, $Res, $DispatcherEvent);
 			if ($View) {
-				if (!sys::event(Event::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
+				if (!sys::event()->trigger(Event::EVENT_VIEW, $DispatcherEvent)->isPropagationStopped()) {
 					$View->render($Req, $Res, $viewResource, $viewOptions);
 				}
 			}
-			sys::event(Event::EVENT_RESPONSE, $DispatcherEvent);
+			sys::event()->trigger(Event::EVENT_RESPONSE, $DispatcherEvent);
 			$Res->send();
 		} catch (AuthException $Ex) {
 			$DispatcherEvent->setException($Ex);
-			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
+			sys::event()->trigger(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			http_response_code(401);
 		} catch (AuthzException $Ex) {
 			$DispatcherEvent->setException($Ex);
-			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
+			sys::event()->trigger(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			http_response_code(403);
 		} catch(\Exception $Ex) {
 			$DispatcherEvent->setException($Ex);
-			sys::event(Event::EVENT_EXCEPTION, $DispatcherEvent);
+			sys::event()->trigger(Event::EVENT_EXCEPTION, $DispatcherEvent);
 			if(200 == http_response_code()) http_response_code(500);
 			Tracer::onException($Ex);
 		} finally {

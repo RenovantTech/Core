@@ -46,7 +46,7 @@ class Dispatcher {
 		$Event = new Event($Req, $Res);
 		try {
 			sys::cmd()->onStart($Req, $Res);
-			if(!sys::event(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
+			if(!sys::event()->trigger(Event::EVENT_ROUTE, $Event)->isPropagationStopped()) {
 				$controllerID = $this->doRoute($Req, $Res);
 				$Controller = sys::context()->get($controllerID, ControllerInterface::class);
 				$Event->setController($Controller);
@@ -58,14 +58,14 @@ class Dispatcher {
 						$method = 'on'.self::SIGNALS[$sig];
 						if(method_exists(sys::context()->container()->getType($controllerID), $method)) $Controller->$method();
 						if($sig == SIGTERM) {
-							sys::event(Event::EVENT_SIGTERM, $Event);
+							sys::event()->trigger(Event::EVENT_SIGTERM, $Event);
 							sys::cmd()->onSIGTERM($Req->CMD());
 							exit;
 						}
 					};
 					foreach (self::SIGNALS as $k=>$v) pcntl_signal($k, $signalFn);
 				}
-				if(!sys::event(Event::EVENT_CONTROLLER, $Event)->isPropagationStopped()) {
+				if(!sys::event()->trigger(Event::EVENT_CONTROLLER, $Event)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
 			}
@@ -73,17 +73,17 @@ class Dispatcher {
 				if(is_string($View)) list($View, $resource) = $this->resolveView($View, $Req, $Res);
 				if(!$View instanceof ViewInterface) throw new Exception(13);
 				$Event->setView($View);
-				if(!sys::event(Event::EVENT_VIEW, $Event)->isPropagationStopped()) {
+				if(!sys::event()->trigger(Event::EVENT_VIEW, $Event)->isPropagationStopped()) {
 					$View->render($Req, $Res, $resource);
 				}
 			}
-			sys::event(Event::EVENT_RESPONSE, $Event);
+			sys::event()->trigger(Event::EVENT_RESPONSE, $Event);
 			sys::cmd()->onEnd($Req->CMD());
 			$Res->send();
 		} catch(\Exception $Ex) {
 			Tracer::onException($Ex);
 			$Event->setException($Ex);
-			sys::event(Event::EVENT_EXCEPTION, $Event);
+			sys::event()->trigger(Event::EVENT_EXCEPTION, $Event);
 			sys::cmd()->onException($Req->CMD());
 		}
 	}

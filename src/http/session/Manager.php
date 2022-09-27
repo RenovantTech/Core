@@ -59,7 +59,7 @@ class Manager {
 		session_set_cookie_params($this->cookie['lifetime'], $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
 		session_set_save_handler($this->Handler, true);
 		session_start();
-		sys::event(self::EVENT_START);
+		sys::event()->trigger(self::EVENT_START);
 	}
 
 	/**
@@ -80,7 +80,7 @@ class Manager {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
 	function end(): void {
-		sys::event(self::EVENT_END);
+		sys::event()->trigger(self::EVENT_END);
 		session_write_close();
 	}
 }
