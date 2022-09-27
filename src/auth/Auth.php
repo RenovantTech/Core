@@ -2,8 +2,6 @@
 namespace renovant\core\auth;
 class Auth {
 
-	const EVENT_LOGIN = 'auth:login';
-
 	/** User custom data */
 	protected array $data = [];
 	/** Group ID */
