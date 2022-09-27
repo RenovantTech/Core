@@ -5,12 +5,12 @@ use renovant\core\sys,
 	renovant\core\context\ContextException;
 class EventDispatcher {
 
-	/** registered listeners (callbacks)
-	 * @var array */
-	protected $listeners = [];
-	/** initialized namespaces
-	 * @var array */
-	protected $namespaces = [];
+	/** registered listeners (callbacks) */
+	protected array $listeners = [];
+	/** initialized namespaces */
+	protected array $namespaces = [];
+	/** shutdown events queue */
+	static protected array $queue = [];
 
 	/**
 	 * Initialize namespace
@@ -34,9 +34,9 @@ class EventDispatcher {
 	 * @param callable $callback the callback function to be invoked
 	 * @param int $priority trigger precedence on the listeners chain (higher values execute earliest)
 	 */
-	function listen(string $eventName, callable $callback, $priority=1) {
+	function listen(string $eventName, callable $callback, int $priority=1) {
 		$eventName = strtoupper($eventName);
-		$this->listeners[$eventName][(int)$priority][] = $callback;
+		$this->listeners[$eventName][$priority][] = $callback;
 		krsort($this->listeners[$eventName], SORT_NUMERIC);
 	}
 
@@ -49,7 +49,7 @@ class EventDispatcher {
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	function trigger(string $eventName, $EventOrParams=null): Event {
+	function trigger(string $eventName, Event|array|null $EventOrParams=null): Event {
 		$eventName = strtoupper($eventName);
 		if(!isset($this->listeners[$eventName]))
 			sys::trace(LOG_DEBUG, T_EVENT, $eventName);
@@ -79,4 +79,34 @@ class EventDispatcher {
 		}
 		return $Event;
 	}
+
+	/**
+	 * Enqueue event to be triggered on shutdown
+	 * @param string $eventName
+	 * @param Event|array|null $EventOrParams custom Event object or params array
+	 * @return void
+	 */
+	function enqueue(string $eventName, Event|array|null $EventOrParams=null): void {
+		$eventName = strtoupper($eventName);
+		sys::trace(LOG_DEBUG, T_EVENT, '[ENQUEUE] '.$eventName);
+		self::$queue[] = [$eventName, $EventOrParams];
+	}
+
+	/**
+	 * @throws \ReflectionException|EventDispatcherException|ContextException
+	 */
+	static function shutdown() {
+		if(empty(self::$queue)) return;
+		$prevTraceFn = sys::traceFn('sys.EventDispatcher::'.__FUNCTION__);
+		try {
+			foreach (self::$queue as $i => list($eventName, $EventOrParams)) {
+				sys::event()->trigger($eventName, $EventOrParams);
+				unset(self::$queue[$i]);
+			}
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
+	}
 }
+if(PHP_SAPI != 'cli')
+	register_shutdown_function(__NAMESPACE__.'\EventDispatcher::shutdown');
