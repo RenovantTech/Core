@@ -142,7 +142,10 @@ class AuthzManager {
 			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ROLE, 'code'=>$role])->fetchColumn())
 				throw new AuthzException(611, [$role]);
 			return (bool) $this->pdo(self::SQL_SET_ROLE)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
-		} finally { sys::traceFn($prevTraceFn); }
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
@@ -152,7 +155,10 @@ class AuthzManager {
 			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ROLE, 'code'=>$role])->fetchColumn())
 				throw new AuthzException(631, [$role]);
 			return (bool) $this->pdo(self::SQL_REVOKE_ROLE)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
-		} finally { sys::traceFn($prevTraceFn); }
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
@@ -162,7 +168,10 @@ class AuthzManager {
 			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_PERMISSION, 'code'=>$permission])->fetchColumn())
 				throw new AuthzException(612, [$permission]);
 			return (bool) $this->pdo(self::SQL_SET_PERMISSION)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
-		} finally { sys::traceFn($prevTraceFn); }
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
@@ -172,55 +181,87 @@ class AuthzManager {
 			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_PERMISSION, 'code'=>$permission])->fetchColumn())
 				throw new AuthzException(632, [$permission]);
 			return (bool) $this->pdo(self::SQL_REVOKE_PERMISSION)->execute(['authz_id'=>$authzId, 'user_id'=>$userId])->rowCount();
-		} finally { sys::traceFn($prevTraceFn); }
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
 	function setUserAcl(string $acl, int $userId, array $items): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
-			throw new AuthzException(613, [$acl]);
-		$items = array_unique($items, SORT_NUMERIC);
-		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($items)])->rowCount();
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+				throw new AuthzException(613, [$acl]);
+			$items = array_unique($items, SORT_NUMERIC);
+			return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($items)])->rowCount();
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
 	function setUserAclItem(string $acl, int $userId, int|string $item): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
-			throw new AuthzException(613, [$acl]);
-		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		$data = ($data) ? (array)json_decode($data) : [];
-		$data[] = $item;
-		$data = array_unique($data, SORT_NUMERIC);
-		return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+				throw new AuthzException(613, [$acl]);
+			$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
+			$data = ($data) ? (array)json_decode($data) : [];
+			$data[] = $item;
+			$data = array_unique($data, SORT_NUMERIC);
+			return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
 	function fetchUserAclData(string $acl, int $userId): array {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
-			throw new AuthzException(623, [$acl]);
-		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		return ($data) ? (array)json_decode($data) : [];
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+				throw new AuthzException(623, [$acl]);
+			$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
+			return ($data) ? (array)json_decode($data) : [];
+		} finally {
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
 	function revokeUserAcl(string $acl, int $userId): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
-			throw new AuthzException(633, [$acl]);
-		return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+				throw new AuthzException(633, [$acl]);
+			return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	/** @throws AuthzException */
 	function revokeUserAclItem(string $acl, int $userId, int|string $item): bool {
-		if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
-			throw new AuthzException(633, [$acl]);
-		$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
-		$data = ($data) ? (array)json_decode($data) : [];
-		$data = array_diff($data, [$item]);
-		$data = array_unique($data, SORT_NUMERIC);
-		if(empty($data))
-			return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
-		else
-			return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
+		$prevTraceFn = sys::traceFn($this->_);
+		try {
+			if(!$authzId = $this->pdo(self::SQL_FETCH_ID)->execute(['type'=>Authz::TYPE_ACL, 'code'=>$acl])->fetchColumn())
+				throw new AuthzException(633, [$acl]);
+			$data = $this->pdo(self::SQL_FETCH_ACL_DATA)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->fetchColumn();
+			$data = ($data) ? (array)json_decode($data) : [];
+			$data = array_diff($data, [$item]);
+			$data = array_unique($data, SORT_NUMERIC);
+			if(empty($data))
+				return (bool) $this->pdo(self::SQL_REVOKE_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId])->rowCount();
+			else
+				return (bool) $this->pdo(self::SQL_SET_ACL)->execute(['user_id'=>$userId, 'authz_id'=>$authzId, 'data'=>json_encode($data)])->rowCount();
+		} finally {
+			sys::cache($this->cache)->delete($this->cachePrefix.$userId);
+			sys::traceFn($prevTraceFn);
+		}
 	}
 
 	protected function pdo($sql): PDOStatement {
