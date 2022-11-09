@@ -101,7 +101,7 @@ class CmdManager {
 	}
 
 	function scan() {
-		include __DIR__.'/CmdManager.scan.inc';
+		include __DIR__.'/CmdManager.scan.php';
 		scan($this->pdo, $this->tablePrefix);
 	}
 

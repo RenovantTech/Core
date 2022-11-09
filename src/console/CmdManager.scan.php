@@ -34,11 +34,7 @@ function scan(string $pdo, string $table): void {
 		}
 		$c = 0;
 		$cache = [];
-		$RefProperty = new ReflectionProperty(sys::class, 'routes');
-		$RefProperty->setAccessible(true);
-		$routes = $RefProperty->getValue(sys::class);
-		$RefProperty->setAccessible(false);
-
+		$routes = (new \ReflectionClass(sys::class))->getStaticPropertyValue('routes');
 
 		foreach ($routes as $app => $conf) {
 			sys::trace(LOG_DEBUG, T_INFO, 'searching namespace ' . $conf['namespace']);
