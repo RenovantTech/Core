@@ -4,26 +4,20 @@ use const renovant\core\trace\T_INFO;
 use renovant\core\sys;
 class Response {
 
-	const DEFAULT_MIME = 'text/html';
+	const DEFAULT_CONTENT_TYPE = 'text/html';
 
-	/** Response data, aka Models passed to the MVC View
-	 * @var array */
-	private $data = [];
-	/** HTTP header "Content-Type"
-	 * @var string */
-	private $contentType;
-	/** Response size (bytes)
-	 * @var int */
-	private $size = 0;
-	/** Current View name
-	 * @var string|null */
-	private $view = null;
-	/** Current View Engine
-	 * @var ViewInterface|string|null */
-	private $viewEngine = null;
-	/** Current View options
-	 * @var array|null */
-	private $viewOptions = null;
+	/** Response data, aka Models passed to the MVC View */
+	private array $data = [];
+	/** HTTP header "Content-Type" */
+	private string $contentType = self::DEFAULT_CONTENT_TYPE;
+	/** Response size (bytes) */
+	private int $size = 0;
+	/** Current View name */
+	private ?string $view = null;
+	/** Current View Engine */
+	private ViewInterface|string|false|null $viewEngine = null;
+	/** Current View options */
+	private ?array $viewOptions = null;
 
 	// === getter & setter ========================================================================
 
@@ -75,7 +69,7 @@ class Response {
 	 * Get View, options and engine
 	 * @return array ViewInterface|null|string
 	 */
-	function getView() {
+	function getView(): array {
 		return [$this->view, $this->viewOptions, $this->viewEngine];
 	}
 
@@ -93,10 +87,10 @@ class Response {
 
 	/**
 	 * Set Response output, erasing existing content
-	 * @param $output
+	 * @param string $output
 	 * @return Response (fluent interface)
 	 */
-	function content($output): Response {
+	function content(string $output): Response {
 		ob_clean();
 		echo $output;
 		return $this;
@@ -106,7 +100,7 @@ class Response {
 	 * Set HTTP header "Content-Type"
 	 */
 	function contentType(string $contentType): Response {
-		if(!$this->contentType) $this->contentType = $contentType;
+		$this->contentType = $contentType;
 		return $this;
 	}
 
@@ -142,7 +136,7 @@ class Response {
 	 * @param string $location URL to be redirect to
 	 * @param int $statusCode the HTTP status code, defaults to 302.
 	 */
-	function redirect($location, $statusCode=302) {
+	function redirect(string $location, int $statusCode=302) {
 		ob_clean();
 		$this->view = null;
 		$this->viewEngine = null;
@@ -176,7 +170,7 @@ class Response {
 	 */
 	function send() {
 		$this->size = ob_get_length();
-		if($this->size) header('Content-Type: '.(($this->contentType)?:self::DEFAULT_MIME));
+		if($this->size) header('Content-Type: '.(($this->contentType)?:self::DEFAULT_CONTENT_TYPE));
 		sys::trace(LOG_DEBUG, T_INFO, null, null, 'sys.http.Response->send');
 		ob_flush();
 		function_exists('fastcgi_finish_request') and fastcgi_finish_request();
@@ -191,7 +185,7 @@ class Response {
 	 * @param mixed|null $v data value
 	 * @return Response (fluent interface)
 	 */
-	function set($k, $v=null) {
+	function set($k, $v=null): Response {
 		if(is_array($k)) $this->data = array_merge($this->data, $k);
 		elseif(is_string($k) && preg_match('/^[a-zA-Z]+/',$k)) $this->data[$k] = $v;
 		else trigger_error(__METHOD__.': invalid key');
@@ -200,15 +194,15 @@ class Response {
 
 	/**
 	 * Set the View name to be rendered with Response data
-	 * @param string $view View name
+	 * @param string|null $view View name
 	 * @param array|null $options View options
 	 * @param \renovant\core\http\ViewInterface|string|integer|null $engine View Engine to be used
 	 * @return Response
 	 */
-	function setView($view, array $options=null, $engine=null): Response {
+	function setView(?string $view, ?array $options=null, ViewInterface|string|bool|null $engine=null): Response {
 		if($view) $this->view = $view;
 		if($options) $this->viewOptions = $options;
-		if($engine) $this->viewEngine = $engine;
+		if(!is_null($engine)) $this->viewEngine = $engine;
 		return $this;
 	}
 }
