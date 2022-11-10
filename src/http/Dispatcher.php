@@ -61,7 +61,6 @@ class Dispatcher {
 				$DispatcherEvent->setController($Controller);
 			}
 			if ($Controller) {
-				$Res->setView(null, null, $this->viewEngine);
 				if (!sys::event()->trigger(Event::EVENT_CONTROLLER, $DispatcherEvent)->isPropagationStopped()) {
 					$Controller->handle($Req, $Res);
 				}
@@ -127,7 +126,9 @@ class Dispatcher {
 	protected function resolveView(Request $Req, Response $Res, Event $Event) {
 		try {
 			list($view, $viewOptions, $viewEngine) = $Res->getView() ?: $Event->getView();
+			if(is_null($viewEngine)) $viewEngine = $this->viewEngine;
 			if(!$viewEngine) return [null, null, null];
+			sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_ . '->' . __FUNCTION__);
 			// detect View class
 			$viewClass = (array_key_exists($viewEngine, $this->viewEngines)) ? $this->viewEngines[$viewEngine] : $viewEngine;
 			if(!class_exists($viewClass) || $viewClass instanceof ViewInterface) throw new Exception(12, $viewEngine);
@@ -137,8 +138,8 @@ class Dispatcher {
 			if(!empty($view)) {
 				$resource = str_replace('//','/', (substr($view,0,1) != '/' ) ? dirname($Req->getAttribute('APP_MOD_URI').'*').'/'.$view : $view);
 				$Req->setAttribute('RESOURCES_DIR', rtrim(preg_replace('/[\w-]+\/\.\.\//', '', (substr($this->resourcesDir,0,1) != '/' ) ? $Req->getAttribute('APP_MOD_DIR').$this->resourcesDir : $this->resourcesDir), '/'));
+				sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);
 			} else $resource = null;
-			sys::trace(LOG_DEBUG, T_INFO, sprintf('view "%s", resource "%s"', $view, $resource), null, $this->_.'->'.__FUNCTION__);
 			return [$View, $resource, $viewOptions];
 		} catch (\Exception $Ex) {
 			http_response_code(500);
