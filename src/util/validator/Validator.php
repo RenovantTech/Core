@@ -42,7 +42,7 @@ class Validator {
 		$k = str_replace('\\','.',$class).':util:validator';
 		if(!$cache[$class] = sys::cache(SYS_CACHE)->get($k)) {
 			$cache[$class] = (new ClassParser)->parse($class);
-			sys::cache(SYS_CACHE)->set($k, $cache[$class], null, 'util:validator');
+			sys::cache(SYS_CACHE)->set($k, $cache[$class], 0, 'util:validator');
 		}
 		return $cache[$class];
 	}

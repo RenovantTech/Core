@@ -30,7 +30,7 @@ trait EntityTrait {
 			$k = str_replace('\\','.',__CLASS__).':'.OrmAuthz::CACHE_TAG;
 			if(false === $data = sys::cache(SYS_CACHE)->get($k)) {
 				$data = OrmTagsParser::parse(__CLASS__);
-				sys::cache(SYS_CACHE)->set($k, $data, null, OrmAuthz::CACHE_TAG);
+				sys::cache(SYS_CACHE)->set($k, $data, 0, OrmAuthz::CACHE_TAG);
 			}
 			self::$OrmAuthz = $data;
 		}
@@ -43,7 +43,7 @@ trait EntityTrait {
 			$k = str_replace('\\','.',__CLASS__).':'.Metadata::CACHE_TAG;
 			if(!$data = sys::cache(SYS_CACHE)->get($k)) {
 				$data = new Metadata(__CLASS__);
-				sys::cache(SYS_CACHE)->set($k, $data, null, Metadata::CACHE_TAG);
+				sys::cache(SYS_CACHE)->set($k, $data, 0, Metadata::CACHE_TAG);
 			}
 			self::$Metadata = $data;
 		}
