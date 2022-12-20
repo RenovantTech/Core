@@ -45,7 +45,8 @@ sys:
   database:
     sqlite:
       #dns:      sqlite:/tmp/renovant-core/db.sqlite
-      dns:      sqlite:file:sqlite?mode=memory
+      #dns:      sqlite:file:sqlite?mode=memory
+      dns:      "sqlite::memory"
     mysql:
       dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
       user:     phpunit
