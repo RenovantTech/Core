@@ -58,6 +58,7 @@ class Context {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
 		$this->namespaces[] = $namespace;
 		if(!$context = sys::cache(SYS_CACHE)->get($namespace.'.$context')) {
+			$context = [];
 			$context['includes'] = ContextYamlParser::parseNamespace($namespace);
 			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
 			$context['events'] = EventYamlParser::parseNamespace($namespace);

@@ -96,7 +96,7 @@ class DataMapper {
 				case 'integer': $v = (int) $v; break;
 				case 'float': $v = (float) $v; break;
 				case 'boolean': $v = (bool) $v; break;
-				case 'datetime': $v = date(DateTime::W3C, strtotime($v)); break;
+				case 'datetime': $v = is_string($v) ? date(DateTime::W3C, strtotime($v)) : null; break;
 				case 'microdatetime': $v = (string) $v; break;
 				case 'array':
 				case 'object': $v = unserialize($v); break;

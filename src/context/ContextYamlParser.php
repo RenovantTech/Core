@@ -15,7 +15,7 @@ class ContextYamlParser {
 	 * @return array
 	 * @throws ContextException
 	 */
-	static function parseNamespace(string $namespace) {
+	static function parseNamespace(string $namespace): array {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$includes = [];
 		try {

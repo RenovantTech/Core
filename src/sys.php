@@ -356,7 +356,7 @@ class sys {
 			$namespace = substr($path, 0 , $i);
 			$class = substr($path, $i+1);
 		}
-		$realPath = null;
+		$realPath = '';
 		foreach(self::$namespaces as $baseName => $baseDir) {
 			if(0 === strpos($path, $baseName)) {
 				$realPath = $baseDir.str_replace(['\\','_'], DIRECTORY_SEPARATOR, substr($namespace, strlen($baseName)).DIRECTORY_SEPARATOR.$class);

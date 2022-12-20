@@ -264,6 +264,7 @@ class Query {
 	 * @return $this
 	 */
 	function orderByExp(?string $orderByExp) {
+		if(is_null($orderByExp)) return $this;
 		$this->PDOStatement = null;
 		$expArray = explode(self::EXP_DELIMITER, $orderByExp);
 		$orderBy = [];
