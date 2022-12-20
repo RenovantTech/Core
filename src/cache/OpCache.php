@@ -55,7 +55,7 @@ class OpCache implements CacheInterface {
 		sys::pdo($pdo)->exec(sprintf(self::SQL_INIT, $table));
 	}
 
-	function get($id) {
+	function get(string $id) {
 		if(isset($this->cache[$id])) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] '.$id, null, $this->_);
 			return $this->cache[$id];
@@ -70,12 +70,12 @@ class OpCache implements CacheInterface {
 		}
 	}
 
-	function has($id) {
+	function has(string $id): bool {
 		if(isset($this->cache[$id])) return true;
 		return file_exists(self::_file($this->id, $id));
 	}
 
-	function set($id, $value, $expire=null, $tags=null) {
+	function set(string $id, mixed $value, int $expire=0, mixed $tags=null): bool {
 		if($this->writeBuffer) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
 			self::$buffer[$this->id.'#'.$this->pdo.'#'.$this->table][] = [$id, $value, $expire, $tags];
@@ -91,7 +91,7 @@ class OpCache implements CacheInterface {
 
 	}
 
-	function delete($id) {
+	function delete(string $id): bool {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
 		if(isset($this->cache[$id])) {
 			$this->cache[$id] = null;
@@ -102,7 +102,7 @@ class OpCache implements CacheInterface {
 		return true;
 	}
 
-	function clean($mode=self::CLEAN_ALL, $tags=null) {
+	function clean(int $mode=self::CLEAN_ALL, $tags=null): bool {
 		$this->cache = [];
 		unset(self::$buffer[$this->id.'#'.$this->pdo.'#'.$this->table]);
 		switch($mode) {

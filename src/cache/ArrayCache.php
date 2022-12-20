@@ -9,23 +9,23 @@ class ArrayCache implements CacheInterface {
 	 * @var array */
 	protected $store = [];
 
-	function get($id) {
+	function get(string $id) {
 		if(isset($this->store[$id])) return $this->store[$id];
 		sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id);
 		return false;
 	}
 
-	function has($id) {
+	function has(string $id): bool {
 		return isset($this->store[$id]);
 	}
 
-	function set($id, $value, $expire=0, $tag=null) {
+	function set(string $id, mixed $value, int $expire=0, mixed $tag=null): bool {
 		sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id);
 		$this->store[$id] = $value;
 		return true;
 	}
 
-	function delete($id) {
+	function delete(string $id): bool {
 		sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id);
 		if(isset($this->store[$id])) {
 			unset($this->store[$id]);
@@ -34,7 +34,7 @@ class ArrayCache implements CacheInterface {
 		return false;
 	}
 
-	function clean($mode=CacheInterface::CLEAN_ALL, $tags=null) {
+	function clean(int $mode=CacheInterface::CLEAN_ALL, $tags=null): bool {
 
 	}
 }

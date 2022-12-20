@@ -54,7 +54,7 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
-	function get($id) {
+	function get(string $id) {
 		if(isset($this->cache[$id])) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] ' . $id, null, $this->_);
 			return $this->cache[$id];
@@ -105,7 +105,7 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
-	function has($id) {
+	function has(string $id): bool {
 		if(isset($this->cache[$id]))
 			return true;
 		try {
@@ -120,7 +120,7 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
-	function set($id, $value, $expire=0, $tags=null) {
+	function set(string $id, mixed $value, int $expire=0, mixed $tags=null): bool {
 		try {
 			if($this->writeBuffer) {
 				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
@@ -140,7 +140,7 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
-	function delete($id) {
+	function delete(string $id): bool {
 		if(isset($this->cache[$id])) {
 			$this->cache[$id] = null;
 			unset($this->cache[$id]);
@@ -157,7 +157,7 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 
-	function clean($mode=self::CLEAN_ALL, $tags=null) {
+	function clean(int $mode=self::CLEAN_ALL, $tags=null): bool {
 		sys::trace(LOG_DEBUG, T_CACHE, '[CLEAN]', null, $this->_);
 		$this->cache = [];
 		switch($mode) {
