@@ -16,6 +16,7 @@ class PDOStatement extends \PDOStatement {
 	 * @param integer $traceLevel trace level, use a LOG_? constant value, default LOG_INFO
 	 * @return PDOStatement
 	 */
+	#[\ReturnTypeWillChange]
 	function execute(array $params = null, int $traceLevel=LOG_INFO) {
 		PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
 		parent::execute($params);

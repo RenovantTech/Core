@@ -38,6 +38,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * Returns an instance of the DocComment
 	 * @return DocComment
 	 */
+	#[\ReturnTypeWillChange]
 	function getDocComment() {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());

@@ -81,6 +81,7 @@ class ReflectionClass extends \ReflectionClass {
 	/**
 	 * Returns an instance of the DocComment
 	 */
+	#[\ReturnTypeWillChange]
 	function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());
