@@ -186,7 +186,7 @@ class Query {
 	 */
 	function criteriaExp(?string $criteriaExp) {
 		$this->PDOStatement = null;
-		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, $criteriaExp));
+		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, trim($criteriaExp,'|')));
 		return $this;
 	}
 
