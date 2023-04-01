@@ -25,25 +25,44 @@ INSERT INTO sys_authz (id, type, code, config) VALUES
 	(15,'ACL',			'acl:type',			NULL)
 ;
 
-INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
+INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
 	('USER_ROLE',		1, 1,	NULL),				-- sys-admin
 	('USER_PERMISSION',	1, 7,	NULL),				-- perm:all
-	('USER_ACL',		1, 13,	'[1,2,3,4,5,6]'),	-- acl:id
-	('USER_ACL',		1, 14,	'[1,2,3]'),			-- acl:school
-	('USER_ACL',		1, 15,	'[0,1,2,3]'),		-- acl:type
+	('USER_ACL',		1, 13,	1),					-- acl:id
+	('USER_ACL',		1, 13,	2),					-- acl:id
+	('USER_ACL',		1, 13,	3),					-- acl:id
+	('USER_ACL',		1, 13,	4),					-- acl:id
+	('USER_ACL',		1, 13,	5),					-- acl:id
+	('USER_ACL',		1, 13,	6),					-- acl:id
+	('USER_ACL',		1, 14,	1),					-- acl:school
+	('USER_ACL',		1, 14,	2),					-- acl:school
+	('USER_ACL',		1, 14,	3),					-- acl:school
+	('USER_ACL',		1, 15,	0),					-- acl:type
+	('USER_ACL',		1, 15,	1),					-- acl:type
+	('USER_ACL',		1, 15,	2),					-- acl:type
+	('USER_ACL',		1, 15,	3),					-- acl:type
 
 	('USER_ROLE', 		2, 2,	NULL),				-- admin:insert
 	('USER_ROLE', 		2, 3,	NULL),				-- admin:select1
 	('USER_PERMISSION',	2, 8,	NULL),				-- perm:insert
 	('USER_PERMISSION',	2, 9,	NULL),				-- perm:select1
-	('USER_ACL',		2, 13,	'[1,2,3,4,5,6]'),	-- acl:id
+	('USER_ACL',		2, 13,	1),					-- acl:id
+	('USER_ACL',		2, 13,	2),					-- acl:id
+	('USER_ACL',		2, 13,	3),					-- acl:id
+	('USER_ACL',		2, 13,	4),					-- acl:id
+	('USER_ACL',		2, 13,	5),					-- acl:id
+	('USER_ACL',		2, 13,	6),					-- acl:id
 
 	('USER_ROLE', 		3, 5,	NULL),				-- admin:update1
 	('USER_ROLE', 		3, 6,	NULL),				-- admin:update2
 	('USER_PERMISSION',	3, 11,	NULL),				-- perm:update1
 	('USER_PERMISSION',	3, 12,	NULL),				-- perm:update2
-	('USER_ACL',		3, 13,	'[1,2,3,4,5,6]')	-- acl:id
-
+	('USER_ACL',		3, 13,	1),					-- acl:id
+	('USER_ACL',		3, 13,	2),					-- acl:id
+	('USER_ACL',		3, 13,	3),					-- acl:id
+	('USER_ACL',		3, 13,	4),					-- acl:id
+	('USER_ACL',		3, 13,	5),					-- acl:id
+	('USER_ACL',		3, 13,	6)					-- acl:id
 ;
 
 CREATE TABLE IF NOT EXISTS classes (

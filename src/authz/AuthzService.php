@@ -9,7 +9,7 @@ class AuthzService {
 	const CACHE_PREFIX	= 'sys.authz.';
 
 	const SQL_FETCH_AUTHZ = 'SELECT id, type, code, config FROM %s WHERE id IN (%s)';
-	const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, data FROM %s_maps WHERE user_id = :user_id';
+	const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, item_id FROM %s_maps WHERE user_id = :user_id';
 
 	/** Cache ID */
 	protected string $cache = 'sys';
@@ -65,7 +65,8 @@ class AuthzService {
 						->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
 					$authzIds = [];
 					foreach ($mapsArray as $map)
-						$authzIds[] = $map['authz_id'];
+						$authzIds[] = (int)$map['authz_id'];
+					$authzIds = array_unique($authzIds);
 					if(!empty($authzIds)) {
 						$authzArray = sys::pdo($this->pdo)
 							->prepare(sprintf(self::SQL_FETCH_AUTHZ, $this->tables['authz'], implode(',', $authzIds)))
@@ -75,10 +76,11 @@ class AuthzService {
 								case Authz::TYPE_ROLE: $roles[] = $authz['code']; break;
 								case Authz::TYPE_PERMISSION: $permissions[] = $authz['code']; break;
 								case Authz::TYPE_ACL:
-									$data = array_values(array_filter($mapsArray, function ($map) use ($authz) {
+									$data = array_filter($mapsArray, function ($map) use ($authz) {
 										return ($map['authz_id'] == $authz['id']);
-									}, ARRAY_FILTER_USE_BOTH))[0]['data'];
-									$acl[$authz['code']] = (array)json_decode($data);
+									}, ARRAY_FILTER_USE_BOTH);
+									foreach($data as $d)
+										$acl[$authz['code']][] = $d['item_id'];
 									break;
 							}
 						}

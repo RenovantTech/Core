@@ -16,7 +16,7 @@ INSERT INTO sys_authz (id, type, code, config) VALUES
 	(7,	'ACL',			'blog.author',	NULL)
 ;
 
-INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
+INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
 	('USER_ROLE', 1, 1,	NULL),	-- ADMIN
 	('USER_ROLE', 2, 2,	NULL),	-- STAFF
 	('USER_ROLE', 3, 3,	NULL),	-- USER
@@ -25,5 +25,6 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
 	('USER_PERMISSION', 1, 4,	NULL),	-- blog.edit
 	('USER_PERMISSION', 1, 5,	NULL),	-- blog.delete
 
-	('USER_ACL', 1, 7, '[123,456]')	-- blog.author
+	('USER_ACL', 1, 7, 123),	-- blog.author
+	('USER_ACL', 1, 7, 456)		-- blog.author
 ;
