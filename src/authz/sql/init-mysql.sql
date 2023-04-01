@@ -40,14 +40,32 @@ CREATE TABLE IF NOT EXISTS t_authz_rules (
 	CONSTRAINT fk_t_authz_rules__authz_id FOREIGN KEY (authz_id) REFERENCES t_authz (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 */
-DROP VIEW IF EXISTS vw_t_authz_maps;
-CREATE VIEW vw_t_authz_maps AS
+DROP VIEW IF EXISTS vw_t_authz_maps_items;
+CREATE VIEW vw_t_authz_maps_items AS
 	SELECT
-		maps.*,
+		maps.type,
+		maps.item_id,
+		maps.authz_id,
+		GROUP_CONCAT(maps.user_id) AS users,
+		authz.code,
+		authz.label
+	FROM t_authz_maps maps
+		 LEFT JOIN t_authz authz ON maps.authz_id = authz.id
+		 GROUP BY maps.type, maps.item_id, maps.authz_id
+;
+
+DROP VIEW IF EXISTS vw_t_authz_maps_users;
+CREATE VIEW vw_t_authz_maps_users AS
+	SELECT
+		maps.type,
+		maps.user_id,
+		maps.authz_id,
+		GROUP_CONCAT(maps.item_id) AS items,
 		CONCAT(u.name, ' ', u.surname) AS userName,
 		authz.code,
 		authz.label
 	FROM t_authz_maps maps
 		 LEFT JOIN t_authz authz ON maps.authz_id = authz.id
 		 LEFT JOIN t_users u ON maps.user_id = u.id
+		 GROUP BY maps.type, maps.user_id, maps.authz_id
 ;
