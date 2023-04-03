@@ -192,12 +192,12 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('acl-12-34-456', $ObjAuthzMock->acl(12, 34, 456));
 
 		self::authenticate(2);
-		$this->assertEquals('acl-all-A1-D1-123', $ObjAuthzMock->aclAll('A1', 'D1', 123));
-		$this->assertEquals('acl-all-A2-D2-123', $ObjAuthzMock->aclAll('A2', 'D2', 123));
+		$this->assertEquals('acl-all-1-1-123', $ObjAuthzMock->aclAll(1, 1, 123));
+		$this->assertEquals('acl-all-2-2-123', $ObjAuthzMock->aclAll(2, 2, 123));
 
 		self::authenticate(3);
-		$this->assertEquals('acl-any-A1-D9-123', $ObjAuthzMock->aclAny('A1', 'D9', 123));
-		$this->assertEquals('acl-any-A2-D9-123', $ObjAuthzMock->aclAny('A2', 'D9', 123));
+		$this->assertEquals('acl-any-1-9-123', $ObjAuthzMock->aclAny(1, 9, 123));
+		$this->assertEquals('acl-any-2-9-123', $ObjAuthzMock->aclAny(2, 9, 123));
 	}
 
 	/**
@@ -223,7 +223,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[ACL] "acl.district"');
 
 		self::authenticate(3);
-		$this->assertEquals('acl-all-A1-D9-123', $ObjAuthzMock->aclAll('A1', 'D9', 123));
+		$this->assertEquals('acl-all-1-9-123', $ObjAuthzMock->aclAll(1, 9, 123));
 	}
 
 	/**
@@ -236,6 +236,6 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 		$this->expectExceptionMessage('[ACL] "acl.area, acl.district"');
 
 		self::authenticate(1);
-		$this->assertEquals('acl-any-A1-D1-123', $ObjAuthzMock->aclAny('A1', 'D1', 123));
+		$this->assertEquals('acl-any-1-1-123', $ObjAuthzMock->aclAny(1, 1, 123));
 	}
 }

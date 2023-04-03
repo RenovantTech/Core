@@ -272,7 +272,6 @@ class AuthzManagerTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSetUserAcl(AuthzManager $AuthzManager) {
 		$this->assertTrue($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
-		$this->assertFalse($AuthzManager->setUserAcl('blog.author', 1, [123,456]));
 		self::authenticate(1);
 		$this->assertTrue(sys::authz()->acl('blog.author', 123));
 		$this->assertTrue(sys::authz()->acl('blog.author', 456));

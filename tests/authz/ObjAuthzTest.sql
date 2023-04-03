@@ -19,7 +19,7 @@ INSERT INTO sys_authz (id, type, code, config) VALUES
 	(9,	'ACL',			'acl.district',		NULL)
 ;
 
-INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
+INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
 	('USER_ROLE', 1, 1,	NULL),	-- role.service
 	('USER_ROLE', 1, 2,	NULL),	-- role.service.foo
 
@@ -45,12 +45,17 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, data) VALUES
 	('USER_PERMISSION', 5, 4,	NULL),	-- role.service
 
 
-	('USER_ACL', 1, 7,	'[123,456]'),		-- acl.foo
+	('USER_ACL', 1, 7,	123),	-- acl.foo
+	('USER_ACL', 1, 7,	456),	-- acl.foo
 
-	('USER_ACL', 2, 8,	'["A1","A2"]'),		-- acl.area
-	('USER_ACL', 2, 9,	'["D1","D2"]'),		-- acl.district
+	('USER_ACL', 2, 8,	1),		-- acl.area
+	('USER_ACL', 2, 8,	2),		-- acl.area
+	('USER_ACL', 2, 9,	1),		-- acl.district
+	('USER_ACL', 2, 9,	2),		-- acl.district
 
-	('USER_ACL', 3, 8,	'["A1","A2"]'),		-- acl.area
+	('USER_ACL', 3, 8,	1),		-- acl.area
+	('USER_ACL', 3, 8,	2),		-- acl.area
 
-	('USER_ACL', 4, 9,	'["D1","D2"]')		-- acl.district
+	('USER_ACL', 4, 9,	1),		-- acl.district
+	('USER_ACL', 4, 9,	2)		-- acl.district
 ;
