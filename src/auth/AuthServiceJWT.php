@@ -82,9 +82,10 @@ class AuthServiceJWT extends AuthService {
 					$this->_commit = true;
 					sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REFRESH-TOKEN OK');
 					$ok = true;
-				}
-			} catch (HttpException) { // CryptoCookie Exception
-				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REFRESH-TOKEN exception: INVALID');
+				} else unset($_COOKIE[$this->cookieREFRESH]);
+			} catch (HttpException $Ex) { // CryptoCookie Exception
+				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REFRESH-TOKEN exception: INVALID', $Ex->getMessage());
+				unset($_COOKIE[$this->cookieREFRESH]);
 			}
 		}
 		if (!$ok && isset($_COOKIE[$this->cookieREMEMBER])) {
@@ -95,9 +96,10 @@ class AuthServiceJWT extends AuthService {
 					$this->_commit = true;
 					sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REMEMBER-TOKEN OK');
 					sys::event()->enqueue(Event::EVENT_LOGIN, new Event($Auth));
-				}
-			} catch (HttpException) { // CryptoCookie Exception
-				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REMEMBER-TOKEN exception: INVALID');
+				} else unset($_COOKIE[$this->cookieREMEMBER]);
+			} catch (HttpException $Ex) { // CryptoCookie Exception
+				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REMEMBER-TOKEN exception: INVALID', $Ex->getMessage());
+				unset($_COOKIE[$this->cookieREMEMBER]);
 			}
 		}
 	}
