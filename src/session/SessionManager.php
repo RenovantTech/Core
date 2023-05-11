@@ -34,7 +34,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 	protected $domain = '';
 	/** If TRUE cookie will only be sent over secure connections.
 	 * @var boolean */
-	protected $secure = false;
+	protected $secure = true;
 	/** Session Handler
 	 * @var object */
 	protected $Handler;
@@ -52,7 +52,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 		if(session_status() == PHP_SESSION_ACTIVE) throw new SessionException(11);
 		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
 		session_name($this->name);
-		session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure);
+		session_set_cookie_params($this->lifetime, $this->path, $this->domain, $this->secure, true);
 		session_set_save_handler($this->Handler, true);
 		session_start();
 		$this->Context->trigger(self::EVENT_START, $this);
@@ -64,7 +64,7 @@ class SessionManager implements \metadigit\core\context\ContextAwareInterface {
 	function destroy() {
 		$this->trace(LOG_DEBUG, 1, __FUNCTION__);
 		session_destroy();
-		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* strtotime('1980-01-01')*/, $this->path, $this->domain, $this->secure);
+		if (isset($_COOKIE[$this->name])) setcookie($this->name, false, 315554400 /* strtotime('1980-01-01')*/, $this->path, $this->domain, $this->secure, true);
 	}
 
 	/**
