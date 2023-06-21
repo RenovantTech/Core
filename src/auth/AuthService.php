@@ -17,9 +17,9 @@ abstract class AuthService {
 	const LOGIN_2FA_INVALID		= -5;
 	const LOGIN_EXCEPTION		= -6;
 
-	const SET_PWD_OK		= 1;
-	const SET_PWD_MISMATCH	= -1;
-	const SET_PWD_EXCEPTION	= -2;
+	const SET_PWD_OK			= 1;
+	const SET_PWD_CURR_INVALID	= -1;
+	const SET_PWD_EXCEPTION		= -2;
 
 	/** Pending commit  flag */
 	protected bool $_commit = false;

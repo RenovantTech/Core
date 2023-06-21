@@ -127,12 +127,12 @@ class PdoProvider implements ProviderInterface {
 			->execute(['user_id'=>$userID, 'email'=>$email])->rowCount();
 	}
 
-	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int {
+	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $currPwd=null): int {
 		try {
-			if($oldPwd) {
+			if($currPwd) {
 				$storedPwd = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_PWD, 'password', $this->tables['auth']))
 					->execute(['user_id'=>$userID])->fetchColumn();
-				if(!password_verify($oldPwd, $storedPwd)) return AuthService::SET_PWD_MISMATCH;
+				if(!password_verify($currPwd, $storedPwd)) return AuthService::SET_PWD_CURR_INVALID;
 			}
 			return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_SET_PASSWORD, $this->tables['auth']))
 				->execute(['user_id'=>$userID, 'password'=>password_hash($pwd, PASSWORD_DEFAULT), 'expire'=>$expireTime])->rowCount();

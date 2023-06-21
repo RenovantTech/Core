@@ -41,10 +41,10 @@ interface ProviderInterface {
 	 * @param int $userID
 	 * @param string $pwd
 	 * @param int|null $expireTime expiration time (unix timestamp)
-	 * @param string|null $oldPwd
+	 * @param string|null $currPwd
 	 * @return integer 1 on success, negative code on ERROR
 	 */
-	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $oldPwd=null): int;
+	function setPassword(int $userID, string $pwd, ?int $expireTime=null, ?string $currPwd=null): int;
 
 	/**
 	 * Set 2FA secret key

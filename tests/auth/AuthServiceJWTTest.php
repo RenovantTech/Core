@@ -136,7 +136,7 @@ class AuthServiceJWTTest extends \PHPUnit\Framework\TestCase {
 	 */
 	function testSetPassword(AuthServiceJWT $AuthService) {
 		// with verification
-		$this->assertEquals(AuthService::SET_PWD_MISMATCH, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123xxx'));
+		$this->assertEquals(AuthService::SET_PWD_CURR_INVALID, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123xxx'));
 		$this->assertEquals(AuthService::SET_PWD_OK, $AuthService->setPassword(1, 'XYZ123', null, 'ABC123'));
 		$storedPwd = sys::pdo('mysql')->query('SELECT password FROM sys_users_auth WHERE user_id = 1')->fetchColumn();
 		$this->assertTrue(password_verify('XYZ123', $storedPwd));
