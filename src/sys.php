@@ -13,7 +13,6 @@ use renovant\core\auth\Auth,
 	renovant\core\context\Context,
 	renovant\core\context\ContextException,
 	renovant\core\db\PDO,
-	renovant\core\event\Event,
 	renovant\core\event\EventDispatcher,
 	renovant\core\event\EventDispatcherException,
 	renovant\core\http\Event as HttpEvent,
@@ -179,7 +178,7 @@ class sys {
 		foreach (self::$pdo as $PDO)
 			if($PDO->inTransaction()) $PDO->rollBack();
 		register_shutdown_function(__NAMESPACE__.'\trace\Tracer::shutdown');
-		self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
+		if(self::$EventDispatcher) self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 		if(PHP_SAPI != 'cli') session_write_close();
 		// LOG service
 		if(!empty(self::$log)) {
