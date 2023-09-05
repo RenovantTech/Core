@@ -349,7 +349,7 @@ class sys {
 	static function info(string $path, $return=null) {
 		$path= str_replace('.', '\\', $path);
 		if(false === $i = strrpos($path, '\\')) {
-			$namespace = null;
+			$namespace = '';
 			$class = $path;
 		} else {
 			$namespace = substr($path, 0 , $i);
