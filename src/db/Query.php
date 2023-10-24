@@ -15,8 +15,8 @@ class Query {
 	protected array $dictionary = [];
 	/** SQL fields (for SELECT) */
 	protected ?string $fields;
-	/** PDO instance ID */
-	protected ?string $pdo;
+	/** PDO instance */
+	protected PDO $PDO;
 	/** PDOStatement
 	 * @var \PDOStatement */
 	protected $PDOStatement;
@@ -44,7 +44,7 @@ class Query {
 	function __construct(string $target, ?string $fields=null, ?string $pdo=null) {
 		$this->target = $target;
 		$this->fields = $fields;
-		$this->pdo = $pdo;
+		$this->PDO = sys::pdo($pdo);
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Query {
 			}
 			if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
 			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return (int) $this->doExec($params)->fetchColumn();
 	}
@@ -76,7 +76,7 @@ class Query {
 			$sql = sprintf('DELETE FROM `%s` %s', $this->target, $this->parseCriteria());
 			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
 			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($params)->rowCount();
 	}
@@ -94,7 +94,7 @@ class Query {
 				$sql2 .= ', :'.$k;
 			}
 			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($data)->rowCount();
 	}
@@ -115,7 +115,7 @@ class Query {
 					$sql3 .= ', '.$k.' = :_'.$k;
 			}
 			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		foreach($data as $k=>$v) {
 			if(!in_array($k, $keys))
@@ -140,7 +140,7 @@ class Query {
 			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
 			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
 			if(!empty($this->offset)) $sql .= ' OFFSET '.$this->offset;
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($params);
 	}
@@ -157,7 +157,7 @@ class Query {
 			foreach($data as $k=>$v)
 				$sql .= ', `'.$k.'` = :'.$k;
 			$sql = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql,2), $this->parseCriteria());
-			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
+			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		foreach($params as $k=>$v)
 			$data[$k] = $v;
