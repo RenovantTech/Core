@@ -17,44 +17,33 @@ class SqliteCache implements CacheInterface {
 			PRIMARY KEY (id)
 		);
 	';
-	const SQL_GET = 'SELECT data FROM `%s` WHERE id = :id AND (expireAt IS NULL OR expireAt > :t)';
+	const SQL_GET = 'SELECT data FROM `%s` WHERE id = :id AND (expireAt = 0 OR expireAt > :t)';
 	const SQL_HAS = 'SELECT COUNT(*) FROM `%s` WHERE id = :id';
 	const SQL_SET = 'INSERT OR REPLACE INTO `%s` (id, data, tags, expireAt, updateAt) VALUES (:id, :data, :tags, :expireAt, :updateAt)';
 	const SQL_DELETE = 'DELETE FROM `%s` WHERE id = :id';
 
-	/** Write buffer
-	 * @var array */
-	static protected $buffer = [];
-	/** File name inside CACHE_DIR
-	 * @var string */
-	protected $filename;
-	/** Memory cache
-	 * @var array */
-	protected $cache = [];
-	/** SQLite3 resource (READ only)
-	 * @var \SQLite3 */
-	protected $db;
-	/** SQLite3 resource (READ/WRITE)
-	 * @var \SQLite3 */
-	protected $dbRW;
-	/** PDOStatement for DELETE
-	 * @var \PDOStatement */
-	protected $SqlDEL;
-	/** PDOStatement for SELECT
-	 * @var \PDOStatement */
-	protected $SqlGET;
-	/** PDOStatement for COUNT
-	 * @var \PDOStatement */
-	protected $SqlHAS;
-	/** PDOStatement for INSERT/REPLACE
-	 * @var \PDOStatement */
-	protected $SqlSET;
-	/** PDO table name
-	 * @var string */
-	protected $table;
-	/** Write buffer
-	 * @var boolean */
-	protected $writeBuffer = false;
+	/** Write buffer */
+	static protected array $buffer = [];
+	/** File name inside CACHE_DIR */
+	protected string $filename;
+	/** Memory cache */
+	protected array $cache = [];
+	/** SQLite3 resource (READ only) */
+	protected \SQLite3 $db;
+	/** SQLite3 resource (READ/WRITE) */
+	protected \SQLite3 $dbRW;
+	/** SQLite Statement for DELETE */
+	protected ?\SQLite3Stmt $SqlDEL = null;
+	/** SQLite Statement for SELECT */
+	protected ?\SQLite3Stmt $SqlGET = null;
+	/** SQLite Statement for COUNT */
+	protected ?\SQLite3Stmt $SqlHAS = null;
+	/** SQLite Statement for INSERT/REPLACE */
+	protected ?\SQLite3Stmt $SqlSET = null;
+	/** PDO table name */
+	protected string $table;
+	/** Write buffer */
+	protected bool $writeBuffer = false;
 
 	/**
 	 * @param string $filename SqLite file name
@@ -76,7 +65,7 @@ class SqliteCache implements CacheInterface {
 		$this->__init();
 	}
 
-	protected function __init($mode='R') {
+	protected function __init(string $mode='R') {
 		$file = CACHE_DIR.$this->filename.self::FILE_EXT;
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] SQLite3 ('.$mode.'): '.$file.', table: '.$this->table, null, $this->_);
 		try {
@@ -118,14 +107,12 @@ class SqliteCache implements CacheInterface {
 			return $this->cache[$id];
 		}
 		try {
-			$data = false;
-			if($this->SqlGET) {
-				$this->SqlGET->bindValue('id', $id);
-				$this->SqlGET->bindValue('t', time());
-				if($res = $this->SqlGET->execute()) { /** @var \SQLite3Result $res */
-					$data = $res->fetchArray(SQLITE3_NUM);
-					$res->finalize();
-				}
+			if(is_null($this->SqlGET)) $this->__init('R');
+			$this->SqlGET->bindValue('id', $id);
+			$this->SqlGET->bindValue('t', time());
+			if($res = $this->SqlGET->execute()) { /** @var \SQLite3Result $res */
+				$data = $res->fetchArray(SQLITE3_NUM);
+				$res->finalize();
 				if($data) {
 					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
 					return $this->cache[$id] = unserialize((string)$data[0]);
@@ -143,13 +130,11 @@ class SqliteCache implements CacheInterface {
 		if(isset($this->cache[$id]))
 			return true;
 		try {
-			$data = false;
-			if($this->SqlHAS) {
-				$this->SqlHAS->bindValue('id', $id);
-				if($res = $this->SqlHAS->execute()) { /** @var \SQLite3Result $res */
-					$data = $res->fetchArray(SQLITE3_NUM);
-					$res->finalize();
-				}
+			if(is_null($this->SqlHAS)) $this->__init('R');
+			$this->SqlHAS->bindValue('id', $id);
+			if($res = $this->SqlHAS->execute()) { /** @var \SQLite3Result $res */
+				$data = $res->fetchArray(SQLITE3_NUM);
+				$res->finalize();
 				if($data)
 					return (boolean)$data[0];
 			}
