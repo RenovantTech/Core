@@ -13,6 +13,8 @@ class Queue {
 	const SQL_RELEASE	= 'UPDATE %s SET status = :status, attempt = attempt + 1 WHERE id = :id AND status = "RUNNING"';
 	const SQL_STATS		= 'SELECT status, priority, delay, ttr, attempt FROM %s WHERE id = :id';
 	const SQL_UPDATE	= 'UPDATE %s SET %s WHERE id = :id';
+	const SQL_CHECK_RUNNING	= 'SELECT id, TIME_TO_SEC(TIMEDIFF(NOW(), timeRUN)) AS secs FROM %s WHERE status = "RUNNING" AND timeIN >= :timeIN ORDER BY timeRUN ASC';
+	const SQL_CHECK_STATUS = 'SELECT status, COUNT(1) AS n FROM %s WHERE timeIN >= :timeIN GROUP BY status';
 
 	const STATUS_WAITING	= 'WAITING';
 	const STATUS_RUNNING	= 'RUNNING';
@@ -148,5 +150,46 @@ class Queue {
 	function stats(int $id): array {
 		return sys::pdo($this->pdo)->prepare(sprintf(self::SQL_STATS, $this->table))
 			->execute(['id'=>$id], false)->fetch(\PDO::FETCH_ASSOC);
+	}
+
+	/**
+	 * Check Queue status in the last $seconds (whole Queue if $seconds is NULL)
+	 * @param int|null $seconds
+	 * @return array
+	 */
+	function status(?int $seconds=null): array {
+		$data = [
+			'WAITING' => 0,
+			'RUNNING' => 0,
+			'OK' => 0,
+			'ERROR' => 0,
+			'runMax' => 0,
+			'runMin' => 0,
+			'run10s' => 0,
+			'run1m' => 0,
+			'run10m' => 0,
+			'run1h' => 0
+		];
+		$timeIN = ($seconds) ? date('Y-m-d H:i:s', time()-$seconds) : '0000-00-00 00:00:00';
+
+		$status = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_STATUS, $this->table))
+			->execute(['timeIN'=> $timeIN])->fetchAll(\PDO::FETCH_ASSOC);
+		foreach($status as $s)
+			$data[$s['status']] = $s['n'];
+
+		$running = sys::pdo($this->pdo)->prepare(sprintf(self::SQL_CHECK_RUNNING, $this->table))
+			->execute(['timeIN' => $timeIN])->fetchAll(\PDO::FETCH_ASSOC);
+		if(count($running)) {
+			$data['runMax'] = $running[0]['secs'];
+			$data['runMin'] = end($running)['secs'];
+		}
+		foreach ($running as $r) {
+			if($r['secs'] >= 10) $data['run10s']++;
+			if($r['secs'] >= 60) $data['run1m']++;
+			if($r['secs'] >= 600) $data['run10m']++;
+			if($r['secs'] >= 3600) $data['run1h']++;
+		}
+
+		return $data;
 	}
 }
