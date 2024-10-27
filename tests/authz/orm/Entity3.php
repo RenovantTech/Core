@@ -18,6 +18,8 @@ class Entity3 {
 	protected $school_id;
 	/** @orm(type="integer", null) */
 	protected $center_id;
+	/** @orm(type="integer") */
+	protected $type_id = 0;
 
 	/** @orm
 	 * @validate(enum="ACTIVE, NEW, OLD") */
