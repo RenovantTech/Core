@@ -1,5 +1,6 @@
 <?php
 namespace renovant\core\console;
+
 /**
  * MVC View for a CLI Request.
  * Implementations are responsible for rendering content, and exposing the model. A single view exposes multiple model attributes.
@@ -17,5 +18,5 @@ interface ViewInterface {
 	 * @throws \Exception if rendering failed
 	 * @return void
 	 */
-	function render(Request $Req, Response $Res, $resource);
+	public function render(Request $Req, Response $Res, $resource);
 }

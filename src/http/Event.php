@@ -1,13 +1,13 @@
 <?php
 namespace renovant\core\http;
-class Event extends \renovant\core\event\Event {
 
-	const EVENT_INIT		= 'http:init';
-	const EVENT_ROUTE		= 'http:route';
-	const EVENT_CONTROLLER	= 'http:controller';
-	const EVENT_VIEW		= 'http:view';
-	const EVENT_RESPONSE	= 'http:response';
-	const EVENT_EXCEPTION	= 'http:exception';
+class Event extends \renovant\core\event\Event {
+	public const EVENT_INIT       = 'http:init';
+	public const EVENT_ROUTE      = 'http:route';
+	public const EVENT_CONTROLLER = 'http:controller';
+	public const EVENT_VIEW       = 'http:view';
+	public const EVENT_RESPONSE   = 'http:response';
+	public const EVENT_EXCEPTION  = 'http:exception';
 
 	/** HTTP Request
 	 * @var \renovant\core\http\Request */
@@ -25,8 +25,8 @@ class Event extends \renovant\core\event\Event {
 	 * @var \Exception */
 	protected $Exception;
 
-	function __construct(Request $Request, Response $Response) {
-		$this->Request = $Request;
+	public function __construct(Request $Request, Response $Response) {
+		$this->Request  = $Request;
 		$this->Response = $Response;
 	}
 
@@ -34,7 +34,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current HTTP Request
 	 * @return \renovant\core\http\Request
 	 */
-	function getRequest() {
+	public function getRequest() {
 		return $this->Request;
 	}
 
@@ -42,7 +42,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current HTTP Response
 	 * @return \renovant\core\http\Response
 	 */
-	function getResponse() {
+	public function getResponse() {
 		return $this->Response;
 	}
 
@@ -50,7 +50,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current Controller, if any
 	 * @return ControllerInterface|null
 	 */
-	function getController() {
+	public function getController() {
 		return $this->Controller;
 	}
 
@@ -58,7 +58,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current View, if any
 	 * @return ViewInterface|null
 	 */
-	function getView() {
+	public function getView() {
 		return $this->View;
 	}
 
@@ -66,28 +66,28 @@ class Event extends \renovant\core\event\Event {
 	 * Get current Exception, if any
 	 * @return \Exception|null
 	 */
-	function getException() {
+	public function getException() {
 		return $this->Exception;
 	}
 
 	/**
 	 * @param $Controller
 	 */
-	function setController($Controller) {
+	public function setController($Controller) {
 		$this->Controller = $Controller;
 	}
 
 	/**
 	 * @param ViewInterface $View
 	 */
-	function setView(ViewInterface $View) {
+	public function setView(ViewInterface $View) {
 		$this->View = $View;
 	}
 
 	/**
 	 * @param \Exception $Exception
 	 */
-	function setException(\Exception $Exception) {
+	public function setException(\Exception $Exception) {
 		$this->Exception = $Exception;
 	}
 }

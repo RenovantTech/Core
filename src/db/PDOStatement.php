@@ -1,12 +1,12 @@
 <?php
 namespace renovant\core\db;
-class PDOStatement extends \PDOStatement {
 
+class PDOStatement extends \PDOStatement {
 	/** database ID */
 	protected string $_id;
 
-	protected function __construct(string $id='master') {
-		$this->_id =$id;
+	protected function __construct(string $id = 'master') {
+		$this->_id = $id;
 	}
 
 	/**
@@ -17,7 +17,7 @@ class PDOStatement extends \PDOStatement {
 	 * @return PDOStatement
 	 */
 	#[\ReturnTypeWillChange]
-	function execute(array $params = null, int $traceLevel=LOG_INFO) {
+	public function execute(array $params = null, int $traceLevel = LOG_INFO) {
 		PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
 		parent::execute($params);
 		return $this;

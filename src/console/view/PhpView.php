@@ -1,21 +1,22 @@
 <?php
 namespace renovant\core\console\view;
+
+use renovant\core\sys;
+use renovant\core\console\{Exception, Request, Response};
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\console\Request,
-	renovant\core\console\Response,
-	renovant\core\console\Exception;
+
 class PhpView implements \renovant\core\console\ViewInterface {
 	use \renovant\core\CoreTrait;
 
 	/** template suffix */
-	const TEMPLATE_SUFFIX = '.phtml';
+	public const TEMPLATE_SUFFIX = '.phtml';
 	/** Model array
 	 * @var array */
-	static private $model;
+	private static $model;
 	/** php template path
 	 * @var string */
-	static private $template;
+	private static $template;
 
 	/**
 	 * @param Request $Req
@@ -23,10 +24,12 @@ class PhpView implements \renovant\core\console\ViewInterface {
 	 * @param string $resource
 	 * @throws Exception
 	 */
-	function render(Request $Req, Response $Res, $resource) {
-		self::$template = $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIX;
-		if(!file_exists(self::$template)) throw new Exception(201, ['PHP Template', self::$template]);
-		sys::trace(LOG_DEBUG, T_INFO, 'render PHP template '.self::$template, null, 'sys.console.PhpView->render');
+	public function render(Request $Req, Response $Res, $resource) {
+		self::$template = $Req->getAttribute('RESOURCES_DIR') . $resource . static::TEMPLATE_SUFFIX;
+		if (!file_exists(self::$template)) {
+			throw new Exception(201, ['PHP Template', self::$template]);
+		}
+		sys::trace(LOG_DEBUG, T_INFO, 'render PHP template ' . self::$template, null, 'sys.console.PhpView->render');
 		self::$model = $Res->getData();
 		self::execTemplate();
 	}
@@ -36,8 +39,8 @@ class PhpView implements \renovant\core\console\ViewInterface {
 	 * and include php template
 	 * @return void
 	 */
-	static private function execTemplate() {
+	private static function execTemplate() {
 		extract(self::$model, EXTR_REFS);
-		include(self::$template);
+		include self::$template;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\event;
-class Event {
 
+class Event {
 	/** Event's parameters
 	 * @var array */
 	protected $params = [];
@@ -12,26 +12,26 @@ class Event {
 	/**
 	 * @param array $params Event's parameters
 	 */
-	function __construct(array $params=null) {
+	public function __construct(array $params = null) {
 		$this->params = $params;
 	}
 
-	function __get($id) {
-		return (isset($this->params[$id])) ? $this->params[$id]: null;
+	public function __get($id) {
+		return (isset($this->params[$id])) ? $this->params[$id] : null;
 	}
 
 	/**
 	 * Verify is Event propagation was stopped
 	 * @return boolean
 	 */
-	function isPropagationStopped() {
+	public function isPropagationStopped() {
 		return $this->_stopped;
 	}
 
 	/**
 	 * Stop Event propagation
 	 */
-	function stopPropagation() {
+	public function stopPropagation() {
 		$this->_stopped = true;
 	}
 }

@@ -1,9 +1,10 @@
 <?php
 namespace renovant\core\log\writer;
-use renovant\core\log\Logger;
-class FileTreeWriter implements \renovant\core\log\LogWriterInterface {
 
-	const DEFAULT_FILENAME = 'system.log';
+use renovant\core\log\Logger;
+
+class FileTreeWriter implements \renovant\core\log\LogWriterInterface {
+	public const DEFAULT_FILENAME = 'system.log';
 	/** tree base directory
 	 * @var string */
 	protected $directory;
@@ -18,26 +19,34 @@ class FileTreeWriter implements \renovant\core\log\LogWriterInterface {
 	 * @param string $filename
 	 * @param string $directory tree root directory, default to renovant\core\LOG_DIR
 	 */
-	function __construct($filename=self::DEFAULT_FILENAME, $directory=\renovant\core\LOG_DIR) {
-		$directory = rtrim($directory,'/');
-		if(!file_exists($directory)) mkdir($directory, 0770, true);
+	public function __construct($filename = self::DEFAULT_FILENAME, $directory = \renovant\core\LOG_DIR) {
+		$directory = rtrim($directory, '/');
+		if (!file_exists($directory)) {
+			mkdir($directory, 0770, true);
+		}
 		$this->directory = $directory;
-		$this->filename = $filename;
+		$this->filename  = $filename;
 	}
 
-	function __destruct() {
-		if(!is_null($this->_fh)) fclose($this->_fh);
+	public function __destruct() {
+		if (!is_null($this->_fh)) {
+			fclose($this->_fh);
+		}
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	function write($time, $message, $level=LOG_INFO, $facility=null) {
-		if(is_null($this->_fh)) {
-			if(!file_exists($this->directory.date('/Y/m/d'))) mkdir($this->directory.date('/Y/m/d'), 0770, true);
-			$this->_fh = fopen($this->directory.date('/Y/m/d/').$this->filename, 'a', 0);
+	public function write($time, $message, $level = LOG_INFO, $facility = null) {
+		if (is_null($this->_fh)) {
+			if (!file_exists($this->directory . date('/Y/m/d'))) {
+				mkdir($this->directory . date('/Y/m/d'), 0770, true);
+			}
+			$this->_fh = fopen($this->directory . date('/Y/m/d/') . $this->filename, 'a', 0);
 		}
-		if($facility) $message = $facility.': '.$message;
-		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::LABELS[$level], $message));
+		if ($facility) {
+			$message = $facility . ': ' . $message;
+		}
+		fwrite($this->_fh, sprintf('%s [%s] %s' . EOL, date('r', $time), Logger::LABELS[$level], $message));
 	}
 }

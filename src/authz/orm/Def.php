@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\authz\orm;
-class Def {
 
+class Def {
 	/** @validate(min=0) */
 	public int $id;
 	/** @validate(enum="ROLE, PERMISSION, ACL") */
@@ -13,11 +13,11 @@ class Def {
 	/** @validate(minLength=0, null) */
 	public ?string $config = null;
 
-	function __construct(array $data) {
-		$this->id = (int) ($data['id'] ?? 0);
-		$this->type = $data['type'];
-		$this->code = $data['code'];
-		$this->label = $data['label'] ?? '';
+	public function __construct(array $data) {
+		$this->id     = (int) ($data['id'] ?? 0);
+		$this->type   = $data['type'];
+		$this->code   = $data['code'];
+		$this->label  = $data['label'] ?? '';
 		$this->config = $data['config'] ?? null;
 	}
 }

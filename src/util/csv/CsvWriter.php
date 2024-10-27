@@ -1,12 +1,15 @@
 <?php
 namespace renovant\core\util\csv;
-use const renovant\core\trace\T_INFO;
+
 use renovant\core\sys;
+
+use const renovant\core\trace\T_INFO;
+
 class CsvWriter {
 	use \renovant\core\CoreTrait;
 
-	const ITERATE_ARRAY = 1;
-	const ITERATE_OBJECT = 2;
+	public const ITERATE_ARRAY  = 1;
+	public const ITERATE_OBJECT = 2;
 	/** CSV delimiter
 	 * @var string */
 	protected $delimiter = ',';
@@ -37,9 +40,9 @@ class CsvWriter {
 	 * @param callback $callback function to render column value
 	 * @return CsvWriter (fluent interface)
 	 */
-	function addColumn($label, $dataIndex, $callback=null) {
-		$this->_labels[] = $label;
-		$this->_indexes[] = $dataIndex;
+	public function addColumn($label, $dataIndex, $callback = null) {
+		$this->_labels[]    = $label;
+		$this->_indexes[]   = $dataIndex;
 		$this->_callbacks[] = $callback;
 		return $this;
 	}
@@ -49,8 +52,8 @@ class CsvWriter {
 	 * @param array $data Data store
 	 * @return CsvWriter (fluent interface)
 	 */
-	function setData(array $data) {
-		$this->_data = $data;
+	public function setData(array $data) {
+		$this->_data        = $data;
 		$this->iteratorMode = (is_object($data[0])) ? self::ITERATE_OBJECT : self::ITERATE_ARRAY;
 		return $this;
 	}
@@ -60,7 +63,7 @@ class CsvWriter {
 	 * @param string $delimiter
 	 * @return CsvWriter (fluent interface)
 	 */
-	function setDelimiter($delimiter) {
+	public function setDelimiter($delimiter) {
 		$this->delimiter = $delimiter;
 		return $this;
 	}
@@ -70,7 +73,7 @@ class CsvWriter {
 	 * @param string $enclosure
 	 * @return CsvWriter (fluent interface)
 	 */
-	function setEnclosure($enclosure) {
+	public function setEnclosure($enclosure) {
 		$this->enclosure = $enclosure;
 		return $this;
 	}
@@ -79,38 +82,42 @@ class CsvWriter {
 	 * Write CSV to file
 	 * @param string $file output file
 	 */
-	function write($file) {
-		sys::trace(LOG_DEBUG, T_INFO, 'output file: '.$file);
+	public function write($file) {
+		sys::trace(LOG_DEBUG, T_INFO, 'output file: ' . $file);
 		$fh = fopen($file, 'w');
 		// labels
 		$output = '';
-		foreach($this->_labels as $label) {
-			$output .=  $this->enclosure.$label.$this->enclosure.$this->delimiter;
+		foreach ($this->_labels as $label) {
+			$output .= $this->enclosure . $label . $this->enclosure . $this->delimiter;
 		}
-		fwrite($fh, substr($output,0,-1).chr(10));
+		fwrite($fh, substr($output, 0, -1) . chr(10));
 		// data
-		$length = count($this->_labels);
+		$length     = count($this->_labels);
 		$outputFunc = ($this->iteratorMode == self::ITERATE_ARRAY) ? 'outputArray' : 'outputObject';
-		foreach($this->_data as $data) {
+		foreach ($this->_data as $data) {
 			$output = '';
-			for($i = 0; $i<$length; $i++) {
-				$output .=  $this->enclosure.$this->$outputFunc($data, $i).$this->enclosure.$this->delimiter;
+			for ($i = 0; $i < $length; $i++) {
+				$output .= $this->enclosure . $this->$outputFunc($data, $i) . $this->enclosure . $this->delimiter;
 			}
-			fwrite($fh, substr($output,0,-1).chr(10));
+			fwrite($fh, substr($output, 0, -1) . chr(10));
 		}
 		fclose($fh);
 	}
 
 	protected function outputArray($data, $i) {
 		$value = $data[$this->_indexes[$i]];
-		if(!is_null($cb = $this->_callbacks[$i])) $value = call_user_func($cb, $value);
+		if (!is_null($cb = $this->_callbacks[$i])) {
+			$value = call_user_func($cb, $value);
+		}
 		return $value;
 	}
 
 	protected function outputObject($data, $i) {
-		$key = $this->_indexes[$i];
-		$value = (is_callable(array($data, $key))) ? $data->$key() : $data->$key;
-		if(!is_null($cb = $this->_callbacks[$i])) $value = call_user_func($cb, $value);
+		$key   = $this->_indexes[$i];
+		$value = (is_callable([$data, $key])) ? $data->$key() : $data->$key;
+		if (!is_null($cb = $this->_callbacks[$i])) {
+			$value = call_user_func($cb, $value);
+		}
 		return $value;
 	}
 }

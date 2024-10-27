@@ -1,15 +1,18 @@
 <?php
 namespace renovant\core\cache;
-use const renovant\core\trace\{T_CACHE,T_ERROR};
+
 use renovant\core\sys;
+
+use const renovant\core\trace\{T_CACHE,T_ERROR};
+
 class MemcachedCache implements CacheInterface {
 	use \renovant\core\CoreTrait;
 
-	const DEFAULT_PARAMS = ['localhost', 11211, 0];
+	public const DEFAULT_PARAMS = ['localhost', 11211, 0];
 
 	/** Write buffer
 	 * @var array */
-	static protected $buffer = [];
+	protected static $buffer = [];
 	/** Memory cache
 	 * @var array */
 	protected $cache = [];
@@ -27,17 +30,17 @@ class MemcachedCache implements CacheInterface {
 	 * @param string $params servers params
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	function __construct($params=null, $writeBuffer=false) {
-		$this->params = $params ?? self::DEFAULT_PARAMS;
-		$this->writeBuffer = (boolean) $writeBuffer;
+	public function __construct($params = null, $writeBuffer = false) {
+		$this->params      = $params ?? self::DEFAULT_PARAMS;
+		$this->writeBuffer = (bool) $writeBuffer;
 		$this->__wakeup();
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return ['_', 'params', 'writeBuffer'];
 	}
 
-	function __wakeup() {
+	public function __wakeup() {
 		sys::trace(LOG_DEBUG, T_CACHE, '[INIT] Memcached', null, $this->_);
 		try {
 			$this->Memcached = new \Memcached($this->_);
@@ -45,122 +48,132 @@ class MemcachedCache implements CacheInterface {
 			$this->Memcached->setOption(\Memcached::OPT_NO_BLOCK, true);
 			$this->Memcached->setOption(\Memcached::OPT_TCP_NODELAY, true);
 			$this->Memcached->setOption(\Memcached::OPT_RETRY_TIMEOUT, 1);
-			if(empty($this->Memcached->getServerList())) {
-				if(is_array($this->params[0])) $this->Memcached->addServers($this->params);
-				else $this->Memcached->addServer($this->params[0], $this->params[1], $this->params[2]);
+			if (empty($this->Memcached->getServerList())) {
+				if (is_array($this->params[0])) {
+					$this->Memcached->addServers($this->params);
+				} else {
+					$this->Memcached->addServer($this->params[0], $this->params[1], $this->params[2]);
+				}
 			}
-		}  catch(\Exception $Ex) {
+		} catch (\Exception $Ex) {
 			sys::trace(LOG_ERR, T_ERROR, '[INIT] FAILURE', null, $this->_);
 		}
 	}
 
-	function get(string $id) {
-		if(isset($this->cache[$id])) {
+	public function get(string $id) {
+		if (isset($this->cache[$id])) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] ' . $id, null, $this->_);
 			return $this->cache[$id];
 		}
 		try {
-			if($this->Memcached) {
+			if ($this->Memcached) {
 				$data = $this->Memcached->get($id);
-				if($data) {
-					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.$id, null, $this->_);
+				if ($data) {
+					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] ' . $id, null, $this->_);
 					return $this->cache[$id] = $data['v'];
 				}
 			}
-			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.$id, null, $this->_);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] ' . $id, null, $this->_);
 			return false;
-		} catch(\Exception $Ex) {
-			sys::trace(LOG_ERR, T_ERROR, '[GET] '.$id.' FAILURE', null, $this->_);
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[GET] ' . $id . ' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
-	function getMulti(array $keys) {
+	public function getMulti(array $keys) {
 		$data = [];
 		foreach ($keys as $i => $k) {
-			if(isset($this->cache[$k]))
+			if (isset($this->cache[$k])) {
 				$data[$i] = $this->cache[$k];
+			}
 		}
-		if(count($keys) == count($data)) {
+		if (count($keys) == count($data)) {
 			sys::trace(LOG_DEBUG, T_CACHE, '[MEM] ' . implode(',', $keys), null, $this->_);
 			return $data;
 		}
 		try {
-			if($this->Memcached) {
+			if ($this->Memcached) {
 				$data = $this->Memcached->getMulti($keys, \Memcached::GET_PRESERVE_ORDER);
-				if($data) {
-					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] '.implode(',', $keys), null, $this->_);
+				if ($data) {
+					sys::trace(LOG_DEBUG, T_CACHE, '[HIT] ' . implode(',', $keys), null, $this->_);
 					foreach ($keys as $i => $k) {
 						$this->cache[$k] = $data[$i]['v'];
-						$data[$i] =$data[$i]['v'];
+						$data[$i]        = $data[$i]['v'];
 					}
 					return $data;
 				}
 			}
-			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] '.implode(',', $keys), null, $this->_);
+			sys::trace(LOG_DEBUG, T_CACHE, '[MISSED] ' . implode(',', $keys), null, $this->_);
 			return false;
-		} catch(\Exception $Ex) {
-			sys::trace(LOG_ERR, T_ERROR, '[GET] '.implode(',', $keys).' FAILURE', null, $this->_);
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[GET] ' . implode(',', $keys) . ' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
-	function has(string $id): bool {
-		if(isset($this->cache[$id]))
+	public function has(string $id): bool {
+		if (isset($this->cache[$id])) {
 			return true;
+		}
 		try {
-			if($this->Memcached) {
+			if ($this->Memcached) {
 				$this->Memcached->get($id);
 				return !($this->Memcached->getResultCode() == \Memcached::RES_NOTFOUND);
 			}
 			return false;
-		} catch(\Exception $Ex) {
-			sys::trace(LOG_ERR, T_ERROR, '[HAS] '.$id.' FAILURE', null, $this->_);
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[HAS] ' . $id . ' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
-	function set(string $id, mixed $value, int $expire=0, mixed $tags=null): bool {
+	public function set(string $id, mixed $value, int $expire = 0, mixed $tags = null): bool {
 		try {
-			if($this->writeBuffer) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id.' (buffered)', null, $this->_);
-				self::$buffer[$this->_]['params'] = $this->params;
+			if ($this->writeBuffer) {
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] ' . $id . ' (buffered)', null, $this->_);
+				self::$buffer[$this->_]['params']      = $this->params;
 				self::$buffer[$this->_]['values'][$id] = [$value, $tags, $expire];
 			} else {
-				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] '.$id, null, $this->_);
-				if(is_array($tags)) $tags = implode('|', $tags);
-				if(false === $this->Memcached->set($id, ['v'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], $expire))
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] ' . $id, null, $this->_);
+				if (is_array($tags)) {
+					$tags = implode('|', $tags);
+				}
+				if (false === $this->Memcached->set($id, ['v' => $value, 'tags' => $tags, 'expireAt' => $expire, 'updateAt' => time()], $expire)) {
 					throw new \Exception();
+				}
 			}
 			$this->cache[$id] = $value;
 			return true;
-		} catch(\Exception $Ex) {
-			sys::trace(LOG_ERR, T_ERROR, '[STORE] '.$id.' FAILURE', null, $this->_);
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[STORE] ' . $id . ' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
-	function delete(string $id): bool {
-		if(isset($this->cache[$id])) {
+	public function delete(string $id): bool {
+		if (isset($this->cache[$id])) {
 			$this->cache[$id] = null;
 			unset($this->cache[$id]);
 		}
 		try {
-			sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] '.$id, null, $this->_);
-			if($this->writeBuffer && isset(self::$buffer[$this->_]) && isset(self::$buffer[$this->_]['values'][$id])) {
+			sys::trace(LOG_DEBUG, T_CACHE, '[DELETE] ' . $id, null, $this->_);
+			if ($this->writeBuffer && isset(self::$buffer[$this->_]) && isset(self::$buffer[$this->_]['values'][$id])) {
 				unset(self::$buffer[$this->_]['values'][$id]);
 				return true;
-			} else return $this->Memcached->delete($id);
-		} catch(\Exception $Ex) {
-			sys::trace(LOG_ERR, T_ERROR, '[DELETE] '.$id.' FAILURE', null, $this->_);
+			} else {
+				return $this->Memcached->delete($id);
+			}
+		} catch (\Exception $Ex) {
+			sys::trace(LOG_ERR, T_ERROR, '[DELETE] ' . $id . ' FAILURE', null, $this->_);
 			return false;
 		}
 	}
 
-	function clean(int $mode=self::CLEAN_ALL, $tags=null): bool {
+	public function clean(int $mode = self::CLEAN_ALL, $tags = null): bool {
 		sys::trace(LOG_DEBUG, T_CACHE, '[CLEAN]', null, $this->_);
 		$this->cache = [];
-		switch($mode) {
+		switch ($mode) {
 			case self::CLEAN_ALL:
 				$this->Memcached->flush();
 				break;
@@ -178,17 +191,22 @@ class MemcachedCache implements CacheInterface {
 	/**
 	 * Commit write buffer to SqLite on shutdown
 	 */
-	static function shutdown() {
+	public static function shutdown() {
 		try {
 			foreach (self::$buffer as $id => $buffer) {
-				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: '.count($buffer).' items on '.$id, null, __METHOD__);
+				sys::trace(LOG_DEBUG, T_CACHE, '[STORE] BUFFER: ' . count($buffer) . ' items on ' . $id, null, __METHOD__);
 				$Memcached = new \Memcached();
-				if(is_array($buffer['params'][0])) $Memcached->addServers($buffer['params']);
-				else $Memcached->addServer($buffer['params'][0], $buffer['params'][1], $buffer['params'][2]);
+				if (is_array($buffer['params'][0])) {
+					$Memcached->addServers($buffer['params']);
+				} else {
+					$Memcached->addServer($buffer['params'][0], $buffer['params'][1], $buffer['params'][2]);
+				}
 				foreach ($buffer['values'] as $k => $data) {
 					list($value, $tags, $expire) = $data;
-					if (is_array($tags)) $tags = implode('|', $tags);
-					$Memcached->set($k, ['v'=>$value, 'tags'=>$tags, 'expireAt'=>$expire, 'updateAt'=>time()], $expire);
+					if (is_array($tags)) {
+						$tags = implode('|', $tags);
+					}
+					$Memcached->set($k, ['v' => $value, 'tags' => $tags, 'expireAt' => $expire, 'updateAt' => time()], $expire);
 				}
 				unset($Memcached);
 			}
@@ -197,4 +215,4 @@ class MemcachedCache implements CacheInterface {
 		}
 	}
 }
-register_shutdown_function(__NAMESPACE__.'\MemcachedCache::shutdown');
+register_shutdown_function(__NAMESPACE__ . '\MemcachedCache::shutdown');

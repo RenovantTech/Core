@@ -1,13 +1,13 @@
 <?php
 namespace renovant\core;
-use const renovant\core\trace\T_INFO;
-use renovant\core\authz\ObjAuthz,
-	renovant\core\authz\ObjAuthzInterface,
-	renovant\core\authz\ObjTagsParser,
-	renovant\core\container\Container,
-	renovant\core\db\orm\Repository;
-class CoreProxy {
 
+use renovant\core\authz\{ObjAuthz, ObjAuthzInterface, ObjTagsParser};
+use renovant\core\container\Container;
+use renovant\core\db\orm\Repository;
+
+use const renovant\core\trace\T_INFO;
+
+class CoreProxy {
 	/** Object OID */
 	protected string $_;
 	/** Proxy-ed Object instance */
@@ -15,35 +15,40 @@ class CoreProxy {
 	/** AUTHZ verifier  */
 	protected ?ObjAuthz $ObjAuthz;
 
-	function __construct(string $id) {
+	public function __construct(string $id) {
 		$this->_ = $id;
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return ['_'];
 	}
 
 	/** @throws \Exception */
-	function __call(string $method, mixed $args): mixed {
+	public function __call(string $method, mixed $args): mixed {
 		pcntl_signal_dispatch();
-		$prevTraceFn = sys::traceFn($this->_.'->'.$method);
+		$prevTraceFn = sys::traceFn($this->_ . '->' . $method);
 		try {
 			// Obj & AUTHZ initialize
-			if(!$this->Obj) {
+			if (!$this->Obj) {
 				sys::context()->init(substr($this->_, 0, strrpos($this->_, '.')));
 				$this->Obj = sys::cache(SYS_CACHE)->get($this->_) ?: sys::context()->container()->get($this->_, null, Container::FAILURE_SILENT);
-				if($this->Obj instanceof ObjAuthzInterface) {
-					if(!$ObjAuthz = sys::cache(SYS_CACHE)->get($this->_.ObjAuthz::CACHE_SUFFIX)) {
-						sys::cache(SYS_CACHE)->set($this->_.ObjAuthz::CACHE_SUFFIX, $ObjAuthz = ObjTagsParser::parse($this->Obj), 0, 'authz');
+				if ($this->Obj instanceof ObjAuthzInterface) {
+					if (!$ObjAuthz = sys::cache(SYS_CACHE)->get($this->_ . ObjAuthz::CACHE_SUFFIX)) {
+						sys::cache(SYS_CACHE)->set($this->_ . ObjAuthz::CACHE_SUFFIX, $ObjAuthz = ObjTagsParser::parse($this->Obj), 0, 'authz');
 					}
 					$this->ObjAuthz = $ObjAuthz;
 				}
 			}
 			// AUTHZ check
-			if($this->Obj instanceof ObjAuthzInterface) $this->ObjAuthz->check($method, $args);
+			if ($this->Obj instanceof ObjAuthzInterface) {
+				$this->ObjAuthz->check($method, $args);
+			}
 
-			if($this->Obj instanceof Repository) sys::trace(LOG_DEBUG, T_INFO, $this->_.'->'.$method, null, $prevTraceFn);
-			else sys::trace();
+			if ($this->Obj instanceof Repository) {
+				sys::trace(LOG_DEBUG, T_INFO, $this->_ . '->' . $method, null, $prevTraceFn);
+			} else {
+				sys::trace();
+			}
 			return call_user_func_array([$this->Obj, $method], $args);
 		} finally {
 			sys::traceFn($prevTraceFn);
@@ -51,7 +56,7 @@ class CoreProxy {
 		}
 	}
 
-	static function __set_state($data) {
+	public static function __set_state($data) {
 		return new CoreProxy($data['id']);
 	}
 }

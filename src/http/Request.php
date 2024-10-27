@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\http;
-class Request {
 
+class Request {
 	/** Request named attributes.
 	 * @var	array */
 	protected $attrs = [];
@@ -32,26 +32,30 @@ class Request {
 	 * @param array|null $headers
 	 * @param string|null $data the raw body data
 	 */
-	function __construct(string $uri=null, string $method=null, array $params=null, array $headers=null, string $data=null) {
-		$this->URI = strstr(($uri ? : $_SERVER['REQUEST_URI']).'?','?',true);
-		$this->method = $method ? : $_SERVER['REQUEST_METHOD'];
+	public function __construct(string $uri = null, string $method = null, array $params = null, array $headers = null, string $data = null) {
+		$this->URI    = strstr(($uri ?: $_SERVER['REQUEST_URI']) . '?', '?', true);
+		$this->method = $method ?: $_SERVER['REQUEST_METHOD'];
 		// @FIXME avoid memory duplication
-		$this->params = $params ? : array_merge($_GET,$_POST);
-		$this->rawData = $data ? : file_get_contents('php://input');
-		$this->QUERY = $_SERVER['QUERY_STRING'];
-		if($headers) {
-			foreach($headers as $key=>$value) {
-				if(substr($key,0,5)=='HTTP_') $key = substr($key,5);
-				$this->headers[strtolower(str_replace('_','-',$key))] = $value;
+		$this->params  = $params ?: array_merge($_GET, $_POST);
+		$this->rawData = $data ?: file_get_contents('php://input');
+		$this->QUERY   = $_SERVER['QUERY_STRING'];
+		if ($headers) {
+			foreach ($headers as $key => $value) {
+				if (substr($key, 0, 5) == 'HTTP_') {
+					$key = substr($key, 5);
+				}
+				$this->headers[strtolower(str_replace('_', '-', $key))] = $value;
 			}
 		} else {
-			foreach($_SERVER as $key=>$value) {
-				if(substr($key,0,5)!='HTTP_') continue;
-				$key = strtolower(str_replace('_','-',substr($key,5)));
-				$this->headers[$key]=$value;
+			foreach ($_SERVER as $key => $value) {
+				if (substr($key, 0, 5) != 'HTTP_') {
+					continue;
+				}
+				$key                 = strtolower(str_replace('_', '-', substr($key, 5)));
+				$this->headers[$key] = $value;
 			}
 		}
-		if(isset($this->headers['content-type']) && substr($this->headers['content-type'],0,16)=='application/json') {
+		if (isset($this->headers['content-type']) && substr($this->headers['content-type'], 0, 16) == 'application/json') {
 			$this->params = array_merge($this->params, (array) json_decode($this->rawData, true));
 		}
 	}
@@ -61,11 +65,11 @@ class Request {
 	 * @param string $p parameter name
 	 * @return mixed|null
 	 */
-	function get(string $p) {
+	public function get(string $p) {
 		return $this->params[$p] ?? null;
 	}
 
-	function getAttribute($k) {
+	public function getAttribute($k) {
 		return $this->attrs[$k] ?? null;
 	}
 
@@ -74,11 +78,11 @@ class Request {
 	 * @param string $p parameter name
 	 * @param mixed $v parameter value
 	 */
-	function set(string $p, $v) {
-		$this->params[$p]=$v;
+	public function set(string $p, $v) {
+		$this->params[$p] = $v;
 	}
 
-	function setAttribute($k, $v) {
+	public function setAttribute($k, $v) {
 		$this->attrs[$k] = $v;
 	}
 
@@ -86,22 +90,22 @@ class Request {
 	 * Return QUERY_STRING
 	 * @return string
 	 */
-	function QUERY(): string {
+	public function QUERY(): string {
 		return $this->QUERY;
 	}
 
-	function URI() {
+	public function URI() {
 		return $this->URI;
 	}
 
 	/**
 	 * @return array GET data
 	 */
-	function getGetData(): array {
+	public function getGetData(): array {
 		return $_GET;
 	}
 
-	function getHeader($key) {
+	public function getHeader($key) {
 		$key = strtolower($key);
 		return $this->headers[$key] ?? null;
 	}
@@ -110,43 +114,43 @@ class Request {
 	 * Get the HTTP method (GET, POST, PUT, ...)
 	 * @return string HTTP method
 	 */
-	function getMethod(): string {
+	public function getMethod(): string {
 		return $this->method;
 	}
 
-	function getJsonData(): array {
+	public function getJsonData(): array {
 		return json_decode($this->rawData, true);
 	}
 
 	/**
 	 * @return array POST data
 	 */
-	function getPostData(): array {
+	public function getPostData(): array {
 		return $_POST;
 	}
 
 	/**
 	 * @return false|string|null POST data
 	 */
-	function getPutData() {
+	public function getPutData() {
 		return ($this->method == 'PUT') ? $this->rawData : null;
 	}
 
-	function getRawData() {
+	public function getRawData() {
 		return $this->rawData;
 	}
 
 	/**
 	 * @return boolean TRUE if Request method = GET
 	 */
-	function isGet(): bool {
-		return ($this->method=='GET');
+	public function isGet(): bool {
+		return ($this->method == 'GET');
 	}
 
 	/**
 	 * @return boolean TRUE if Request method = GET
 	 */
-	function isPost(): bool {
-		return ($this->method=='POST');
+	public function isPost(): bool {
+		return ($this->method == 'POST');
 	}
 }

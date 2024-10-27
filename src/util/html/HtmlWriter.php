@@ -1,11 +1,13 @@
 <?php
 namespace renovant\core\util\html;
+
 use renovant\core\sys;
+
 class HtmlWriter {
 	use \renovant\core\CoreTrait;
 
-	const ITERATE_ARRAY = 1;
-	const ITERATE_OBJECT = 2;
+	public const ITERATE_ARRAY  = 1;
+	public const ITERATE_OBJECT = 2;
 	/** Data Iterator mode
 	 * @var integer */
 	protected $iteratorMode = self::ITERATE_ARRAY;
@@ -23,17 +25,17 @@ class HtmlWriter {
 	protected $_callbacks = [];
 	/** Data array
 	 * @var array */
-	static private $data;
+	private static $data;
 	/** php template path
 	 * @var string */
-	static private $template;
+	private static $template;
 
 	/**
 	 * Set template data
 	 * @param array $data template data
 	 * @return HtmlWriter (fluent interface)
 	 */
-	function setData(array $data) {
+	public function setData(array $data) {
 		self::$data = $data;
 		return $this;
 	}
@@ -44,8 +46,10 @@ class HtmlWriter {
 	 * @return HtmlWriter
 	 * @throws HtmlException
 	 */
-	function setTemplate($template) {
-		if(!file_exists($template)) throw new HtmlException(1, $template);
+	public function setTemplate($template) {
+		if (!file_exists($template)) {
+			throw new HtmlException(1, $template);
+		}
 		self::$template = $template;
 		return $this;
 	}
@@ -55,10 +59,12 @@ class HtmlWriter {
 	 * @param string $file output file
 	 * @throws HtmlException
 	 */
-	function write($file) {
-		sys::trace(LOG_DEBUG, 1, __FUNCTION__, 'template: '.self::$template.' - output file: '.$file);
+	public function write($file) {
+		sys::trace(LOG_DEBUG, 1, __FUNCTION__, 'template: ' . self::$template . ' - output file: ' . $file);
 		$html = self::execTemplate();
-		if(!$fh = fopen($file, 'w')) throw new HtmlException(3, $file);
+		if (!$fh = fopen($file, 'w')) {
+			throw new HtmlException(3, $file);
+		}
 		fwrite($fh, $html);
 		fclose($fh);
 	}
@@ -69,11 +75,11 @@ class HtmlWriter {
 	 * @return string HTML output
 	 * @throws HtmlException
 	 */
-	static private function execTemplate() {
+	private static function execTemplate() {
 		ob_start();
 		try {
 			extract(self::$data, EXTR_REFS);
-			include(self::$template);
+			include self::$template;
 			$html = ob_get_contents();
 			return $html;
 		} catch (\Exception $Ex) {

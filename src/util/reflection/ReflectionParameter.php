@@ -2,7 +2,6 @@
 namespace renovant\core\util\reflection;
 
 class ReflectionParameter extends \ReflectionParameter {
-
 	/** DocComment instance
 	 * @var DocComment */
 	protected $DocComment;
@@ -12,10 +11,12 @@ class ReflectionParameter extends \ReflectionParameter {
 	 * @return string|bool Parameter type (boolean, string, array, object), FALSE if unavailable
 	 * @throws \ReflectionException
 	 */
-	function getDocType(): string|bool {
-		if($tag = $this->getDocComment()->getTag('param', $this->getPosition())) {
+	public function getDocType(): string|bool {
+		if ($tag = $this->getDocComment()->getTag('param', $this->getPosition())) {
 			$exploded = explode(' ', $tag);
-			if (count($exploded) >= 2) return ltrim($exploded[0], '\\');
+			if (count($exploded) >= 2) {
+				return ltrim($exploded[0], '\\');
+			}
 		}
 		return false;
 	}
@@ -24,9 +25,9 @@ class ReflectionParameter extends \ReflectionParameter {
 	 * Returns an instance of the DocComment
 	 * @throws \ReflectionException
 	 */
-	function getDocComment(): DocComment {
+	public function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
-			$RefMethod = new ReflectionMethod($this->getDeclaringClass()->getName(), $this->getDeclaringFunction()->getName());
+			$RefMethod        = new ReflectionMethod($this->getDeclaringClass()->getName(), $this->getDeclaringFunction()->getName());
 			$this->DocComment = $RefMethod->getDocComment();
 		}
 		return $this->DocComment;

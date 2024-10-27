@@ -1,9 +1,10 @@
 <?php
 namespace renovant\core\log\writer;
-use renovant\core\log\Logger;
-class FileWriter implements \renovant\core\log\LogWriterInterface {
 
-	const DEFAULT_FILENAME = 'system.log';
+use renovant\core\log\Logger;
+
+class FileWriter implements \renovant\core\log\LogWriterInterface {
+	public const DEFAULT_FILENAME = 'system.log';
 	/** log file path
 	 * @var string */
 	protected $filename;
@@ -14,23 +15,35 @@ class FileWriter implements \renovant\core\log\LogWriterInterface {
 	/**
 	 * @param string $filename log file path
 	 */
-	function __construct($filename=self::DEFAULT_FILENAME) {
+	public function __construct($filename = self::DEFAULT_FILENAME) {
 		$this->filename = $filename;
-		if('/'!=$this->filename[0]) $this->filename = \renovant\core\LOG_DIR.$this->filename;
-		if(!file_exists(dirname($this->filename))) mkdir(dirname($this->filename), 0700, true);
-		if(!file_exists($this->filename)) touch($this->filename);
+		if ('/' != $this->filename[0]) {
+			$this->filename = \renovant\core\LOG_DIR . $this->filename;
+		}
+		if (!file_exists(dirname($this->filename))) {
+			mkdir(dirname($this->filename), 0700, true);
+		}
+		if (!file_exists($this->filename)) {
+			touch($this->filename);
+		}
 	}
 
-	function __destruct() {
-		if(!is_null($this->_fh)) fclose($this->_fh);
+	public function __destruct() {
+		if (!is_null($this->_fh)) {
+			fclose($this->_fh);
+		}
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	function write($time, $message, $level=LOG_INFO, $facility=null) {
-		if(is_null($this->_fh)) $this->_fh = fopen($this->filename, 'a', 0);
-		if($facility) $message = $facility.': '.$message;
-		fwrite($this->_fh, sprintf('%s [%s] %s'.EOL, date('r',$time), Logger::LABELS[$level], $message));
+	public function write($time, $message, $level = LOG_INFO, $facility = null) {
+		if (is_null($this->_fh)) {
+			$this->_fh = fopen($this->filename, 'a', 0);
+		}
+		if ($facility) {
+			$message = $facility . ': ' . $message;
+		}
+		fwrite($this->_fh, sprintf('%s [%s] %s' . EOL, date('r', $time), Logger::LABELS[$level], $message));
 	}
 }

@@ -1,16 +1,17 @@
 <?php
 namespace renovant\core\authz;
-use const renovant\core\ENVIRONMENT;
-use const renovant\core\trace\T_INFO;
+
 use renovant\core\sys;
 
+use const renovant\core\ENVIRONMENT;
+use const renovant\core\trace\T_INFO;
+
 class ObjAuthz {
+	public const CACHE_SUFFIX = ':authz';
 
-	const CACHE_SUFFIX = ':authz';
-
-	const OP_ONE = 1;
-	const OP_ALL = 2;
-	const OP_ANY = 3;
+	public const OP_ONE = 1;
+	public const OP_ALL = 2;
+	public const OP_ANY = 3;
 
 	/** OID (Object Identifier) */
 	protected string $_;
@@ -24,42 +25,51 @@ class ObjAuthz {
 	protected ?array $op_perms;
 	protected ?array $op_acls;
 
-	function __construct($id, $methodsParams, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls) {
-		$this->_ = $id;
+	public function __construct($id, $methodsParams, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls) {
+		$this->_             = $id;
 		$this->methodsParams = $methodsParams;
-		$this->roles = $roles;
-		$this->perms = $perms;
-		$this->acls = $acls;
-		$this->op_roles = $op_roles;
-		$this->op_perms = $op_perms;
-		$this->op_acls = $op_acls;
-
+		$this->roles         = $roles;
+		$this->perms         = $perms;
+		$this->acls          = $acls;
+		$this->op_roles      = $op_roles;
+		$this->op_perms      = $op_perms;
+		$this->op_acls       = $op_acls;
 	}
 
 	/** @throws AuthzException */
-	function check(string $method, $args): void {
-		if(PHP_SAPI == 'cli' && ENVIRONMENT !== 'PHPUNIT') return;
-		$Authz = sys::authz();
+	public function check(string $method, $args): void {
+		if (PHP_SAPI == 'cli' && ENVIRONMENT !== 'PHPUNIT') {
+			return;
+		}
+		$Authz   = sys::authz();
 		$checked = [];
 		try {
 			// check RBAC roles
-			if(isset($this->roles['_']))
+			if (isset($this->roles['_'])) {
 				$this->checkRoles($Authz, $checked);
-			if(isset($this->roles[$method]))
+			}
+			if (isset($this->roles[$method])) {
 				$this->checkRoles($Authz, $checked, $method);
+			}
 
 			// check RBAC permissions
-			if(isset($this->perms['_']))
+			if (isset($this->perms['_'])) {
 				$this->checkPermissions($Authz, $checked);
-			if(isset($this->perms[$method]))
+			}
+			if (isset($this->perms[$method])) {
 				$this->checkPermissions($Authz, $checked, $method);
+			}
 
 			// check ACL
-			if(isset($this->acls['_']) || isset($this->acls[$method]))
+			if (isset($this->acls['_']) || isset($this->acls[$method])) {
 				$this->checkAcls($Authz, $checked, $method, $args);
+			}
 
-			if(empty($checked)) sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
-			else sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+			if (empty($checked)) {
+				sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
+			} else {
+				sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+			}
 		} catch (AuthzException $Ex) {
 			sys::trace(LOG_WARNING, T_INFO, '[AUTHZ] check FAILED');
 			throw $Ex;
@@ -67,7 +77,7 @@ class ObjAuthz {
 	}
 
 	/** @throws AuthzException */
-	protected function checkRoles(Authz $Authz, array &$checked, ?string $method=null): void {
+	protected function checkRoles(Authz $Authz, array &$checked, ?string $method = null): void {
 		$exCode = $method ? 301 : 300;
 		$method = $method ?? '_';
 		switch ($this->op_roles[$method]) {
@@ -83,14 +93,17 @@ class ObjAuthz {
 				throw new AuthzException($exCode, [implode(', ', $exRoles), $this->_, $method]);
 			default:
 				foreach ($this->roles[$method] as $role) {
-					if (!$Authz->role($role)) throw new AuthzException($exCode, [$role, $this->_, $method]);
-					else $checked['ROLES'][] = $role;
+					if (!$Authz->role($role)) {
+						throw new AuthzException($exCode, [$role, $this->_, $method]);
+					} else {
+						$checked['ROLES'][] = $role;
+					}
 				}
 		}
 	}
 
 	/** @throws AuthzException */
-	protected function checkPermissions(Authz $Authz, array &$checked, ?string $method=null): void {
+	protected function checkPermissions(Authz $Authz, array &$checked, ?string $method = null): void {
 		$exCode = $method ? 401 : 400;
 		$method = $method ?? '_';
 		switch ($this->op_perms[$method]) {
@@ -106,8 +119,11 @@ class ObjAuthz {
 				throw new AuthzException($exCode, [implode(', ', $exPerms), $this->_, $method]);
 			default:
 				foreach ($this->perms[$method] as $perm) {
-					if (!$Authz->permission($perm)) throw new AuthzException($exCode, [$perm, $this->_, $method]);
-					else $checked['PERMISSIONS'][] = $perm;
+					if (!$Authz->permission($perm)) {
+						throw new AuthzException($exCode, [$perm, $this->_, $method]);
+					} else {
+						$checked['PERMISSIONS'][] = $perm;
+					}
 				}
 		}
 	}
@@ -131,8 +147,11 @@ class ObjAuthz {
 			default:
 				foreach ($this->acls[$method] as $aclKey => $aclParam) {
 					$index = $this->methodsParams[$methodName][substr($aclParam, 1)]['index'];
-					if (!$Authz->acl($aclKey, $args[$index])) throw new AuthzException($exCode, [$aclKey, $this->_, $method]);
-					else $checked['ACL'][] = $aclKey;
+					if (!$Authz->acl($aclKey, $args[$index])) {
+						throw new AuthzException($exCode, [$aclKey, $this->_, $method]);
+					} else {
+						$checked['ACL'][] = $aclKey;
+					}
 				}
 		}
 	}

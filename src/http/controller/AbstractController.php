@@ -1,11 +1,12 @@
 <?php
 namespace renovant\core\http\controller;
+
+use renovant\core\sys;
+use renovant\core\auth\Auth;
+use renovant\core\http\{Exception, Request, Response};
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\auth\Auth,
-	renovant\core\http\Request,
-	renovant\core\http\Response,
-	renovant\core\http\Exception;
+
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
@@ -26,7 +27,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->_config = AbstractControllerReflection::analyzeHandle($this);
 	}
 
@@ -34,50 +35,62 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 	 * @param Request $Req
 	 * @param Response $Res
 	 */
-	function handle(Request $Req, Response $Res) {
-		if($this->viewEngine) $Res->setView(null, null, $this->viewEngine);
-		if(true!==$this->preHandle($Req, $Res)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
+	public function handle(Request $Req, Response $Res) {
+		if ($this->viewEngine) {
+			$Res->setView(null, null, $this->viewEngine);
+		}
+		if (true !== $this->preHandle($Req, $Res)) {
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_ . '->preHandle');
 			return;
 		}
 		// inject URL params into Request
-		if(isset($this->_config['route'])) {
-			if(preg_match($this->_config['route'], $Req->getAttribute('APP_MOD_CONTROLLER_URI'), $matches)) {
-				foreach($matches as $k=>$v) {
-					if(is_string($k)) $Req->set($k, $v);
+		if (isset($this->_config['route'])) {
+			if (preg_match($this->_config['route'], $Req->getAttribute('APP_MOD_CONTROLLER_URI'), $matches)) {
+				foreach ($matches as $k => $v) {
+					if (is_string($k)) {
+						$Req->set($k, $v);
+					}
 				}
 			}
 		}
 		$args = [];
-		if(isset($this->_config['params'])) {
-			foreach($this->_config['params'] as $i => $param) {
-				if(!is_null($param['class'])) {
+		if (isset($this->_config['params'])) {
+			foreach ($this->_config['params'] as $i => $param) {
+				if (!is_null($param['class'])) {
 					switch ($param['class']) {
-						case Request::class: $args[$i] = $Req; break;
-						case Response::class: $args[$i] = $Res; break;
-						case Auth::class: $args[$i] = Auth::instance(); break;
+						case Request::class: $args[$i] = $Req;
+							break;
+						case Response::class: $args[$i] = $Res;
+							break;
+						case Auth::class: $args[$i] = Auth::instance();
+							break;
 						default: $args[$i] = new $param['class']($Req);
 					}
 				} elseif (isset($param['type'])) {
-					switch($param['type']) {
-						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
-						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
-						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
-						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
-						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null: $v;
+					switch ($param['type']) {
+						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (bool) $v;
+							break;
+						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (int) $v;
+							break;
+						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (string) $v;
+							break;
+						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (array) $v;
+							break;
+						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null : $v;
 					}
 				}
 			}
 		}
-		$prevTraceFn = sys::traceFn($this->_.'->doHandle');
+		$prevTraceFn = sys::traceFn($this->_ . '->doHandle');
 		try {
 			sys::trace(LOG_DEBUG, T_INFO);
-			call_user_func_array([$this,'doHandle'], $args);
+			call_user_func_array([$this, 'doHandle'], $args);
 			$this->postHandle($Req, $Res);
 		} finally {
 			sys::traceFn($prevTraceFn);
 		}
 	}
+
 	/**
 	 * Pre-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request
@@ -87,6 +100,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 	protected function preHandle(Request $Req, Response $Res) {
 		return true;
 	}
+
 	/**
 	 * Post-handle hook, can be overridden by subclasses.
 	 * @param Request $Req current request

@@ -1,11 +1,13 @@
 <?php
 namespace renovant\core\auth;
-use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\http\Event as HttpEvent;
-class AuthServiceSession extends AuthService {
 
-	function __sleep() {
+use renovant\core\sys;
+use renovant\core\http\Event as HttpEvent;
+
+use const renovant\core\trace\T_INFO;
+
+class AuthServiceSession extends AuthService {
+	public function __sleep() {
 		return ['_', 'cookieAUTH', 'cookieREFRESH', 'cookieREMEMBER', 'cookieXSRF', 'ttlAUTH', 'ttlREFRESH', 'ttlREMEMBER', 'skipAuthModules', 'skipAuthUrls', 'skipXSRFModules', 'skipXSRFUrls'];
 	}
 
@@ -17,10 +19,12 @@ class AuthServiceSession extends AuthService {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function init(HttpEvent $Event) {
-		$prevTraceFn = sys::traceFn($this->_.'->init');
+	public function init(HttpEvent $Event) {
+		$prevTraceFn = sys::traceFn($this->_ . '->init');
 		try {
-			if (!isset($_SESSION)) throw new Exception(23);
+			if (!isset($_SESSION)) {
+				throw new Exception(23);
+			}
 			if (isset($_SESSION['__AUTH__']) && is_array($_SESSION['__AUTH__'])) {
 				$this->doAuthenticate($_SESSION['__AUTH__']);
 				sys::trace(LOG_DEBUG, T_INFO, 'SESSION AUTH OK', $_SESSION['__AUTH__']);
@@ -41,25 +45,29 @@ class AuthServiceSession extends AuthService {
 	 * To be invoked via event listener after HTTP Controller execution (HTTP:VIEW & HTTP:EXCEPTION).
 	 * @throws \Exception
 	 */
-	function commit() {
-		if(!$this->_commit) return;
-		$prevTraceFn = sys::traceFn($this->_.'->commit');
+	public function commit() {
+		if (!$this->_commit) {
+			return;
+		}
+		$prevTraceFn = sys::traceFn($this->_ . '->commit');
 
 		$Auth = Auth::instance();
-		if(!$Auth->UID()) return;
+		if (!$Auth->UID()) {
+			return;
+		}
 		try {
 			// AUTH DATA
 			$data = array_merge($Auth->data(), [
-				'GID' => $Auth->GID(),
+				'GID'   => $Auth->GID(),
 				'GROUP' => $Auth->GROUP(),
-				'NAME' => $Auth->NAME(),
-				'UID' => $Auth->UID()
+				'NAME'  => $Auth->NAME(),
+				'UID'   => $Auth->UID()
 			]);
 			sys::trace(LOG_DEBUG, T_INFO, 'update SESSION data');
 			$_SESSION['__AUTH__'] = $data;
 
 			// REMEMBER cookie
-			if($this->rememberFlag) {
+			if ($this->rememberFlag) {
 				// @TODO
 			}
 
@@ -75,8 +83,8 @@ class AuthServiceSession extends AuthService {
 	 * To be invoked on LOGOUT or other required situations.
 	 * @throws \Exception
 	 */
-	function erase() {
-		$prevTraceFn = sys::traceFn($this->_.'->erase');
+	public function erase() {
+		$prevTraceFn = sys::traceFn($this->_ . '->erase');
 		try {
 			// delete AUTH DATA
 			sys::trace(LOG_DEBUG, T_INFO, 'erase SESSION data');

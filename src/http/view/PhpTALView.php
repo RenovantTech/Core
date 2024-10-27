@@ -1,15 +1,14 @@
 <?php
 namespace renovant\core\http\view;
-use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\http\Request,
-	renovant\core\http\Response,
-	renovant\core\http\Exception,
-	renovant\core\http\ViewInterface;
-class PhpTALView implements ViewInterface {
 
+use renovant\core\sys;
+use renovant\core\http\{Exception, Request, Response, ViewInterface};
+
+use const renovant\core\trace\T_INFO;
+
+class PhpTALView implements ViewInterface {
 	/** template suffixes */
-	const TEMPLATE_SUFFIXES = '.html|.xml';
+	public const TEMPLATE_SUFFIXES = '.html|.xml';
 	/** customizable PhpTAL pre-filter class, must implements PHPTAL_Filter
 	 * @var string */
 	protected $preFilterClass = null;
@@ -25,24 +24,24 @@ class PhpTALView implements ViewInterface {
 	 * @throws Exception
 	 * @throws \PHPTAL_ConfigurationException
 	 */
-	function render(Request $Req, Response $Res, $resource=null, array $options=null) {
+	public function render(Request $Req, Response $Res, $resource = null, array $options = null) {
 		$template = null;
 		$suffixes = explode('|', static::TEMPLATE_SUFFIXES);
-		foreach($suffixes as $suffix) {
-			if(file_exists($template = $Req->getAttribute('RESOURCES_DIR').$resource.$suffix)) {
-				sys::trace(LOG_DEBUG, T_INFO, 'template: '.$template, null, 'sys.http.PhpTALView->render');
+		foreach ($suffixes as $suffix) {
+			if (file_exists($template = $Req->getAttribute('RESOURCES_DIR') . $resource . $suffix)) {
+				sys::trace(LOG_DEBUG, T_INFO, 'template: ' . $template, null, 'sys.http.PhpTALView->render');
 				$this->execTemplate($template, $Res);
 				return;
 			}
 		}
-		throw new Exception(201, ['PHPTal Template', $Req->getAttribute('RESOURCES_DIR').$resource.static::TEMPLATE_SUFFIXES]);
+		throw new Exception(201, ['PHPTal Template', $Req->getAttribute('RESOURCES_DIR') . $resource . static::TEMPLATE_SUFFIXES]);
 	}
 
-	function setPreFilter($class) {
+	public function setPreFilter($class) {
 		$this->preFilterClass = $class;
 	}
 
-	function setPostFilter($class) {
+	public function setPostFilter($class) {
 		$this->postFilterClass = $class;
 	}
 
@@ -56,18 +55,20 @@ class PhpTALView implements ViewInterface {
 		$PhpTAL = new \PHPTAL($template);
 		$PhpTAL->setEncoding('UTF-8');
 		$PhpTAL->setOutputMode(\PHPTAL::HTML5);
-		if(!file_exists(\renovant\core\CACHE_DIR.'phptal')) mkdir(\renovant\core\CACHE_DIR.'phptal', 0750);
-		$PhpTAL->setPhpCodeDestination(\renovant\core\CACHE_DIR.'phptal');
-		if(!is_null($class = $this->preFilterClass)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: '.$class, null, 'sys.http.PhpTALView->execTemplate');
-			$PhpTAL->addPreFilter(new $class);
+		if (!file_exists(\renovant\core\CACHE_DIR . 'phptal')) {
+			mkdir(\renovant\core\CACHE_DIR . 'phptal', 0750);
 		}
-		if(!is_null($class = $this->postFilterClass)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'set postFilter: '.$class, null, 'sys.http.PhpTALView->execTemplate');
-			$PhpTAL->setPostFilter(new $class);
+		$PhpTAL->setPhpCodeDestination(\renovant\core\CACHE_DIR . 'phptal');
+		if (!is_null($class = $this->preFilterClass)) {
+			sys::trace(LOG_DEBUG, T_INFO, 'set preFilter: ' . $class, null, 'sys.http.PhpTALView->execTemplate');
+			$PhpTAL->addPreFilter(new $class());
+		}
+		if (!is_null($class = $this->postFilterClass)) {
+			sys::trace(LOG_DEBUG, T_INFO, 'set postFilter: ' . $class, null, 'sys.http.PhpTALView->execTemplate');
+			$PhpTAL->setPostFilter(new $class());
 		}
 		// assign Model values
-		foreach($Res->getData() as $k => $v) {
+		foreach ($Res->getData() as $k => $v) {
 			$PhpTAL->set($k, $v);
 		}
 		// execute

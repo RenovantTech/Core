@@ -1,23 +1,22 @@
 <?php
 namespace renovant\core\console;
+
+use renovant\core\sys;
+use renovant\core\util\reflection\{ReflectionMethod, ReflectionProperty};
+use renovant\core\util\str;
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\util\reflection\ReflectionMethod,
-	renovant\core\util\reflection\ReflectionProperty,
-	renovant\core\util\str;
 
 const SQLITE_INSERT = 'INSERT OR IGNORE INTO %s (id, class, namespace, description) VALUES (:id, :class, :namespace, :description)';
 const SQLITE_UPDATE = 'UPDATE %s SET class = :class, namespace = :namespace, description = :description WHERE id = :id';
-const MYSQL_INSERT = 'INSERT IGNORE INTO %s (id, class, namespace, description) VALUES (:id, :class, :namespace, :description)';
-const MYSQL_UPDATE = 'UPDATE %s SET class = :class, namespace = :namespace, description = :description WHERE id = :id';
-
+const MYSQL_INSERT  = 'INSERT IGNORE INTO %s (id, class, namespace, description) VALUES (:id, :class, :namespace, :description)';
+const MYSQL_UPDATE  = 'UPDATE %s SET class = :class, namespace = :namespace, description = :description WHERE id = :id';
 
 /**
  * @param string $pdo PDO instance ID
  * @param string $table table name
  */
 function scan(string $pdo, string $table): void {
-
 	$prevTraceFn = sys::traceFn(__METHOD__);
 	try {
 		sys::trace(LOG_DEBUG);
@@ -32,21 +31,23 @@ function scan(string $pdo, string $table): void {
 				$pdoUpdate = sys::pdo($pdo)->prepare(sprintf(SQLITE_UPDATE, $table));
 				break;
 		}
-		$c = 0;
-		$cache = [];
+		$c      = 0;
+		$cache  = [];
 		$routes = (new \ReflectionClass(sys::class))->getStaticPropertyValue('routes');
 
 		foreach ($routes as $app => $conf) {
 			sys::trace(LOG_DEBUG, T_INFO, 'searching namespace ' . $conf['namespace']);
 			sys::context()->init($conf['namespace']);
-			$Dispatcher = sys::context()->container()->get($conf['namespace'] . '.Dispatcher');
+			$Dispatcher      = sys::context()->container()->get($conf['namespace'] . '.Dispatcher');
 			$RefPropMappings = new \ReflectionProperty($Dispatcher, 'routes');
 			$RefPropMappings->setAccessible(true);
 			$routes = $RefPropMappings->getValue($Dispatcher);
 			foreach ($routes as $cmd2 => $controllerID) {
 				$BatchController = sys::context()->container()->get($controllerID);
-				if (!$BatchController instanceof ControllerInterface) continue;
-				$params['class'] = get_class($BatchController);
+				if (!$BatchController instanceof ControllerInterface) {
+					continue;
+				}
+				$params['class']     = get_class($BatchController);
 				$params['namespace'] = $conf['namespace'];
 				if ($BatchController instanceof \renovant\core\console\controller\ActionController) {
 					$RefPropActions = new \ReflectionProperty($BatchController, '_config');
@@ -55,7 +56,7 @@ function scan(string $pdo, string $table): void {
 					foreach ($actions as $action => $config) {
 						$RefMethod = new ReflectionMethod($BatchController, $action);
 						if ($RefMethod->getDocComment()->hasTag('batch')) {
-							$params['id'] = $conf['cmd'] . ' ' . $cmd2 . ' ' . str::camel2kebab($action);
+							$params['id']          = $conf['cmd'] . ' ' . $cmd2 . ' ' . str::camel2kebab($action);
 							$params['description'] = $RefMethod->getDocComment()->getTag('batch')['description'];
 							$c++;
 							sys::trace(LOG_DEBUG, T_INFO, '[STORE] ' . $params['id']);
@@ -66,9 +67,9 @@ function scan(string $pdo, string $table): void {
 					}
 				} else {
 					$handleMethod = ($BatchController instanceof \renovant\core\console\controller\AbstractController) ? 'doHandle' : 'handle';
-					$RefMethod = new ReflectionMethod($BatchController, $handleMethod);
+					$RefMethod    = new ReflectionMethod($BatchController, $handleMethod);
 					if ($RefMethod->getDocComment()->hasTag('batch')) {
-						$params['id'] = $conf['cmd'] . ' ' . $cmd2;
+						$params['id']          = $conf['cmd'] . ' ' . $cmd2;
 						$params['description'] = $RefMethod->getDocComment()->getTag('batch')['description'];
 						$c++;
 						sys::trace(LOG_DEBUG, T_INFO, '[STORE] ' . $params['id']);

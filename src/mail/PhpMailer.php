@@ -1,8 +1,10 @@
 <?php
 namespace renovant\core\mail;
-use const renovant\core\trace\T_ERROR;
-use const renovant\core\trace\T_INFO;
+
 use renovant\core\sys;
+
+use const renovant\core\trace\{T_ERROR, T_INFO};
+
 /**
  * Wrapper for PHPMailer
  *
@@ -16,7 +18,7 @@ class PhpMailer {
 	use \renovant\core\CoreTrait;
 
 	/** default transport type to be used */
-	const DEFAULT_TRANSPORT = 'smtp';
+	public const DEFAULT_TRANSPORT = 'smtp';
 	/** Array of failed recipients after a call to Mailer->send() or Mailer->batchSend()
 	 * @var array */
 	protected $failedRecipients = [];
@@ -26,11 +28,11 @@ class PhpMailer {
 	/** SMTP params array
 	 * @var array */
 	protected $transportOptions = [
-		'server'	=> 'localhost',
-		'port'		=> 25,
-		'encryption'=> false,
-		'user'		=> null,
-		'password'	=> null
+		'server'     => 'localhost',
+		'port'       => 25,
+		'encryption' => false,
+		'user'       => null,
+		'password'   => null
 	];
 	/** mail transport type to be used, can be: mail | smtp | sendmail (default: mail)
 	 * @var string */
@@ -40,24 +42,29 @@ class PhpMailer {
 	 * @param string $transportType
 	 * @param array|null $transportOptions
 	 */
-	function __construct($transportType=self::DEFAULT_TRANSPORT, array $transportOptions=null) {
+	public function __construct($transportType = self::DEFAULT_TRANSPORT, array $transportOptions = null) {
 		$this->transportType = $transportType;
-		if($transportType == 'smtp' && !is_null($transportOptions)) $this->transportOptions = $transportOptions;
+		if ($transportType == 'smtp' && !is_null($transportOptions)) {
+			$this->transportOptions = $transportOptions;
+		}
 	}
 
-	function __call($method, $args) {
-		if(is_null($this->Mailer)) $this->initMailer();
-		if (is_callable([$this->Mailer, $method]))
+	public function __call($method, $args) {
+		if (is_null($this->Mailer)) {
+			$this->initMailer();
+		}
+		if (is_callable([$this->Mailer, $method])) {
 			return call_user_func_array([$this->Mailer, $method], $args);
-		if(substr($method, 0,3) == 'set') {
-			$prop = substr($method, 3);
+		}
+		if (substr($method, 0, 3) == 'set') {
+			$prop                = substr($method, 3);
 			$this->Mailer->$prop = $args[0];
 			return null;
 		}
 		return null;
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return ['_', 'transportOptions', 'transportType'];
 	}
 
@@ -67,7 +74,7 @@ class PhpMailer {
 	protected function initMailer() {
 		sys::trace(LOG_DEBUG, T_INFO);
 		$this->Mailer = new \PHPMailer\PHPMailer\PHPMailer(true);
-		switch($this->transportType) {
+		switch ($this->transportType) {
 			case 'sendmail':
 
 				break;
@@ -90,9 +97,11 @@ class PhpMailer {
 	 * @return boolean
 	 * @see PHPMailer::send()
 	 */
-	function send() {
+	public function send() {
 		try {
-			if(is_null($this->Mailer)) $this->initMailer();
+			if (is_null($this->Mailer)) {
+				$this->initMailer();
+			}
 			$this->Mailer->send();
 			sys::trace(LOG_DEBUG, T_INFO, 'OK: Mail successfully sent!');
 			return true;
