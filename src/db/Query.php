@@ -388,22 +388,22 @@ class Query {
 			$values = array_slice($cExpTokens, 2);
 			switch($op) {
 				case 'EQ':
-					$sql[] = "`$field` = :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` = :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case '!EQ':
-					$sql[] = "`$field` != :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` != :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'LT':
-					$sql[] = "`$field` < :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` < :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'LTE':
-					$sql[] = "`$field` <= :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` <= :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'GT':
-					$sql[] = "`$field` > :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` > :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'GTE':
-					$sql[] = "`$field` >= :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` >= :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'NULL':
 					$sql[] = "`$field` IS NULL";
@@ -412,10 +412,10 @@ class Query {
 					$sql[] = "`$field` IS NOT NULL";
 					break;
 				case 'BTW':
-					$sql[] = "(`$field` >= :${field}_${i}_1 AND `$field` <= :${field}_${i}_2)"; $addParams($field, $values);
+					$sql[] = "(`$field` >= :{$field}_{$i}_1 AND `$field` <= :{$field}_{$i}_2)"; $addParams($field, $values);
 					break;
 				case '!BTW':
-					$sql[] = "(`$field` < :${field}_${i}_1 OR `$field` > :${field}_${i}_2)"; $addParams($field, $values);
+					$sql[] = "(`$field` < :{$field}_{$i}_1 OR `$field` > :{$field}_{$i}_2)"; $addParams($field, $values);
 					break;
 				case 'IN':
 					$in = '';
@@ -428,28 +428,28 @@ class Query {
 					$sql[] = sprintf('`%s` NOT IN (%s)', $field, substr($in, 0, -2)); $addParams($field, $values);
 					break;
 				case 'LIKE':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` LIKE :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case '!LIKE':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` NOT LIKE :{$field}_$i"; $addParam($field, $values[0]);
 					break;
 				case 'LIKEHAS':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, '%'.$values[0].'%');
+					$sql[] = "`$field` LIKE :{$field}_$i"; $addParam($field, '%'.$values[0].'%');
 					break;
 				case '!LIKEHAS':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, '%'.$values[0].'%');
+					$sql[] = "`$field` NOT LIKE :{$field}_$i"; $addParam($field, '%'.$values[0].'%');
 					break;
 				case 'LIKESTART':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, $values[0].'%');
+					$sql[] = "`$field` LIKE :{$field}_$i"; $addParam($field, $values[0].'%');
 					break;
 				case '!LIKESTART':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, $values[0].'%');
+					$sql[] = "`$field` NOT LIKE :{$field}_$i"; $addParam($field, $values[0].'%');
 					break;
 				case 'LIKEEND':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, '%'.$values[0]);
+					$sql[] = "`$field` LIKE :{$field}_$i"; $addParam($field, '%'.$values[0]);
 					break;
 				case '!LIKEEND':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, '%'.$values[0]);
+					$sql[] = "`$field` NOT LIKE :{$field}_$i"; $addParam($field, '%'.$values[0]);
 					break;
 				default:
 					trigger_error(__METHOD__.' - invalid criteriaExp: '.$cExp, E_USER_ERROR);
