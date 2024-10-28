@@ -13,11 +13,11 @@ class TracerLog {
 
 		$trace[] = [round(microtime(1) - $_SERVER['REQUEST_TIME_FLOAT'], 5), memory_get_usage(), LOG_DEBUG, T_INFO, '\\\trace\Tracer::shutdown', null, null];
 
+		$hr  = str_pad('', 160, '-', STR_PAD_RIGHT);
 		$log = '';
 
 		// build HEADER
 
-		$hr                    = str_pad('', 160, '-', STR_PAD_RIGHT);
 		list($legend, $header) = self::buildHeader($Req, $Res);
 		$log .= $hr . PHP_EOL;
 		$log .= $legend . PHP_EOL;
@@ -88,7 +88,8 @@ class TracerLog {
 		return [$legend, $header];
 	}
 
-	protected static function indentData(string $data): string {
+	protected static function indentData(mixed $data): string {
+		$data = print_r($data, true);
 		return str_pad('', 50) . str_replace("\n", "\n" . str_pad('', length: 50), $data);
 	}
 
