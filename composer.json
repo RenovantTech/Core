@@ -30,7 +30,7 @@
 		"ext-sqlite3": "*",
 		"bacon/bacon-qr-code": "^1.0",
 		"defuse/php-encryption": ">=2.1",
-		"firebase/php-jwt": "v5.0.0",
+		"firebase/php-jwt": "^6.0",
 		"phpmailer/phpmailer": "^6.0",
 		"pragmarx/google2fa": "^8.0"
 	},
