@@ -7,32 +7,34 @@ use const renovant\core\LOG_DIR;
 
 class TracerLog {
 	public static function write($Req, $Res, array $trace, int $errorLevel) {
-		$trace[] = [round(microtime(1) - $_SERVER['REQUEST_TIME_FLOAT'], 5), memory_get_usage(), LOG_DEBUG, T_INFO, '\\\trace\Tracer::shutdown', null, null];
-		$hr      = str_pad('', 160, '-', STR_PAD_RIGHT);
+		if (defined('renovant\webconsole\ABORT_TRACE') && constant('renovant\webconsole\ABORT_TRACE')) {
+			return;
+		}
 
-		$fp = fopen(LOG_DIR . 'debug.log', 'a');
+		$trace[] = [round(microtime(1) - $_SERVER['REQUEST_TIME_FLOAT'], 5), memory_get_usage(), LOG_DEBUG, T_INFO, '\\\trace\Tracer::shutdown', null, null];
+
+		$log = '';
 
 		// build HEADER
 
+		$hr                    = str_pad('', 160, '-', STR_PAD_RIGHT);
 		list($legend, $header) = self::buildHeader($Req, $Res);
-
-		fwrite($fp, $hr . PHP_EOL);
-		fwrite($fp, $legend . PHP_EOL);
-		fwrite($fp, $header . PHP_EOL);
-		fwrite($fp, $hr . PHP_EOL);
+		$log .= $hr . PHP_EOL;
+		$log .= $legend . PHP_EOL;
+		$log .= $header . PHP_EOL;
+		$log .= $hr . PHP_EOL;
 
 		// build TRACE
 
 		foreach ($trace as $t) {
-			$line = str_pad(number_format($t[0], 6, '.', ''), 10, ' ', STR_PAD_LEFT) . ' ' . str_pad($t[1], 9, ' ', STR_PAD_LEFT) . '  ' . self::level($t[2]) . '  ' . self::type($t[3]) . '  ' . str_pad($t[4], 60) . str_replace(["\n", "\t"], '', $t[5]);
-			fwrite($fp, $line . PHP_EOL);
+			$log .= str_pad(number_format($t[0], 6, '.', ''), 10, ' ', STR_PAD_LEFT) . ' ' . str_pad($t[1], 9, ' ', STR_PAD_LEFT) . '  ' . self::level($t[2]) . '  ' . self::type($t[3]) . '  ' . str_pad($t[4], 60) . str_replace(["\n", "\t"], '', $t[5]) . PHP_EOL;
 			$data = unserialize($t[6]);
 			if (!empty($data)) {
-				fwrite($fp, self::indentData($data) . PHP_EOL);
+				$log .= self::indentData($data) . PHP_EOL;
 			}
 		}
-		fwrite($fp, PHP_EOL);
-		fclose($fp);
+		$log .= PHP_EOL;
+		file_put_contents(LOG_DIR . 'debug.log', $log, FILE_APPEND);
 	}
 
 	protected static function buildHeader($Req, $Res): array {
