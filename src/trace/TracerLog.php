@@ -27,10 +27,12 @@ class TracerLog {
 		// build TRACE
 
 		foreach ($trace as $t) {
-			$log .= str_pad(number_format($t[0], 6, '.', ''), 10, ' ', STR_PAD_LEFT) . ' ' . str_pad($t[1], 9, ' ', STR_PAD_LEFT) . '  ' . self::level($t[2]) . '  ' . self::type($t[3]) . '  ' . str_pad($t[4], 60) . str_replace(["\n", "\t"], '', $t[5]) . PHP_EOL;
-			$data = unserialize($t[6]);
-			if (!empty($data)) {
-				$log .= self::indentData($data) . PHP_EOL;
+			$log .= str_pad(number_format($t[0], 6, '.', ''), 10, ' ', STR_PAD_LEFT) . ' ' . str_pad($t[1], 9, ' ', STR_PAD_LEFT) . '  ' . self::level($t[2]) . '  ' . self::type($t[3]) . '  ' . str_pad($t[4], 60) . str_replace(["\n", "\t"], '', $t[5] ?? '') . PHP_EOL;
+			if (!empty($t[6])) {
+				$data = unserialize($t[6]);
+				if (!empty($data)) {
+					$log .= self::indentData($data) . PHP_EOL;
+				}
 			}
 		}
 		$log .= PHP_EOL;
@@ -77,7 +79,7 @@ class TracerLog {
 		$header .= str_pad($Req ? (int) $Res->getSize() : 0, 6);
 
 		$legend .= str_pad('Geo', 4);
-		$header .= str_pad($_SERVER['HTTP_CF_IPCOUNTRY'] ?? null, 4);
+		$header .= str_pad($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '', 4);
 
 		$legend .= str_pad('IP', 17);
 		$header .= str_pad($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? null, 17);
