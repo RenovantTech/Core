@@ -9,21 +9,16 @@ use const renovant\core\http\ENGINE_JSON;
 use const renovant\core\trace\{T_ERROR, T_INFO};
 
 class RestOrmController extends \renovant\core\http\controller\ActionController {
-	/** JSON data param
-	 * @var string */
-	protected $responseData = 'data';
-	/** JSON errors param
-	 * @var string */
-	protected $responseErrors = 'errors';
-	/** JSON total param
-	 * @var string */
-	protected $responseTotal = 'total';
-	/** default View engine
-	 * @var string */
-	protected $viewEngine = ENGINE_JSON;
-	/** Urls to resources mappings
-	 * @var array */
-	protected $routes = [];
+	/** JSON data param */
+	protected string $responseData = 'data';
+	/** JSON errors param */
+	protected string $responseErrors = 'errors';
+	/** JSON total param */
+	protected string $responseTotal = 'total';
+	/** default View engine */
+	protected ?string $viewEngine = ENGINE_JSON;
+	/** Urls to resources mappings */
+	protected array $routes = [];
 
 	/**
 	 * @routing(method="POST", pattern="^<resource>$")

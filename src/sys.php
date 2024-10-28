@@ -49,62 +49,50 @@ class sys {
 	/** Logger
 	 * @var \renovant\core\log\Logger */
 	protected static $Logger;
-	/** Log buffer
-	 * @var array */
-	protected static $log = [];
-	/** PDO instances
-	 * @var array */
-	protected static $pdo = [];
+	/** Log buffer */
+	protected static ?array $log = [];
+	/** PDO instances */
+	protected static array $pdo = [];
 	/** Current HTTP/CLI Request
 	 * @var object */
 	protected static $Req;
 	/** Current HTTP/CLI Response
 	 * @var object */
 	protected static $Res;
-	/** Current HTTP/CLI routes
-	 * @var array */
-	protected static $routes = [];
+	/** Current HTTP/CLI routes */
+	protected static array $routes = [];
 	/** Singleton instance
 	 * @var sys */
 	protected static $Sys;
-	/** trace store
-	 * @var array */
-	protected static $trace = [];
-	/** trace current scope
-	 * @var string */
-	protected static $traceFn;
-	/** trace level
-	 * @var integer */
-	protected static $traceLevel = LOG_DEBUG;
+	/** trace store */
+	protected static array $trace = [];
+	/** trace current scope */
+	protected static string $traceFn;
+	/** trace level */
+	protected static int $traceLevel = LOG_DEBUG;
 
-	/** Cache configurations
-	 * @var array */
-	protected $cnfCache = [];
-	/** Constants
-	 * @var array */
-	protected $cnfConstants = [];
+	/** Cache configurations */
+	protected array $cnfCache = [];
+	/** Constants */
+	protected array $cnfConstants = [];
 	/** LogWriters configurations
 	 * @var array */
-	protected $cnfLog = [];
-	/** Database PDO configurations
-	 * @var array */
-	protected $cnfPdo = [];
-	/** system settings
-	 * @var array */
-	protected $cnfSettings = [
+	protected array $cnfLog = [];
+	/** Database PDO configurations */
+	protected array $cnfPdo = [];
+	/** system settings */
+	protected array $cnfSettings = [
 		'charset'  => 'UTF-8',
 		'locale'   => 'en_US.UTF-8',
 		'timeZone' => 'UTC'
 	];
-	/** trace settings
-	 * @var array */
-	protected $cnfTrace = [
+	/** trace settings */
+	protected array $cnfTrace = [
 		'level'   => LOG_DEBUG,
 		'storeFn' => null
 	];
-	/** sys services
-	 * @var array */
-	protected $cnfServices = [
+	/** sys services */
+	protected array $cnfServices = [
 		'auth'  => 'sys.AUTH',
 		'authz' => 'sys.AUTHZ',
 		'cmd'   => 'sys.CmdManager'

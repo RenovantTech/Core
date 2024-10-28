@@ -93,7 +93,7 @@ class CmdManager {
 	 * @param string $cmd
 	 * @return array|false [$output, $exitCode] on SUCCESS, FALSE on FAILURE
 	 */
-	public function execWait(string $cmd) {
+	public function execWait(string $cmd): array|false {
 		$exec = CLI_PHP_BIN . ' ' . CLI_BOOTSTRAP . ' ' . $cmd;
 		sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager');
 		if (exec($exec, $output, $exitCode)) {

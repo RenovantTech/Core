@@ -11,12 +11,10 @@ class PhpView implements \renovant\core\console\ViewInterface {
 
 	/** template suffix */
 	public const TEMPLATE_SUFFIX = '.phtml';
-	/** Model array
-	 * @var array */
-	private static $model;
-	/** php template path
-	 * @var string */
-	private static $template;
+	/** Model array */
+	private static array $model;
+	/** php template path */
+	private static string $template;
 
 	/**
 	 * @param Request $Req

@@ -11,11 +11,10 @@ class AbstractControllerReflection {
 	/**
 	 * Return Controller's actions metadata
 	 * @param AbstractController $Controller
-	 * @return array
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\http\Exception
 	 */
-	public static function analyzeHandle(AbstractController $Controller) {
+	public static function analyzeHandle(AbstractController $Controller): array {
 		$config     = [];
 		$RefClass   = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();

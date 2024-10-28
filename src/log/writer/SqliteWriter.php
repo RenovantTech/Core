@@ -26,9 +26,8 @@ class SqliteWriter implements \renovant\core\log\LogWriterInterface {
 	/** PDO instance ID
 	 * @var string */
 	protected $pdo;
-	/** PDO table name
-	 * @var string */
-	protected $table;
+	/** PDO table name */
+	protected string $table;
 
 	/**
 	 * @param string|null $pdo PDO instance ID

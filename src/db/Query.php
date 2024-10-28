@@ -175,7 +175,7 @@ class Query {
 	 * @param array $params PDO criteria params
 	 * @return int n° of rows deleted
 	 */
-	public function execUpdate(array $data, array $params = []) {
+	public function execUpdate(array $data, array $params = []): int {
 		if (is_null($this->PDOStatement)) {
 			$sql = '';
 			foreach ($data as $k => $v) {

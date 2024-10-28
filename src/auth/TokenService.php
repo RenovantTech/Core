@@ -17,12 +17,10 @@ class TokenService {
 
 	/** @var ProviderInterface */
 	protected $Provider;
-	/** Activate Token TTL
-	 * @var int */
-	protected $ttlACTIVATE = self::TTL_ACTIVATE;
-	/** Reset Token TTL
-	 * @var int */
-	protected $ttlRESET = self::TTL_RESET;
+	/** Activate Token TTL */
+	protected int $ttlACTIVATE = self::TTL_ACTIVATE;
+	/** Reset Token TTL */
+	protected int $ttlRESET = self::TTL_RESET;
 
 	/**
 	 * @param string $token

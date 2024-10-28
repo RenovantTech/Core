@@ -10,27 +10,22 @@ class MemcachedCache implements CacheInterface {
 
 	public const DEFAULT_PARAMS = ['localhost', 11211, 0];
 
-	/** Write buffer
-	 * @var array */
-	protected static $buffer = [];
-	/** Memory cache
-	 * @var array */
-	protected $cache = [];
-	/** Memory cache
-	 * @var array */
-	protected $params = self::DEFAULT_PARAMS;
-	/** Write buffer
-	 * @var boolean */
-	protected $writeBuffer = false;
-	/** SQLite3 resource (READ only)
-	 * @var \Memcached */
-	protected $Memcached;
+	/** Write buffer */
+	protected static array $buffer = [];
+	/** Memory cache */
+	protected array $cache = [];
+	/** Memory cache */
+	protected array $params = self::DEFAULT_PARAMS;
+	/** Write buffer */
+	protected bool $writeBuffer = false;
+	/** SQLite3 resource (READ only) */
+	protected \Memcached $Memcached;
 
 	/**
-	 * @param string $params servers params
+	 * @param array $params servers params
 	 * @param bool $writeBuffer write cache at shutdown
 	 */
-	public function __construct($params = null, $writeBuffer = false) {
+	public function __construct(?array $params = null, bool $writeBuffer = false) {
 		$this->params      = $params ?? self::DEFAULT_PARAMS;
 		$this->writeBuffer = (bool) $writeBuffer;
 		$this->__wakeup();

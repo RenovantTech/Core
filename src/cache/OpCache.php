@@ -21,24 +21,18 @@ class OpCache implements CacheInterface {
 	public const SQL_SET    = 'INSERT OR REPLACE INTO `%s` (id, tags, expireAt, updateAt) VALUES (:id, :tags, :expireAt, :updateAt)';
 	public const SQL_DELETE = 'DELETE FROM `%s` WHERE id = :id';
 
-	/** Write buffer
-	 * @var array */
-	protected static $buffer = [];
-	/** ID (Cache Identifier)
-	 * @var string */
-	protected $id;
-	/** Memory cache
-	 * @var array */
-	protected $cache = [];
-	/** PDO instance ID
-	 * @var string */
-	protected $pdo;
-	/** PDO table name
-	 * @var string */
-	protected $table;
-	/** Write buffer
-	 * @var boolean */
-	protected $writeBuffer = false;
+	/** Write buffer */
+	protected static array $buffer = [];
+	/** ID (Cache Identifier) */
+	protected string $id;
+	/** Memory cache */
+	protected array $cache = [];
+	/** PDO instance ID */
+	protected ?string $pdo;
+	/** PDO table name */
+	protected string $table;
+	/** Write buffer */
+	protected bool $writeBuffer = false;
 
 	/**
 	 * @param string $id cache ID
@@ -150,7 +144,7 @@ class OpCache implements CacheInterface {
 	 * Recursive directory remove (like UNIX rm -fR /path)
 	 * @param string $dir directory
 	 */
-	protected static function _clean($dir) {
+	protected static function _clean(string $dir) {
 		$files = glob($dir . '/*');
 		foreach ($files as $file) {
 			if (is_dir($file)) {

@@ -9,12 +9,10 @@ use const renovant\core\trace\T_INFO;
 class PhpTALView implements ViewInterface {
 	/** template suffixes */
 	public const TEMPLATE_SUFFIXES = '.html|.xml';
-	/** customizable PhpTAL pre-filter class, must implements PHPTAL_Filter
-	 * @var string */
-	protected $preFilterClass = null;
-	/** customizable PhpTAL post-filter class, must implements PHPTAL_Filter
-	 * @var string */
-	protected $postFilterClass = null;
+	/** customizable PhpTAL pre-filter class, must implements PHPTAL_Filter */
+	protected ?string $preFilterClass = null;
+	/** customizable PhpTAL post-filter class, must implements PHPTAL_Filter */
+	protected ?string $postFilterClass = null;
 
 	/**
 	 * @param Request $Req

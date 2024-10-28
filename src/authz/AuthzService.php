@@ -19,9 +19,8 @@ class AuthzService {
 	protected string $cachePrefix = self::CACHE_PREFIX;
 	/** PDO instance ID */
 	protected string $pdo;
-	/** DB tables
-	 * @var array */
-	protected $tables = [
+	/** DB tables */
+	protected array $tables = [
 		'authz' => 'sys_authz',
 		'users' => 'sys_users'
 	];
@@ -60,8 +59,8 @@ class AuthzService {
 		try {
 			$Auth = sys::auth();
 			if ($Auth->UID()) {
-				if ($data = sys::cache($this->cache)->get($this->cachePrefix . $Auth->UID())) {
-					Authz::init(...$data);
+				if (list($roles, $permissions, $acl) = sys::cache($this->cache)->get($this->cachePrefix . $Auth->UID())) {
+					Authz::init($roles, $permissions, $acl);
 				} else {
 					$acl       = $roles = $permissions = [];
 					$mapsArray = sys::pdo($this->pdo)

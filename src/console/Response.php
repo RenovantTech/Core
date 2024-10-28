@@ -12,15 +12,12 @@ class Response {
 	public const LINE_WARNING = 12;
 	public const LINE_ERROR   = 13;
 
-	/** Response data, aka Models passed to the MVC View
-	 * @var array */
-	protected $data = [];
-	/** Exit status
-	 * @var int */
-	protected $exit = 0;
-	/** Output buffer ON/OFF
-	 * @var bool */
-	protected $outputBuffer = false;
+	/** Response data, aka Models passed to the MVC View */
+	protected array $data = [];
+	/** Exit status */
+	protected int $exit = 0;
+	/** Output buffer ON/OFF */
+	protected bool $outputBuffer = false;
 	/** Output stream
 	 * @var resource */
 	protected $STDOUT = STDOUT;
@@ -42,14 +39,13 @@ class Response {
 	 * @return mixed|null
 	 */
 	public function get($key) {
-		return (isset($this->data[$key])) ? $this->data[$key] : null;
+		return $this->data[$key] ?? null;
 	}
 
 	/**
 	 * Get all Response data (array)
-	 * @return array
 	 */
-	public function getData() {
+	public function getData(): array {
 		return $this->data;
 	}
 
@@ -58,7 +54,7 @@ class Response {
 	 * @return string
 	 */
 	public function getContent() {
-		return ($this->outputBuffer) ? ob_get_contents() : file_get_contents($this->STDOUT);
+		return $this->outputBuffer ? ob_get_contents() : file_get_contents($this->STDOUT);
 	}
 
 	/**
@@ -66,7 +62,7 @@ class Response {
 	 * @return int
 	 */
 	public function getSize() {
-		return ($this->outputBuffer) ? ob_get_length() : 0;
+		return $this->outputBuffer ? ob_get_length() : 0;
 	}
 
 	/**

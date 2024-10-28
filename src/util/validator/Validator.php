@@ -13,7 +13,7 @@ class Validator {
 	 * @return array
 	 * @throws \ReflectionException
 	 */
-	public static function validate($Object, ?array $validateSubset = null) {
+	public static function validate($Object, ?array $validateSubset = null): array {
 		$class    = get_class($Object);
 		$metadata = self::metadata($Object);
 		$errors   = [];
@@ -59,93 +59,93 @@ class Validator {
 
 	// ====== basic constraints =====================================
 
-	public static function null($value) {
+	public static function null($value): bool {
 		return null === $value;
 	}
 
-	public static function true($value) {
+	public static function true($value): bool {
 		return true === $value;
 	}
 
-	public static function false($value) {
+	public static function false($value): bool {
 		return false === $value;
 	}
 
-	public static function boolean($value) {
+	public static function boolean($value): bool {
 		return in_array($value, [true, false]);
 	}
 
 	// ====== string constraints ====================================
 
-	public static function email($value) {
+	public static function email($value): bool {
 		return (bool) filter_var($value, FILTER_VALIDATE_EMAIL);
 	}
 
-	public static function enum($value, $array) {
+	public static function enum($value, $array): bool {
 		$array = array_map('trim', explode(',', $array));
 		return in_array($value, $array);
 	}
 
-	public static function ip($value) {
+	public static function ip($value): bool {
 		return (bool) filter_var($value, FILTER_VALIDATE_IP);
 	}
 
-	public static function length($value, $l) {
+	public static function length($value, $l): bool {
 		return (strlen($value) == $l);
 	}
 
-	public static function minLength($value, $l) {
+	public static function minLength($value, $l): bool {
 		return (strlen($value) >= $l);
 	}
 
-	public static function maxLength($value, $l) {
+	public static function maxLength($value, $l): bool {
 		return (strlen($value) <= $l);
 	}
 
-	public static function regex($value, $regex) {
+	public static function regex($value, $regex): bool {
 		return (bool) preg_match($regex, $value);
 	}
 
-	public static function URL($value) {
+	public static function URL($value): bool {
 		return (bool) filter_var($value, FILTER_VALIDATE_URL);
 	}
 
 	// ====== number constraints ====================================
 
-	public static function max($value, $i) {
+	public static function max($value, $i): bool {
 		return ($value <= $i);
 	}
 
-	public static function min($value, $i) {
+	public static function min($value, $i): bool {
 		return ($value >= $i);
 	}
 
-	public static function range($value, $range) {
+	public static function range($value, $range): bool {
 		list($min, $max) = explode(',', $range);
 		return ($value >= $min && $value <= $max);
 	}
 
 	// ====== date & time constraints ===============================
 
-	public static function date($value) {
+	public static function date($value): bool {
 		return (bool) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/', $value);
 	}
 
-	public static function datetime($value) {
+	public static function datetime($value): bool {
 		return (bool) preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
 	}
 
-	public static function time($value) {
+	public static function time($value): bool {
 		return (bool) preg_match('/^([0-9]{2}):([0-9]{2}):([0-9]{2})$/', $value);
 	}
 
-	public static function year($value) {
+	public static function year($value): bool {
 		return (bool) preg_match('/^([0-9]{4})$/', $value);
 	}
 
 	// ====== other constraints =====================================
 
-	public static function callback($value, $callback) {
+	public static function callback($value, $callback): bool {
 		return (bool) call_user_func($callback, $value);
 	}
 }

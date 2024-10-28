@@ -13,7 +13,7 @@ class ContainerYamlParser {
 	 * @return array id2class and class2id maps
 	 * @throws ContainerException
 	 */
-	public static function parseNamespace(string $namespace) {
+	public static function parseNamespace(string $namespace): array {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$id2classMap = $class2idMap = $services = [];
 		try {
@@ -45,10 +45,8 @@ class ContainerYamlParser {
 			switch ($Ex->getCode()) {
 				case 1:
 					throw new ContainerException(11, [__METHOD__, $namespace]);
-					break;
 				case 2:
 					throw new ContainerException(12, [__METHOD__, $namespace]);
-					break;
 			}
 		}
 		return ['id2class' => $id2classMap, 'class2id' => $class2idMap, 'services' => $services];
@@ -59,7 +57,7 @@ class ContainerYamlParser {
 	 * @param array $yaml Object YAML
 	 * @return array class, constructor args, properties
 	 */
-	public static function parseYaml(array $yaml) {
+	public static function parseYaml(array $yaml): array {
 		$obj = Container::YAML_OBJ_SKELETON;
 		// class
 		if ($yaml['class']) {

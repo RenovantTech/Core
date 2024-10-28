@@ -9,18 +9,14 @@ class Session {
 	public const FORCE_SINGLETON = false;
 
 	/** Since expiring data is handled at startup to avoid __destruct difficulties,
-	 * the data that will be expiring at end of this request is held here
-	 * @var array */
-	protected static $_expiringData = [];
-	/** Trace current instances to prevent creation of additional accessor instance objects for this namespace
-	 * @var array */
-	private static $_singletons = [];
-	/** Session locking status
-	 * @var bool */
-	protected $_isLocked = false;
-	/** Session namespace
-	 * @var string */
-	protected $_namespace = self::DEFAULT_NAMESPACE;
+	 * the data that will be expiring at end of this request is held here */
+	protected static array $_expiringData = [];
+	/** Trace current instances to prevent creation of additional accessor instance objects for this namespace */
+	private static array $_singletons = [];
+	/** Session locking status */
+	protected bool $_isLocked = false;
+	/** Session namespace */
+	protected string $_namespace = self::DEFAULT_NAMESPACE;
 
 	/**
 	 * Returns an instance object bound to a particular, isolated section
@@ -64,7 +60,7 @@ class Session {
 		}
 	}
 
-	final public function __isset($k) {
+	final public function __isset($k): bool {
 		if (isset($_SESSION[$this->_namespace][$k])) {
 			return true;
 		} elseif (isset(self::$_expiringData[$this->_namespace][$k])) {

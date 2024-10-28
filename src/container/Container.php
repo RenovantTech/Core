@@ -18,18 +18,14 @@ class Container {
 		'properties'  => []
 	];
 
-	/** Mapping between services IDs and their parent classes and interfaces.
-	 * @var array */
-	protected $id2classMap = [];
-	/** Mapping between classes and services IDs.
-	 * @var array */
-	protected $class2idMap = [];
-	/** initialized namespaces
-	 * @var array */
-	protected $namespaces = [];
-	/** Array of instantiated services (to avoid replication)
-	 * @var array */
-	protected $services = [];
+	/** Mapping between services IDs and their parent classes and interfaces */
+	protected array $id2classMap = [];
+	/** Mapping between classes and services IDs */
+	protected array $class2idMap = [];
+	/** initialized namespaces */
+	protected array $namespaces = [];
+	/** Array of instantiated services (to avoid replication) */
+	protected array $services = [];
 
 	/**
 	 * Build an Object using reflection
@@ -110,7 +106,7 @@ class Container {
 	 * @throws ContainerException
 	 * @throws \ReflectionException
 	 */
-	public function getAllByType(string $class) {
+	public function getAllByType(string $class): array {
 		$ids = $this->getListByType($class);
 		$_   = [];
 		foreach ($ids as $id) {

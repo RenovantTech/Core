@@ -14,18 +14,14 @@ use const renovant\core\trace\T_INFO;
 class Dispatcher {
 	use \renovant\core\CoreTrait;
 
-	/** Array of routes between Request URLs and Controllers names.
-	 * @var array */
-	protected $routes = [];
-	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR
-	 * @var string */
-	protected $resourcesDir = \renovant\core\PUBLIC_DIR;
-	/** default View engine
-	 * @var string */
-	protected $viewEngine = null;
-	/** View engines mapping
-	 * @var array */
-	protected $viewEngines = [
+	/** Array of routes between Request URLs and Controllers names */
+	protected array $routes = [];
+	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR */
+	protected string $resourcesDir = \renovant\core\PUBLIC_DIR;
+	/** default View engine */
+	protected ?string $viewEngine = null;
+	/** View engines mapping */
+	protected array $viewEngines = [
 		ENGINE_FILE       => FileView::class,
 		ENGINE_FILE_CSV   => CsvView::class,
 		ENGINE_FILE_EXCEL => ExcelView::class,
@@ -126,7 +122,7 @@ class Dispatcher {
 	 * @return array $View, $resource, $viewOptions
 	 * @throws \Exception
 	 */
-	protected function resolveView(Request $Req, Response $Res, Event $Event) {
+	protected function resolveView(Request $Req, Response $Res, Event $Event): array {
 		try {
 			list($view, $viewOptions, $viewEngine) = $Res->getView() ?: $Event->getView();
 			if (is_null($viewEngine)) {

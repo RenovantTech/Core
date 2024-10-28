@@ -5,12 +5,10 @@ use renovant\core\log\Logger;
 
 class FileTreeWriter implements \renovant\core\log\LogWriterInterface {
 	public const DEFAULT_FILENAME = 'system.log';
-	/** tree base directory
-	 * @var string */
-	protected $directory;
-	/** log file path
-	 * @var string */
-	protected $filename;
+	/** tree base directory */
+	protected string $directory;
+	/** log file path */
+	protected string $filename;
 	/** File handle
 	 * @var resource */
 	private $_fh;

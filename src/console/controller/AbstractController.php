@@ -14,9 +14,8 @@ use const renovant\core\trace\T_INFO;
 abstract class AbstractController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
 
-	/** Controller handle method configuration
-	 * @var array */
-	protected $_config = [];
+	/** Controller handle method configuration */
+	protected array $_config = [];
 
 	/**
 	 * AbstractController constructor.
@@ -79,7 +78,7 @@ abstract class AbstractController implements \renovant\core\console\ControllerIn
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
 	 */
-	protected function preHandle(Request $Req, Response $Res) {
+	protected function preHandle(Request $Req, Response $Res): bool {
 		return true;
 	}
 

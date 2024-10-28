@@ -30,12 +30,10 @@ class Sqlite implements \SessionHandlerInterface {
 	/** PDO instance ID
 	 * @var \PDO */
 	protected $pdo;
-	/** database table name
-	 * @var string */
-	protected $table;
-	/** session ID on read(), to support session_regenerate_id()
-	 * @var string */
-	protected static $id;
+	/** database table name */
+	protected string $table;
+	/** session ID on read(), to support session_regenerate_id() */
+	protected static string $id;
 
 	public function init() {
 		$prevTraceFn = sys::traceFn($this->_);

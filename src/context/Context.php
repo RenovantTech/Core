@@ -20,12 +20,10 @@ class Context {
 	/** EventDispatcher instance
 	 * @var EventDispatcher */
 	protected $EventDispatcher;
-	/** initialized namespaces
-	 * @var array */
-	protected $namespaces = [];
-	/** Array of instantiated services (to avoid replication)
-	 * @var array */
-	protected $services = [];
+	/** initialized namespaces */
+	protected array $namespaces = [];
+	/** Array of instantiated services (to avoid replication) */
+	protected array $services = [];
 
 	/**
 	 * Constructor
@@ -78,7 +76,6 @@ class Context {
 	 * Return TRUE if contains object (optionally verifying class)
 	 * @param string $id object OID
 	 * @param string|null $class class/interface that object must extend/implement (optional)
-	 * @return boolean
 	 */
 	public function has(string $id, string $class = null): bool {
 		return $this->Container->has($id, $class);
@@ -89,7 +86,7 @@ class Context {
 	 * @param string $id           object identifier
 	 * @param string|null $class        required object class
 	 * @param integer $failureMode failure mode when the object does not exist
-	 * @return object
+	 * @return object|null
 	 * @throws ContextException
 	 * @throws EventDispatcherException|\ReflectionException
 	 */

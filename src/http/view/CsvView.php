@@ -55,7 +55,7 @@ class CsvView implements ViewInterface {
 	 * @throws \renovant\core\http\Exception
 	 * @return array
 	 */
-	private static function execTemplate() {
+	private static function execTemplate(): array {
 		$columns = null;
 		include self::$template;
 		if (is_null($columns)) {

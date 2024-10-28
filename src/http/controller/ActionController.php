@@ -14,12 +14,10 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 
 	/** Default action method to invoke. */
 	public const DEFAULT_ACTION = 'index';
-	/** Controller actions metadata (routing, params)
-	 * @var array */
-	protected $_config = [];
-	/** default View engine
-	 * @var string */
-	protected $viewEngine = null;
+	/** Controller actions metadata (routing, params) */
+	protected array $_config = [];
+	/** default View engine */
+	protected ?string $viewEngine = null;
 
 	/**
 	 * ActionController constructor.
@@ -94,7 +92,7 @@ abstract class ActionController implements \renovant\core\http\ControllerInterfa
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
 	 */
-	protected function preHandle(Request $Req, Response $Res) {
+	protected function preHandle(Request $Req, Response $Res): bool {
 		return true;
 	}
 

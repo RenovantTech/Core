@@ -10,9 +10,8 @@ class Tracer extends sys {
 	public const E_WARNING = 2;
 	public const E_ERROR   = 3;
 
-	/** current Error level, incremented by errors & exceptions
-	 * @var integer */
-	protected static $errorLevel = 0;
+	/** current Error level, incremented by errors & exceptions */
+	protected static int $errorLevel = 0;
 
 	/** @see set_error_handler() */
 	public static function onError(int $n, string $str, string $file, int $line): void {

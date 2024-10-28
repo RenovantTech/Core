@@ -15,7 +15,7 @@ class ClassParser {
 	 * @throws \ReflectionException
 	 * @throws \Exception
 	 */
-	public function parse(string $class) {
+	public function parse(string $class): array {
 		$metadata = [
 			'properties' => [],
 			'null'       => [],

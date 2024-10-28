@@ -11,9 +11,8 @@ class ExcelView implements ViewInterface {
 	public const CONTENT_TYPE = 'application/vnd.ms-excel';
 	/** template suffix */
 	public const TEMPLATE_SUFFIX = '.xls.php';
-	/** php template path
-	 * @var string */
-	private static $template;
+	/** php template path */
+	private static string $template;
 
 	/**
 	 * @param Request $Req
@@ -55,7 +54,7 @@ class ExcelView implements ViewInterface {
 	 * @throws \renovant\core\http\Exception
 	 * @return array
 	 */
-	private static function execTemplate() {
+	private static function execTemplate(): array {
 		$columns = null;
 		include self::$template;
 		if (is_null($columns)) {

@@ -4,25 +4,19 @@ namespace renovant\core\http;
 class Request {
 	/** Request named attributes.
 	 * @var	array */
-	protected $attrs = [];
-	/** Request parameters (contents of $_GET, $_POST & $_COOKIE).
-	 * @var	array */
-	protected $params = [];
-	/** Request HTTP headers
-	 * @var	array */
-	protected $headers = [];
-	/** HTTP method
-	 * @var string */
-	protected $method;
-	/** HTTP Request query
-	 * @var string */
-	protected $QUERY;
-	/** POST/PUT raw data
-	 * @var string */
-	protected $rawData;
-	/** HTTP Request URI
-	 * @var string */
-	protected $URI;
+	protected array $attrs = [];
+	/** Request parameters (contents of $_GET, $_POST & $_COOKIE) */
+	protected array $params = [];
+	/** Request HTTP headers */
+	protected array $headers = [];
+	/** HTTP method */
+	protected ?string $method;
+	/** HTTP Request query */
+	protected ?string $QUERY;
+	/** POST/PUT raw data */
+	protected string $rawData;
+	/** HTTP Request URI */
+	protected string $URI;
 
 	/**
 	 * Constructor: create a new HTTP Request
@@ -88,13 +82,12 @@ class Request {
 
 	/**
 	 * Return QUERY_STRING
-	 * @return string
 	 */
-	public function QUERY(): string {
+	public function QUERY(): string|null {
 		return $this->QUERY;
 	}
 
-	public function URI() {
+	public function URI(): string {
 		return $this->URI;
 	}
 
@@ -112,9 +105,8 @@ class Request {
 
 	/**
 	 * Get the HTTP method (GET, POST, PUT, ...)
-	 * @return string HTTP method
 	 */
-	public function getMethod(): string {
+	public function getMethod(): string|null {
 		return $this->method;
 	}
 

@@ -2,15 +2,12 @@
 namespace renovant\core\console;
 
 class Request {
-	/** Request named attributes.
-	 * @var	array */
-	protected $attrs = [];
-	/** Request command passed by command line (plain args).
-	 * @var	array */
-	protected $cmd = [];
-	/** Request parameters passed by command line.
-	 * @var	array */
-	protected $data = [];
+	/** Request named attributes */
+	protected array $attrs = [];
+	/** Request command passed by command line (plain args) */
+	protected array $cmd = [];
+	/** Request parameters passed by command line */
+	protected array $data = [];
 
 	/**
 	 * Constructor: create a new CLI Request

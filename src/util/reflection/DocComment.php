@@ -4,10 +4,10 @@ namespace renovant\core\util\reflection;
 class DocComment {
 	public const TAG_REGEX = '/(([\w\:\.-]+)="([^"]+)" | ([\w\:\.-]+)=(\w+) | ([\w\:\.-]+))/x';
 
-	/** @var string The description as found in the doc comment */
-	protected $description = '';
-	/** @var array An array of tag names and their values (multiple values are possible) */
-	protected $tags = [];
+	/** The description as found in the doc comment */
+	protected string $description = '';
+	/** An array of tag names and their values (multiple values are possible) */
+	protected array $tags = [];
 
 	/**
 	 * Parses the given doc comment and saves the result (description and tags) in the object properties.

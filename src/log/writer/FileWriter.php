@@ -5,9 +5,8 @@ use renovant\core\log\Logger;
 
 class FileWriter implements \renovant\core\log\LogWriterInterface {
 	public const DEFAULT_FILENAME = 'system.log';
-	/** log file path
-	 * @var string */
-	protected $filename;
+	/** log file path */
+	protected string $filename;
 	/** File handle
 	 * @var resource */
 	private $_fh;
@@ -15,7 +14,7 @@ class FileWriter implements \renovant\core\log\LogWriterInterface {
 	/**
 	 * @param string $filename log file path
 	 */
-	public function __construct($filename = self::DEFAULT_FILENAME) {
+	public function __construct(string $filename = self::DEFAULT_FILENAME) {
 		$this->filename = $filename;
 		if ('/' != $this->filename[0]) {
 			$this->filename = \renovant\core\LOG_DIR . $this->filename;

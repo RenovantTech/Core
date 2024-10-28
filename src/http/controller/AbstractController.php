@@ -15,12 +15,10 @@ use const renovant\core\trace\T_INFO;
 abstract class AbstractController implements \renovant\core\http\ControllerInterface {
 	use \renovant\core\CoreTrait;
 
-	/** Controller handle method metadata (routing, params)
-	 * @var array */
-	protected $_config = [];
-	/** default View engine
-	 * @var string */
-	protected $viewEngine = null;
+	/** Controller handle method metadata (routing, params) */
+	protected array $_config = [];
+	/** default View engine */
+	protected ?string $viewEngine = null;
 
 	/**
 	 * AbstractController constructor.
@@ -97,7 +95,7 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
 	 */
-	protected function preHandle(Request $Req, Response $Res) {
+	protected function preHandle(Request $Req, Response $Res): bool {
 		return true;
 	}
 

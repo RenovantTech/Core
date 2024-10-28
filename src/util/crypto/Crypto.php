@@ -29,7 +29,7 @@ class Crypto {
 	 * @throws \SodiumException
 	 * @throws \Exception
 	 */
-	public static function encrypt($data, bool $bin2hex = false) {
+	public static function encrypt($data, bool $bin2hex = false): string {
 		self::init();
 		$data       = serialize($data);
 		$nonce      = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);

@@ -16,7 +16,7 @@ class EventYamlParser {
 	 * @return array listeners map
 	 * @throws EventDispatcherException
 	 */
-	public static function parseNamespace($namespace) {
+	public static function parseNamespace($namespace): array {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$listeners = [];
 		try {
@@ -48,7 +48,7 @@ class EventYamlParser {
 	 * @param array $yaml YAML config extract
 	 * @return array listeners map
 	 */
-	public static function parseYaml(array $yaml) {
+	public static function parseYaml(array $yaml): array {
 		$listeners = [];
 		foreach ($yaml as $eventName => $eventYAML) {
 			$eventName = strtoupper($eventName);

@@ -14,7 +14,7 @@ class ContextHelper extends sys {
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws ContextException
 	 */
-	public static function getAllContexts() {
+	public static function getAllContexts(): array {
 		$namespaces = [];
 		// scan global namespaces
 		$files = scandir(\renovant\core\BASE_DIR);

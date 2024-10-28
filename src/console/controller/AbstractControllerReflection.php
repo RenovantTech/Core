@@ -15,7 +15,7 @@ class AbstractControllerReflection {
 	 * @return array
 	 * @throws \renovant\core\console\Exception|\ReflectionException
 	 */
-	public static function analyzeHandle(AbstractController $Controller) {
+	public static function analyzeHandle(AbstractController $Controller): array {
 		$config     = [];
 		$RefClass   = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();

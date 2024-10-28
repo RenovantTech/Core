@@ -15,7 +15,7 @@ class ActionControllerReflection {
 	 * @throws Exception
 	 * @throws \ReflectionException
 	 */
-	public static function analyzeActions(ActionController $Controller) {
+	public static function analyzeActions(ActionController $Controller): array {
 		$config     = [];
 		$RefClass   = new ReflectionClass($Controller);
 		$refMethods = $RefClass->getMethods();

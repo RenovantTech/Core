@@ -87,7 +87,7 @@ class Auth2FA {
 	public function qrCode(string $email, string $serviceName, string $secretKey, int $dimension = self::QRCODE_DIM): string {
 		$Google2FA = new Google2FA();
 		$qrCodeUrl = $Google2FA->getQRCodeUrl($serviceName, $email, $secretKey);
-		$Writer    = new Writer((new \BaconQrCode\Renderer\Image\Png())->setWidth($dimension)->setHeight($dimension));
+		$Writer    = new Writer((new Png())->setWidth($dimension)->setHeight($dimension));
 		return base64_encode($Writer->writeString($qrCodeUrl));
 	}
 }

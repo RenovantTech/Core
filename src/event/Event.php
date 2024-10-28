@@ -2,12 +2,10 @@
 namespace renovant\core\event;
 
 class Event {
-	/** Event's parameters
-	 * @var array */
-	protected $params = [];
-	/** Event propagation flag
-	 * @var bool */
-	protected $_stopped = false;
+	/** Event's parameters */
+	protected ?array $params = [];
+	/** Event propagation flag */
+	protected bool $_stopped = false;
 
 	/**
 	 * @param array $params Event's parameters
@@ -22,9 +20,8 @@ class Event {
 
 	/**
 	 * Verify is Event propagation was stopped
-	 * @return boolean
 	 */
-	public function isPropagationStopped() {
+	public function isPropagationStopped(): bool {
 		return $this->_stopped;
 	}
 

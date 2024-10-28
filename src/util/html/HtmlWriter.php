@@ -8,27 +8,20 @@ class HtmlWriter {
 
 	public const ITERATE_ARRAY  = 1;
 	public const ITERATE_OBJECT = 2;
-	/** Data Iterator mode
-	 * @var integer */
-	protected $iteratorMode = self::ITERATE_ARRAY;
-	/** Data store
-	 * @var array */
-	protected $_data = [];
-	/** Columns labels
-	 * @var array */
-	protected $_labels = [];
-	/** Data store indexes for each column
-	 * @var array */
-	protected $_indexes = [];
-	/** Callback functions to render each column
-	 * @var array */
-	protected $_callbacks = [];
-	/** Data array
-	 * @var array */
-	private static $data;
-	/** php template path
-	 * @var string */
-	private static $template;
+	/** Data Iterator mode */
+	protected int $iteratorMode = self::ITERATE_ARRAY;
+	/** Data store */
+	protected array $_data = [];
+	/** Columns labels */
+	protected array $_labels = [];
+	/** Data store indexes for each column */
+	protected array $_indexes = [];
+	/** Callback functions to render each column */
+	protected array $_callbacks = [];
+	/** Data array */
+	private static array $data;
+	/** php template path */
+	private static string $template;
 
 	/**
 	 * Set template data

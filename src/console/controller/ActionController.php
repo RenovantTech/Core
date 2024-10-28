@@ -14,9 +14,8 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	public const DEFAULT_ACTION = 'index';
 	/** Fallback action method to invoke. */
 	public const FALLBACK_ACTION = null;
-	/** Controller actions metadata (routing, params)
-	 * @var array */
-	protected $_config = [];
+	/** Controller actions metadata (routing, params) */
+	protected array $_config = [];
 
 	/**
 	 * ActionController constructor.
@@ -81,7 +80,7 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
 	 */
-	protected function preHandle(Request $Req, Response $Res) {
+	protected function preHandle(Request $Req, Response $Res): bool {
 		return true;
 	}
 

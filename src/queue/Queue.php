@@ -24,11 +24,9 @@ class Queue {
 	public const STATUS_OK      = 'OK';
 	public const STATUS_ERROR   = 'ERROR';
 
-	/** PDO instance ID
-	 * @var string */
+	/** PDO instance ID */
 	protected string $pdo;
-	/** DB table
-	 * @var string */
+	/** DB table */
 	protected string $table = 'sys_queue';
 
 	/**

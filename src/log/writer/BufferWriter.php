@@ -4,7 +4,7 @@ namespace renovant\core\log\writer;
 use renovant\core\log\Logger;
 
 class BufferWriter implements \renovant\core\log\LogWriterInterface {
-	protected $buffer = [];
+	protected array $buffer = [];
 
 	/**
 	 * {@inheritdoc}

@@ -13,7 +13,6 @@ class ContextYamlParser {
 	/**
 	 * Parse YAML namespace config
 	 * @param string $namespace
-	 * @return array
 	 * @throws ContextException
 	 */
 	public static function parseNamespace(string $namespace): array {
@@ -82,10 +81,8 @@ class ContextYamlParser {
 			switch ($Ex->getCode()) {
 				case 1:
 					throw new ContextException(11, [__METHOD__, $namespace]);
-					break;
 				case 2:
 					throw new ContextException(12, [__METHOD__, $namespace]);
-					break;
 			}
 		}
 		return $includes;

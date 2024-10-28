@@ -8,7 +8,6 @@ namespace renovant\core;
  * - trace support..
  */
 trait CoreTrait {
-	/** OID (Object Identifier)
-	 * @var string */
+	/** OID (Object Identifier) */
 	protected $_;
 }

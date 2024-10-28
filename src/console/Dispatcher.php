@@ -22,18 +22,14 @@ class Dispatcher {
 		SIGCONT => 'SIGCONT'
 	];
 
-	/** default View engine
-	 * @var string */
-	protected $defaultViewEngine = 'php';
-	/** Array of routes between Request URLs and Controllers names.
-	 * @var array */
-	protected $routes = [];
-	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR
-	 * @var string */
-	protected $resourcesDir = \renovant\core\PUBLIC_DIR;
-	/** View engines mapping
-	 * @var array */
-	protected $viewEngines = [
+	/** default View engine */
+	protected string $defaultViewEngine = 'php';
+	/** Array of routes between Request URLs and Controllers names */
+	protected array $routes = [];
+	/** customizable templates dir path, default to \renovant\core\PUBLIC_DIR */
+	protected string $resourcesDir = \renovant\core\PUBLIC_DIR;
+	/** View engines mapping */
+	protected array $viewEngines = [
 		'php' => PhpView::class
 		//		'smarty'	=> view\SmartyView::class
 		//		'twig'		=> view\TwigView::class
@@ -126,7 +122,7 @@ class Dispatcher {
 	 * @return array
 	 * @throws \Exception
 	 */
-	protected function resolveView(string $view, Request $Req, Response $Res) {
+	protected function resolveView(string $view, Request $Req, Response $Res): array {
 		try {
 			preg_match('/^([a-z-]+:)?([^:\s]+)?$/', $view, $matches);
 			@list(, $engine, $resource) = $matches;

@@ -22,15 +22,12 @@ class Logger extends sys {
 		LOG_ALERT   => 'ALERT',
 		LOG_EMERG   => 'EMERG'
 	];
-	/** attached LogWriters instances
-	 * @var array */
-	protected $writers = [];
-	/** LogWriters filtering levels
-	 * @var array */
-	protected $levels = [];
-	/** LogWriters filtering facilities
-	 * @var array */
-	protected $facilities = [];
+	/** attached LogWriters instances */
+	protected array $writers = [];
+	/** LogWriters filtering levels */
+	protected array $levels = [];
+	/** LogWriters filtering facilities */
+	protected array $facilities = [];
 
 	public function __destruct() {
 		$this->flush();

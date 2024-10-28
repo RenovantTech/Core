@@ -19,24 +19,21 @@ class PhpMailer {
 
 	/** default transport type to be used */
 	public const DEFAULT_TRANSPORT = 'smtp';
-	/** Array of failed recipients after a call to Mailer->send() or Mailer->batchSend()
-	 * @var array */
-	protected $failedRecipients = [];
+	/** Array of failed recipients after a call to Mailer->send() or Mailer->batchSend() */
+	protected array $failedRecipients = [];
 	/** PHPMailer instance
 	 * @var \PHPMailer\PHPMailer\PHPMailer */
 	protected $Mailer;
-	/** SMTP params array
-	 * @var array */
-	protected $transportOptions = [
+	/** SMTP params array */
+	protected array $transportOptions = [
 		'server'     => 'localhost',
 		'port'       => 25,
 		'encryption' => false,
 		'user'       => null,
 		'password'   => null
 	];
-	/** mail transport type to be used, can be: mail | smtp | sendmail (default: mail)
-	 * @var string */
-	protected $transportType = self::DEFAULT_TRANSPORT;
+	/** mail transport type to be used, can be: mail | smtp | sendmail (default: mail) */
+	protected string $transportType = self::DEFAULT_TRANSPORT;
 
 	/**
 	 * @param string $transportType
@@ -97,7 +94,7 @@ class PhpMailer {
 	 * @return boolean
 	 * @see PHPMailer::send()
 	 */
-	public function send() {
+	public function send(): bool {
 		try {
 			if (is_null($this->Mailer)) {
 				$this->initMailer();

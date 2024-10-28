@@ -5,15 +5,13 @@ namespace renovant\core\http;
  * HTTP Digest Authentication.
  */
 class DigestAuth {
-	/** Realm
-	 * @var string */
-	protected $realm;
+	/** Realm */
+	protected string $realm;
 	/** A1 callback function
 	 * @var callback */
 	protected $A1Function;
-	/** Digest data
-	 * @var array */
-	protected $data = [];
+	/** Digest data */
+	protected array $data = [];
 
 	/**
 	 * Requires REALM and A1 function.
@@ -33,7 +31,7 @@ class DigestAuth {
 	 * Check HTTP Digest
 	 * @return bool TRUE on success
 	 */
-	public function checkDigest() {
+	public function checkDigest(): bool {
 		$data           = $this->data;
 		$A1             = call_user_func($this->A1Function, $data['username']);
 		$A2             = md5($_SERVER['REQUEST_METHOD'] . ':' . $data['uri']);
@@ -50,7 +48,7 @@ class DigestAuth {
 	 * Parse HTTP Digest, if any.
 	 * @return bool TRUE on success
 	 */
-	public function parseDigest() {
+	public function parseDigest(): bool {
 		$missing = ['nonce' => 1, 'nc' => 1, 'cnonce' => 1, 'qop' => 1, 'username' => 1, 'uri' => 1, 'response' => 1];
 		preg_match_all('@(\w+)=(?:([\'])([^\']+)(?:\2)|(["])([^"]+)(?:\4)|(\w+)),?@', $_SERVER['PHP_AUTH_DIGEST'], $matches, PREG_SET_ORDER);
 		foreach ($matches as $m) {

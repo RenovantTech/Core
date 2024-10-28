@@ -10,27 +10,20 @@ class CsvWriter {
 
 	public const ITERATE_ARRAY  = 1;
 	public const ITERATE_OBJECT = 2;
-	/** CSV delimiter
-	 * @var string */
-	protected $delimiter = ',';
-	/** CSV enclosure
-	 * @var string */
-	protected $enclosure = '"';
-	/** Data Iterator mode
-	 * @var integer */
-	protected $iteratorMode = self::ITERATE_ARRAY;
-	/** Data store
-	 * @var array */
-	protected $_data = [];
-	/** Columns labels
-	 * @var array */
-	protected $_labels = [];
-	/** Data store indexes for each column
-	 * @var array */
-	protected $_indexes = [];
-	/** Callback functions to render each column
-	 * @var array */
-	protected $_callbacks = [];
+	/** CSV delimiter */
+	protected string $delimiter = ',';
+	/** CSV enclosure */
+	protected string $enclosure = '"';
+	/** Data Iterator mode */
+	protected int $iteratorMode = self::ITERATE_ARRAY;
+	/** Data store */
+	protected array $_data = [];
+	/** Columns labels */
+	protected array $_labels = [];
+	/** Data store indexes for each column */
+	protected array $_indexes = [];
+	/** Callback functions to render each column */
+	protected array $_callbacks = [];
 
 	/**
 	 *
@@ -60,20 +53,18 @@ class CsvWriter {
 
 	/**
 	 * Set CSV delimiter
-	 * @param string $delimiter
 	 * @return CsvWriter (fluent interface)
 	 */
-	public function setDelimiter($delimiter) {
+	public function setDelimiter(string $delimiter) {
 		$this->delimiter = $delimiter;
 		return $this;
 	}
 
 	/**
 	 * Set CSV enclosure
-	 * @param string $enclosure
 	 * @return CsvWriter (fluent interface)
 	 */
-	public function setEnclosure($enclosure) {
+	public function setEnclosure(string $enclosure) {
 		$this->enclosure = $enclosure;
 		return $this;
 	}
@@ -82,7 +73,7 @@ class CsvWriter {
 	 * Write CSV to file
 	 * @param string $file output file
 	 */
-	public function write($file) {
+	public function write(string $file) {
 		sys::trace(LOG_DEBUG, T_INFO, 'output file: ' . $file);
 		$fh = fopen($file, 'w');
 		// labels

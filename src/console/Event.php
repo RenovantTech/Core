@@ -10,12 +10,10 @@ class Event extends \renovant\core\event\Event {
 	public const EVENT_EXCEPTION  = 'console:exception';
 	public const EVENT_SIGTERM    = 'console:sigterm';
 
-	/** CLI Request
-	 * @var Request */
-	protected $Request;
-	/** CLI Response
-	 * @var Response */
-	protected $Response;
+	/** CLI Request */
+	protected Request $Request;
+	/** CLI Response */
+	protected Response $Response;
 	/** Controller, if any
 	 * @var ControllerInterface */
 	protected $Controller;
@@ -33,17 +31,15 @@ class Event extends \renovant\core\event\Event {
 
 	/**
 	 * Get current CLI Request
-	 * @return Request
 	 */
-	public function getRequest() {
+	public function getRequest(): Request {
 		return $this->Request;
 	}
 
 	/**
 	 * Get current CLI Response
-	 * @return Response
 	 */
-	public function getResponse() {
+	public function getResponse(): Response {
 		return $this->Response;
 	}
 
