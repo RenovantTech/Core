@@ -82,7 +82,7 @@ class TracerLog {
 		$header .= str_pad($_SERVER['HTTP_CF_IPCOUNTRY'] ?? '', 4);
 
 		$legend .= str_pad('IP', 17);
-		$header .= str_pad($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? null, 17);
+		$header .= str_pad($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '', 17);
 
 		$legend .= 'UID';
 		$header .= Auth::instance()->UID() ?? null;
