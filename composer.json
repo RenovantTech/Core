@@ -28,7 +28,7 @@
 		"ext-pcntl": "*",
 		"ext-sodium": "*",
 		"ext-sqlite3": "*",
-		"bacon/bacon-qr-code": "^1.0",
+		"bacon/bacon-qr-code": "^3.0",
 		"defuse/php-encryption": ">=2.1",
 		"firebase/php-jwt": "^6.0",
 		"phpmailer/phpmailer": "^6.0",
