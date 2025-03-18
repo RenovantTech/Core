@@ -3,192 +3,189 @@
 # =========================================================
 
 sys:
+    # -------------------------------------------------------
+    # __autoload map namespace/directory --------------------
+    namespaces:
+        test: /home/renovant/renovant-core/tests
+        metadigit\lib: /opt/metadigit-lib/src
 
-  # -------------------------------------------------------
-  # __autoload map namespace/directory --------------------
-  namespaces:
-    test:           /home/renovant/renovant-core/tests
-    metadigit\lib:  /opt/metadigit-lib/src
+    # -------------------------------------------------------
+    # Environment constants ---------------------------------
+    constants:
+        ASSETS_DIR: /var/www/devel.com/data/assets/
+        ASSETS_URL: /assets/
+        UPLOAD_DIR: /var/www/devel.com/data/files/
+        SWIFT_DIR: phar://${BASE_DIR}swift-mailer-4.3.0.phar/
 
-  # -------------------------------------------------------
-  # Environment constants ---------------------------------
-  constants:
-    ASSETS_DIR:   /var/www/devel.com/data/assets/
-    ASSETS_URL:   /assets/
-    UPLOAD_DIR:   /var/www/devel.com/data/files/
-    SWIFT_DIR:    phar://${BASE_DIR}swift-mailer-4.3.0.phar/
+    # -------------------------------------------------------
+    # Php settings ------------------------------------------
+    settings:
+        charset: UTF-8
+        locale: en_GB.UTF-8
+        timeZone: Europe/London
 
-  # -------------------------------------------------------
-  # Php settings ------------------------------------------
-  settings:
-    charset:      UTF-8
-    locale:       en_GB.UTF-8
-    timeZone:     Europe/London
+    # -------------------------------------------------------
+    # CACHE settings ----------------------------------------
+    cache:
+        ### System cache, override with CAUTION
+        sys:
+            class: renovant\core\cache\SqliteCache
+            constructor: ['sys', 'cache', true]
+        #sys:
+        #class:       renovant\core\cache\MemcachedCache
+        #constructor: [['localhost', 11211, 0], true]
+        main:
+            class: renovant\core\cache\SqliteCache
+            constructor: ['sqlite', 'cache', false]
 
-  # -------------------------------------------------------
-  # CACHE settings ----------------------------------------
-  cache:
-    ### System cache, override with CAUTION
-    sys:
-      class:       renovant\core\cache\SqliteCache
-      constructor: ['sys', 'cache', true]
-    #sys:
-      #class:       renovant\core\cache\MemcachedCache
-      #constructor: [['localhost', 11211, 0], true]
-    main:
-      class:        renovant\core\cache\SqliteCache
-      constructor:  [ 'sqlite', 'cache', false ]
+    # -------------------------------------------------------
+    # DB settings -------------------------------------------
+    database:
+        sqlite:
+            #dns:      sqlite:/tmp/renovant-core/db.sqlite
+            #dns:      sqlite:file:sqlite?mode=memory
+            dns: 'sqlite::memory:'
+        mysql:
+            dns: mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
+            user: phpunit
+            pwd: tR.858NPD/N-BY[A
 
+    # -------------------------------------------------------
+    # LOG settings ------------------------------------------
+    log:
+        kernel:
+            level: LOG_INFO
+            facility: kernel
+            class: renovant\core\log\writer\FileWriter
+            param1: kernel.log
+            param2: null
+        system:
+            level: LOG_DEBUG
+            facility: null
+            class: renovant\core\log\writer\FileWriter
+            param1: system.log
+            param2: null
 
-  # -------------------------------------------------------
-  # DB settings -------------------------------------------
-  database:
-    sqlite:
-      #dns:      sqlite:/tmp/renovant-core/db.sqlite
-      #dns:      sqlite:file:sqlite?mode=memory
-      dns:      "sqlite::memory"
-    mysql:
-      dns:      mysql:unix_socket=/run/mysqld/mysqld.sock;dbname=phpunit
-      user:     phpunit
-      pwd:      phpunit
+    # -------------------------------------------------------
+    # TRACE settings ----------------------------------------
+    trace:
+        level: LOG_DEBUG
+        storeFn: null
 
-  # -------------------------------------------------------
-  # LOG settings ------------------------------------------
-  log:
-    kernel:
-      level:    LOG_INFO
-      facility: kernel
-      class:    renovant\core\log\writer\FileWriter
-      param1:   kernel.log
-      param2:   null
-    system:
-      level:    LOG_DEBUG
-      facility: null
-      class:    renovant\core\log\writer\FileWriter
-      param1:   system.log
-      param2:   null
-
-  # -------------------------------------------------------
-  # TRACE settings ----------------------------------------
-  trace:
-    level:      LOG_DEBUG
-    storeFn:    null
-
-  # -------------------------------------------------------
-  # sys services override ---------------------------------
-  services:
-    auth:       sys.AUTH
-    authz:      sys.AUTHZ
-    cmd:        sys.CmdManager
+    # -------------------------------------------------------
+    # sys services override ---------------------------------
+    services:
+        auth: sys.AUTH
+        authz: sys.AUTHZ
+        cmd: sys.CmdManager
 
 # =========================================================
 # EVENTS
 # =========================================================
 events:
-  HTTP:ROUTE:
-    - sys.HttpSession->start
-    #- sys.AUTH->init
-    #- sys.AUTHZ->init
-  HTTP:VIEW:
-    #- sys.AUTH->commit
-    - sys.HttpSession->end
-  HTTP:EXCEPTION:
-    #- sys.AUTH->commit
-    - sys.HttpSession->end
+    HTTP:ROUTE:
+        - sys.HttpSession->start
+        #- sys.AUTH->init
+        #- sys.AUTHZ->init
+    HTTP:VIEW:
+        #- sys.AUTH->commit
+        - sys.HttpSession->end
+    HTTP:EXCEPTION:
+        #- sys.AUTH->commit
+        - sys.HttpSession->end
 
 # =========================================================
 # SERVICES
 # =========================================================
 services:
-
-  # -------------------------------------------------------
-  # AUTH service
-  # -------------------------------------------------------
-  sys.AUTH:
-    class: renovant\core\auth\AuthServiceJWT
-    properties:
-      Provider:       !obj sys.AuthProvider
-      skipAuthModules: [ 'AUTH' ]
-      skipAuthUrls: []
-      skipXSRFModules: [ 'RRD' ]
-      skipXSRFUrls: [ '/^\/api\/auth\/login$/' ]
-
-  sys.AuthProvider:
-    class: renovant\core\auth\provider\PdoProvider
-    constructor:
-      pdo:        mysql
-      tables:
-        auth:     sys_users_auth
-        tokens:   sys_users_tokens
-        users:    sys_users
-    properties:
-      fields:     '*'
-
-  sys.AuthTokenService:
-    class: renovant\core\auth\TokenService
-    properties:
-      Provider:   !obj sys.AuthProvider
-
-  # -------------------------------------------------------
-  # AUTHZ service
-  # -------------------------------------------------------
-  sys.AUTHZ:
-    class: renovant\core\authz\AuthzService
-    constructor:
-      pdo: mysql
-      tables:
-        authz:  sys_authz
-        users:  sys_users
-    properties:
-      cache:    sys
-
-  sys.AuthzManager:
-    class: renovant\core\authz\AuthzManager
-    constructor:
-      pdo: mysql
-      tables:
-        authz:  sys_authz
-        users:  sys_users
-    properties:
-      cache:    sys
-
-  # =========================================================
-  # CmdManager service
-  # =========================================================
-  sys.CmdManager:
-    class: renovant\core\console\CmdManager
-    constructor:
-      pdo:          mysql
-      tablePrefix:  sys_cmd
-
-  # -------------------------------------------------------
-  # SESSION service
-  # -------------------------------------------------------
-  sys.HttpSession:
-    class: renovant\core\http\session\Manager
-    constructor:
-      # session cookie parameters
-      cookie:
-        name:     SESSION   # cookie name
-        lifetime: 3600      # lifetime of the session cookie, defined in seconds
-        path:     /         # path on the domain where the cookie will work (use a single slash '/' for all paths on the domain)
-        domain:   null      # cookie domain (to make cookies visible on all sub-domains then the domain must be prefixed with a dot like '.php.net')
-        secure:   true      # if TRUE cookie will only be sent over secure connections
-        httponly: true      #
-      # session handler
-      handler:
-        class: renovant\core\http\session\handler\Mysql
+    # -------------------------------------------------------
+    # AUTH service
+    # -------------------------------------------------------
+    sys.AUTH:
+        class: renovant\core\auth\AuthServiceJWT
         properties:
-          pdo:    mysql
-          table:  sys_sessions
+            Provider: !obj sys.AuthProvider
+            skipAuthModules: ['AUTH']
+            skipAuthUrls: []
+            skipXSRFModules: ['RRD']
+            skipXSRFUrls: ['/^\/api\/auth\/login$/']
 
-  # -------------------------------------------------------
-  # QUEUE service
-  # -------------------------------------------------------
-  sys.Queue:
-    class: renovant\core\queue\Queue
-    constructor:
-      pdo:        mysql
-      table:      sys_queue
-    properties:
-      fields:     '*'
+    sys.AuthProvider:
+        class: renovant\core\auth\provider\PdoProvider
+        constructor:
+            pdo: mysql
+            tables:
+                auth: sys_users_auth
+                tokens: sys_users_tokens
+                users: sys_users
+        properties:
+            fields: '*'
+
+    sys.AuthTokenService:
+        class: renovant\core\auth\TokenService
+        properties:
+            Provider: !obj sys.AuthProvider
+
+    # -------------------------------------------------------
+    # AUTHZ service
+    # -------------------------------------------------------
+    sys.AUTHZ:
+        class: renovant\core\authz\AuthzService
+        constructor:
+            pdo: mysql
+            tables:
+                authz: sys_authz
+                users: sys_users
+        properties:
+            cache: sys
+
+    sys.AuthzManager:
+        class: renovant\core\authz\AuthzManager
+        constructor:
+            pdo: mysql
+            tables:
+                authz: sys_authz
+                users: sys_users
+        properties:
+            cache: sys
+
+    # =========================================================
+    # CmdManager service
+    # =========================================================
+    sys.CmdManager:
+        class: renovant\core\console\CmdManager
+        constructor:
+            pdo: mysql
+            tablePrefix: sys_cmd
+
+    # -------------------------------------------------------
+    # SESSION service
+    # -------------------------------------------------------
+    sys.HttpSession:
+        class: renovant\core\http\session\Manager
+        constructor:
+            # session cookie parameters
+            cookie:
+                name: SESSION # cookie name
+                lifetime: 3600 # lifetime of the session cookie, defined in seconds
+                path: / # path on the domain where the cookie will work (use a single slash '/' for all paths on the domain)
+                domain: null # cookie domain (to make cookies visible on all sub-domains then the domain must be prefixed with a dot like '.php.net')
+                secure: true # if TRUE cookie will only be sent over secure connections
+                httponly: true #
+            # session handler
+            handler:
+                class: renovant\core\http\session\handler\Mysql
+                properties:
+                    pdo: mysql
+                    table: sys_sessions
+
+    # -------------------------------------------------------
+    # QUEUE service
+    # -------------------------------------------------------
+    sys.Queue:
+        class: renovant\core\queue\Queue
+        constructor:
+            pdo: mysql
+            table: sys_queue
+        properties:
+            fields: '*'

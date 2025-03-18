@@ -387,9 +387,9 @@ class sys {
 	 * System log helper
 	 * @param string $message log message
 	 * @param integer $level log level, one of the LOG_* constants, default: LOG_INFO
-	 * @param null $facility optional log facility, default NULL
+	 * @param string|null $facility optional log facility, default NULL
 	 */
-	public static function log(string $message, $level = LOG_INFO, $facility = null) {
+	public static function log(string $message, int $level = LOG_INFO, ?string $facility = null) {
 		self::trace(LOG_DEBUG, T_INFO, sprintf('[%s] %s: %s', Logger::LABELS[$level], $facility, $message), null, __METHOD__);
 		self::$log[] = [$message, $level, $facility, time()];
 	}

@@ -110,10 +110,10 @@ class Yaml {
 		if (strpos($file, 'phar://') !== false) {
 			$tmp = tempnam(TMP_DIR, 'yaml-');
 			file_put_contents($tmp, file_get_contents($file));
-			$yaml = yaml_parse_file($tmp, 0, $n, $callbacks);
+			$yaml = \yaml_parse_file($tmp, 0, $n, $callbacks);
 			unlink($tmp);
 		} else {
-			$yaml = yaml_parse_file($file, 0, $n, $callbacks);
+			$yaml = \yaml_parse_file($file, 0, $n, $callbacks);
 		}
 		return $yaml;
 	}
