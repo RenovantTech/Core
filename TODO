@@ -1,0 +1,9 @@
+/opt/php/8.1/bin/php /opt/php/bin/phpunit9 --bootstrap /home/renovant/renovant-core/tests/bootstrap.inc --configuration /home/renovant/renovant-core/tests/phpunit.xml
+/opt/php/8.3/bin/php /opt/php/bin/phpunit11 --bootstrap /home/renovant/renovant-core/tests/bootstrap.inc --configuration /home/renovant/renovant-core/tests/phpunit.xml --display-deprecations
+
+https://www.php.net/manual/en/reflectionproperty.getvalue.php
+PHP 8.1: Private and protected properties can be accessed by ReflectionProperty::getValue() right away. Previously, they needed to be made accessible by calling ReflectionProperty::setAccessible(); otherwise a ReflectionException was thrown
+
+
+MESSAGE: SQLSTATE[40001]: Serialization failure: 1213 Deadlock found when trying to get lock; try restarting transaction
+FILE: phar:///srv/noc.renovant.tech/lib/renovant-core-3.0.0-alpha1.phar/db/PDOStatement.php:22

@@ -3,7 +3,7 @@ namespace renovant\core\console;
 
 use renovant\core\sys;
 
-use const renovant\core\{CLI_BOOTSTRAP, CLI_PHP_BIN, RUN_DIR, TMP_DIR};
+use const renovant\core\{CLI_BOOTSTRAP, RUN_DIR, TMP_DIR};
 use const renovant\core\trace\T_INFO;
 
 class CmdManager {
@@ -80,7 +80,7 @@ class CmdManager {
 
 	public function exec(string $cmd, bool $waitShutdown = false) {
 		if (!$waitShutdown) {
-			$exec = CLI_PHP_BIN . ' ' . CLI_BOOTSTRAP . ' ' . $cmd;
+			$exec = CLI_BOOTSTRAP . ' ' . $cmd;
 			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager');
 			shell_exec('nohup ' . $exec . ' > /dev/null 2>&1 & echo $!');
 		} else {
@@ -94,7 +94,7 @@ class CmdManager {
 	 * @return array|false [$output, $exitCode] on SUCCESS, FALSE on FAILURE
 	 */
 	public function execWait(string $cmd): array|false {
-		$exec = CLI_PHP_BIN . ' ' . CLI_BOOTSTRAP . ' ' . $cmd;
+		$exec = CLI_BOOTSTRAP . ' ' . $cmd;
 		sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager');
 		if (exec($exec, $output, $exitCode)) {
 			return [$output, $exitCode];
@@ -134,7 +134,7 @@ class CmdManager {
 
 	public static function shutdown() {
 		foreach (self::$buffer as $cmd) {
-			$exec = CLI_PHP_BIN . ' ' . CLI_BOOTSTRAP . ' ' . $cmd;
+			$exec = CLI_BOOTSTRAP . ' ' . $cmd;
 			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager::shutdown');
 			shell_exec('nohup ' . $exec . ' > /dev/null 2>&1 & echo $!');
 		}
