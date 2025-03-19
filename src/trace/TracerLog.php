@@ -43,9 +43,7 @@ class TracerLog {
 		if (PHP_SAPI != 'cli') {
 			$url = $Req->URI();
 		} else {
-			$args = $_SERVER['argv'];
-			array_shift($args);
-			$url = implode(' ', $args);
+			$url = $Req->CMD() . ' ' . strstr(implode(' ', $_SERVER['argv']), ' -');
 		}
 
 		$legend = str_pad('Date', 21);
