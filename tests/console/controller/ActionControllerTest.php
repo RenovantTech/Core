@@ -15,7 +15,7 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$RefProp = new \ReflectionProperty(ActionController::class, '_config');
 		$RefProp->setAccessible(true);
 		$_config = $RefProp->getValue($ActionController);
-		$this->assertCount(6, $_config);
+		$this->assertCount(7, $_config);
 
 		// index()
 		$this->assertArrayHasKey('index', $_config);
@@ -44,6 +44,14 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue($_config['action3']['params'][1]['optional']);
 		$this->assertEquals('Tom', $_config['action3']['params'][1]['default']);
 
+		// actionFoo()
+		$this->assertArrayHasKey('actionFoo', $_config);
+		$this->assertEquals('name', $_config['actionFoo']['params'][1]['name']);
+		$this->assertNull($_config['actionFoo']['params'][1]['class']);
+		$this->assertEquals('string', $_config['actionFoo']['params'][1]['type']);
+		$this->assertTrue($_config['actionFoo']['params'][1]['optional']);
+		$this->assertEquals('Jack', $_config['actionFoo']['params'][1]['default']);
+
 		return $ActionController;
 	}
 
@@ -67,6 +75,11 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$Req             = new Request();
 		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'foo');
 		$this->assertEquals('foo', $RefMethod->invoke($ActionController, $Req));
+
+		$_SERVER['argv'] = ['sys', 'mod1', 'action-foo'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action-foo');
+		$this->assertEquals('actionFoo', $RefMethod->invoke($ActionController, $Req));
 
 		$_SERVER['argv'] = ['sys', 'mod1', 'not-exists'];
 		$Req             = new Request();
@@ -124,5 +137,14 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals('view3', $Res->getView());
 		$this->assertEquals('Jack', $Res->get('name'));
+
+		$_SERVER['argv'] = ['sys', 'mod1', 'action-foo', '--name=Rob'];
+		$_GET['name']    = 'Jack';
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action-foo');
+		$Res = new Response();
+		$ActionController->handle($Req, $Res);
+		$this->assertEquals('action-foo', $Res->getView());
+		$this->assertEquals('Rob', $Res->get('name'));
 	}
 }

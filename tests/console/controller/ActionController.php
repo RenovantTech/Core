@@ -29,6 +29,11 @@ class ActionController extends \renovant\core\console\controller\ActionControlle
 		$Res->setView('view3');
 	}
 
+	public function actionFoo(Response $Res, string $name = 'Jack') {
+		$Res->set('name', $name);
+		$Res->setView('action-foo');
+	}
+
 	public function fallback(Request $Req, Response $Res) {
 	}
 }
