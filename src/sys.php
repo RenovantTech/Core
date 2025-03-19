@@ -196,27 +196,29 @@ class sys {
 	 * @throws SysException
 	 * @throws \ReflectionException
 	 */
-	public static function dispatchCLI(array $routes) {
+	public static function dispatchCLI(string $app, array $routes) {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req    = new console\Request();
 		self::$Res    = new console\Response();
 		self::$routes = $routes;
-		$app          = $dispatcherID = $namespace = null;
-		foreach ($routes as $app => $conf) {
-			if (self::$Req->CMD(0) == $conf['cmd']) {
+		$dispatcherID = $namespace = $module = null;
+
+		$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
+		foreach ($routes as $module => $conf) {
+			if (strpos(self::$Req->CMD(), $conf['cmd']) === 0) {
 				$namespace    = $conf['namespace'];
 				$dispatcherID = $namespace . '.Dispatcher';
 				self::$Req->setAttribute('APP_MOD_URI', trim(strstr(self::$Req->CMD(), ' ')));
 				break;
 			}
 		}
-		if (is_null($app)) {
+		if (is_null($namespace)) {
 			throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
 		}
 		self::$Req->setAttribute('APP', $app);
+		self::$Req->setAttribute('APP_MOD', $module);
 		self::$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
 		self::$Req->setAttribute('APP_MOD_DIR', self::info($namespace . '.class', self::INFO_PATH_DIR) . '/');
-		$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
 		self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
 		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
 	}
@@ -227,13 +229,14 @@ class sys {
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 */
-	public static function dispatchHTTP($app, array $routes) {
+	public static function dispatchHTTP(string $app, array $routes) {
 		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
 		self::$Req    = new http\Request();
 		self::$Res    = new http\Response();
 		self::$routes = $routes;
-		$HttpEvent    = new HttpEvent(self::$Req, self::$Res);
-		$module       = $dispatcherID = $namespace = null;
+		$dispatcherID = $namespace = $module = null;
+
+		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
 		foreach ($routes as $module => $conf) {
 			if (strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
 				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR'] == $conf['domain']) &&

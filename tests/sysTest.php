@@ -195,6 +195,8 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \ReflectionException
 	 */
 	public function testDispatchCLI() {
+		$_SERVER['SCRIPT_FILENAME'] = 'sys.php';
+
 		$routes = [
 			'CMD' => ['cmd' => 'console',		'namespace' => 'test.console'],
 			'SYS' => ['cmd' => 'sys',			'namespace' => 'renovant.core.bin']
@@ -207,7 +209,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			3 => 'foo',
 			4 => '--bar=2'
 		];
-		$this->assertNull(sys::dispatchCLI($routes));
+		$this->assertNull(sys::dispatchCLI('APP', $routes));
 	}
 
 	/**
