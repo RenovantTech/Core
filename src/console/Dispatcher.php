@@ -107,6 +107,7 @@ class Dispatcher {
 			if (0 === strpos($Req->getAttribute('APP_MOD_URI'), $cmd)) {
 				sys::trace(LOG_DEBUG, T_INFO, 'matched CMD: ' . $cmd . ' => Controller: ' . $controllerID, null, $this->_ . '->' . __FUNCTION__);
 				$Req->setAttribute('APP_MOD_CONTROLLER', $controllerID);
+				$Req->setAttribute('APP_MOD_CONTROLLER_URI', trim(substr($Req->getAttribute('APP_MOD_URI'), strlen($cmd))));
 				return $controllerID;
 			}
 		}

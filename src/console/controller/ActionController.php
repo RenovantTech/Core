@@ -100,14 +100,14 @@ abstract class ActionController implements \renovant\core\console\ControllerInte
 	 * @throws Exception if no handler method can be found for the given request
 	 */
 	protected function resolveActionMethod(Request $Req) {
-		$action = str::kebab2camel(substr(strrchr($Req->CMD(), ' '), 1));
+		$action = str::kebab2camel(explode(' ', $Req->getAttribute('APP_MOD_CONTROLLER_URI'))[0]);
 		if (empty($action)) {
 			$action = self::DEFAULT_ACTION;
 		}
 		if (isset($this->_config[$action])) {
 			return $action;
 		}
-		if (isset($this->_config[$this::FALLBACK_ACTION])) {
+		if (isset($this->_config[(string)$this::FALLBACK_ACTION])) {
 			return $this::FALLBACK_ACTION;
 		}
 		http_response_code(404);
