@@ -1,0 +1,9 @@
+{
+	"php.version": "8.3",
+	"[php]": {
+		"editor.defaultFormatter": "junstyle.php-cs-fixer"
+	},
+	"phpunit.command": "\"${php}\" ${phpargs} \"${phpunit}\" --bootstrap tests/bootstrap.inc --configuration phpunit.xml --display-deprecations",
+	"phpunit.phpunit": "vendor/bin/phpunit",
+	"yaml.customTags": ["!obj scalar"]
+}
