@@ -1,26 +1,27 @@
 <?php
 namespace renovant\core\event;
+
+use renovant\core\sys;
+use renovant\core\util\yaml\{Yaml, YamlException};
+
 use const renovant\core\trace\T_DEPINJ;
-use renovant\core\sys,
-	renovant\core\util\yaml\Yaml,
-	renovant\core\util\yaml\YamlException;
+
 /**
  * @internal
  */
 class EventYamlParser {
-
 	/**
 	 * Parse YAML namespace config
 	 * @param string $namespace
 	 * @return array listeners map
 	 * @throws EventDispatcherException
 	 */
-	static function parseNamespace($namespace) {
+	public static function parseNamespace($namespace): array {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
 		$listeners = [];
 		try {
 			$yaml = Yaml::parseContext($namespace, 'events');
-			if(isset($yaml) && is_array($yaml)) {
+			if (isset($yaml) && is_array($yaml)) {
 				/* @TODO verify YAML content
 				if(
 				!is_array($YAML) ||
@@ -32,9 +33,11 @@ class EventYamlParser {
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
-					throw new EventDispatcherException(11, [__METHOD__, $namespace]); break;
+					throw new EventDispatcherException(11, [__METHOD__, $namespace]);
+					break;
 				case 2:
-					throw new EventDispatcherException(12, [__METHOD__, $namespace]); break;
+					throw new EventDispatcherException(12, [__METHOD__, $namespace]);
+					break;
 			}
 		}
 		return $listeners;
@@ -45,12 +48,12 @@ class EventYamlParser {
 	 * @param array $yaml YAML config extract
 	 * @return array listeners map
 	 */
-	static function parseYaml(array $yaml) {
+	public static function parseYaml(array $yaml): array {
 		$listeners = [];
-		foreach($yaml as $eventName => $eventYAML) {
+		foreach ($yaml as $eventName => $eventYAML) {
 			$eventName = strtoupper($eventName);
 			foreach ($eventYAML as $listenerYAML) {
-				if(is_string($listenerYAML)) {
+				if (is_string($listenerYAML)) {
 					$listeners[$eventName][1][] = $listenerYAML;
 				} elseif (is_array($listenerYAML)) {
 					$listeners[$eventName][$listenerYAML['priority']][] = $listenerYAML['listener'];

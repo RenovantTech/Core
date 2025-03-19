@@ -1,10 +1,12 @@
 <?php
 namespace renovant\core\db;
+
 use renovant\core\sys;
+
 class Query {
 	use \renovant\core\CoreTrait;
 
-	const EXP_DELIMITER = '|';
+	public const EXP_DELIMITER = '|';
 	/** criteria params */
 	protected array $criteria = [];
 	/** SQL criteria */
@@ -41,10 +43,10 @@ class Query {
 	 * @param string|null $fields SQL fields (for SELECT, COUNT)
 	 * @param string|null $pdo optional PDO instance ID
 	 */
-	function __construct(string $target, ?string $fields=null, ?string $pdo=null) {
+	public function __construct(string $target, ?string $fields = null, ?string $pdo = null) {
 		$this->target = $target;
 		$this->fields = $fields;
-		$this->PDO = sys::pdo($pdo);
+		$this->PDO    = sys::pdo($pdo);
 	}
 
 	/**
@@ -52,15 +54,21 @@ class Query {
 	 * @param array $params PDO params
 	 * @return integer count result
 	 */
-	function execCount(array $params=[]): int {
-		if(is_null($this->PDOStatement)) {
-			$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
-			if(!empty($this->groupBy)) {
-				$sql .= ' GROUP BY '.$this->groupBy;
-				if($this->withRollup) $sql .= ' WITH ROLLUP ';
+	public function execCount(array $params = []): int {
+		if (is_null($this->PDOStatement)) {
+			$sql = sprintf('SELECT COUNT(%s) FROM `%s` %s', ($this->fields ?: '*'), $this->target, $this->parseCriteria());
+			if (!empty($this->groupBy)) {
+				$sql .= ' GROUP BY ' . $this->groupBy;
+				if ($this->withRollup) {
+					$sql .= ' WITH ROLLUP ';
+				}
 			}
-			if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
-			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
+			if (!empty($this->having)) {
+				$sql .= ' HAVING ' . $this->having;
+			}
+			if (!empty($this->orderBy)) {
+				$sql .= ' ORDER BY ' . $this->orderBy;
+			}
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return (int) $this->doExec($params)->fetchColumn();
@@ -71,11 +79,15 @@ class Query {
 	 * @param array $params PDO params
 	 * @return int n° of deleted rows
 	 */
-	function execDelete(array $params=[]): int {
-		if(is_null($this->PDOStatement)) {
+	public function execDelete(array $params = []): int {
+		if (is_null($this->PDOStatement)) {
 			$sql = sprintf('DELETE FROM `%s` %s', $this->target, $this->parseCriteria());
-			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
+			if (!empty($this->orderBy)) {
+				$sql .= ' ORDER BY ' . $this->orderBy;
+			}
+			if (!empty($this->limit)) {
+				$sql .= ' LIMIT ' . $this->limit;
+			}
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($params)->rowCount();
@@ -86,14 +98,14 @@ class Query {
 	 * @param array $data
 	 * @return int n° of inserted rows
 	 */
-	function execInsert(array $data): int {
-		if(is_null($this->PDOStatement)) {
+	public function execInsert(array $data): int {
+		if (is_null($this->PDOStatement)) {
 			$sql1 = $sql2 = '';
-			foreach($data as $k=>$v) {
-				$sql1 .= ', `'.$k.'`';
-				$sql2 .= ', :'.$k;
+			foreach ($data as $k => $v) {
+				$sql1 .= ', `' . $k . '`';
+				$sql2 .= ', :' . $k;
 			}
-			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1,1), substr($sql2,1));
+			$sql                = sprintf('INSERT INTO `%s` (%s) VALUES (%s)', $this->target, substr($sql1, 1), substr($sql2, 1));
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($data)->rowCount();
@@ -105,21 +117,23 @@ class Query {
 	 * @param array $keys table PRIMARY/UNIQUE keys
 	 * @return int n° of inserted rows
 	 */
-	function execInsertUpdate(array $data, array $keys): int {
-		if(is_null($this->PDOStatement)) {
+	public function execInsertUpdate(array $data, array $keys): int {
+		if (is_null($this->PDOStatement)) {
 			$sql1 = $sql2 = $sql3 = '';
-			foreach($data as $k=>$v) {
-				$sql1 .= ', `'.$k.'`';
-				$sql2 .= ', :'.$k;
-				if(!in_array($k, $keys))
-					$sql3 .= ', '.$k.' = :_'.$k;
+			foreach ($data as $k => $v) {
+				$sql1 .= ', `' . $k . '`';
+				$sql2 .= ', :' . $k;
+				if (!in_array($k, $keys)) {
+					$sql3 .= ', ' . $k . ' = :_' . $k;
+				}
 			}
-			$sql = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1,1), substr($sql2,1), substr($sql3,1));
+			$sql                = sprintf('INSERT INTO `%s` (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s', $this->target, substr($sql1, 1), substr($sql2, 1), substr($sql3, 1));
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
-		foreach($data as $k=>$v) {
-			if(!in_array($k, $keys))
-				$data['_'.$k] = $v;
+		foreach ($data as $k => $v) {
+			if (!in_array($k, $keys)) {
+				$data['_' . $k] = $v;
+			}
 		}
 		return $this->doExec($data)->rowCount();
 	}
@@ -129,17 +143,27 @@ class Query {
 	 * @param array $params PDO params
 	 * @return \PDOStatement
 	 */
-	function execSelect(array $params=[]) {
-		if(is_null($this->PDOStatement)) {
-			$sql = sprintf('SELECT %s FROM `%s` %s', ($this->fields?:'*'), $this->target, $this->parseCriteria());
-			if(!empty($this->groupBy)) {
-				$sql .= ' GROUP BY '.$this->groupBy;
-				if($this->withRollup) $sql .= ' WITH ROLLUP ';
+	public function execSelect(array $params = []) {
+		if (is_null($this->PDOStatement)) {
+			$sql = sprintf('SELECT %s FROM `%s` %s', ($this->fields ?: '*'), $this->target, $this->parseCriteria());
+			if (!empty($this->groupBy)) {
+				$sql .= ' GROUP BY ' . $this->groupBy;
+				if ($this->withRollup) {
+					$sql .= ' WITH ROLLUP ';
+				}
 			}
-			if(!empty($this->having)) $sql .= ' HAVING '.$this->having;
-			if(!empty($this->orderBy)) $sql .= ' ORDER BY '.$this->orderBy;
-			if(!empty($this->limit)) $sql .= ' LIMIT '.$this->limit;
-			if(!empty($this->offset)) $sql .= ' OFFSET '.$this->offset;
+			if (!empty($this->having)) {
+				$sql .= ' HAVING ' . $this->having;
+			}
+			if (!empty($this->orderBy)) {
+				$sql .= ' ORDER BY ' . $this->orderBy;
+			}
+			if (!empty($this->limit)) {
+				$sql .= ' LIMIT ' . $this->limit;
+			}
+			if (!empty($this->offset)) {
+				$sql .= ' OFFSET ' . $this->offset;
+			}
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
 		return $this->doExec($params);
@@ -151,20 +175,22 @@ class Query {
 	 * @param array $params PDO criteria params
 	 * @return int n° of rows deleted
 	 */
-	function execUpdate(array $data, array $params=[]) {
-		if(is_null($this->PDOStatement)) {
+	public function execUpdate(array $data, array $params = []): int {
+		if (is_null($this->PDOStatement)) {
 			$sql = '';
-			foreach($data as $k=>$v)
-				$sql .= ', `'.$k.'` = :'.$k;
-			$sql = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql,2), $this->parseCriteria());
+			foreach ($data as $k => $v) {
+				$sql .= ', `' . $k . '` = :' . $k;
+			}
+			$sql                = sprintf('UPDATE `%s` SET %s %s', $this->target, substr($sql, 2), $this->parseCriteria());
 			$this->PDOStatement = $this->PDO->prepare($sql);
 		}
-		foreach($params as $k=>$v)
+		foreach ($params as $k => $v) {
 			$data[$k] = $v;
+		}
 		return $this->doExec($data)->rowCount();
 	}
 
-	function errorCode() {
+	public function errorCode() {
 		return $this->PDOStatement->errorCode();
 	}
 
@@ -173,9 +199,11 @@ class Query {
 	 * @param string|null $criteria
 	 * @return $this
 	 */
-	function criteria(?string $criteria) {
+	public function criteria(?string $criteria) {
 		$this->PDOStatement = null;
-		if(!empty($criteria)) $this->criteriaSql[] = $criteria;
+		if (!empty($criteria)) {
+			$this->criteriaSql[] = $criteria;
+		}
 		return $this;
 	}
 
@@ -184,9 +212,11 @@ class Query {
 	 * @param string|null $criteriaExp
 	 * @return $this
 	 */
-	function criteriaExp(?string $criteriaExp) {
+	public function criteriaExp(?string $criteriaExp) {
 		$this->PDOStatement = null;
-		if(!empty($criteriaExp)) $this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, trim($criteriaExp,'|')));
+		if (!empty($criteriaExp)) {
+			$this->criteriaExp = array_merge($this->criteriaExp, explode(self::EXP_DELIMITER, trim($criteriaExp, '|')));
+		}
 		return $this;
 	}
 
@@ -195,9 +225,9 @@ class Query {
 	 * @param string $groupBy
 	 * @return $this
 	 */
-	function groupBy(string $groupBy) {
+	public function groupBy(string $groupBy) {
 		$this->PDOStatement = null;
-		$this->groupBy = $groupBy;
+		$this->groupBy      = $groupBy;
 		return $this;
 	}
 
@@ -206,9 +236,9 @@ class Query {
 	 * @param string $having
 	 * @return $this
 	 */
-	function having(string $having) {
+	public function having(string $having) {
 		$this->PDOStatement = null;
-		$this->having = $having;
+		$this->having       = $having;
 		return $this;
 	}
 
@@ -217,9 +247,9 @@ class Query {
 	 * @param integer|null $limit
 	 * @return $this
 	 */
-	function limit(?int $limit) {
+	public function limit(?int $limit) {
 		$this->PDOStatement = null;
-		$this->limit = (int)$limit;
+		$this->limit        = (int)$limit;
 		return $this;
 	}
 
@@ -229,10 +259,10 @@ class Query {
 	 * @param integer|null $pageSize
 	 * @return $this
 	 */
-	function page(?int $page, ?int $pageSize) {
+	public function page(?int $page, ?int $pageSize) {
 		$this->PDOStatement = null;
-		$this->limit = $pageSize;
-		$this->offset = ($pageSize * $page - $pageSize);
+		$this->limit        = $pageSize;
+		$this->offset       = ($pageSize * $page - $pageSize);
 		return $this;
 	}
 
@@ -241,9 +271,9 @@ class Query {
 	 * @param integer|null $offset
 	 * @return $this
 	 */
-	function offset(?int $offset) {
+	public function offset(?int $offset) {
 		$this->PDOStatement = null;
-		$this->offset = (int)$offset;
+		$this->offset       = (int)$offset;
 		return $this;
 	}
 
@@ -252,9 +282,9 @@ class Query {
 	 * @param string|null $orderBy
 	 * @return $this
 	 */
-	function orderBy(?string $orderBy) {
+	public function orderBy(?string $orderBy) {
 		$this->PDOStatement = null;
-		$this->orderBy = $orderBy;
+		$this->orderBy      = $orderBy;
 		return $this;
 	}
 
@@ -263,22 +293,24 @@ class Query {
 	 * @param string|null $orderByExp
 	 * @return $this
 	 */
-	function orderByExp(?string $orderByExp) {
-		if(is_null($orderByExp)) return $this;
+	public function orderByExp(?string $orderByExp) {
+		if (is_null($orderByExp)) {
+			return $this;
+		}
 		$this->PDOStatement = null;
-		$expArray = explode(self::EXP_DELIMITER, $orderByExp);
-		$orderBy = [];
-		foreach($expArray as $oExp) {
+		$expArray           = explode(self::EXP_DELIMITER, $orderByExp);
+		$orderBy            = [];
+		foreach ($expArray as $oExp) {
 			$sort = strtok($oExp, '.');
-			$dir = strtok('.');
-			if(isset($this->dictionary['order-by'][$sort])) {
-				$oExp = str_replace('?', strtoupper($dir), $this->dictionary['order-by'][$sort]);
+			$dir  = strtok('.');
+			if (isset($this->dictionary['order-by'][$sort])) {
+				$oExp      = str_replace('?', strtoupper($dir), $this->dictionary['order-by'][$sort]);
 				$orderBy[] = $oExp;
 			} else {
-				$orderBy[] = str_replace('.',' ',$oExp);
+				$orderBy[] = str_replace('.', ' ', $oExp);
 			}
 		}
-		$this->orderBy = implode(', ',$orderBy);
+		$this->orderBy = implode(', ', $orderBy);
 		return $this;
 	}
 
@@ -286,9 +318,9 @@ class Query {
 	 * Set WITH ROLLUP
 	 * @return $this
 	 */
-	function withRollup() {
+	public function withRollup() {
 		$this->PDOStatement = null;
-		$this->withRollup = true;
+		$this->withRollup   = true;
 		return $this;
 	}
 
@@ -297,7 +329,7 @@ class Query {
 	 * @param array $dictionary
 	 * @return $this
 	 */
-	function setCriteriaDictionary(array $dictionary) {
+	public function setCriteriaDictionary(array $dictionary) {
 		$this->dictionary['criteria'] = $dictionary;
 		return $this;
 	}
@@ -307,7 +339,7 @@ class Query {
 	 * @param array $dictionary
 	 * @return $this
 	 */
-	function setOrderByDictionary(array $dictionary) {
+	public function setOrderByDictionary(array $dictionary) {
 		$this->dictionary['order-by'] = $dictionary;
 		return $this;
 	}
@@ -317,93 +349,101 @@ class Query {
 	 * @param array|null $params
 	 * @return \PDOStatement
 	 */
-	protected function doExec(?array $params=[]) {
+	protected function doExec(?array $params = []) {
 		$execParams = $this->criteria;
-		foreach($params as $k=>$v) {
-			if($keys = array_keys($execParams, ':'.$k, true)) {
-				foreach($keys as $key) {
+		foreach ($params as $k => $v) {
+			if ($keys = array_keys($execParams, ':' . $k, true)) {
+				foreach ($keys as $key) {
 					$execParams[$key] = $v;
 				}
-			} else $execParams[$k] = $v;
+			} else {
+				$execParams[$k] = $v;
+			}
 		}
 		$this->PDOStatement->execute($execParams);
 		return $this->PDOStatement;
 	}
 
 	protected function parseCriteria() {
-		$i = 0;
-		$sql = [];
-		$params = [];
-		$addParam = function($field, $value) use (&$i, &$params) {
-			$params[$field.'_'.$i] = $value;
+		$i        = 0;
+		$sql      = [];
+		$params   = [];
+		$addParam = function ($field, $value) use (&$i, &$params) {
+			$params[$field . '_' . $i] = $value;
 		};
-		$addParams = function($field, $values) use (&$i, &$params) {
-			foreach($values as $j=>$value) {
-				$params[$field.'_'.$i.'_'.($j+1)] = $value;
+		$addParams = function ($field, $values) use (&$i, &$params) {
+			foreach ($values as $j => $value) {
+				$params[$field . '_' . $i . '_' . ($j + 1)] = $value;
 			}
 		};
 		// #1 parse SQL criteria
-		foreach($this->criteriaSql as $cSql) {
-			if(preg_match_all('(:[\w]+)', $cSql, $matches)) {
-				foreach($matches[0] as $match) {
-					$params[substr($match,1)] = $match;
+		foreach ($this->criteriaSql as $cSql) {
+			if (preg_match_all('(:[\w]+)', $cSql, $matches)) {
+				foreach ($matches[0] as $match) {
+					$params[substr($match, 1)] = $match;
 				}
 			}
 			$sql[] = $cSql;
 		}
 		// #2 add Expression Dictionary translations
 		$transExp = [];
-		foreach($this->criteriaExp as $k => $cExp) {
-			$cExp = explode(',', $cExp);
-			$expName = $cExp[0];
+		foreach ($this->criteriaExp as $k => $cExp) {
+			$cExp      = explode(',', $cExp);
+			$expName   = $cExp[0];
 			$expValues = array_slice($cExp, 1);
-			if(isset($this->dictionary['criteria'][$expName])) {
+			if (isset($this->dictionary['criteria'][$expName])) {
 				$newExp = $this->dictionary['criteria'][$expName];
 				unset($this->criteriaExp[$k]);
-				$n = substr_count($newExp, '?');
+				$n      = substr_count($newExp, '?');
 				$search = $replace = [];
-				if(preg_match('/([\w]+),([\!A-Z]+)([,:?\w]*)/', $newExp)) {
-					for($j=1; $j<=$n; $j++) {
-						$search[] = '?'.$j;
-						$replace[] = $expValues[$j-1];
+				if (preg_match('/([\w]+),([\!A-Z]+)([,:?\w]*)/', $newExp)) {
+					for ($j = 1; $j <= $n; $j++) {
+						$search[]  = '?' . $j;
+						$replace[] = $expValues[$j - 1];
 					}
 					$transExp[] = str_replace($search, $replace, $newExp);
 				} else {
 					preg_match_all('/\?(\d+)/', $newExp, $matches);
 					foreach ($matches[1] as $match) {
 						$i++;
-						$addParam('_', $expValues[$match-1]);
-						$newExp = preg_replace('/\?'.$match.'/', ':__'.$i, $newExp, 1);
+						$addParam('_', $expValues[$match - 1]);
+						$newExp = preg_replace('/\?' . $match . '/', ':__' . $i, $newExp, 1);
 					}
 					$sql[] = $newExp;
 				}
 			}
 		}
-		$this->criteriaExp(implode('|',$transExp));
+		$this->criteriaExp(implode('|', $transExp));
 		// #3 parse criteria expressions
-		foreach($this->criteriaExp as $cExp) {
+		foreach ($this->criteriaExp as $cExp) {
 			$i++;
-			$cExpTokens = explode(',', $cExp);
+			$cExpTokens       = explode(',', $cExp);
 			list($field, $op) = $cExpTokens;
-			$values = array_slice($cExpTokens, 2);
-			switch($op) {
+			$values           = array_slice($cExpTokens, 2);
+			switch ($op) {
 				case 'EQ':
-					$sql[] = "`$field` = :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` = :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case '!EQ':
-					$sql[] = "`$field` != :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` != :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'LT':
-					$sql[] = "`$field` < :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` < :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'LTE':
-					$sql[] = "`$field` <= :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` <= :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'GT':
-					$sql[] = "`$field` > :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` > :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'GTE':
-					$sql[] = "`$field` >= :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` >= :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'NULL':
 					$sql[] = "`$field` IS NULL";
@@ -412,50 +452,66 @@ class Query {
 					$sql[] = "`$field` IS NOT NULL";
 					break;
 				case 'BTW':
-					$sql[] = "(`$field` >= :${field}_${i}_1 AND `$field` <= :${field}_${i}_2)"; $addParams($field, $values);
+					$sql[] = "(`$field` >= :{$field}_{$i}_1 AND `$field` <= :{$field}_{$i}_2)";
+					$addParams($field, $values);
 					break;
 				case '!BTW':
-					$sql[] = "(`$field` < :${field}_${i}_1 OR `$field` > :${field}_${i}_2)"; $addParams($field, $values);
+					$sql[] = "(`$field` < :{$field}_{$i}_1 OR `$field` > :{$field}_{$i}_2)";
+					$addParams($field, $values);
 					break;
 				case 'IN':
 					$in = '';
-					for($j=1; $j<=count($values); $j++) $in .= sprintf(':%s_%d_%d, ',$field, $i, $j);
-					$sql[] = sprintf('`%s` IN (%s)', $field, substr($in, 0, -2)); $addParams($field, $values);
+					for ($j = 1; $j <= count($values); $j++) {
+						$in .= sprintf(':%s_%d_%d, ', $field, $i, $j);
+					}
+					$sql[] = sprintf('`%s` IN (%s)', $field, substr($in, 0, -2));
+					$addParams($field, $values);
 					break;
 				case '!IN':
 					$in = '';
-					for($j=1; $j<=count($values); $j++) $in .= sprintf(':%s_%d_%d, ',$field, $i, $j);
-					$sql[] = sprintf('`%s` NOT IN (%s)', $field, substr($in, 0, -2)); $addParams($field, $values);
+					for ($j = 1; $j <= count($values); $j++) {
+						$in .= sprintf(':%s_%d_%d, ', $field, $i, $j);
+					}
+					$sql[] = sprintf('`%s` NOT IN (%s)', $field, substr($in, 0, -2));
+					$addParams($field, $values);
 					break;
 				case 'LIKE':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` LIKE :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case '!LIKE':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, $values[0]);
+					$sql[] = "`$field` NOT LIKE :{$field}_$i";
+					$addParam($field, $values[0]);
 					break;
 				case 'LIKEHAS':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, '%'.$values[0].'%');
+					$sql[] = "`$field` LIKE :{$field}_$i";
+					$addParam($field, '%' . $values[0] . '%');
 					break;
 				case '!LIKEHAS':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, '%'.$values[0].'%');
+					$sql[] = "`$field` NOT LIKE :{$field}_$i";
+					$addParam($field, '%' . $values[0] . '%');
 					break;
 				case 'LIKESTART':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, $values[0].'%');
+					$sql[] = "`$field` LIKE :{$field}_$i";
+					$addParam($field, $values[0] . '%');
 					break;
 				case '!LIKESTART':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, $values[0].'%');
+					$sql[] = "`$field` NOT LIKE :{$field}_$i";
+					$addParam($field, $values[0] . '%');
 					break;
 				case 'LIKEEND':
-					$sql[] = "`$field` LIKE :${field}_$i"; $addParam($field, '%'.$values[0]);
+					$sql[] = "`$field` LIKE :{$field}_$i";
+					$addParam($field, '%' . $values[0]);
 					break;
 				case '!LIKEEND':
-					$sql[] = "`$field` NOT LIKE :${field}_$i"; $addParam($field, '%'.$values[0]);
+					$sql[] = "`$field` NOT LIKE :{$field}_$i";
+					$addParam($field, '%' . $values[0]);
 					break;
 				default:
-					trigger_error(__METHOD__.' - invalid criteriaExp: '.$cExp, E_USER_ERROR);
+					trigger_error(__METHOD__ . ' - invalid criteriaExp: ' . $cExp, E_USER_ERROR);
 			}
 		}
 		$this->criteria = $params;
-		return (empty($sql)) ? '' : 'WHERE '.implode(' AND ',$sql);
+		return (empty($sql)) ? '' : 'WHERE ' . implode(' AND ', $sql);
 	}
 }

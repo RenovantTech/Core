@@ -1,11 +1,12 @@
 <?php
 namespace renovant\core\util\yaml;
+
+use renovant\core\{CoreProxy, sys};
+
 use const renovant\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
 use const renovant\core\trace\T_DEPINJ;
-use renovant\core\sys,
-	renovant\core\CoreProxy;
-class Yaml {
 
+class Yaml {
 	/**
 	 * YAML Context parser utility, supporting PHAR & ENVIRONMENT switch
 	 * @param string $namespace Context namespace
@@ -14,16 +15,19 @@ class Yaml {
 	 * @return mixed|null
 	 * @throws YamlException
 	 */
-	static function parseContext($namespace, $section=null, array $callbacks=[]) {
-		$dirName = sys::info($namespace.'.Context', sys::INFO_PATH_DIR);
-		if($namespace == 'sys')
-			$yamlPath = BASE_DIR.SYS_YAML;
-		elseif(empty($dirName))
+	public static function parseContext($namespace, $section = null, array $callbacks = []) {
+		$dirName = sys::info($namespace . '.Context', sys::INFO_PATH_DIR);
+		if ($namespace == 'sys') {
+			$yamlPath = BASE_DIR . SYS_YAML;
+		} elseif (empty($dirName)) {
 			$yamlPath = BASE_DIR . $namespace . '.yml';
-		else
-			$yamlPath = $dirName.DIRECTORY_SEPARATOR.'context.yml';
+		} else {
+			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
+		}
 		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
-		if(!file_exists($yamlPath)) throw new YamlException(1, [__METHOD__, $yamlPath]);
+		if (!file_exists($yamlPath)) {
+			throw new YamlException(1, [__METHOD__, $yamlPath]);
+		}
 		return Yaml::parseFile($yamlPath, $section, $callbacks);
 	}
 
@@ -35,17 +39,25 @@ class Yaml {
 	 * @return mixed|null
 	 * @throws YamlException
 	 */
-	static function parseFile($file, $section=null, array $callbacks=[]) {
+	public static function parseFile($file, $section = null, array $callbacks = []) {
 		sys::trace(LOG_DEBUG, T_DEPINJ, $file, null, __METHOD__);
-		$fileEnv = str_replace(['.yml','.yaml'], ['.'.ENVIRONMENT.'.yml', '.'.ENVIRONMENT.'.yaml'], $file);
-		if(!file_exists($file) && !file_exists($fileEnv)) throw new YamlException(1, [__METHOD__, $file]);
+		$fileEnv = str_replace(['.yml', '.yaml'], ['.' . ENVIRONMENT . '.yml', '.' . ENVIRONMENT . '.yaml'], $file);
+		if (!file_exists($file) && !file_exists($fileEnv)) {
+			throw new YamlException(1, [__METHOD__, $file]);
+		}
 
 		$yaml = $yamlEnv = [];
-		if(file_exists($file)) $yaml = self::_parseFile($file, $callbacks);
-		if(file_exists($fileEnv)) $yamlEnv = self::_parseFile($fileEnv, $callbacks);
+		if (file_exists($file)) {
+			$yaml = self::_parseFile($file, $callbacks);
+		}
+		if (file_exists($fileEnv)) {
+			$yamlEnv = self::_parseFile($fileEnv, $callbacks);
+		}
 		$yaml = array_merge($yaml, $yamlEnv);
 
-		if(empty($yaml)) throw new YamlException(2, [__METHOD__, $file]);
+		if (empty($yaml)) {
+			throw new YamlException(2, [__METHOD__, $file]);
+		}
 		return $section ? isset($yaml[$section]) ? $yaml[$section] : null : $yaml;
 	}
 
@@ -54,25 +66,38 @@ class Yaml {
 	 * @param mixed $yamlNode
 	 * @return mixed
 	 */
-	static function typeCast($yamlNode) {
+	public static function typeCast($yamlNode) {
 		// NULL
-		if(is_null($yamlNode))return null;
+		if (is_null($yamlNode)) {
+			return null;
+		}
 		// BOOLEAN
-		elseif(is_bool($yamlNode)) return (boolean) $yamlNode;
+		elseif (is_bool($yamlNode)) {
+			return (bool) $yamlNode;
+		}
 		// INTEGER
-		elseif(is_int($yamlNode)) return (integer) $yamlNode;
+		elseif (is_int($yamlNode)) {
+			return (int) $yamlNode;
+		}
 		// FLOAT
-		elseif(is_float($yamlNode)) return (float) $yamlNode;
+		elseif (is_float($yamlNode)) {
+			return (float) $yamlNode;
+		}
 		// ARRAY
-		elseif(is_array($yamlNode)) {
-			foreach ($yamlNode as $k => $val)
+		elseif (is_array($yamlNode)) {
+			foreach ($yamlNode as $k => $val) {
 				$yamlNode[$k] = self::typeCast($val);
+			}
 			return $yamlNode;
 		}
 		// OBJECT
-		elseif(substr($yamlNode, 0, 4) == '!obj') return new CoreProxy(substr($yamlNode, 5));
+		elseif (substr($yamlNode, 0, 4) == '!obj') {
+			return new CoreProxy(substr($yamlNode, 5));
+		}
 		// STRING
-		else return (string) $yamlNode;
+		else {
+			return (string) $yamlNode;
+		}
 	}
 
 	/**
@@ -81,13 +106,15 @@ class Yaml {
 	 * @param array $callbacks content handlers for YAML nodes
 	 * @return array parsed YAML
 	 */
-	static protected function _parseFile($file, array $callbacks=[]) {
-		if(strpos($file, 'phar://')!==false) {
+	protected static function _parseFile($file, array $callbacks = []) {
+		if (strpos($file, 'phar://') !== false) {
 			$tmp = tempnam(TMP_DIR, 'yaml-');
 			file_put_contents($tmp, file_get_contents($file));
-			$yaml = yaml_parse_file($tmp, 0, $n, $callbacks);
+			$yaml = \yaml_parse_file($tmp, 0, $n, $callbacks);
 			unlink($tmp);
-		} else $yaml = yaml_parse_file($file, 0, $n, $callbacks);
+		} else {
+			$yaml = \yaml_parse_file($file, 0, $n, $callbacks);
+		}
 		return $yaml;
 	}
 }

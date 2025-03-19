@@ -1,24 +1,23 @@
 <?php
 namespace renovant\core\console;
-use const renovant\core\trace\T_INFO;
+
 use renovant\core\sys;
+
+use const renovant\core\trace\T_INFO;
+
 class Response {
+	public const LINE_NORMAL  = 0;
+	public const LINE_INFO    = 1;
+	public const LINE_SUCCESS = 11;
+	public const LINE_WARNING = 12;
+	public const LINE_ERROR   = 13;
 
-	const LINE_NORMAL = 0;
-	const LINE_INFO = 1;
-	const LINE_SUCCESS = 11;
-	const LINE_WARNING = 12;
-	const LINE_ERROR = 13;
-
-	/** Response data, aka Models passed to the MVC View
-	 * @var array */
-	protected $data = [];
-	/** Exit status
-	 * @var int */
-	protected $exit = 0;
-	/** Output buffer ON/OFF
-	 * @var bool */
-	protected $outputBuffer = false;
+	/** Response data, aka Models passed to the MVC View */
+	protected array $data = [];
+	/** Exit status */
+	protected int $exit = 0;
+	/** Output buffer ON/OFF */
+	protected bool $outputBuffer = false;
 	/** Output stream
 	 * @var resource */
 	protected $STDOUT = STDOUT;
@@ -26,9 +25,10 @@ class Response {
 	 * @var ViewInterface|string|null */
 	protected $View = null;
 
-	function __destruct() {
-		if ($this->outputBuffer)
+	public function __destruct() {
+		if ($this->outputBuffer) {
 			ob_end_clean();
+		}
 	}
 
 	// === getter & setter ========================================================================
@@ -38,15 +38,14 @@ class Response {
 	 * @param string $key
 	 * @return mixed|null
 	 */
-	function get($key) {
-		return (isset($this->data[$key])) ? $this->data[$key] : null;
+	public function get($key) {
+		return $this->data[$key] ?? null;
 	}
 
 	/**
 	 * Get all Response data (array)
-	 * @return array
 	 */
-	function getData() {
+	public function getData(): array {
 		return $this->data;
 	}
 
@@ -54,23 +53,23 @@ class Response {
 	 * Get current Response output
 	 * @return string
 	 */
-	function getContent() {
-		return ($this->outputBuffer) ? ob_get_contents() : file_get_contents($this->STDOUT);
+	public function getContent() {
+		return $this->outputBuffer ? ob_get_contents() : file_get_contents($this->STDOUT);
 	}
 
 	/**
 	 * Returns the actual buffer size used for this Response. If no buffering is used, this method returns 0.
 	 * @return int
 	 */
-	function getSize() {
-		return ($this->outputBuffer) ? ob_get_length() : 0;
+	public function getSize() {
+		return $this->outputBuffer ? ob_get_length() : 0;
 	}
 
 	/**
 	 * Get current View / viewName
 	 * @return ViewInterface|null|string
 	 */
-	function getView() {
+	public function getView() {
 		return $this->View;
 	}
 
@@ -80,10 +79,14 @@ class Response {
 	 * @param mixed|null $v data value
 	 * @return Response (fluent interface)
 	 */
-	function set($k, $v=null) {
-		if(is_array($k)) $this->data = array_merge($this->data, $k);
-		elseif(is_string($k) && preg_match('/^[a-zA-Z]+/',$k)) $this->data[$k] = $v;
-		else trigger_error(__METHOD__.': invalid key');
+	public function set($k, $v = null) {
+		if (is_array($k)) {
+			$this->data = array_merge($this->data, $k);
+		} elseif (is_string($k) && preg_match('/^[a-zA-Z]+/', $k)) {
+			$this->data[$k] = $v;
+		} else {
+			trigger_error(__METHOD__ . ': invalid key');
+		}
 		return $this;
 	}
 
@@ -92,8 +95,10 @@ class Response {
 	 * @param $output
 	 * @return Response (fluent interface)
 	 */
-	function setContent($output) {
-		if($this->outputBuffer) ob_clean();
+	public function setContent($output) {
+		if ($this->outputBuffer) {
+			ob_clean();
+		}
 		fwrite($this->STDOUT, $output);
 		return $this;
 	}
@@ -102,7 +107,7 @@ class Response {
 	 * Set exit status
 	 * @param int $exit
 	 */
-	function setExitStatus($exit) {
+	public function setExitStatus($exit) {
 		$this->exit = $exit;
 	}
 
@@ -111,10 +116,16 @@ class Response {
 	 * @param resource $handle
 	 * @throws Exception
 	 */
-	function setOutput($handle) {
-		if(!is_resource($handle)) throw new Exception(31);
-		if(!is_writable(stream_get_meta_data($handle)['uri'])) throw new Exception(31);
-		if(stream_get_meta_data($handle)['mode'] == 'r') throw new Exception(31);
+	public function setOutput($handle) {
+		if (!is_resource($handle)) {
+			throw new Exception(31);
+		}
+		if (!is_writable(stream_get_meta_data($handle)['uri'])) {
+			throw new Exception(31);
+		}
+		if (stream_get_meta_data($handle)['mode'] == 'r') {
+			throw new Exception(31);
+		}
 		$this->STDOUT = $handle;
 	}
 
@@ -122,41 +133,41 @@ class Response {
 	 * Set the View / viewName to be rendered with Response data
 	 * @param ViewInterface|string $view
 	 */
-	function setView($view) {
+	public function setView($view) {
 		$this->View = $view;
 	}
 
 	// === OUTPUT methods =========================================================================
 
-	function error($text, $newLine=false) {
+	public function error($text, $newLine = false) {
 		$this->write($text, false, self::LINE_ERROR);
 	}
 
-	function errorLn($text) {
+	public function errorLn($text) {
 		$this->write($text, true, self::LINE_ERROR);
 	}
 
-	function info($text, $newLine=false) {
+	public function info($text, $newLine = false) {
 		$this->write($text, false, self::LINE_INFO);
 	}
 
-	function infoLn($text) {
+	public function infoLn($text) {
 		$this->write($text, true, self::LINE_INFO);
 	}
 
-	function success($text, $newLine=false) {
+	public function success($text, $newLine = false) {
 		$this->write($text, false, self::LINE_SUCCESS);
 	}
 
-	function successLn($text) {
+	public function successLn($text) {
 		$this->write($text, true, self::LINE_SUCCESS);
 	}
 
-	function warning($text, $newLine=false) {
+	public function warning($text, $newLine = false) {
 		$this->write($text, false, self::LINE_WARNING);
 	}
 
-	function warningLn($text) {
+	public function warningLn($text) {
 		$this->write($text, true, self::LINE_WARNING);
 	}
 
@@ -165,11 +176,11 @@ class Response {
 	 * @param boolean $newLine add new line at end
 	 * @param $type
 	 */
-	function write($text, $newLine=false, $type=self::LINE_NORMAL) {
-		fwrite($this->STDOUT, $text.($newLine?chr(10):''));
+	public function write($text, $newLine = false, $type = self::LINE_NORMAL) {
+		fwrite($this->STDOUT, $text . ($newLine ? chr(10) : ''));
 	}
 
-	function writeLn($text) {
+	public function writeLn($text) {
 		$this->write($text, true);
 	}
 
@@ -179,9 +190,11 @@ class Response {
 	 * Forces any content in the buffer to be written to the client.
 	 * A call to this method automatically commits the Response.
 	 */
-	function send() {
-		sys::trace(LOG_DEBUG, T_INFO, null, null. 'sys.console.Response->send');
-		if($this->outputBuffer) ob_flush();
+	public function send() {
+		sys::trace(LOG_DEBUG, T_INFO, null, null . 'sys.console.Response->send');
+		if ($this->outputBuffer) {
+			ob_flush();
+		}
 		ini_set('precision', 16);
 		define('renovant\core\trace\TRACE_END_TIME', microtime(1));
 		ini_restore('precision');
@@ -190,8 +203,10 @@ class Response {
 	/**
 	 * Clears any data that exists in the buffer as well as the exit status.
 	 */
-	function reset() {
+	public function reset() {
 		$this->exit = 0;
-		if($this->outputBuffer) ob_clean();
+		if ($this->outputBuffer) {
+			ob_clean();
+		}
 	}
 }

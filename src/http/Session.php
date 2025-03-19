@@ -1,26 +1,22 @@
 <?php
 namespace renovant\core\http;
+
 class Session {
+	public const DEFAULT_NAMESPACE = 'default';
 
-	const DEFAULT_NAMESPACE = 'default';
+	public const FORCE_NAMESPACE = false;
 
-	const FORCE_NAMESPACE = false;
-
-	const FORCE_SINGLETON = false;
+	public const FORCE_SINGLETON = false;
 
 	/** Since expiring data is handled at startup to avoid __destruct difficulties,
-	 * the data that will be expiring at end of this request is held here
-	 * @var array */
-	static protected $_expiringData = [];
-	/** Trace current instances to prevent creation of additional accessor instance objects for this namespace
-	 * @var array */
-	static private $_singletons = [];
-	/** Session locking status
-	 * @var bool */
-	protected $_isLocked = false;
-	/** Session namespace
-	 * @var string */
-	protected $_namespace = self::DEFAULT_NAMESPACE;
+	 * the data that will be expiring at end of this request is held here */
+	protected static array $_expiringData = [];
+	/** Trace current instances to prevent creation of additional accessor instance objects for this namespace */
+	private static array $_singletons = [];
+	/** Session locking status */
+	protected bool $_isLocked = false;
+	/** Session namespace */
+	protected string $_namespace = self::DEFAULT_NAMESPACE;
 
 	/**
 	 * Returns an instance object bound to a particular, isolated section
@@ -31,26 +27,47 @@ class Session {
 	 * @param bool $isSingleton prevent creation of additional accessor instance objects for this namespace
 	 * @throws SessionException
 	 */
-	final function __construct($namespace=null, $isSingleton=false) {
-		if(session_status() == PHP_SESSION_DISABLED) throw new SessionException(51);
-		if(static::FORCE_NAMESPACE) $this->_namespace = static::FORCE_NAMESPACE;
-		else $this->_namespace = (!is_null($namespace)) ? $namespace : static::DEFAULT_NAMESPACE;
-		if(!preg_match('/^[a-zA-Z]{1}[_a-zA-Z0-9]*[a-zA-Z0-9]{1}$/', $this->_namespace)) throw new SessionException(52, [$this->_namespace]);
-		if(isset(self::$_singletons[$this->_namespace])) throw new SessionException(53, [$this->_namespace]);
-		if(static::FORCE_SINGLETON || $isSingleton === true) self::$_singletons[$this->_namespace] = true;
-		if (isset($_SESSION['_METADATA_'])) $this->expireData();
+	final public function __construct($namespace = null, $isSingleton = false) {
+		if (session_status() == PHP_SESSION_DISABLED) {
+			throw new SessionException(51);
+		}
+		if (static::FORCE_NAMESPACE) {
+			$this->_namespace = static::FORCE_NAMESPACE;
+		} else {
+			$this->_namespace = (!is_null($namespace)) ? $namespace : static::DEFAULT_NAMESPACE;
+		}
+		if (!preg_match('/^[a-zA-Z]{1}[_a-zA-Z0-9]*[a-zA-Z0-9]{1}$/', $this->_namespace)) {
+			throw new SessionException(52, [$this->_namespace]);
+		}
+		if (isset(self::$_singletons[$this->_namespace])) {
+			throw new SessionException(53, [$this->_namespace]);
+		}
+		if (static::FORCE_SINGLETON || $isSingleton === true) {
+			self::$_singletons[$this->_namespace] = true;
+		}
+		if (isset($_SESSION['_METADATA_'])) {
+			$this->expireData();
+		}
 	}
 
-	final function __get($k){
-		if(isset($_SESSION[$this->_namespace][$k])) return $_SESSION[$this->_namespace][$k];
-		elseif(isset(self::$_expiringData[$this->_namespace][$k])) return self::$_expiringData[$this->_namespace][$k];
-		else return null;
+	final public function __get($k) {
+		if (isset($_SESSION[$this->_namespace][$k])) {
+			return $_SESSION[$this->_namespace][$k];
+		} elseif (isset(self::$_expiringData[$this->_namespace][$k])) {
+			return self::$_expiringData[$this->_namespace][$k];
+		} else {
+			return null;
+		}
 	}
 
-	final function __isset($k){
-		if(isset($_SESSION[$this->_namespace][$k])) return true;
-		elseif(isset(self::$_expiringData[$this->_namespace][$k])) return true;
-		else return false;
+	final public function __isset($k): bool {
+		if (isset($_SESSION[$this->_namespace][$k])) {
+			return true;
+		} elseif (isset(self::$_expiringData[$this->_namespace][$k])) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -58,18 +75,25 @@ class Session {
 	 * @param $v
 	 * @throws SessionException
 	 */
-	final function __set($k, $v){
-		if($k==='') throw new SessionException("The '$k' key must be a non-empty string");
-		if($this->_isLocked) throw new SessionException(61, [$this->_namespace]);
-		if(method_exists($this, $method ='set'.ucfirst($k))) $this->$method($v);
-		else $_SESSION[$this->_namespace][(string)$k] = $v;
+	final public function __set($k, $v) {
+		if ($k === '') {
+			throw new SessionException("The '$k' key must be a non-empty string");
+		}
+		if ($this->_isLocked) {
+			throw new SessionException(61, [$this->_namespace]);
+		}
+		if (method_exists($this, $method = 'set' . ucfirst($k))) {
+			$this->$method($v);
+		} else {
+			$_SESSION[$this->_namespace][(string)$k] = $v;
+		}
 	}
 
-	final function lock() {
+	final public function lock() {
 		$this->_isLocked = true;
 	}
 
-	final function isLocked() {
+	final public function isLocked() {
 		return $this->_isLocked;
 	}
 
@@ -79,13 +103,17 @@ class Session {
 	 * @param mixed $variables - OPTIONAL list of variables to expire (defaults to all)
 	 * @throws SessionException
 	 */
-	final function setExpirationSeconds($seconds, $variables=null) {
-		if($seconds <= 0) throw new SessionException('Seconds must be positive.');
+	final public function setExpirationSeconds($seconds, $variables = null) {
+		if ($seconds <= 0) {
+			throw new SessionException('Seconds must be positive.');
+		}
 		if ($variables === null) {
 			// apply expiration to entire namespace
 			$_SESSION['_METADATA_'][$this->_namespace]['ENT'] = time() + $seconds;
 		} else {
-			if(is_string($variables)) $variables = [$variables];
+			if (is_string($variables)) {
+				$variables = [$variables];
+			}
 			foreach ($variables as $variable) {
 				if (!empty($variable)) {
 					$_SESSION['_METADATA_'][$this->_namespace]['EVT'][$variable] = time() + $seconds;
@@ -101,24 +129,34 @@ class Session {
 	 * @param boolean $hopCountOnUsageOnly - OPTIONAL if set, only count a hop/request if this namespace is used
 	 * @throws SessionException
 	 */
-	final function setExpirationHops($hops, $variables = null, $hopCountOnUsageOnly = false) {
-		if($hops <= 0) throw new SessionException('Hops must be positive number.');
+	final public function setExpirationHops($hops, $variables = null, $hopCountOnUsageOnly = false) {
+		if ($hops <= 0) {
+			throw new SessionException('Hops must be positive number.');
+		}
 		if ($variables === null) {
 			// apply expiration to entire namespace
-			if ($hopCountOnUsageOnly === false) $_SESSION['_METADATA_'][$this->_namespace]['ENGH'] = $hops;
-			else $_SESSION['_METADATA_'][$this->_namespace]['ENNH'] = $hops;
+			if ($hopCountOnUsageOnly === false) {
+				$_SESSION['_METADATA_'][$this->_namespace]['ENGH'] = $hops;
+			} else {
+				$_SESSION['_METADATA_'][$this->_namespace]['ENNH'] = $hops;
+			}
 		} else {
-			if (is_string($variables)) $variables = [$variables];
+			if (is_string($variables)) {
+				$variables = [$variables];
+			}
 			foreach ($variables as $variable) {
 				if (!empty($variable)) {
-					if ($hopCountOnUsageOnly === false) $_SESSION['_METADATA_'][$this->_namespace]['EVGH'][$variable] = $hops;
-					else $_SESSION['_METADATA_'][$this->_namespace]['EVNH'][$variable] = $hops;
+					if ($hopCountOnUsageOnly === false) {
+						$_SESSION['_METADATA_'][$this->_namespace]['EVGH'][$variable] = $hops;
+					} else {
+						$_SESSION['_METADATA_'][$this->_namespace]['EVNH'][$variable] = $hops;
+					}
 				}
 			}
 		}
 	}
 
-	final function unlock() {
+	final public function unlock() {
 		$this->_isLocked = false;
 	}
 
@@ -151,23 +189,28 @@ class Session {
 						unset($_SESSION['_METADATA_'][$namespace]['EVNH'][$variable]);
 					}
 				}
-				if(empty($_SESSION['_METADATA_'][$namespace]['EVNH'])) unset($_SESSION['_METADATA_'][$namespace]['EVNH']);
+				if (empty($_SESSION['_METADATA_'][$namespace]['EVNH'])) {
+					unset($_SESSION['_METADATA_'][$namespace]['EVNH']);
+				}
 			}
 		}
-		if (empty($_SESSION['_METADATA_'][$namespace])) unset($_SESSION['_METADATA_'][$namespace]);
-		if (empty($_SESSION['_METADATA_'])) unset($_SESSION['_METADATA_']);
+		if (empty($_SESSION['_METADATA_'][$namespace])) {
+			unset($_SESSION['_METADATA_'][$namespace]);
+		}
+		if (empty($_SESSION['_METADATA_'])) {
+			unset($_SESSION['_METADATA_']);
+		}
 	}
 
 	/**
 	 * Global data expiration calculations.
 	 */
-	final static function expireGlobalData() {
+	final public static function expireGlobalData() {
 		if (isset($_SESSION['_METADATA_'])) {
 			foreach ($_SESSION['_METADATA_'] as $namespace => $metadata) {
 				// Expire Namespace by Time (ENT)
-				if (isset($metadata['ENT']) && ($metadata['ENT'] > 0) && (time() > $metadata['ENT']) ) {
-					unset($_SESSION[$namespace]);
-					unset($_SESSION['_METADATA_'][$namespace]);
+				if (isset($metadata['ENT']) && ($metadata['ENT'] > 0) && (time() > $metadata['ENT'])) {
+					unset($_SESSION[$namespace], $_SESSION['_METADATA_'][$namespace]);
 				}
 				// Expire Namespace by Global Hop (ENGH) if it wasnt expired above
 				if (isset($_SESSION['_METADATA_'][$namespace]) && isset($metadata['ENGH']) && $metadata['ENGH'] >= 1) {
@@ -184,11 +227,12 @@ class Session {
 				if (isset($metadata['EVT'])) {
 					foreach ($metadata['EVT'] as $variable => $time) {
 						if (time() > $time) {
-							unset($_SESSION[$namespace][$variable]);
-							unset($_SESSION['_METADATA_'][$namespace]['EVT'][$variable]);
+							unset($_SESSION[$namespace][$variable], $_SESSION['_METADATA_'][$namespace]['EVT'][$variable]);
 						}
 					}
-					if(empty($_SESSION['_METADATA_'][$namespace]['EVT'])) unset($_SESSION['_METADATA_'][$namespace]['EVT']);
+					if (empty($_SESSION['_METADATA_'][$namespace]['EVT'])) {
+						unset($_SESSION['_METADATA_'][$namespace]['EVT']);
+					}
 				}
 				// Expire Namespace Variables by Global Hop (EVGH)
 				if (isset($metadata['EVGH'])) {
@@ -203,12 +247,18 @@ class Session {
 							unset($_SESSION['_METADATA_'][$namespace]['EVGH'][$variable]);
 						}
 					}
-					if (empty($_SESSION['_METADATA_'][$namespace]['EVGH'])) unset($_SESSION['_METADATA_'][$namespace]['EVGH']);
+					if (empty($_SESSION['_METADATA_'][$namespace]['EVGH'])) {
+						unset($_SESSION['_METADATA_'][$namespace]['EVGH']);
+					}
 				}
 			}
-			if (isset($namespace) && empty($_SESSION['_METADATA_'][$namespace])) unset($_SESSION['_METADATA_'][$namespace]);
+			if (isset($namespace) && empty($_SESSION['_METADATA_'][$namespace])) {
+				unset($_SESSION['_METADATA_'][$namespace]);
+			}
 		}
-		if (isset($_SESSION['_METADATA_']) && empty($_SESSION['_METADATA_'])) unset($_SESSION['_METADATA_']);
+		if (isset($_SESSION['_METADATA_']) && empty($_SESSION['_METADATA_'])) {
+			unset($_SESSION['_METADATA_']);
+		}
 	}
 }
 Session::expireGlobalData();

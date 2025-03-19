@@ -1,6 +1,6 @@
 <?php
 Phar::mapPhar();
-include 'phar://renovant-core.phar/constants.inc';
+include 'phar://renovant-core.phar/constants.inc.php';
 include 'phar://renovant-core.phar/CoreProxy.php';
 include 'phar://renovant-core.phar/CoreTrait.php';
 include 'phar://renovant-core.phar/sys.php';

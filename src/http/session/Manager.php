@@ -1,30 +1,33 @@
 <?php
 namespace renovant\core\http\session;
+
+use renovant\core\sys;
+use renovant\core\container\Container;
+use renovant\core\http\SessionException;
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\container\Container,
-	renovant\core\http\SessionException;
+
 class Manager {
 	use \renovant\core\CoreTrait;
 
-	const EVENT_START	= 'http.session:start';
-	const EVENT_END		= 'http.session:end';
+	public const EVENT_START = 'http.session:start';
+	public const EVENT_END   = 'http.session:end';
 
 	/** Cookie config */
 	protected array $cookie = [
-		'name'		=> 'SESSION',
-		'lifetime'	=> 3600,
-		'path'		=> '/',
-		'domain'	=> null,
-		'secure'	=> true,
-		'httponly'	=> true
+		'name'     => 'SESSION',
+		'lifetime' => 3600,
+		'path'     => '/',
+		'domain'   => null,
+		'secure'   => true,
+		'httponly' => true
 	];
 	/** Handler config */
 	protected array $handlerCnf = [
-		'class' => 'renovant\core\http\session\handler\Mysql',
+		'class'       => 'renovant\core\http\session\handler\Mysql',
 		'constructor' => null,
-		'properties' => [
-			'pdo' => 'master',
+		'properties'  => [
+			'pdo'   => 'master',
 			'table' => 'sys_auth_session'
 		]
 	];
@@ -38,9 +41,13 @@ class Manager {
 	 * @param array|null $handler Handler config
 	 * @throws \ReflectionException
 	 */
-	function __construct(?array $cookie=null, ?array $handler=null) {
-		if($cookie) $this->cookie = $cookie;
-		if($handler) $this->handlerCnf = array_merge(Container::YAML_OBJ_SKELETON, $handler);
+	public function __construct(?array $cookie = null, ?array $handler = null) {
+		if ($cookie) {
+			$this->cookie = $cookie;
+		}
+		if ($handler) {
+			$this->handlerCnf = array_merge(Container::YAML_OBJ_SKELETON, $handler);
+		}
 		$this->Handler = (new Container())->build('sys.http.SessionHandler', $this->handlerCnf['class'], $this->handlerCnf['constructor'], $this->handlerCnf['properties']);
 		$this->Handler->init();
 	}
@@ -51,10 +58,16 @@ class Manager {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function start(): void {
-		if(PHP_SAPI=='cli') return;
-		if(session_status() == PHP_SESSION_ACTIVE) throw new SessionException(11);
-		if(headers_sent($file,$line)) throw new SessionException(12, [$file,$line]);
+	public function start(): void {
+		if (PHP_SAPI == 'cli') {
+			return;
+		}
+		if (session_status() == PHP_SESSION_ACTIVE) {
+			throw new SessionException(11);
+		}
+		if (headers_sent($file, $line)) {
+			throw new SessionException(12, [$file, $line]);
+		}
 		session_name($this->cookie['name']);
 		session_set_cookie_params($this->cookie['lifetime'], $this->cookie['path'], $this->cookie['domain'], $this->cookie['secure'], $this->cookie['httponly']);
 		session_set_save_handler($this->Handler, true);
@@ -65,10 +78,12 @@ class Manager {
 	/**
 	 * Destroys all of the data associated with the current session.
 	 */
-	function destroy(): void {
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->destroy');
+	public function destroy(): void {
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_ . '->destroy');
 		session_destroy();
-		if (isset($_COOKIE[$this->cookie['name']])) setcookie($this->cookie['name'], false, ['expires'=>315554400 /* 1980-01-01 */, 'path'=>$this->cookie['path'], 'domain'=>$this->cookie['domain'], 'secure'=>$this->cookie['secure'], 'httponly'=>$this->cookie['httponly'], 'samesite'=>'Lax']);
+		if (isset($_COOKIE[$this->cookie['name']])) {
+			setcookie($this->cookie['name'], false, ['expires' => 315554400 /* 1980-01-01 */, 'path' => $this->cookie['path'], 'domain' => $this->cookie['domain'], 'secure' => $this->cookie['secure'], 'httponly' => $this->cookie['httponly'], 'samesite' => 'Lax']);
+		}
 	}
 
 	/**
@@ -79,7 +94,7 @@ class Manager {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function end(): void {
+	public function end(): void {
 		sys::event()->trigger(self::EVENT_END);
 		session_write_close();
 	}

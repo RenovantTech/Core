@@ -2,7 +2,6 @@
 namespace renovant\core\util\reflection;
 
 class ReflectionProperty extends \ReflectionProperty {
-
 	/** DocComment instance
 	 * @var DocComment */
 	protected $DocComment;
@@ -12,7 +11,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * @param string $tagName Tag name to check for
 	 * @return boolean TRUE if such a tag has been defined, otherwise FALSE
 	 */
-	function hasTag($tagName) {
+	public function hasTag($tagName) {
 		return $this->getDocComment()->hasTag($tagName);
 	}
 
@@ -20,7 +19,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * Returns an array of tags and their values
 	 * @return array Tags and values
 	 */
-	function getAllTags() {
+	public function getAllTags() {
 		return $this->getDocComment()->getAllTags();
 	}
 
@@ -30,7 +29,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * @return array Values of the given tag
 	 * @throws \Exception
 	 */
-	function getTagValues($tagName) {
+	public function getTagValues($tagName) {
 		return $this->getDocComment()->getTagValues($tagName);
 	}
 
@@ -39,7 +38,7 @@ class ReflectionProperty extends \ReflectionProperty {
 	 * @return DocComment
 	 */
 	#[\ReturnTypeWillChange]
-	function getDocComment() {
+	public function getDocComment() {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());
 		}

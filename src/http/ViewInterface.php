@@ -1,5 +1,6 @@
 <?php
 namespace renovant\core\http;
+
 /**
  * MVC View for an HTTP Request.
  * Implementations are responsible for rendering content, and exposing the model. A single view exposes multiple model attributes.
@@ -17,5 +18,5 @@ interface ViewInterface {
 	 * @param array|null $options rendering options
 	 * @throws \Exception if rendering failed
 	 */
-	function render(Request $Req, Response $Res, $resource=null, array $options=null);
+	public function render(Request $Req, Response $Res, $resource = null, array $options = null);
 }

@@ -1,21 +1,19 @@
 <?php
 namespace renovant\core\console;
+
 class Event extends \renovant\core\event\Event {
+	public const EVENT_INIT       = 'console:init';
+	public const EVENT_ROUTE      = 'console:route';
+	public const EVENT_CONTROLLER = 'console:controller';
+	public const EVENT_VIEW       = 'console:view';
+	public const EVENT_RESPONSE   = 'console:response';
+	public const EVENT_EXCEPTION  = 'console:exception';
+	public const EVENT_SIGTERM    = 'console:sigterm';
 
-	const EVENT_INIT		= 'console:init';
-	const EVENT_ROUTE		= 'console:route';
-	const EVENT_CONTROLLER	= 'console:controller';
-	const EVENT_VIEW		= 'console:view';
-	const EVENT_RESPONSE	= 'console:response';
-	const EVENT_EXCEPTION	= 'console:exception';
-	const EVENT_SIGTERM		= 'console:sigterm';
-
-	/** CLI Request
-	 * @var Request */
-	protected $Request;
-	/** CLI Response
-	 * @var Response */
-	protected $Response;
+	/** CLI Request */
+	protected Request $Request;
+	/** CLI Response */
+	protected Response $Response;
 	/** Controller, if any
 	 * @var ControllerInterface */
 	protected $Controller;
@@ -26,24 +24,22 @@ class Event extends \renovant\core\event\Event {
 	 * @var \Exception */
 	protected $Exception;
 
-	function __construct(Request $Request, Response $Response) {
-		$this->Request = $Request;
+	public function __construct(Request $Request, Response $Response) {
+		$this->Request  = $Request;
 		$this->Response = $Response;
 	}
 
 	/**
 	 * Get current CLI Request
-	 * @return Request
 	 */
-	function getRequest() {
+	public function getRequest(): Request {
 		return $this->Request;
 	}
 
 	/**
 	 * Get current CLI Response
-	 * @return Response
 	 */
-	function getResponse() {
+	public function getResponse(): Response {
 		return $this->Response;
 	}
 
@@ -51,7 +47,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current Controller, if any
 	 * @return ControllerInterface|null
 	 */
-	function getController() {
+	public function getController() {
 		return $this->Controller;
 	}
 
@@ -59,7 +55,7 @@ class Event extends \renovant\core\event\Event {
 	 * Get current View, if any
 	 * @return ViewInterface|null
 	 */
-	function getView() {
+	public function getView() {
 		return $this->View;
 	}
 
@@ -67,28 +63,28 @@ class Event extends \renovant\core\event\Event {
 	 * Get current Exception, if any
 	 * @return \Exception|null
 	 */
-	function getException() {
+	public function getException() {
 		return $this->Exception;
 	}
 
 	/**
 	 * @param $Controller
 	 */
-	function setController($Controller) {
+	public function setController($Controller) {
 		$this->Controller = $Controller;
 	}
 
 	/**
 	 * @param ViewInterface $View
 	 */
-	function setView(ViewInterface $View) {
+	public function setView(ViewInterface $View) {
 		$this->View = $View;
 	}
 
 	/**
 	 * @param \Exception $Exception
 	 */
-	function setException(\Exception $Exception) {
+	public function setException(\Exception $Exception) {
 		$this->Exception = $Exception;
 	}
 }

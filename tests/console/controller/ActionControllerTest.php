@@ -1,14 +1,14 @@
 <?php
 namespace test\console\controller;
+
 use renovant\core\console\ControllerInterface,
-	renovant\core\console\controller\ActionController,
-	renovant\core\console\Request,
-	renovant\core\console\Response;
+renovant\core\console\controller\ActionController,
+renovant\core\console\Request,
+renovant\core\console\Response;
 
 class ActionControllerTest extends \PHPUnit\Framework\TestCase {
-
-	function testConstructor() {
-		$ActionController = new \test\console\controller\ActionController;
+	public function testConstructor() {
+		$ActionController = new \test\console\controller\ActionController();
 		$this->assertInstanceOf(ControllerInterface::class, $ActionController);
 		$this->assertInstanceOf(ActionController::class, $ActionController);
 
@@ -53,20 +53,24 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @return \test\console\controller\ActionController
 	 * @throws \ReflectionException
 	 */
-	function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
+	public function testResolveActionMethod(\test\console\controller\ActionController $ActionController) {
 		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
+		$_SERVER['SCRIPT_FILENAME'] = 'sys.php';
 
-		$_SERVER['argv'] = ['sys','mod1'];
-		$Req = new Request;
+		$_SERVER['argv'] = ['sys', 'mod1'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', '');
 		$this->assertEquals('index', $RefMethod->invoke($ActionController, $Req));
 
-		$_SERVER['argv'] = ['sys','mod1','foo'];
-		$Req = new Request;
+		$_SERVER['argv'] = ['sys', 'mod1', 'foo'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'foo');
 		$this->assertEquals('foo', $RefMethod->invoke($ActionController, $Req));
 
-		$_SERVER['argv'] = ['sys','mod1','not-exists'];
-		$Req = new Request;
+		$_SERVER['argv'] = ['sys', 'mod1', 'not-exists'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'not-exists');
 		$this->assertEquals('fallback', $RefMethod->invoke($ActionController, $Req));
 
 		return $ActionController;
@@ -76,15 +80,17 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testResolveActionMethod
 	 * @throws \ReflectionException
 	 */
-	function testResolveActionException() {
+	public function testResolveActionException() {
 		$this->expectExceptionCode(111);
 		$this->expectException(\renovant\core\console\Exception::class);
-		$ActionController2 = new \test\console\controller\ActionController2;
-		$RefMethod = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
+		$ActionController2 = new \test\console\controller\ActionController2();
+		$RefMethod         = new \ReflectionMethod(ActionController::class, 'resolveActionMethod');
 		$RefMethod->setAccessible(true);
+		$_SERVER['SCRIPT_FILENAME'] = 'sys.php';
 
-		$_SERVER['argv'] = ['sys','mod1','not-exists'];
-		$Req = new Request;
+		$_SERVER['argv'] = ['sys', 'mod1', 'not-exists'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'not-exists');
 		$RefMethod->invoke($ActionController2, $Req);
 	}
 
@@ -93,25 +99,28 @@ class ActionControllerTest extends \PHPUnit\Framework\TestCase {
 	 * @param \test\console\controller\ActionController $ActionController
 	 * @throws \renovant\core\console\Exception
 	 */
-	function testHandle(\test\console\controller\ActionController $ActionController) {
-		$_SERVER['argv'] = ['sys','mod1','action2','--id=7'];
-		$Req = new Request;
-		$Res = new Response;
+	public function testHandle(\test\console\controller\ActionController $ActionController) {
+		$_SERVER['argv'] = ['sys', 'mod1', 'action2', '--id=7'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action2');
+		$Res = new Response();
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals('id-7', $Res->getView());
 		$this->assertEquals(7, $Res->get('id'));
 
-		$_SERVER['argv'] = ['sys','mod1','action3'];
-		$Req = new Request;
-		$Res = new Response;
+		$_SERVER['argv'] = ['sys', 'mod1', 'action3'];
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action3');
+		$Res = new Response();
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals('view3', $Res->getView());
 		$this->assertEquals('Tom', $Res->get('name'));
 
-		$_SERVER['argv'] = ['sys','mod1','action3','--name=Jack'];
-		$_GET['name'] = 'Jack';
-		$Req = new Request;
-		$Res = new Response;
+		$_SERVER['argv'] = ['sys', 'mod1', 'action3', '--name=Jack'];
+		$_GET['name']    = 'Jack';
+		$Req             = new Request();
+		$Req->setAttribute('APP_MOD_CONTROLLER_URI', 'action3');
+		$Res = new Response();
 		$ActionController->handle($Req, $Res);
 		$this->assertEquals('view3', $Res->getView());
 		$this->assertEquals('Jack', $Res->get('name'));

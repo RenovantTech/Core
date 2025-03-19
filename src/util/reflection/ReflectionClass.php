@@ -2,7 +2,6 @@
 namespace renovant\core\util\reflection;
 
 class ReflectionClass extends \ReflectionClass {
-
 	/** DocComment instance
 	 * @var DocComment */
 	protected $DocComment;
@@ -13,9 +12,9 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionMethod instances.
 	 * @throws \ReflectionException
 	 */
-	function getMethods(?int $filter = NULL): array {
+	public function getMethods(?int $filter = null): array {
 		$extendedMethods = [];
-		$methods = parent::getMethods($filter);
+		$methods         = parent::getMethods($filter);
 		foreach ($methods as $method) {
 			$extendedMethods[] = new ReflectionMethod($this->getName(), $method->getName());
 		}
@@ -28,7 +27,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionMethod instances.
 	 * @throws \ReflectionException
 	 */
-	function getMethod(string $name): ReflectionMethod {
+	public function getMethod(string $name): ReflectionMethod {
 		$parentMethod = parent::getMethod($name);
 		return new ReflectionMethod($this->getName(), $parentMethod->getName());
 	}
@@ -39,9 +38,9 @@ class ReflectionClass extends \ReflectionClass {
 	 * original ReflectionProperty instances.
 	 * @throws \ReflectionException
 	 */
-	function getProperties(?int $filter = NULL): array {
+	public function getProperties(?int $filter = null): array {
 		$extendedProperties = [];
-		$properties = parent::getProperties($filter);
+		$properties         = parent::getProperties($filter);
 		foreach ($properties as $property) {
 			$extendedProperties[] = new ReflectionProperty($this->getName(), $property->getName());
 		}
@@ -51,14 +50,14 @@ class ReflectionClass extends \ReflectionClass {
 	/**
 	 * Checks if the doc comment of this method is tagged with the specified tag
 	 */
-	function hasTag(string $tagName): bool {
+	public function hasTag(string $tagName): bool {
 		return $this->getDocComment()->hasTag($tagName);
 	}
 
 	/**
 	 * Returns an array of tags and their values
 	 */
-	function getAllTags(): array {
+	public function getAllTags(): array {
 		return $this->getDocComment()->getAllTags();
 	}
 
@@ -66,7 +65,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * Return tag values at specified index, can be NULL if not exists
 	 * @return mixed|null
 	 */
-	function getTag(string$tagName, ?int $index=0) {
+	public function getTag(string $tagName, ?int $index = 0) {
 		return $this->getDocComment()->getTag($tagName, $index);
 	}
 
@@ -74,7 +73,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * Returns the values of the specified tag
 	 * @throws \Exception
 	 */
-	function getTagValues(string $tagName): array {
+	public function getTagValues(string $tagName): array {
 		return $this->getDocComment()->getTagValues($tagName);
 	}
 
@@ -82,7 +81,7 @@ class ReflectionClass extends \ReflectionClass {
 	 * Returns an instance of the DocComment
 	 */
 	#[\ReturnTypeWillChange]
-	function getDocComment(): DocComment {
+	public function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());
 		}

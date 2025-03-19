@@ -26,8 +26,8 @@ INSERT INTO sys_authz (id, type, code, config) VALUES
 ;
 
 INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
-	('USER_ROLE',		1, 1,	NULL),				-- sys-admin
-	('USER_PERMISSION',	1, 7,	NULL),				-- perm:all
+	('USER_ROLE',		1, 1,	0),					-- sys-admin
+	('USER_PERMISSION',	1, 7,	0),					-- perm:all
 	('USER_ACL',		1, 13,	1),					-- acl:id
 	('USER_ACL',		1, 13,	2),					-- acl:id
 	('USER_ACL',		1, 13,	3),					-- acl:id
@@ -42,10 +42,10 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
 	('USER_ACL',		1, 15,	2),					-- acl:type
 	('USER_ACL',		1, 15,	3),					-- acl:type
 
-	('USER_ROLE', 		2, 2,	NULL),				-- admin:insert
-	('USER_ROLE', 		2, 3,	NULL),				-- admin:select1
-	('USER_PERMISSION',	2, 8,	NULL),				-- perm:insert
-	('USER_PERMISSION',	2, 9,	NULL),				-- perm:select1
+	('USER_ROLE', 		2, 2,	0),					-- admin:insert
+	('USER_ROLE', 		2, 3,	0),					-- admin:select1
+	('USER_PERMISSION',	2, 8,	0),					-- perm:insert
+	('USER_PERMISSION',	2, 9,	0),					-- perm:select1
 	('USER_ACL',		2, 13,	1),					-- acl:id
 	('USER_ACL',		2, 13,	2),					-- acl:id
 	('USER_ACL',		2, 13,	3),					-- acl:id
@@ -53,10 +53,10 @@ INSERT INTO sys_authz_maps (type, user_id, authz_id, item_id) VALUES
 	('USER_ACL',		2, 13,	5),					-- acl:id
 	('USER_ACL',		2, 13,	6),					-- acl:id
 
-	('USER_ROLE', 		3, 5,	NULL),				-- admin:update1
-	('USER_ROLE', 		3, 6,	NULL),				-- admin:update2
-	('USER_PERMISSION',	3, 11,	NULL),				-- perm:update1
-	('USER_PERMISSION',	3, 12,	NULL),				-- perm:update2
+	('USER_ROLE', 		3, 5,	0),					-- admin:update1
+	('USER_ROLE', 		3, 6,	0),					-- admin:update2
+	('USER_PERMISSION',	3, 11,	0),					-- perm:update1
+	('USER_PERMISSION',	3, 12,	0),					-- perm:update2
 	('USER_ACL',		3, 13,	1),					-- acl:id
 	('USER_ACL',		3, 13,	2),					-- acl:id
 	('USER_ACL',		3, 13,	3),					-- acl:id
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS classes (
 	id					INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
 	school_id			MEDIUMINT UNSIGNED NOT NULL,
 	center_id			MEDIUMINT UNSIGNED NULL DEFAULT NULL,
-	type_id				SMALLINT UNSIGNED NOT NULL,
+	type_id				SMALLINT UNSIGNED NOT NULL DEFAULT 0,
 
 	status				ENUM('ACTIVE','NEW','OLD') NOT NULL,
 	code				VARCHAR(25) NULL DEFAULT NULL,

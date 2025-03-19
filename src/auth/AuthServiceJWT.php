@@ -1,26 +1,23 @@
 <?php
 namespace renovant\core\auth;
+
+use renovant\core\sys;
+use Firebase\JWT\{BeforeValidException, ExpiredException, JWT, Key};
+use renovant\core\http\{CryptoCookie, Event as HttpEvent, Exception as HttpException};
+
 use const renovant\core\DATA_DIR;
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\http\CryptoCookie,
-	renovant\core\http\Event as HttpEvent,
-	renovant\core\http\Exception as HttpException,
-	Firebase\JWT\BeforeValidException,
-	Firebase\JWT\ExpiredException,
-	Firebase\JWT\JWT,
-	Firebase\JWT\Key;
+
 class AuthServiceJWT extends AuthService {
+	public const COOKIE_AUTH     = 'AUTH-TOKEN';
+	public const COOKIE_REFRESH  = 'AUTH-REFRESH-TOKEN';
+	public const COOKIE_REMEMBER = 'AUTH-REMEMBER-TOKEN';
 
-	const COOKIE_AUTH		= 'AUTH-TOKEN';
-	const COOKIE_REFRESH	= 'AUTH-REFRESH-TOKEN';
-	const COOKIE_REMEMBER	= 'AUTH-REMEMBER-TOKEN';
+	public const JWT_KEY = DATA_DIR . 'JWT.key';
 
-	const JWT_KEY = DATA_DIR.'JWT.key';
-
-	const TTL_AUTH		= 300;
-	const TTL_REFRESH	= 86400;
-	const TTL_REMEMBER	= 2592000;
+	public const TTL_AUTH     = 300;
+	public const TTL_REFRESH  = 86400;
+	public const TTL_REMEMBER = 2592000;
 
 	/** Cookie AUTH-TOKEN */
 	protected string $cookieAUTH = self::COOKIE_AUTH;
@@ -40,13 +37,16 @@ class AuthServiceJWT extends AuthService {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function __construct() {
-		if(!class_exists('Firebase\JWT\JWT')) throw new Exception(12);
-		if(!file_exists(self::JWT_KEY))
+	public function __construct() {
+		if (!class_exists('Firebase\JWT\JWT')) {
+			throw new Exception(12);
+		}
+		if (!file_exists(self::JWT_KEY)) {
 			file_put_contents(self::JWT_KEY, base64_encode(random_bytes(64)));
+		}
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return array_merge(parent::__sleep(), ['cookieAUTH', 'cookieREFRESH', 'cookieREMEMBER', 'ttlAUTH', 'ttlREFRESH', 'ttlREMEMBER']);
 	}
 
@@ -77,12 +77,14 @@ class AuthServiceJWT extends AuthService {
 		if (!$ok && isset($_COOKIE[$this->cookieREFRESH])) {
 			try {
 				$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
-				if($this->Provider->tokenCheck(TokenService::TOKEN_AUTH_REFRESH, $refreshToken['TOKEN'], $refreshToken['UID'])) {
+				if ($this->Provider->tokenCheck(TokenService::TOKEN_AUTH_REFRESH, $refreshToken['TOKEN'], $refreshToken['UID'])) {
 					$this->doAuthenticate($this->Provider->fetchUserData($refreshToken['UID']));
 					$this->_commit = true;
 					sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REFRESH-TOKEN OK');
 					$ok = true;
-				} else unset($_COOKIE[$this->cookieREFRESH]);
+				} else {
+					unset($_COOKIE[$this->cookieREFRESH]);
+				}
 			} catch (HttpException $Ex) { // CryptoCookie Exception
 				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REFRESH-TOKEN exception: INVALID', $Ex->getMessage());
 				unset($_COOKIE[$this->cookieREFRESH]);
@@ -91,12 +93,14 @@ class AuthServiceJWT extends AuthService {
 		if (!$ok && isset($_COOKIE[$this->cookieREMEMBER])) {
 			try {
 				$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
-				if($this->Provider->tokenCheck(TokenService::TOKEN_AUTH_REMEMBER, $rememberToken['TOKEN'], $rememberToken['UID'])) {
-					$Auth = $this->doAuthenticate($this->Provider->fetchUserData($rememberToken['UID']));
+				if ($this->Provider->tokenCheck(TokenService::TOKEN_AUTH_REMEMBER, $rememberToken['TOKEN'], $rememberToken['UID'])) {
+					$Auth          = $this->doAuthenticate($this->Provider->fetchUserData($rememberToken['UID']));
 					$this->_commit = true;
 					sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REMEMBER-TOKEN OK');
 					sys::event()->enqueue(Event::EVENT_LOGIN, new Event($Auth));
-				} else unset($_COOKIE[$this->cookieREMEMBER]);
+				} else {
+					unset($_COOKIE[$this->cookieREMEMBER]);
+				}
 			} catch (HttpException $Ex) { // CryptoCookie Exception
 				sys::trace(LOG_DEBUG, T_INFO, 'JWT AUTH-REMEMBER-TOKEN exception: INVALID', $Ex->getMessage());
 				unset($_COOKIE[$this->cookieREMEMBER]);
@@ -109,46 +113,48 @@ class AuthServiceJWT extends AuthService {
 	 */
 	protected function commitAUTH(): void {
 		$Auth = Auth::instance();
-		if(!$Auth->UID()) return;
+		if (!$Auth->UID()) {
+			return;
+		}
 
 		// AUTH-TOKEN
 		sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-TOKEN');
 		$data = array_merge($Auth->data(), [
-			'GID' => $Auth->GID(),
+			'GID'   => $Auth->GID(),
 			'GROUP' => $Auth->GROUP(),
-			'NAME' => $Auth->NAME(),
-			'UID' => $Auth->UID()
+			'NAME'  => $Auth->NAME(),
+			'UID'   => $Auth->UID()
 		]);
 		$authToken = [
 			//'aud' => 'http://example.com',
 			'exp' => time() + $this->ttlAUTH, // Expiry
 			'iat' => time() - 1, // Issued At
 			//'iss' => 'http://example.org', // Issuer
-			'nbf' => time() - 1, // Not Before
+			'nbf'  => time() - 1, // Not Before
 			'data' => $data
 		];
-		setcookie($this->cookieAUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), ['expires'=>time() + $this->ttlAUTH, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>true, 'samesite'=>'Lax']);
+		setcookie($this->cookieAUTH, JWT::encode($authToken, file_get_contents(self::JWT_KEY), 'HS512'), ['expires' => time() + $this->ttlAUTH, 'path' => '/', 'domain' => null, 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 
 		// AUTH-REFRESH-TOKEN
-		if(!isset($_COOKIE[$this->cookieREFRESH])) {
+		if (!isset($_COOKIE[$this->cookieREFRESH])) {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-REFRESH-TOKEN');
 			$refreshToken = [
-				'UID'	=> $Auth->UID(),
-				'TOKEN'	=> TokenService::generateToken()
+				'UID'   => $Auth->UID(),
+				'TOKEN' => TokenService::generateToken()
 			];
-			$this->Provider->tokenSet(TokenService::TOKEN_AUTH_REFRESH, $Auth->UID(), $refreshToken['TOKEN'], null, time()+$this->ttlREFRESH);
+			$this->Provider->tokenSet(TokenService::TOKEN_AUTH_REFRESH, $Auth->UID(), $refreshToken['TOKEN'], null, time() + $this->ttlREFRESH);
 			(new CryptoCookie($this->cookieREFRESH, 0, '/', null, true, true))->write($refreshToken);
 		}
 
 		// AUTH-REMEMBER-TOKEN
-		if($this->rememberFlag) {
+		if ($this->rememberFlag) {
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize JWT AUTH-REMEMBER-TOKEN');
 			$rememberToken = [
-				'UID'	=> $Auth->UID(),
-				'TOKEN'	=> TokenService::generateToken()
+				'UID'   => $Auth->UID(),
+				'TOKEN' => TokenService::generateToken()
 			];
-			$this->Provider->tokenSet(TokenService::TOKEN_AUTH_REMEMBER, $Auth->UID(), $rememberToken['TOKEN'], null, time()+$this->ttlREMEMBER);
-			(new CryptoCookie($this->cookieREMEMBER, time()+$this->ttlREMEMBER, '/', null, true, true))->write($rememberToken);
+			$this->Provider->tokenSet(TokenService::TOKEN_AUTH_REMEMBER, $Auth->UID(), $rememberToken['TOKEN'], null, time() + $this->ttlREMEMBER);
+			(new CryptoCookie($this->cookieREMEMBER, time() + $this->ttlREMEMBER, '/', null, true, true))->write($rememberToken);
 		}
 	}
 
@@ -160,7 +166,7 @@ class AuthServiceJWT extends AuthService {
 
 		// delete AUTH-TOKEN
 		sys::trace(LOG_DEBUG, T_INFO, 'erase JWT AUTH-TOKEN');
-		setcookie($this->cookieAUTH, '', ['expires'=>time()-86400, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>true, 'samesite'=>'Lax']);
+		setcookie($this->cookieAUTH, '', ['expires' => time() - 86400, 'path' => '/', 'domain' => null, 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 
 		// delete AUTH-REFRESH-TOKEN
 		if (isset($_COOKIE[$this->cookieREFRESH])) {
@@ -168,8 +174,9 @@ class AuthServiceJWT extends AuthService {
 			try {
 				$refreshToken = (new CryptoCookie($this->cookieREFRESH))->read();
 				$this->Provider->tokenDelete(TokenService::TOKEN_AUTH_REFRESH, $refreshToken['TOKEN'], $Auth->UID());
-			} catch (HttpException) {} // CryptoCookie Exception
-			setcookie($this->cookieREFRESH, '', ['expires'=>time()-86400, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>true, 'samesite'=>'Lax']);
+			} catch (HttpException) {
+			} // CryptoCookie Exception
+			setcookie($this->cookieREFRESH, '', ['expires' => time() - 86400, 'path' => '/', 'domain' => null, 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 		}
 
 		// delete AUTH-REMEMBER-TOKEN
@@ -178,8 +185,9 @@ class AuthServiceJWT extends AuthService {
 			try {
 				$rememberToken = (new CryptoCookie($this->cookieREMEMBER))->read();
 				$this->Provider->tokenDelete(TokenService::TOKEN_AUTH_REMEMBER, $rememberToken['TOKEN'], $Auth->UID());
-			} catch (HttpException) {} // CryptoCookie Exception
-			setcookie($this->cookieREMEMBER, '', ['expires'=>time()-86400, 'path'=>'/', 'domain'=>null, 'secure'=>true, 'httponly'=>true, 'samesite'=>'Lax']);
+			} catch (HttpException) {
+			} // CryptoCookie Exception
+			setcookie($this->cookieREMEMBER, '', ['expires' => time() - 86400, 'path' => '/', 'domain' => null, 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 		}
 	}
 }

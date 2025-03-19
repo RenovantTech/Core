@@ -2,7 +2,6 @@
 namespace renovant\core\util\reflection;
 
 class ReflectionMethod extends \ReflectionMethod {
-
 	/** DocComment instance
 	 * @var DocComment */
 	protected $DocComment;
@@ -13,7 +12,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * original ReflectionParameter instances.
 	 * @throws \ReflectionException
 	 */
-	function getParameters(): array {
+	public function getParameters(): array {
 		$extendedParameters = [];
 		foreach (parent::getParameters() as $parameter) {
 			$extendedParameters[] = new ReflectionParameter([$this->getDeclaringClass()->getName(), $this->getName()], $parameter->getName());
@@ -24,7 +23,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	/**
 	 * Checks if the doc comment of this method is tagged with the specified tag
 	 */
-	function hasTag(string $tagName): bool {
+	public function hasTag(string $tagName): bool {
 		return $this->getDocComment()->hasTag($tagName);
 	}
 
@@ -32,7 +31,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * Returns an array of tags and their values
 	 * @return array Tags and values
 	 */
-	function getAllTags(): array {
+	public function getAllTags(): array {
 		return $this->getDocComment()->getAllTags();
 	}
 
@@ -40,7 +39,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * Returns the values of the specified tag
 	 * @throws \Exception
 	 */
-	function getTagValues(string $tagName): array {
+	public function getTagValues(string $tagName): array {
 		return $this->getDocComment()->getTagValues($tagName);
 	}
 
@@ -48,7 +47,7 @@ class ReflectionMethod extends \ReflectionMethod {
 	 * Returns an instance of the DocComment
 	 */
 	#[\ReturnTypeWillChange]
-	function getDocComment(): DocComment {
+	public function getDocComment(): DocComment {
 		if (!is_object($this->DocComment)) {
 			$this->DocComment = new DocComment(parent::getDocComment());
 		}

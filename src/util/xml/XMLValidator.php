@@ -3,11 +3,12 @@ namespace renovant\core\util\xml;
 
 libxml_use_internal_errors(true);
 abstract class XMLValidator {
-
-	static function relaxNG($xml, $rng) {
+	public static function relaxNG($xml, $rng) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->relaxNGValidate($rng)) throw new XMLException(3, [self::errors(), $xml, $rng]);
+		if (!$dom->relaxNGValidate($rng)) {
+			throw new XMLException(3, [self::errors(), $xml, $rng]);
+		}
 		return true;
 	}
 
@@ -18,10 +19,12 @@ abstract class XMLValidator {
 	 * @return boolean TRUE on successful validation
 	 * @throws XMLException
 	 */
-	static function relaxNGSource($xml, $rng) {
+	public static function relaxNGSource($xml, $rng) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->relaxNGValidateSource($rng)) throw new XMLException(3, [self::errors(), $xml, $rng]);
+		if (!$dom->relaxNGValidateSource($rng)) {
+			throw new XMLException(3, [self::errors(), $xml, $rng]);
+		}
 		return true;
 	}
 
@@ -32,10 +35,12 @@ abstract class XMLValidator {
 	 * @throws XMLException
 	 * @return boolean TRUE on successful validation
 	 */
-	static function schema($xml, $xsd) {
+	public static function schema($xml, $xsd) {
 		$dom = new \DOMDocument();
 		$dom->load($xml);
-		if(!$dom->schemaValidate($xsd)) throw new XMLException(2, [self::errors(), $xml, $xsd]);
+		if (!$dom->schemaValidate($xsd)) {
+			throw new XMLException(2, [self::errors(), $xml, $xsd]);
+		}
 		return true;
 	}
 
@@ -46,29 +51,31 @@ abstract class XMLValidator {
 	 * @return boolean TRUE on successful validation
 	 * @throws XMLException
 	 */
-	static function schemaSource($xml, $xsd) {
+	public static function schemaSource($xml, $xsd) {
 		$dom = new \DOMDocument();
 		$dom->loadXML($xml);
-		if(!$dom->schemaValidateSource($xsd)) throw new XMLException(2, [self::errors(), $xml, $xsd]);
+		if (!$dom->schemaValidateSource($xsd)) {
+			throw new XMLException(2, [self::errors(), $xml, $xsd]);
+		}
 		return true;
 	}
 
 	// implementation methods -------------------------------------------------------------------------------------
 
-	static private function errors() {
+	private static function errors() {
 		$errors = libxml_get_errors();
-		$r = '';
-		foreach($errors as $e) {
+		$r      = '';
+		foreach ($errors as $e) {
 			$r .= self::error($e);
 		}
 		libxml_clear_errors();
 		return $r;
 	}
 
-	static private function error($e) {
+	private static function error($e) {
 		$r = "\n";
 		$r .= "#[$e->line:$e->column] ";
-		switch($e->level) {
+		switch ($e->level) {
 			case LIBXML_ERR_WARNING:
 				$r .= "Warning $e->code - ";
 				break;

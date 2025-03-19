@@ -1,10 +1,11 @@
 <?php
 namespace renovant\core\console\controller;
+
+use renovant\core\sys;
+use renovant\core\console\{Exception, Request, Response};
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	renovant\core\console\Request,
-	renovant\core\console\Response,
-	renovant\core\console\Exception;
+
 /**
  * Convenient superclass for controller implementations.
  * It adds interception methods and automatic request parameters on method signature.
@@ -13,15 +14,14 @@ use renovant\core\sys,
 abstract class AbstractController implements \renovant\core\console\ControllerInterface {
 	use \renovant\core\CoreTrait;
 
-	/** Controller handle method configuration
-	 * @var array */
-	protected $_config = [];
+	/** Controller handle method configuration */
+	protected array $_config = [];
 
 	/**
 	 * AbstractController constructor.
 	 * @throws Exception
 	 */
-	function __construct() {
+	public function __construct() {
 		$this->_config = AbstractControllerReflection::analyzeHandle($this);
 	}
 
@@ -30,27 +30,33 @@ abstract class AbstractController implements \renovant\core\console\ControllerIn
 	 * @param Response $Res
 	 * @return \renovant\core\console\ViewInterface|mixed|null|string
 	 */
-	function handle(Request $Req, Response $Res) {
-		if(true!==$this->preHandle($Req, $Res)) {
-			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_.'->preHandle');
+	public function handle(Request $Req, Response $Res) {
+		if (true !== $this->preHandle($Req, $Res)) {
+			sys::trace(LOG_DEBUG, T_INFO, 'FALSE returned, skip Request handling', null, $this->_ . '->preHandle');
 			return null;
 		}
 		$args = [];
-		if(isset($this->_config['params'])) {
-			foreach($this->_config['params'] as $i => $param) {
-				if(!is_null($param['class'])) {
+		if (isset($this->_config['params'])) {
+			foreach ($this->_config['params'] as $i => $param) {
+				if (!is_null($param['class'])) {
 					switch ($param['class']) {
-						case Request::class: $args[$i] = $Req; break;
-						case Response::class: $args[$i] = $Res; break;
+						case Request::class: $args[$i] = $Req;
+							break;
+						case Response::class: $args[$i] = $Res;
+							break;
 						default: $args[$i] = new $param['class']($Req);
 					}
 				} elseif (isset($param['type'])) {
-					switch($param['type']) {
-						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (boolean) $v; break;
-						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (integer) $v; break;
-						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (string) $v; break;
-						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default']: (array) $v; break;
-						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null: $v;
+					switch ($param['type']) {
+						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (bool) $v;
+							break;
+						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (int) $v;
+							break;
+						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (string) $v;
+							break;
+						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (array) $v;
+							break;
+						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null : $v;
 					}
 				}
 			}
@@ -72,7 +78,7 @@ abstract class AbstractController implements \renovant\core\console\ControllerIn
 	 * @param Response $Res current response
 	 * @return boolean TRUE on success, FALSE on error
 	 */
-	protected function preHandle(Request $Req, Response $Res) {
+	protected function preHandle(Request $Req, Response $Res): bool {
 		return true;
 	}
 
@@ -82,6 +88,6 @@ abstract class AbstractController implements \renovant\core\console\ControllerIn
 	 * @param Response $Res current response
 	 * @param \renovant\core\http\ViewInterface|string $View the View or view name
 	 */
-	protected function postHandle(Request $Req, Response $Res, $View=null) {
+	protected function postHandle(Request $Req, Response $Res, $View = null) {
 	}
 }

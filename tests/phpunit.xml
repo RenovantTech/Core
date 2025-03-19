@@ -1,10 +1,20 @@
-<phpunit bootstrap="bootstrap.inc" colors="true">
+<phpunit
+		bootstrap="bootstrap.inc"
+		colors="true"
+		testdox="false"
+		displayDetailsOnIncompleteTests="true"
+		displayDetailsOnSkippedTests="true"
+		displayDetailsOnPhpunitDeprecations="false"
+		displayDetailsOnTestsThatTriggerDeprecations="true"
+		displayDetailsOnTestsThatTriggerErrors="true"
+		displayDetailsOnTestsThatTriggerNotices="true"
+		displayDetailsOnTestsThatTriggerWarnings="true"
+		>
 	<testsuites>
 		<testsuite name="base">
 			<directory>util</directory>
 			<directory>cache</directory>
 			<directory>event</directory>
-			<directory>log/writer</directory>
 			<directory>log</directory>
 		</testsuite>
 		<testsuite name="container">
@@ -17,7 +27,6 @@
 			<directory>authz</directory>
 		</testsuite>
 		<testsuite name="auth">
-			<directory>auth/provider</directory>
 			<directory>auth</directory>
 		</testsuite>
 		<testsuite name="db">

@@ -15,6 +15,8 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS sys_authz_rules;
 			DROP TABLE IF EXISTS sys_authz_maps;
 			DROP TABLE IF EXISTS sys_authz;
+			DROP TABLE IF EXISTS sys_users_tokens;
+			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
 		');
 	}
@@ -25,6 +27,8 @@ class AuthzServiceTest extends \PHPUnit\Framework\TestCase {
 			DROP TABLE IF EXISTS sys_authz_rules;
 			DROP TABLE IF EXISTS sys_authz_maps;
 			DROP TABLE IF EXISTS sys_authz;
+			DROP TABLE IF EXISTS sys_users_tokens;
+			DROP TABLE IF EXISTS sys_users_auth;
 			DROP TABLE IF EXISTS sys_users;
 		');
 	}

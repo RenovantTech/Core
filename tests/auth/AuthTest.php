@@ -1,20 +1,21 @@
 <?php
 namespace test\auth;
+
 use renovant\core\sys,
-	renovant\core\auth\Auth;
+renovant\core\auth\Auth,
+renovant\core\auth\AuthService;
 
 class AuthTest extends \PHPUnit\Framework\TestCase {
-
 	/**
 	 * @return Auth
 	 * @throws \ReflectionException
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function testConstruct(): Auth {
-		/** @var @AuthService $AuthService */
+	public function testConstruct(): Auth {
+		/** @var AuthService $AuthService */
 		$AuthService = sys::context()->get('sys.AUTH');
-		$Auth = $AuthService->authenticate(11, 11, 'John Black', 'admin', [
+		$Auth        = $AuthService->authenticate(11, 11, 'John Black', 'admin', [
 			'foo' => 'foo1',
 			'bar' => 'bar1'
 		]);
@@ -25,7 +26,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	/**
 	 * @depends testConstruct
 	 */
-	function testInstance() {
+	public function testInstance() {
 		$this->assertInstanceOf(Auth::class, Auth::instance());
 	}
 
@@ -33,17 +34,17 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
-	function testData(Auth $Auth) {
+	public function testData(Auth $Auth) {
 		$this->assertEquals('foo1', $Auth->data('foo'));
 		$this->assertEquals('bar1', $Auth->data('bar'));
-		$this->assertEquals(['foo'=>'foo1', 'bar'=>'bar1'], $Auth->data());
+		$this->assertEquals(['foo' => 'foo1', 'bar' => 'bar1'], $Auth->data());
 	}
 
 	/**
 	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
-	function testGID(Auth $Auth) {
+	public function testGID(Auth $Auth) {
 		$this->assertEquals(11, $Auth->GID());
 	}
 
@@ -51,7 +52,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
-	function testGROUP(Auth $Auth) {
+	public function testGROUP(Auth $Auth) {
 		$this->assertEquals('admin', $Auth->GROUP());
 	}
 
@@ -59,7 +60,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
-	function testNAME(Auth $Auth) {
+	public function testNAME(Auth $Auth) {
 		$this->assertEquals('John Black', $Auth->NAME());
 	}
 
@@ -67,7 +68,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @param Auth $Auth
 	 */
-	function testUID(Auth $Auth) {
+	public function testUID(Auth $Auth) {
 		$this->assertEquals(11, $Auth->UID());
 	}
 }

@@ -1,15 +1,17 @@
 <?php
 namespace renovant\core\authz;
-use const renovant\core\trace\T_INFO;
+
 use renovant\core\sys;
+
+use const renovant\core\trace\T_INFO;
 
 class AuthzService {
 	use \renovant\core\CoreTrait;
 
-	const CACHE_PREFIX	= 'sys.authz.';
+	public const CACHE_PREFIX = 'sys.authz.';
 
-	const SQL_FETCH_AUTHZ = 'SELECT id, type, code, config FROM %s WHERE id IN (%s)';
-	const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, item_id FROM %s_maps WHERE user_id = :user_id';
+	public const SQL_FETCH_AUTHZ      = 'SELECT id, type, code, config FROM %s WHERE id IN (%s)';
+	public const SQL_FETCH_AUTHZ_MAPS = 'SELECT type, authz_id, item_id FROM %s_maps WHERE user_id = :user_id';
 
 	/** Cache ID */
 	protected string $cache = 'sys';
@@ -17,24 +19,25 @@ class AuthzService {
 	protected string $cachePrefix = self::CACHE_PREFIX;
 	/** PDO instance ID */
 	protected string $pdo;
-	/** DB tables
-	 * @var array */
-	protected $tables = [
-		'authz'	=> 'sys_authz',
-		'users'	=> 'sys_users'
+	/** DB tables */
+	protected array $tables = [
+		'authz' => 'sys_authz',
+		'users' => 'sys_users'
 	];
 
 	/**
 	 * @param string|null $pdo PDO instance ID
 	 * @param array|null $tables
 	 */
-	function __construct(?string $pdo=null, array $tables=null) {
+	public function __construct(?string $pdo = null, array $tables = null) {
 		$prevTraceFn = sys::traceFn($this->_);
 		try {
 			$this->pdo = $pdo;
-			if ($tables) $this->tables = array_merge($this->tables, $tables);
+			if ($tables) {
+				$this->tables = array_merge($this->tables, $tables);
+			}
 			sys::trace(LOG_DEBUG, T_INFO, 'initialize AUTHZ storage');
-			$PDO = sys::pdo($this->pdo);
+			$PDO    = sys::pdo($this->pdo);
 			$driver = $PDO->getAttribute(\PDO::ATTR_DRIVER_NAME);
 			$PDO->exec(str_replace(
 				['t_authz', 't_users'],
@@ -51,41 +54,45 @@ class AuthzService {
 	 * To be invoked via event listener before HTTP Routing execution (HTTP:INIT or HTTP:ROUTE).
 	 * @throws AuthzException
 	 */
-	function init() {
-		$prevTraceFn = sys::traceFn($this->_.'->init');
+	public function init() {
+		$prevTraceFn = sys::traceFn($this->_ . '->init');
 		try {
 			$Auth = sys::auth();
-			if($Auth->UID()) {
-				if($data = sys::cache($this->cache)->get($this->cachePrefix.$Auth->UID())) {
-					Authz::init(...$data);
+			if ($Auth->UID()) {
+				if (list($roles, $permissions, $acl) = sys::cache($this->cache)->get($this->cachePrefix . $Auth->UID())) {
+					Authz::init($roles, $permissions, $acl);
 				} else {
-					$acl = $roles = $permissions = [];
+					$acl       = $roles = $permissions = [];
 					$mapsArray = sys::pdo($this->pdo)
 						->prepare(sprintf(self::SQL_FETCH_AUTHZ_MAPS, $this->tables['authz']))
-						->execute(['user_id'=>$Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
+						->execute(['user_id' => $Auth->UID()])->fetchAll(\PDO::FETCH_ASSOC);
 					$authzIds = [];
-					foreach ($mapsArray as $map)
+					foreach ($mapsArray as $map) {
 						$authzIds[] = (int)$map['authz_id'];
+					}
 					$authzIds = array_unique($authzIds);
-					if(!empty($authzIds)) {
+					if (!empty($authzIds)) {
 						$authzArray = sys::pdo($this->pdo)
 							->prepare(sprintf(self::SQL_FETCH_AUTHZ, $this->tables['authz'], implode(',', $authzIds)))
 							->execute()->fetchAll(\PDO::FETCH_ASSOC);
 						foreach ($authzArray as $authz) {
 							switch ($authz['type']) {
-								case Authz::TYPE_ROLE: $roles[] = $authz['code']; break;
-								case Authz::TYPE_PERMISSION: $permissions[] = $authz['code']; break;
+								case Authz::TYPE_ROLE: $roles[] = $authz['code'];
+									break;
+								case Authz::TYPE_PERMISSION: $permissions[] = $authz['code'];
+									break;
 								case Authz::TYPE_ACL:
 									$data = array_filter($mapsArray, function ($map) use ($authz) {
 										return ($map['authz_id'] == $authz['id']);
 									}, ARRAY_FILTER_USE_BOTH);
-									foreach($data as $d)
+									foreach ($data as $d) {
 										$acl[$authz['code']][] = $d['item_id'];
+									}
 									break;
 							}
 						}
 					}
-					sys::cache($this->cache)->set($this->cachePrefix.$Auth->UID(), [$roles, $permissions, $acl], 0, 'authz');
+					sys::cache($this->cache)->set($this->cachePrefix . $Auth->UID(), [$roles, $permissions, $acl], 0, 'authz');
 					Authz::init($roles, $permissions, $acl);
 				}
 				sys::trace(LOG_DEBUG, T_INFO, 'AUTHZ initialized');

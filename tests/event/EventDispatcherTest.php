@@ -1,11 +1,10 @@
 <?php
 namespace test\event;
-use renovant\core\event\Event,
-	renovant\core\event\EventDispatcher,
-	renovant\core\event\EventDispatcherException;
 
-$p1 = 'Hello';
-$p2 = 'Byebye';
+use renovant\core\event\Event,
+renovant\core\event\EventDispatcher,
+renovant\core\event\EventDispatcherException;
+
 function callback0() {
 	global $p1;
 	$p1 .= ' Big';
@@ -28,16 +27,14 @@ function callback4() {
 	$p2 = 'Byebye World 4';
 }
 class EventTester {
-	static function test1() {
+	public static function test1() {
 		return 'test1';
 	}
 }
 
-
 class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
-
-	function testConstructor() {
-		$EventDispatcher = new EventDispatcher;
+	public function testConstructor() {
+		$EventDispatcher = new EventDispatcher();
 		$this->assertInstanceOf('renovant\core\event\EventDispatcher', $EventDispatcher);
 		return $EventDispatcher;
 	}
@@ -47,7 +44,7 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @param EventDispatcher $EventDispatcher
 	 * @throws EventDispatcherException
 	 */
-	function testInit(EventDispatcher $EventDispatcher) {
+	public function testInit(EventDispatcher $EventDispatcher) {
 		/** @noinspection PhpVoidFunctionResultUsedInspection */
 		$this->assertNull($EventDispatcher->init('test.event'));
 	}
@@ -56,11 +53,11 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param EventDispatcher $EventDispatcher
 	 */
-	function testInitException(EventDispatcher $EventDispatcher) {
+	public function testInitException(EventDispatcher $EventDispatcher) {
 		try {
 			$EventDispatcher->init('test.xxxxxxx');
 			$this->fail('Expected EventDispatcherException not thrown');
-		} catch(EventDispatcherException $Ex) {
+		} catch (EventDispatcherException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}
@@ -70,7 +67,7 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param EventDispatcher $EventDispatcher
 	 */
-	function testAddListener(EventDispatcher $EventDispatcher) {
+	public function testAddListener(EventDispatcher $EventDispatcher) {
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback1');
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback2');
 		$EventDispatcher->listen('test.event.add1', 'test\event\callback0', 2);
@@ -90,11 +87,15 @@ class EventDispatcherTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstructor
 	 * @param EventDispatcher $EventDispatcher
 	 */
-	function testTrigger(EventDispatcher $EventDispatcher) {
+	public function testTrigger(EventDispatcher $EventDispatcher) {
 		global $p1, $p2;
+
+		$p1 = 'Hello';
+		$p2 = 'Byebye';
+
 		$this->assertEquals('Hello', $p1);
 		$this->assertEquals('Byebye', $p2);
-		$Event = $EventDispatcher->trigger('test.event.add1', ['p1'=>'hello', 'p2'=>'world']);
+		$Event = $EventDispatcher->trigger('test.event.add1', ['p1' => 'hello', 'p2' => 'world']);
 		$this->assertInstanceOf('renovant\core\event\Event', $Event);
 		$this->assertEquals('Hello Big World 1', $p1);
 		$this->assertEquals('Byebye World 3', $p2);

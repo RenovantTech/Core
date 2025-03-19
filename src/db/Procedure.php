@@ -1,6 +1,8 @@
 <?php
 namespace renovant\core\db;
+
 use renovant\core\sys;
+
 class Procedure {
 	use \renovant\core\CoreTrait;
 
@@ -12,9 +14,9 @@ class Procedure {
 	/** SQL procedure */
 	protected string $procedure;
 
-	function __construct(string $procedure, ?string $pdo=null) {
+	public function __construct(string $procedure, ?string $pdo = null) {
 		$this->procedure = $procedure;
-		$this->pdo = $pdo;
+		$this->pdo       = $pdo;
 	}
 
 	/**
@@ -22,38 +24,40 @@ class Procedure {
 	 * @param array $params
 	 * @return array|true|null output params if any
 	 */
-	function exec(array $params=[]): array|bool|null {
-		if(is_null($this->PDOStatement)) {
-			$sql = '';
+	public function exec(array $params = []): array|bool|null {
+		if (is_null($this->PDOStatement)) {
+			$sql          = '';
 			$outputParams = [];
-			if(!empty($params)) {
-				foreach($params as $k=>$v){
-					if(is_string($v) && $v[0]=='@') {
-						$sql .= ', '.$v;
+			if (!empty($params)) {
+				foreach ($params as $k => $v) {
+					if (is_string($v) && $v[0] == '@') {
+						$sql .= ', ' . $v;
 						$outputParams[] = $v;
 						unset($params[$k]);
 					} else {
-						$sql .= ', :'.$k;
+						$sql .= ', :' . $k;
 					}
 				}
-				$sql = substr($sql,2);
+				$sql = substr($sql, 2);
 			}
-			$sql = sprintf('CALL %s(%s)', $this->procedure, $sql);
+			$sql                = sprintf('CALL %s(%s)', $this->procedure, $sql);
 			$this->PDOStatement = sys::pdo($this->pdo)->prepare($sql);
 		}
 		$this->PDOStatement->execute($params);
 
-		if(empty($outputParams))
+		if (empty($outputParams)) {
 			return true;
-		else {
+		} else {
 			$keys = [];
-			$sql = sprintf('SELECT %s', implode(', ', $outputParams));
-			foreach($outputParams as $p) $keys[] = substr($p,1);
+			$sql  = sprintf('SELECT %s', implode(', ', $outputParams));
+			foreach ($outputParams as $p) {
+				$keys[] = substr($p, 1);
+			}
 			return array_combine($keys, sys::pdo($this->pdo)->query($sql)->fetch(\PDO::FETCH_NUM));
 		}
 	}
 
-	function errorCode() {
+	public function errorCode() {
 		return $this->PDOStatement->errorCode();
 	}
 }

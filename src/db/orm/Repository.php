@@ -1,21 +1,22 @@
 <?php
 namespace renovant\core\db\orm;
+
+use renovant\core\sys;
+use renovant\core\authz\OrmAuthz;
+use renovant\core\db\orm\util\{DataMapper, Metadata, QueryRunner};
+use renovant\core\util\validator\Validator;
+
 use const renovant\core\trace\T_DB;
-use renovant\core\sys,
-	renovant\core\authz\OrmAuthz,
-	renovant\core\db\orm\util\DataMapper,
-	renovant\core\db\orm\util\Metadata,
-	renovant\core\db\orm\util\QueryRunner,
-	renovant\core\util\validator\Validator;
+
 class Repository {
 	use \renovant\core\CoreTrait;
 
 	/** FETCH MODE as objects */
-	const FETCH_OBJ		= 1;
+	public const FETCH_OBJ = 1;
 	/** FETCH MODE as array (with data type mapping) */
-	const FETCH_ARRAY	= 2;
+	public const FETCH_ARRAY = 2;
 	/** FETCH MODE as array for JSON output (with data type mapping) */
-	const FETCH_JSON	= 3;
+	public const FETCH_JSON = 3;
 
 	/** Entity class */
 	protected string $class;
@@ -33,50 +34,54 @@ class Repository {
 	 * @param string $class Entity class
 	 * @param string|null $pdo PDO instance ID
 	 */
-	function __construct(string $class, ?string $pdo=null) {
+	public function __construct(string $class, ?string $pdo = null) {
 		$this->class = $class;
-		$this->pdo = $pdo;
+		$this->pdo   = $pdo;
 		$this->__wakeup();
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return ['_', 'class', 'pdo'];
 	}
 
-	function __wakeup() {
+	public function __wakeup() {
 		class_exists($this->class);
-		$this->OrmAuthz = call_user_func($this->class.'::authz');
-		$this->Metadata = call_user_func($this->class.'::metadata');
+		$this->OrmAuthz    = call_user_func($this->class . '::authz');
+		$this->Metadata    = call_user_func($this->class . '::metadata');
 		$this->QueryRunner = new QueryRunner($this->pdo, $this->Metadata);
 	}
 
 	/**
 	 * Convert entities objects to array
 	 */
-	function toArray(object|array $entities, ?string $subset=null): array {
+	public function toArray(object|array $entities, ?string $subset = null): array {
 		$data = [];
-		if(is_array($entities)) {
-			foreach($entities as $Entity) {
+		if (is_array($entities)) {
+			foreach ($entities as $Entity) {
 				$data[] = DataMapper::object2array($Entity, $subset);
 			}
-		} elseif(is_object($entities))
+		} elseif (is_object($entities)) {
 			$data = DataMapper::object2array($entities, $subset);
-		else trigger_error('Invalid data');
+		} else {
+			trigger_error('Invalid data');
+		}
 		return $data;
 	}
 
 	/**
 	 * Convert entities objects to JSON array
 	 */
-	function toJson(object|array $entities, ?string $subset=null): array {
+	public function toJson(object|array $entities, ?string $subset = null): array {
 		$data = [];
-		if(is_array($entities)) {
-			foreach($entities as $Entity) {
+		if (is_array($entities)) {
+			foreach ($entities as $Entity) {
 				$data[] = DataMapper::object2json($Entity, $subset);
 			}
-		} elseif(is_object($entities))
+		} elseif (is_object($entities)) {
 			$data = DataMapper::object2json($entities, $subset);
-		else trigger_error('Invalid data');
+		} else {
+			trigger_error('Invalid data');
+		}
 		return $data;
 	}
 
@@ -85,14 +90,14 @@ class Repository {
 	 * @throws Exception
 	 * @throws \Exception
 	 */
-	function count(?string $criteriaExp=null): int {
+	public function count(?string $criteriaExp = null): int {
 		return $this->execCount($criteriaExp);
 	}
 
 	/**
 	 * Create new Entity instance
 	 */
-	function create(array $data=[]): object {
+	public function create(array $data = []): object {
 		return new $this->class($data);
 	}
 
@@ -108,12 +113,12 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function delete(mixed $EntityOrKey, int|false|null $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
-		if(is_object($EntityOrKey)) {
+	public function delete(mixed $EntityOrKey, int|false|null $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
+		if (is_object($EntityOrKey)) {
 			$Entity = $EntityOrKey;
 		} else {
 			$criteriaExp = $this->Metadata->pkCriteria($EntityOrKey);
-			$Entity = $this->execFetchOne(0, null, $criteriaExp);
+			$Entity      = $this->execFetchOne(0, null, $criteriaExp);
 		}
 		return $this->execDeleteOne($Entity, $fetchMode, $fetchSubset);
 	}
@@ -124,7 +129,7 @@ class Repository {
 	 * @throws \Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function deleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
+	public function deleteAll(?int $limit, ?string $orderExp = null, ?string $criteriaExp = null): int {
 		return $this->execDeleteAll($limit, $orderExp, $criteriaExp);
 	}
 
@@ -140,7 +145,7 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function fetch(mixed $id, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
+	public function fetch(mixed $id, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|false {
 		$criteriaExp = $this->Metadata->pkCriteria($id);
 		return $this->execFetchOne(0, null, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -159,8 +164,10 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function fetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
-		if($offset) $offset--;
+	public function fetchOne(?int $offset = null, ?string $orderExp = null, ?string $criteriaExp = null, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|false {
+		if ($offset) {
+			$offset--;
+		}
 		return $this->execFetchOne($offset, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
 
@@ -176,7 +183,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function fetchAll(?int $page=null, ?int $pageSize=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
+	public function fetchAll(?int $page = null, ?int $pageSize = null, ?string $orderExp = null, ?string $criteriaExp = null, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): array {
 		$offset = ($page && $pageSize) ? $pageSize * $page - $pageSize : null;
 		return $this->execFetchAll($offset, $pageSize, $orderExp, $criteriaExp, $fetchMode, $fetchSubset);
 	}
@@ -191,7 +198,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function insert(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	public function insert(object $Entity, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		return $this->execInsertOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -206,7 +213,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function insertOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	public function insertOne(mixed $id, array $data, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		return $this->execInsertOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -220,7 +227,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function update(object $Entity, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	public function update(object $Entity, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		return $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -234,10 +241,11 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function updateAll(array $entities, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array|bool {
+	public function updateAll(array $entities, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): array|bool {
 		$data = [];
-		foreach ($entities as $Entity)
+		foreach ($entities as $Entity) {
 			$data[] = $this->execUpdateOne(null, $Entity, $validate, $fetchMode, $fetchSubset);
+		}
 		return $data;
 	}
 
@@ -252,7 +260,7 @@ class Repository {
 	 * @throws Exception
 	 * @throws \renovant\core\authz\AuthzException
 	 */
-	function updateOne(mixed $id, array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	public function updateOne(mixed $id, array $data, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		return $this->execUpdateOne($id, $data, $validate, $fetchMode, $fetchSubset);
 	}
 
@@ -263,7 +271,7 @@ class Repository {
 	 * @param string|null $validateMode
 	 * @return array map of properties & error codes, empty if VALID
 	 */
-	function validate(object $Entity, ?string $validateMode): array {
+	public function validate(object $Entity, ?string $validateMode): array {
 		return [];
 	}
 
@@ -275,13 +283,13 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execCount(?string $criteriaExp=null): int {
+	protected function execCount(?string $criteriaExp = null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_COUNT);
 			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
 			return $this->QueryRunner->count($this->OrmEvent->getCriteriaExp());
-		} catch(\PDOException $Ex){
+		} catch (\PDOException $Ex) {
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -298,22 +306,25 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execDeleteOne(mixed $Entity, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	protected function execDeleteOne(mixed $Entity, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		try {
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE);
 			$this->OrmAuthz?->check(OrmAuthz::ACTION_DELETE, $this->OrmEvent);
-			if(!$this->QueryRunner->deleteOne($Entity, $this->OrmEvent->getCriteriaExp()))
+			if (!$this->QueryRunner->deleteOne($Entity, $this->OrmEvent->getCriteriaExp())) {
 				return false;
-			if(method_exists($Entity, 'onDelete')) $Entity->onDelete();
+			}
+			if (method_exists($Entity, 'onDelete')) {
+				$Entity->onDelete();
+			}
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE);
 			return match ($fetchMode) {
-				self::FETCH_OBJ => $Entity,
+				self::FETCH_OBJ   => $Entity,
 				self::FETCH_ARRAY => DataMapper::object2array($Entity, $fetchSubset),
-				self::FETCH_JSON => DataMapper::object2json($Entity, $fetchSubset),
-				default => true,
+				self::FETCH_JSON  => DataMapper::object2json($Entity, $fetchSubset),
+				default           => true,
 			};
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(400, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -330,7 +341,7 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execDeleteAll(?int $limit, ?string $orderExp=null, ?string $criteriaExp=null): int {
+	protected function execDeleteAll(?int $limit, ?string $orderExp = null, ?string $criteriaExp = null): int {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_DELETE_ALL);
@@ -338,7 +349,7 @@ class Repository {
 			$n = $this->QueryRunner->deleteAll($limit, $orderExp, $this->OrmEvent->getCriteriaExp());
 			$this->triggerEvent(OrmEvent::EVENT_POST_DELETE_ALL);
 			return $n;
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(400, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -350,16 +361,16 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execFetchOne(?int $offset=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|false {
+	protected function execFetchOne(?int $offset = null, ?string $orderExp = null, ?string $criteriaExp = null, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|false {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH);
 			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
-			if($Entity = $this->QueryRunner->fetchOne($this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if ($Entity = $this->QueryRunner->fetchOne($this->class, $offset, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH, $Entity);
 			}
 			return $Entity;
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -371,16 +382,16 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execFetchAll(?int $offset=null, ?int $limit=null, ?string $orderExp=null, ?string $criteriaExp=null, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): array {
+	protected function execFetchAll(?int $offset = null, ?int $limit = null, ?string $orderExp = null, ?string $criteriaExp = null, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): array {
 		$this->OrmEvent = (new OrmEvent($this))->criteriaExp($criteriaExp);
 		try {
 			$this->triggerEvent(OrmEvent::EVENT_PRE_FETCH_ALL);
 			$this->OrmAuthz?->check(OrmAuthz::ACTION_SELECT, $this->OrmEvent);
-			if($entities = $this->QueryRunner->fetchAll($this->class, $offset,  $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
+			if ($entities = $this->QueryRunner->fetchAll($this->class, $offset, $limit, $orderExp, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset)) {
 				$this->triggerEvent(OrmEvent::EVENT_POST_FETCH_ALL, $entities);
 			}
 			return $entities;
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(200, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -392,30 +403,37 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execInsertOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	protected function execInsertOne(mixed $id, object|array $data, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		try {
 			$Entity = (is_object($data)) ? $data : new $this->class($data);
 			// inject primary key(s)
-			if($id) {
+			if ($id) {
 				$Entity->__construct(array_combine($this->Metadata->pKeys(), (array)$id));
 			}
 			$this->OrmEvent = (new OrmEvent($this))->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_INSERT);
 			$this->OrmAuthz?->check(OrmAuthz::ACTION_INSERT, $this->OrmEvent);
-			if(method_exists($Entity, 'onSave')) $Entity->onSave();
+			if (method_exists($Entity, 'onSave')) {
+				$Entity->onSave();
+			}
 			// validate
-			if($validate) $this->doValidate($Entity, $validate);
+			if ($validate) {
+				$this->doValidate($Entity, $validate);
+			}
 			// run INSERT & build response
-			if(!$this->QueryRunner->insert($Entity))
+			if (!$this->QueryRunner->insert($Entity)) {
 				$response = false;
-			elseif($fetchMode) {
+			} elseif ($fetchMode) {
 				$criteriaExp = $this->Metadata->pkCriteria($Entity);
-				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
-			} else
+				$response    = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $criteriaExp, $fetchMode, $fetchSubset);
+			} else {
 				$response = true;
-			if($response) $this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
+			}
+			if ($response) {
+				$this->triggerEvent(OrmEvent::EVENT_POST_INSERT, $Entity);
+			}
 			return $response;
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(100, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -427,10 +445,10 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function execUpdateOne(mixed $id, object|array $data, string|bool $validate=true, int $fetchMode=self::FETCH_OBJ, ?string $fetchSubset=null): object|array|bool {
+	protected function execUpdateOne(mixed $id, object|array $data, string|bool $validate = true, int $fetchMode = self::FETCH_OBJ, ?string $fetchSubset = null): object|array|bool {
 		try {
 			$this->OrmEvent = (new OrmEvent($this));
-			if(is_object($data)) {
+			if (is_object($data)) {
 				$Entity = $data;
 				$this->OrmEvent->criteriaExp($this->Metadata->pkCriteria($Entity));
 				$this->OrmAuthz?->check(OrmAuthz::ACTION_UPDATE, $this->OrmEvent);
@@ -443,27 +461,34 @@ class Repository {
 			$this->OrmEvent->setEntity($Entity);
 			$this->triggerEvent(OrmEvent::EVENT_PRE_UPDATE);
 			// onSave callback
-			if(method_exists($Entity, 'onSave')) $Entity->onSave();
+			if (method_exists($Entity, 'onSave')) {
+				$Entity->onSave();
+			}
 			// detect changes after onSave()
 			$changes = $Entity::changes($Entity);
 			// validate
-			if($validate) $this->doValidate($Entity, $validate);
+			if ($validate) {
+				$this->doValidate($Entity, $validate);
+			}
 			// run UPDATE & build response
 			$response = false;
-			if(empty($changes)) {
+			if (empty($changes)) {
 				sys::trace(LOG_DEBUG, T_DB, sprintf('[%s] SKIP UPDATE `%s` WHERE %s', $this->pdo, $this->Metadata->sql('target'), $this->Metadata->pkCriteria($Entity)));
 				$response = true;
 			} else {
-				if($this->QueryRunner->update($Entity, $changes, $this->OrmEvent->getCriteriaExp()))
+				if ($this->QueryRunner->update($Entity, $changes, $this->OrmEvent->getCriteriaExp())) {
 					$response = true;
+				}
 			}
-			if($response && $fetchMode) {
-//				$criteriaExp = $this->Metadata->pkCriteria($Entity);
+			if ($response && $fetchMode) {
+				//				$criteriaExp = $this->Metadata->pkCriteria($Entity);
 				$response = $Entity = $this->QueryRunner->fetchOne($this->class, null, null, $this->OrmEvent->getCriteriaExp(), $fetchMode, $fetchSubset);
 			}
-			if(!empty($changes)) $this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
+			if (!empty($changes)) {
+				$this->triggerEvent(OrmEvent::EVENT_POST_UPDATE, $Entity);
+			}
 			return $response;
-		} catch(\PDOException $Ex) {
+		} catch (\PDOException $Ex) {
 			throw new Exception(300, [$this->_, $Ex->getCode(), $Ex->getMessage()]);
 		}
 	}
@@ -474,11 +499,13 @@ class Repository {
 	 */
 	protected function doValidate(object $Entity, string|bool $validateMode) {
 		$validateSubset = (is_string($validateMode)) ? $this->Metadata->validateSubset($validateMode) : null;
-		$validateMode = (is_string($validateMode)) ? $validateMode : null;
-		$errorsByTags = Validator::validate($Entity, $validateSubset);
-		$errorsByFn = $this->validate($Entity, $validateMode);
-		$errors = array_merge($errorsByTags, $errorsByFn);
-		if(!empty($errors)) throw new Exception(500, [implode(', ',array_keys($errors))], $errors);
+		$validateMode   = (is_string($validateMode)) ? $validateMode : null;
+		$errorsByTags   = Validator::validate($Entity, $validateSubset);
+		$errorsByFn     = $this->validate($Entity, $validateMode);
+		$errors         = array_merge($errorsByTags, $errorsByFn);
+		if (!empty($errors)) {
+			throw new Exception(500, [implode(', ', array_keys($errors))], $errors);
+		}
 	}
 
 	/**
@@ -486,10 +513,13 @@ class Repository {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	protected function triggerEvent(string $eventName, mixed $param=null) {
-		if($name = $this->Metadata->event($eventName)) {
-			if(is_object($param)) $this->OrmEvent->setEntity($param);
-			elseif(is_array($param)) $this->OrmEvent->setEntities($param);
+	protected function triggerEvent(string $eventName, mixed $param = null) {
+		if ($name = $this->Metadata->event($eventName)) {
+			if (is_object($param)) {
+				$this->OrmEvent->setEntity($param);
+			} elseif (is_array($param)) {
+				$this->OrmEvent->setEntities($param);
+			}
 			sys::event()->trigger(is_string($name) ? $name : $eventName, $this->OrmEvent);
 		}
 	}

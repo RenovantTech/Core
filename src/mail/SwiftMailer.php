@@ -1,8 +1,11 @@
 <?php
 namespace renovant\core\mail;
+
+use renovant\core\sys;
+use Swift_Message;
+
 use const renovant\core\trace\T_INFO;
-use renovant\core\sys,
-	Swift_Message;
+
 /**
  * Wrapper for Swift_Mailer 4.3.0
  *
@@ -16,7 +19,7 @@ class SwiftMailer {
 	use \renovant\core\CoreTrait;
 
 	/** default transport type to be used */
-	const DEFAULT_TRANSPORT = 'smtp';
+	public const DEFAULT_TRANSPORT = 'smtp';
 	/** Array of failed recipients after a call to Mailer->send() or Mailer->batchSend()
 	 * @var array */
 	protected $failedRecipients = [];
@@ -29,11 +32,11 @@ class SwiftMailer {
 	/** SMTP params array
 	 * @var array */
 	protected $transportOptions = [
-		'server'	=> 'localhost',
-		'port'		=> 25,
-		'encryption'=> false,
-		'user'		=> null,
-		'password'	=> null
+		'server'     => 'localhost',
+		'port'       => 25,
+		'encryption' => false,
+		'user'       => null,
+		'password'   => null
 	];
 	/** mail transport type to be used, can be: mail | smtp | sendmail (default: mail)
 	 * @var string */
@@ -47,21 +50,29 @@ class SwiftMailer {
 	 * @param string $transportType
 	 * @param array|null $transportOptions
 	 */
-	function __construct($swiftDirectory=null, $transportType=self::DEFAULT_TRANSPORT, array $transportOptions=null) {
-		if(is_null($swiftDirectory) && defined('SWIFT_DIR')) $swiftDirectory = SWIFT_DIR;
-		if(!is_dir($swiftDirectory)) trigger_error('SWIFT_DIR not defined');
+	public function __construct($swiftDirectory = null, $transportType = self::DEFAULT_TRANSPORT, array $transportOptions = null) {
+		if (is_null($swiftDirectory) && defined('SWIFT_DIR')) {
+			$swiftDirectory = SWIFT_DIR;
+		}
+		if (!is_dir($swiftDirectory)) {
+			trigger_error('SWIFT_DIR not defined');
+		}
 		$this->swiftDirectory = $swiftDirectory;
-		$this->transportType = $transportType;
-		if($transportType == 'smtp' && !is_null($transportOptions)) $this->transportOptions = $transportOptions;
+		$this->transportType  = $transportType;
+		if ($transportType == 'smtp' && !is_null($transportOptions)) {
+			$this->transportOptions = $transportOptions;
+		}
 	}
 
-	function __call($method, $args) {
-		if(is_null($this->Mailer)) $this->initMailer();
-		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_.'->'.$method);
+	public function __call($method, $args) {
+		if (is_null($this->Mailer)) {
+			$this->initMailer();
+		}
+		sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_ . '->' . $method);
 		return call_user_func_array([$this->Mailer, $method], $args);
 	}
 
-	function __sleep() {
+	public function __sleep() {
 		return ['_', 'transportOptions', 'transportType', 'swiftDirectory'];
 	}
 
@@ -73,10 +84,10 @@ class SwiftMailer {
 	 */
 	protected function initMailer() {
 		sys::trace(LOG_DEBUG, T_INFO);
-		require $this->swiftDirectory.'dependency_maps/cache_deps.php';
-		require $this->swiftDirectory.'dependency_maps/message_deps.php';
-		require $this->swiftDirectory.'dependency_maps/mime_deps.php';
-		require $this->swiftDirectory.'dependency_maps/transport_deps.php';
+		require $this->swiftDirectory . 'dependency_maps/cache_deps.php';
+		require $this->swiftDirectory . 'dependency_maps/message_deps.php';
+		require $this->swiftDirectory . 'dependency_maps/mime_deps.php';
+		require $this->swiftDirectory . 'dependency_maps/transport_deps.php';
 		// Sets the default charset so that setCharset() is not needed elsewhere
 		\Swift_Preferences::getInstance()->setCharset('utf-8');
 		// Without these lines the default caching mechanism is "array" but this uses a lot of memory.
@@ -84,15 +95,19 @@ class SwiftMailer {
 		\Swift_Preferences::getInstance()->setTempDir(\renovant\core\TMP_DIR)->setCacheType('disk');
 		\Swift_Preferences::getInstance()->setQPDotEscape(false);
 		//Create the Transport
-		switch($this->transportType) {
+		switch ($this->transportType) {
 			case 'sendmail':
 				$this->Transport = \Swift_SendmailTransport::newInstance('/usr/sbin/sendmail -bs');
 				break;
 			case 'smtp':
-				$port = (isset($this->transportOptions['port'])) ? (int) $this->transportOptions['port'] : 25;
+				$port            = (isset($this->transportOptions['port'])) ? (int) $this->transportOptions['port'] : 25;
 				$this->Transport = \Swift_SmtpTransport::newInstance($this->transportOptions['server'], $port);
-				if(!empty($this->transportOptions['encryption'])) $this->Transport->setEncryption($this->transportOptions['encryption']);
-				if(!empty($this->transportOptions['user'])) $this->Transport->setUsername($this->transportOptions['user'])->setPassword($this->transportOptions['password']);
+				if (!empty($this->transportOptions['encryption'])) {
+					$this->Transport->setEncryption($this->transportOptions['encryption']);
+				}
+				if (!empty($this->transportOptions['user'])) {
+					$this->Transport->setUsername($this->transportOptions['user'])->setPassword($this->transportOptions['password']);
+				}
 				break;
 			default:
 				$this->Transport = \Swift_MailTransport::newInstance();
@@ -105,8 +120,10 @@ class SwiftMailer {
 	 * Create a Swift_Message instance
 	 * @return Swift_Message
 	 */
-	function newMessage() {
-		if(is_null($this->Mailer)) $this->initMailer();
+	public function newMessage() {
+		if (is_null($this->Mailer)) {
+			$this->initMailer();
+		}
 		sys::trace(LOG_DEBUG, T_INFO);
 		return Swift_Message::newInstance();
 	}
@@ -118,11 +135,13 @@ class SwiftMailer {
 	 * @return integer the number of successful recipients
 	 * @see Swift_Mailer::batchSend()
 	 */
-	function batchSend(Swift_Message $Message) {
-		if(is_null($this->Mailer)) $this->initMailer();
+	public function batchSend(Swift_Message $Message) {
+		if (is_null($this->Mailer)) {
+			$this->initMailer();
+		}
 		sys::trace(LOG_DEBUG, T_INFO, 'START');
 		$n = $this->Mailer->batchSend($Message, $this->failedRecipients);
-		sys::trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
+		sys::trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: ' . $n . ' FAILED: ' . count($this->failedRecipients));
 		return $n;
 	}
 
@@ -133,11 +152,13 @@ class SwiftMailer {
 	 * @return integer the number of successful recipients
 	 * @see Swift_Mailer::send()
 	 */
-	function send(Swift_Message $Message) {
-		if(is_null($this->Mailer)) $this->initMailer();
+	public function send(Swift_Message $Message) {
+		if (is_null($this->Mailer)) {
+			$this->initMailer();
+		}
 		sys::trace(LOG_DEBUG, T_INFO);
 		$n = $this->Mailer->send($Message, $this->failedRecipients);
-		sys::trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: '.$n.' FAILED: '.count($this->failedRecipients));
+		sys::trace(LOG_DEBUG, T_INFO, 'END: Mail successfully sent! Recipients OK: ' . $n . ' FAILED: ' . count($this->failedRecipients));
 		return $n;
 	}
 }
