@@ -15,6 +15,8 @@ class Request {
 	 * @param array|null $env Environment data. If not supplied, $_ENV will be used
 	 */
 	public function __construct(array $args = null, array $env = null) {
+		$this->cmd[] = basename($_SERVER['SCRIPT_FILENAME'], '.php');
+
 		if (is_null($args)) {
 			$args = $_SERVER['argv'];
 		}
@@ -66,7 +68,7 @@ class Request {
 	 * @param int|null $i arg index, NULL to have the full command string
 	 * @return string
 	 */
-	public function CMD(int $i = null) {
+	public function CMD(int $i = null): string {
 		if (is_null($i)) {
 			return implode(' ', $this->cmd);
 		} else {
