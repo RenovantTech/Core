@@ -17,6 +17,9 @@
 			<directory>event</directory>
 			<directory>log</directory>
 		</testsuite>
+		<testsuite name="trace">
+			<directory>trace</directory>
+		</testsuite>
 		<testsuite name="container">
 			<directory>container</directory>
 		</testsuite>

@@ -1,17 +1,19 @@
 <?php
 namespace test\tracer;
+
+use renovant\core\sys;
+use renovant\core\trace\Tracer;
+
 use const renovant\core\trace\{T_ERROR, T_INFO};
-use renovant\core\sys,
-	renovant\core\trace\Tracer;
 
 class TracerTest extends \PHPUnit\Framework\TestCase {
-
-	function testInit() {
-		Tracer::init();
+	public function testInit() {
 		sys::trace(LOG_DEBUG, T_INFO, 'msg1');
 		sys::trace(LOG_ERR, T_INFO, 'err1');
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'trace');
+		$ReflProp->setAccessible(true);
+		$trace = $ReflProp->getValue();
 
-		$trace = Tracer::export();
 		$t = array_pop($trace);
 		$this->assertEquals(LOG_ERR, $t[2]);
 		$this->assertEquals(T_INFO, $t[3]);
@@ -23,10 +25,12 @@ class TracerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('msg1', $t[5]);
 	}
 
-	function testOnError() {
+	public function testOnError() {
 		trigger_error('NOTICE msg', E_USER_NOTICE);
 		trigger_error('ERROR msg', E_USER_ERROR);
-		$trace = Tracer::export();
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'trace');
+		$ReflProp->setAccessible(true);
+		$trace = $ReflProp->getValue();
 
 		array_pop($trace);
 		$t = array_pop($trace);
@@ -43,10 +47,12 @@ class TracerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('NOTICE msg', $t[5]);
 	}
 
-	function testOnException() {
+	public function testOnException() {
 		$Ex = new \Exception('test', 123);
 		Tracer::onException($Ex);
-		$trace = Tracer::export();
+		$ReflProp = new \ReflectionProperty('renovant\core\sys', 'trace');
+		$ReflProp->setAccessible(true);
+		$trace = $ReflProp->getValue();
 
 		array_pop($trace);
 		$t = array_pop($trace);
