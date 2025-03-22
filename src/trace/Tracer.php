@@ -1,14 +1,12 @@
 <?php
 namespace renovant\core\trace;
 
-use renovant\core\sys;
-
 use const renovant\core\DEBUG_MODE;
 
-class Tracer extends sys {
-	public const E_NOTICE  = 1;
-	public const E_WARNING = 2;
-	public const E_ERROR   = 3;
+class Tracer {
+	public const int E_NOTICE  = 1;
+	public const int E_WARNING = 2;
+	public const int E_ERROR   = 3;
 
 	/** current Error level, incremented by errors & exceptions */
 	protected static int $errorLevel = 0;
@@ -56,20 +54,16 @@ class Tracer extends sys {
 	/**
 	 * Shutdown handler
 	 */
-	public static function shutdown() {
+	public static function shutdown($Req, $Res, array $trace, $storeFn = null) {
 		$err = error_get_last();
 		if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_CORE_WARNING, E_COMPILE_ERROR, E_COMPILE_WARNING])) {
 			self::onError($err['type'], $err['message'], $err['file'], $err['line']);
 		}
 		if (DEBUG_MODE) {
-			TracerLog::write(self::$Req, self::$Res, self::$trace, self::$errorLevel);
+			TracerLog::write($Req, $Res, $trace, self::$errorLevel);
 		}
-		if (self::$Sys->cnfTrace['storeFn']) {
-			call_user_func(self::$Sys->cnfTrace['storeFn'], self::$Req, self::$Res, self::$trace, self::$errorLevel);
+		if ($storeFn) {
+			call_user_func($storeFn, $Req, $Res, $trace, self::$errorLevel);
 		}
-	}
-
-	public static function export() {
-		return self::$trace;
 	}
 }

@@ -172,7 +172,7 @@ class sys {
 				$PDO->rollBack();
 			}
 		}
-		register_shutdown_function(__NAMESPACE__ . '\trace\Tracer::shutdown');
+		register_shutdown_function(__NAMESPACE__ . '\trace\Tracer::shutdown', self::$Req, self::$Res, self::$trace, self::$Sys->cnfTrace['storeFn']);
 		if (self::$EventDispatcher) {
 			self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 		}
