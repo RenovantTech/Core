@@ -39,12 +39,17 @@
 		</testsuite>
 		<testsuite name="console">
 			<directory>console/controller</directory>
+			<file>console/RequestTest.php</file>
+			<file>console/ResponseTest.php</file>
 			<file>console/DispatcherTest.php</file>
+			<file>console/AppTest.php</file>
 		</testsuite>
 		<testsuite name="http">
 			<directory>http/view</directory>
 			<directory>http/controller</directory>
+			<file>http/RequestTest.php</file>
 			<file>http/DispatcherTest.php</file>
+			<file>http/AppTest.php</file>
 		</testsuite>
 		<testsuite name="sys">
 			<file>ExceptionTest.php</file>

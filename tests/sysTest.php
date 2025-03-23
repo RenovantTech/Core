@@ -186,41 +186,4 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$this->assertMatchesRegularExpression('/valid data source name/', $Ex->getMessage());
 		}
 	}
-
-	/**
-	 * @depends testInit
-	 * @throws ContextException
-	 * @throws EventDispatcherException
-	 * @throws SysException
-	 * @throws \ReflectionException
-	 */
-	public function testDispatchCLI() {
-		$_SERVER['SCRIPT_FILENAME'] = 'sys.php';
-
-		$routes = [
-			'CMD' => ['cmd' => 'console',		'namespace' => 'test.console'],
-			'SYS' => ['cmd' => 'sys',			'namespace' => 'renovant.core.bin']
-		];
-
-		$_SERVER['argv'] = [
-			0 => \renovant\core\CLI_BOOTSTRAP,
-			1 => 'console',
-			2 => 'mod1',
-			3 => 'foo',
-			4 => '--bar=2'
-		];
-		$this->assertNull(sys::dispatchCLI('APP', $routes));
-	}
-
-	/**
-	 * @depends testInit
-	 * @throws EventDispatcherException
-	 * @throws ContextException|\ReflectionException
-	 */
-	public function testDispatchHTTP() {
-		$_SERVER['SERVER_ADDR'] = 'example.com';
-		$_SERVER['SERVER_PORT'] = 443;
-		$_SERVER['REQUEST_URI'] = '/api/bar/';
-		$this->assertNull(sys::dispatchHTTP('APP', self::HTTP_ROUTES));
-	}
 }
