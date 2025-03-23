@@ -11,8 +11,8 @@ use const renovant\core\trace\{T_DEPINJ};
 class Context {
 	use \renovant\core\CoreTrait;
 
-	public const FAILURE_EXCEPTION = 1;
-	public const FAILURE_SILENT    = 2;
+	public const int FAILURE_EXCEPTION = 1;
+	public const int FAILURE_SILENT    = 2;
 
 	/** Container instance
 	 * @var Container */
@@ -77,7 +77,7 @@ class Context {
 	 * @param string $id object OID
 	 * @param string|null $class class/interface that object must extend/implement (optional)
 	 */
-	public function has(string $id, string $class = null): bool {
+	public function has(string $id, ?string $class = null): bool {
 		return $this->Container->has($id, $class);
 	}
 
