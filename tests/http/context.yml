@@ -1,21 +1,30 @@
 services:
-  # Dispatcher
-  test.http.Dispatcher:
-    class: renovant\core\http\Dispatcher
-    properties:
-      routes:
-        /blog/<category>/: test.http.ActionController
-        /catalog/:  test.http.AbstractController
-        /action/:   test.http.ActionController
-        /rest/:     test.http.RestActionController
-        /home:      test.http.SimpleController
-      resourcesDir: templates/
-  # controllers
-  test.http.SimpleController:
-    class: test\http\controller\SimpleController
-  test.http.ActionController:
-    class: test\http\controller\ActionController
-  test.http.AbstractController:
-    class: test\http\controller\AbstractController
-  test.http.RestActionController:
-    class: test\http\controller\RestActionController
+    # App
+    test.http.AppHTTP:
+        class: renovant\core\http\App
+        properties:
+            name: TEST-APP
+            modules:
+                MOD1:
+                    url: /
+                    namespace: test.http
+    # Dispatcher
+    test.http.Dispatcher:
+        class: renovant\core\http\Dispatcher
+        properties:
+            routes:
+                /blog/<category>/: test.http.ActionController
+                /catalog/: test.http.AbstractController
+                /action/: test.http.ActionController
+                /rest/: test.http.RestActionController
+                /home: test.http.SimpleController
+            resourcesDir: templates/
+    # controllers
+    test.http.SimpleController:
+        class: test\http\controller\SimpleController
+    test.http.ActionController:
+        class: test\http\controller\ActionController
+    test.http.AbstractController:
+        class: test\http\controller\AbstractController
+    test.http.RestActionController:
+        class: test\http\controller\RestActionController
