@@ -4,7 +4,7 @@ namespace renovant\core;
 // directories
 const PUBLIC_DIR = '/tmp/renovant-core/httpdocs/';
 const BASE_DIR   = __DIR__ . '/';
-const BIN_DIR    = '/tmp/renovant-core/bin/';
+const BIN_DIR    = __DIR__ . '/bin/';
 const DATA_DIR   = '/tmp/renovant-core/';
 const ASSETS_DIR = '/tmp/renovant-core/assets/';
 const BACKUP_DIR = '/tmp/renovant-core/backup/';
@@ -28,6 +28,9 @@ require __DIR__ . '/../src/CoreProxy.php';
 require __DIR__ . '/../src/CoreTrait.php';
 require __DIR__ . '/../src/sys.php';
 require __DIR__ . '/../vendor/autoload.php';
+
+// prepare BIN_DIR
+chmod(BIN_DIR . 'sys', 755);
 
 // clean DATA_DIR
 exec('rm -fr ' . DATA_DIR);

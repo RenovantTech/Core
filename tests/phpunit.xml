@@ -43,6 +43,7 @@
 			<file>console/ResponseTest.php</file>
 			<file>console/DispatcherTest.php</file>
 			<file>console/AppTest.php</file>
+			<file>console/CmdManagerTest.php</file>
 		</testsuite>
 		<testsuite name="http">
 			<directory>http/view</directory>

@@ -1,0 +1,8 @@
+#!/opt/php/8.3/bin/php
+<?php
+namespace renovant\core;
+
+include __DIR__ . '/../app/sys.php';
+
+sys::init('sys');
+sys::run('cmd.system');
