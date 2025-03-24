@@ -3,12 +3,11 @@ namespace renovant\core;
 
 class SysException extends Exception {
 	// bootstrap
-	public const ERR21 = 'FATAL ERROR: PUBLIC_DIR not defined in your index.php!';
-	public const ERR22 = 'FATAL ERROR: BASE_DIR not defined in your index.php!';
-	public const ERR23 = 'FATAL ERROR: DATA_DIR not defined in your index.php!';
-	public const ERR24 = 'FATAL ERROR: DATA_DIR "{1}" is NOT writable!';
-	public const ERR25 = 'FATAL ERROR: CLI_BOOTSTRAP not defined in your index.php!';
-	public const ERR26 = 'FATAL ERROR: CLI_PHP_BIN not defined in your index.php!';
+	public const ERR21 = 'FATAL ERROR: const PUBLIC_DIR not defined in your boostrap php file';
+	public const ERR22 = 'FATAL ERROR: const BASE_DIR not defined in your boostrap php file';
+	public const ERR23 = 'FATAL ERROR: const BIN_DIR not defined in your boostrap php file';
+	public const ERR24 = 'FATAL ERROR: const DATA_DIR not defined in your boostrap php file';
+	public const ERR25 = 'FATAL ERROR: const DATA_DIR "{1}" is NOT writable!';
 	public const ERR29 = 'FATAL ERROR: please set magic_quotes_gpc Off in your php.ini';
 
 	// constructor

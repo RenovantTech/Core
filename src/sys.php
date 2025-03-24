@@ -2,14 +2,13 @@
 namespace renovant\core;
 
 use renovant\core\cache\ArrayCache;
-use renovant\core\auth\{Auth, AuthException};
+use renovant\core\auth\Auth;
 use renovant\core\event\{EventDispatcher, EventDispatcherException};
-use renovant\core\console\{CmdManager, Event as ConsoleEvent};
+use renovant\core\console\CmdManager;
 use renovant\core\context\{Context, ContextException};
 use renovant\core\container\{Container, ContainerException};
 use renovant\core\authz\Authz;
 use renovant\core\db\PDO;
-use renovant\core\http\Event as HttpEvent;
 use renovant\core\log\Logger;
 use renovant\core\queue\Queue;
 
