@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\console;
 
-use renovant\core\{sys,SysException};
+use renovant\core\{sys,sysinfo,SysException};
 use renovant\core\event\{EventDispatcher, EventDispatcherException};
 use renovant\core\context\{Context, ContextException};
 
@@ -21,25 +21,25 @@ class App {
 	 * @throws \ReflectionException
 	 */
 	public function run(Request $Req, Response $Res) {
-		$Event     = new Event($Req, $Res);
-		$namespace = null;
+		$Event   = new Event($Req, $Res);
+		$context = null;
 		try {
 			foreach ($this->modules as $module => $conf) {
 				if (strpos($Req->CMD(), $conf['cmd']) === 0) {
-					$namespace = $conf['namespace'];
+					$context = $conf['context'] ?? strrchr($this->_, '.', true);
 					break;
 				}
 			}
-			if ($namespace === null) {
+			if ($context === null) {
 				throw new SysException(1, [PHP_SAPI, ...explode(' ', $Req->CMD())]);
 			}
 			$Req->setAttribute('APP', $this->name);
 			$Req->setAttribute('APP_MOD', $module);
-			$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
+			$Req->setAttribute('APP_MOD_CONTEXT', $context);
 			$Req->setAttribute('APP_MOD_URI', trim(strstr($Req->CMD(), ' ')));
-			$Req->setAttribute('APP_MOD_DIR', sys::info($namespace . '.class', sys::INFO_PATH_DIR) . '/');
+			$Req->setAttribute('APP_MOD_DIR', sysinfo::dir($context . '.class') . '/');
 			sys::event()->trigger(Event::EVENT_INIT, $Event);
-			sys::context()->get($namespace . '.Dispatcher')->dispatch($Req, $Res);
+			sys::context()->get($context . '.Dispatcher')->dispatch($Req, $Res);
 		} catch (\Exception $Ex) {
 			//@TODO set CLI exit() code
 			//http_response_code($Ex->getCode());

@@ -7,13 +7,17 @@ services:
             modules:
                 DB:
                     cmd: console db
-                    namespace: test.console
+                    context: test.console
                 MOD1:
                     cmd: console mod1
-                    namespace: test.console
+                MOD2:
+                    cmd: console mod2
+                    context: test.console.mod2
                 CRON:
                     cmd: console cron
-                    namespace: test.console
+                    context: test.console
+                '':
+                    cmd: console
 
     # Dispatcher
     test.console.Dispatcher:
