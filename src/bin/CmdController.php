@@ -7,7 +7,7 @@ class CmdController extends \renovant\core\console\controller\ActionController {
 	/**
 	 * @throws \ReflectionException
 	 */
-	public function scan() {
+	public function batchScan() {
 		sys::cmd()->scan();
 	}
 }
