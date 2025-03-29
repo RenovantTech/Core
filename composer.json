@@ -28,6 +28,7 @@
 		"ext-pcntl": "*",
 		"ext-sodium": "*",
 		"ext-sqlite3": "*",
+		"ext-yaml": "*",
 		"bacon/bacon-qr-code": "^3.0",
 		"defuse/php-encryption": ">=2.1",
 		"firebase/php-jwt": "^6.0",

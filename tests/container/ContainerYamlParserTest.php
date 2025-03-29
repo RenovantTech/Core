@@ -1,16 +1,16 @@
 <?php
 namespace test\container;
+
 use renovant\core\container\ContainerException,
-	renovant\core\container\ContainerYamlParser;
+renovant\core\container\ContainerYamlParser;
 use renovant\core\CoreProxy;
 
 class ContainerYamlParserTest extends \PHPUnit\Framework\TestCase {
-
 	/**
 	 * @throws ContainerException
 	 */
-	function testParseNamespace() {
-		$maps = ContainerYamlParser::parseNamespace('test.container');
+	public function testParse() {
+		$maps = ContainerYamlParser::parse('test.container');
 		$this->assertCount(2, $maps['id2class']);
 		$this->assertArrayHasKey('test.container.Mock1', $maps['id2class']);
 		$this->assertEquals(['test\container\Mock1'], $maps['id2class']['test.container.Mock1']);
@@ -25,7 +25,7 @@ class ContainerYamlParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals(Mock1::class, $maps['services']['test.container.Mock1']['class']);
 		$this->assertCount(0, $maps['services']['test.container.Mock1']['constructor']);
 		$this->assertCount(4, $maps['services']['test.container.Mock1']['properties']);
-		$this->assertEquals([ 2, 5, 8 ], $maps['services']['test.container.Mock1']['properties']['numbers']);
+		$this->assertEquals([2, 5, 8], $maps['services']['test.container.Mock1']['properties']['numbers']);
 
 		$this->assertArrayHasKey('test.container.Mock2', $maps['services']);
 		$this->assertEquals(Mock2::class, $maps['services']['test.container.Mock2']['class']);
@@ -35,11 +35,11 @@ class ContainerYamlParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertCount(0, $maps['services']['test.container.Mock2']['properties']);
 	}
 
-	function testParseNamespaceException() {
+	public function testParseException() {
 		try {
-			ContainerYamlParser::parseNamespace('test.xxxx');
+			ContainerYamlParser::parse('test.xxxx');
 			$this->fail('Expected ContainerException not thrown');
-		} catch(ContainerException $Ex) {
+		} catch (ContainerException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}

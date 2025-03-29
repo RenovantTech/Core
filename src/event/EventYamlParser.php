@@ -11,16 +11,16 @@ use const renovant\core\trace\T_DEPINJ;
  */
 class EventYamlParser {
 	/**
-	 * Parse YAML namespace config
-	 * @param string $namespace
+	 * Parse YAML context config
+	 * @param string $context
 	 * @return array listeners map
 	 * @throws EventDispatcherException
 	 */
-	public static function parseNamespace($namespace): array {
-		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+	public static function parse($context): array {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, __METHOD__);
 		$listeners = [];
 		try {
-			$yaml = Yaml::parseContext($namespace, 'events');
+			$yaml = Yaml::parseContext($context, 'events');
 			if (isset($yaml) && is_array($yaml)) {
 				/* @TODO verify YAML content
 				if(
@@ -33,11 +33,9 @@ class EventYamlParser {
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
-					throw new EventDispatcherException(11, [__METHOD__, $namespace]);
-					break;
+					throw new EventDispatcherException(11, [__METHOD__, $context]);
 				case 2:
-					throw new EventDispatcherException(12, [__METHOD__, $namespace]);
-					break;
+					throw new EventDispatcherException(12, [__METHOD__, $context]);
 			}
 		}
 		return $listeners;

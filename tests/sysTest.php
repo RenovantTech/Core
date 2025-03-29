@@ -92,37 +92,6 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 		restore_exception_handler();
 	}
 
-	public function testInfo() {
-		// test PHP namespaces
-		$this->assertEquals('renovant\core\http', sys::info('renovant\core\http\Dispatcher', sys::INFO_NAMESPACE));
-		$this->assertEquals('Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_CLASS));
-		$this->assertEquals(realpath(__DIR__ . '/../src/http') . '/Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH));
-		$this->assertEquals(realpath(__DIR__ . '/../src/http'), sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH_DIR));
-		$this->assertEquals('Dispatcher', sys::info('renovant\core\http\Dispatcher', sys::INFO_PATH_FILE));
-		list($namespace, $className, $dir, $file) = sys::info('renovant\core\http\Dispatcher');
-		$this->assertEquals('renovant\core\http', $namespace);
-		$this->assertEquals('Dispatcher', $className);
-		$this->assertEquals(realpath(__DIR__ . '/../src/http'), $dir);
-		$this->assertEquals('Dispatcher', $file);
-	}
-
-	/**
-	 * @depends testInit
-	 */
-	public function testInfo2() {
-		// test ID namespaces
-		$this->assertEquals('test\app', sys::info('test.app.Dispatcher', sys::INFO_NAMESPACE));
-		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_CLASS));
-		$this->assertEquals(TEST_DIR . '/app/Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH));
-		$this->assertEquals(TEST_DIR . '/app', sys::info('test.app.Dispatcher', sys::INFO_PATH_DIR));
-		$this->assertEquals('Dispatcher', sys::info('test.app.Dispatcher', sys::INFO_PATH_FILE));
-		list($namespace, $className, $dir, $file) = sys::info('test.app.Dispatcher');
-		$this->assertEquals('test\app', $namespace);
-		$this->assertEquals('Dispatcher', $className);
-		$this->assertEquals(TEST_DIR . '/app', $dir);
-		$this->assertEquals('Dispatcher', $file);
-	}
-
 	/**
 	 * @depends testInit
 	 */
@@ -140,7 +109,7 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @depends testInfo
+	 * @depends testInit
 	 */
 	public function testAutoload() {
 		sys::autoload('renovant\core\util\Date');
@@ -185,42 +154,5 @@ class sysTest extends \PHPUnit\Framework\TestCase {
 			$this->assertEquals(0, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/valid data source name/', $Ex->getMessage());
 		}
-	}
-
-	/**
-	 * @depends testInit
-	 * @throws ContextException
-	 * @throws EventDispatcherException
-	 * @throws SysException
-	 * @throws \ReflectionException
-	 */
-	public function testDispatchCLI() {
-		$_SERVER['SCRIPT_FILENAME'] = 'sys.php';
-
-		$routes = [
-			'CMD' => ['cmd' => 'console',		'namespace' => 'test.console'],
-			'SYS' => ['cmd' => 'sys',			'namespace' => 'renovant.core.bin']
-		];
-
-		$_SERVER['argv'] = [
-			0 => \renovant\core\CLI_BOOTSTRAP,
-			1 => 'console',
-			2 => 'mod1',
-			3 => 'foo',
-			4 => '--bar=2'
-		];
-		$this->assertNull(sys::dispatchCLI('APP', $routes));
-	}
-
-	/**
-	 * @depends testInit
-	 * @throws EventDispatcherException
-	 * @throws ContextException|\ReflectionException
-	 */
-	public function testDispatchHTTP() {
-		$_SERVER['SERVER_ADDR'] = 'example.com';
-		$_SERVER['SERVER_PORT'] = 443;
-		$_SERVER['REQUEST_URI'] = '/api/bar/';
-		$this->assertNull(sys::dispatchHTTP('APP', self::HTTP_ROUTES));
 	}
 }

@@ -2,14 +2,13 @@
 namespace renovant\core;
 
 use renovant\core\cache\ArrayCache;
-use renovant\core\auth\{Auth, AuthException};
+use renovant\core\auth\Auth;
 use renovant\core\event\{EventDispatcher, EventDispatcherException};
-use renovant\core\console\{CmdManager, Event as ConsoleEvent};
+use renovant\core\console\CmdManager;
 use renovant\core\context\{Context, ContextException};
 use renovant\core\container\{Container, ContainerException};
 use renovant\core\authz\Authz;
 use renovant\core\db\PDO;
-use renovant\core\http\Event as HttpEvent;
 use renovant\core\log\Logger;
 use renovant\core\queue\Queue;
 
@@ -23,11 +22,6 @@ class sys {
 	public const SYS_YAML_CACHE = CACHE_DIR . SYS_YAML . '.php';
 	public const EVENT_INIT     = 'sys:init';
 	public const EVENT_SHUTDOWN = 'sys:shutdown';
-	public const INFO_NAMESPACE = 1;
-	public const INFO_CLASS     = 2;
-	public const INFO_PATH      = 3;
-	public const INFO_PATH_DIR  = 4;
-	public const INFO_PATH_FILE = 5;
 	public const PDO_DEFAULT    = 'master';
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
@@ -105,15 +99,15 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
-	 * @param string $sys the system namespace to initialize
-	 * @param string $app the APP namespace to initialize
+	 * @param string $sys the system context to initialize
+	 * @param string $context an optional additional Context to initialize
 	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 * @throws util\yaml\YamlException
 	 */
-	public static function init(string $sys = 'sys', string $app = 'app') {
+	public static function init(string $sys = 'sys', ?string $context = null) {
 		self::$traceFn = __METHOD__;
 		self::trace();
 		set_exception_handler(__NAMESPACE__ . '\trace\Tracer::onException');
@@ -152,7 +146,9 @@ class sys {
 		self::$EventDispatcher = new EventDispatcher();
 		self::$Context         = new Context(self::$Container, self::$EventDispatcher);
 		self::$Context->init($sys);
-		self::$Context->init($app);
+		if ($context) {
+			self::$Context->init($context);
+		}
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
 
@@ -172,7 +168,7 @@ class sys {
 				$PDO->rollBack();
 			}
 		}
-		register_shutdown_function(__NAMESPACE__ . '\trace\Tracer::shutdown');
+		register_shutdown_function(__NAMESPACE__ . '\trace\Tracer::shutdown', self::$Req, self::$Res, self::$trace, self::$Sys->cnfTrace['storeFn']);
 		if (self::$EventDispatcher) {
 			self::$EventDispatcher->trigger(self::EVENT_SHUTDOWN);
 		}
@@ -190,86 +186,26 @@ class sys {
 	}
 
 	/**
-	 * @param array $routes CLI APP modules routing
-	 * @throws ContextException
-	 * @throws EventDispatcherException
-	 * @throws SysException
-	 * @throws \ReflectionException
-	 */
-	public static function dispatchCLI(string $app, array $routes) {
-		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
-		self::$Req    = new console\Request();
-		self::$Res    = new console\Response();
-		self::$routes = $routes;
-		$dispatcherID = $namespace = $module = null;
-
-		$HttpEvent = new ConsoleEvent(self::$Req, self::$Res);
-		foreach ($routes as $module => $conf) {
-			if (strpos(self::$Req->CMD(), $conf['cmd']) === 0) {
-				$namespace    = $conf['namespace'];
-				$dispatcherID = $namespace . '.Dispatcher';
-				self::$Req->setAttribute('APP_MOD_URI', trim(strstr(self::$Req->CMD(), ' ')));
-				break;
-			}
-		}
-		if (is_null($namespace)) {
-			throw new SysException(1, [PHP_SAPI, self::$Req->CMD()]);
-		}
-		self::$Req->setAttribute('APP', $app);
-		self::$Req->setAttribute('APP_MOD', $module);
-		self::$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
-		self::$Req->setAttribute('APP_MOD_DIR', self::info($namespace . '.class', self::INFO_PATH_DIR) . '/');
-		self::$EventDispatcher->trigger(ConsoleEvent::EVENT_INIT, $HttpEvent);
-		self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
-	}
-
-	/**
-	 * @param array $routes HTTP APP modules routing
+	 * @param string $context the APP context to initialize
+	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
+	 * @throws util\yaml\YamlException
 	 */
-	public static function dispatchHTTP(string $app, array $routes) {
-		self::trace(LOG_DEBUG, T_INFO, null, null, __METHOD__);
-		self::$Req    = new http\Request();
-		self::$Res    = new http\Response();
-		self::$routes = $routes;
-		$dispatcherID = $namespace = $module = null;
-
-		$HttpEvent = new HttpEvent(self::$Req, self::$Res);
-		foreach ($routes as $module => $conf) {
-			if (strpos($_SERVER['REQUEST_URI'], $conf['url']) === 0 &&
-				(!isset($conf['domain']) || $_SERVER['SERVER_ADDR'] == $conf['domain']) &&
-				(!isset($conf['port']) || $_SERVER['SERVER_PORT'] == $conf['port'])) {
-				$namespace    = $conf['namespace'];
-				$dispatcherID = $namespace . '.Dispatcher';
-				self::$Req->setAttribute('APP_MOD_URI', '/' . ltrim('/' . substr(self::$Req->URI(), strlen($conf['url'])), '/'));
-				self::trace(LOG_DEBUG, T_INFO, 'matched URL: ' . $conf['url'] . ' => MODULE namespace: ' . $namespace, null, 'sys->dispatchHTTP');
+	public static function run(string $context) {
+		switch (PHP_SAPI) {
+			case 'cli':
+				self::trace(LOG_DEBUG, T_INFO, 'CLI app context "' . $context . '"', null, __METHOD__);
+				self::$Req = new console\Request();
+				self::$Res = new console\Response();
+				self::$Context->get($context . '.AppCLI')->run(self::$Req, self::$Res);
 				break;
-			}
-		}
-		try {
-			if (is_null($namespace)) {
-				throw new SysException(1, [strtoupper(PHP_SAPI), $_SERVER['SERVER_ADDR'], $_SERVER['SERVER_PORT'], self::$Req->URI()]);
-			}
-			self::$Req->setAttribute('APP', $app);
-			self::$Req->setAttribute('APP_MOD', $module);
-			self::$Req->setAttribute('APP_MOD_NAMESPACE', $namespace);
-			self::$Req->setAttribute('APP_MOD_DIR', self::info($namespace . '.class', self::INFO_PATH_DIR) . '/');
-			self::$EventDispatcher->trigger(HttpEvent::EVENT_INIT, $HttpEvent);
-			self::$Context->get($dispatcherID)->dispatch(self::$Req, self::$Res);
-		} catch (AuthException $Ex) {
-			http_response_code(401);
-			$HttpEvent->setException($Ex);
-			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
-		} catch (SysException $Ex) {
-			http_response_code(404);
-			$HttpEvent->setException($Ex);
-			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
-		} catch (\Exception $Ex) {
-			http_response_code(500);
-			$HttpEvent->setException($Ex);
-			sys::event()->trigger(HttpEvent::EVENT_EXCEPTION, $HttpEvent);
+			default: // HTTP
+				self::trace(LOG_DEBUG, T_INFO, 'HTTP app context "' . $context . '"', null, __METHOD__);
+				self::$Req = new http\Request();
+				self::$Res = new http\Response();
+				self::$Context->get($context . '.AppHTTP')->run(self::$Req, self::$Res);
 		}
 	}
 
@@ -278,7 +214,7 @@ class sys {
 	 * @param string $class class name
 	 */
 	public static function autoload(string $class) {
-		if (@file_exists($file = self::info($class, self::INFO_PATH) . '.php')) {
+		if (@file_exists($file = sysinfo::path($class) . '.php')) {
 			self::trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
 			require $file;
 			if (in_array(\renovant\core\db\orm\EntityTrait::class, class_uses($class))) {
@@ -351,39 +287,6 @@ class sys {
 	 */
 	public static function event(): EventDispatcher {
 		return self::$EventDispatcher;
-	}
-
-	/**
-	 * Parse class or namespace, returning: namespace, class name (without namespace), full path, directory, file
-	 * @param string $path
-	 * @param int|null $return
-	 * @return array|string|false
-	 */
-	public static function info(string $path, $return = null) {
-		$path = str_replace('.', '\\', $path);
-		if (false === $i = strrpos($path, '\\')) {
-			$namespace = '';
-			$class     = $path;
-		} else {
-			$namespace = substr($path, 0, $i);
-			$class     = substr($path, $i + 1);
-		}
-		$realPath = '';
-		foreach (self::$namespaces as $baseName => $baseDir) {
-			if (0 === strpos($path, $baseName)) {
-				$realPath = $baseDir . str_replace(['\\', '_'], DIRECTORY_SEPARATOR, substr($namespace, strlen($baseName)) . DIRECTORY_SEPARATOR . $class);
-				//				$realPath = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $realPath);
-				break;
-			}
-		}
-		switch ($return) {
-			case self::INFO_NAMESPACE: return $namespace;
-			case self::INFO_CLASS: return $class;
-			case self::INFO_PATH: return $realPath;
-			case self::INFO_PATH_DIR: return dirname($realPath);
-			case self::INFO_PATH_FILE: return basename($realPath);
-			default: return [$namespace, $class, dirname($realPath), basename($realPath)];
-		}
 	}
 
 	/**

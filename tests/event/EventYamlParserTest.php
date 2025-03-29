@@ -1,15 +1,15 @@
 <?php
 namespace test\event;
+
 use renovant\core\event\EventDispatcherException,
-	renovant\core\event\EventYamlParser;
+renovant\core\event\EventYamlParser;
 
 class EventYamlParserTest extends \PHPUnit\Framework\TestCase {
-
 	/**
 	 * @throws EventDispatcherException
 	 */
-	function testParseNamespace() {
-		$listeners = EventYamlParser::parseNamespace('test.event');
+	public function testParse() {
+		$listeners = EventYamlParser::parse('test.event');
 		$this->assertCount(2, $listeners);
 		$this->assertCount(3, $listeners['TEST.EVENT1'][1]);
 		$this->assertEquals('substr', $listeners['TEST.EVENT1'][1][0]);
@@ -20,11 +20,11 @@ class EventYamlParserTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals('bar', $listeners['TEST.EVENT2'][2][0]);
 	}
 
-	function testParseNamespaceException() {
+	public function testParseException() {
 		try {
-			EventYamlParser::parseNamespace('test.xxxx');
+			EventYamlParser::parse('test.xxxx');
 			$this->fail('Expected EventDispatcherException not thrown');
-		} catch(EventDispatcherException $Ex) {
+		} catch (EventDispatcherException $Ex) {
 			$this->assertEquals(11, $Ex->getCode());
 			$this->assertMatchesRegularExpression('/YAML config file NOT FOUND/', $Ex->getMessage());
 		}

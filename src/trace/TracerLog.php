@@ -40,11 +40,10 @@ class TracerLog {
 	}
 
 	protected static function buildHeader($Req, $Res): array {
-		if (PHP_SAPI != 'cli') {
-			$url = $Req->URI();
-		} else {
-			$url = $Req->CMD() . ' ' . strstr(implode(' ', $_SERVER['argv']), ' -');
-		}
+		$url = match (PHP_SAPI) {
+			'cli'   => $Req->CMD() . ' ' . strstr(implode(' ', $_SERVER['argv']), ' -'),
+			default => $Req->URI()
+		};
 
 		$legend = str_pad('Date', 21);
 		$header = str_pad(date('Y-m-d H:i:s  '), 21);

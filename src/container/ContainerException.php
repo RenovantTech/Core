@@ -7,6 +7,6 @@ class ContainerException extends \renovant\core\Exception {
 	public const COD2 = '%s: object OID "%2$s" NOT implementing required class/interface %2$s';
 	public const COD4 = 'CoreProxy `%s`: can not retrieve proxied object';
 	// configuration
-	public const COD11 = '%s: namespace %s - YAML config file NOT FOUND';
-	public const COD12 = '%s: namespace %s - invalid YAML configuration';
+	public const COD11 = '%s: context %s - YAML config file NOT FOUND';
+	public const COD12 = '%s: context %s - invalid YAML configuration';
 }

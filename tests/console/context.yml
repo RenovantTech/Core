@@ -1,17 +1,37 @@
 services:
-  # Dispatcher
-  test.console.Dispatcher:
-    class: renovant\core\console\Dispatcher
-    properties:
-      routes:
-        db: test.console.AbstractController
-        mod1: test.console.ActionController
-        cron: test.console.SimpleController
-      resourcesDir: templates/
-  # controllers
-  test.console.SimpleController:
-    class: test\console\controller\SimpleController
-  test.console.ActionController:
-    class: test\console\controller\ActionController
-  test.console.AbstractController:
-    class: test\console\controller\AbstractController
+    # App
+    test.console.AppCLI:
+        class: renovant\core\console\App
+        properties:
+            name: TEST-CONSOLE
+            modules:
+                DB:
+                    cmd: console db
+                    context: test.console
+                MOD1:
+                    cmd: console mod1
+                MOD2:
+                    cmd: console mod2
+                    context: test.console.mod2
+                CRON:
+                    cmd: console cron
+                    context: test.console
+                '':
+                    cmd: console
+
+    # Dispatcher
+    test.console.Dispatcher:
+        class: renovant\core\console\Dispatcher
+        properties:
+            routes:
+                db: test.console.AbstractController
+                mod1: test.console.ActionController
+                cron: test.console.SimpleController
+            resourcesDir: templates/
+    # controllers
+    test.console.SimpleController:
+        class: test\console\controller\SimpleController
+    test.console.ActionController:
+        class: test\console\controller\ActionController
+    test.console.AbstractController:
+        class: test\console\controller\AbstractController

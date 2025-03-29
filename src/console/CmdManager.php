@@ -3,15 +3,15 @@ namespace renovant\core\console;
 
 use renovant\core\sys;
 
-use const renovant\core\{CLI_BOOTSTRAP, RUN_DIR, TMP_DIR};
+use const renovant\core\{BIN_DIR, RUN_DIR, TMP_DIR};
 use const renovant\core\trace\T_INFO;
 
 class CmdManager {
 	use \renovant\core\CoreTrait;
 
-	public const SQL_ON_START = 'UPDATE %s SET runningPID = :pid, runningAt = :runningAt WHERE id = :id';
-	public const SQL_ON_END   = 'UPDATE %s SET runningPID = NULL, lastTime = runningAt, runningAt = NULL, lastStatus = :lastStatus WHERE id = :id';
-	public const SQL_ON_LOG   = 'INSERT INTO %s_logs (id, startedAt, execTime, status, log) VALUES (:id, :startedAt, :execTime, :status, :log)';
+	public const string SQL_ON_START = 'UPDATE %s SET runningPID = :pid, runningAt = :runningAt WHERE id = :id';
+	public const string SQL_ON_END   = 'UPDATE %s SET runningPID = NULL, lastTime = runningAt, runningAt = NULL, lastStatus = :lastStatus WHERE id = :id';
+	public const string SQL_ON_LOG   = 'INSERT INTO %s_logs (id, startedAt, execTime, status, log) VALUES (:id, :startedAt, :execTime, :status, :log)';
 
 	protected static array $buffer = [];
 
@@ -80,9 +80,9 @@ class CmdManager {
 
 	public function exec(string $cmd, bool $waitShutdown = false) {
 		if (!$waitShutdown) {
-			$exec = CLI_BOOTSTRAP . ' ' . $cmd;
-			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager');
-			shell_exec('nohup ' . $exec . ' > /dev/null 2>&1 & echo $!');
+			$this->checkExecutable($cmd);
+			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, null, 'sys.CmdManager');
+			shell_exec('nohup ' . BIN_DIR . $cmd . ' > /dev/null 2>&1 & echo $!');
 		} else {
 			sys::trace(LOG_DEBUG, T_INFO, '[EXEC on shutdown] ' . $cmd, null, 'sys.CmdManager');
 			self::$buffer[] = $cmd;
@@ -94,9 +94,9 @@ class CmdManager {
 	 * @return array|false [$output, $exitCode] on SUCCESS, FALSE on FAILURE
 	 */
 	public function execWait(string $cmd): array|false {
-		$exec = CLI_BOOTSTRAP . ' ' . $cmd;
-		sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager');
-		if (exec($exec, $output, $exitCode)) {
+		$this->checkExecutable($cmd);
+		sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, null, 'sys.CmdManager');
+		if (exec(BIN_DIR . $cmd, $output, $exitCode)) {
 			return [$output, $exitCode];
 		} else {
 			return false;
@@ -110,8 +110,7 @@ class CmdManager {
 	}
 
 	public function scan() {
-		include __DIR__ . '/CmdManager.scan.php';
-		scan($this->pdo, $this->tablePrefix);
+		CmdScanner::scan($this->pdo, $this->tablePrefix);
 	}
 
 	protected function _onEnd(string $cmd, $status = null) {
@@ -132,11 +131,20 @@ class CmdManager {
 		}
 	}
 
+	protected function checkExecutable(string $cmd) {
+		BIN_DIR . $file = explode(' ', $cmd)[0];
+		if (!is_file(BIN_DIR . $file)) {
+			throw new Exception(1, [BIN_DIR . $file]);
+		}
+		if (!is_executable(BIN_DIR . $file)) {
+			throw new Exception(2, [BIN_DIR . $file]);
+		}
+	}
+
 	public static function shutdown() {
 		foreach (self::$buffer as $cmd) {
-			$exec = CLI_BOOTSTRAP . ' ' . $cmd;
-			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, $exec, 'sys.CmdManager::shutdown');
-			shell_exec('nohup ' . $exec . ' > /dev/null 2>&1 & echo $!');
+			sys::trace(LOG_DEBUG, T_INFO, '[EXEC] ' . $cmd, null, 'sys.CmdManager::shutdown');
+			shell_exec('nohup ' . BIN_DIR . $cmd . ' > /dev/null 2>&1 & echo $!');
 		}
 	}
 }

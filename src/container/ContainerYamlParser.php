@@ -8,16 +8,16 @@ use const renovant\core\trace\T_DEPINJ;
 
 class ContainerYamlParser {
 	/**
-	 * Parse YAML namespace config
-	 * @param string $namespace
+	 * Parse YAML context config
+	 * @param string $context
 	 * @return array id2class and class2id maps
 	 * @throws ContainerException
 	 */
-	public static function parseNamespace(string $namespace): array {
-		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+	public static function parse(string $context): array {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, __METHOD__);
 		$id2classMap = $class2idMap = $services = [];
 		try {
-			$yaml = Yaml::parseContext($namespace, 'services', [
+			$yaml = Yaml::parseContext($context, 'services', [
 				'!obj' => function ($value) {
 					return '!obj ' . $value;
 				}
@@ -44,9 +44,9 @@ class ContainerYamlParser {
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
-					throw new ContainerException(11, [__METHOD__, $namespace]);
+					throw new ContainerException(11, [__METHOD__, $context]);
 				case 2:
-					throw new ContainerException(12, [__METHOD__, $namespace]);
+					throw new ContainerException(12, [__METHOD__, $context]);
 			}
 		}
 		return ['id2class' => $id2classMap, 'class2id' => $class2idMap, 'services' => $services];

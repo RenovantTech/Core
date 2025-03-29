@@ -31,11 +31,14 @@ class SysBoot extends sys {
 		if (!defined(__NAMESPACE__ . '\BASE_DIR')) {
 			die(SysException::ERR22);
 		}
-		if (!defined(__NAMESPACE__ . '\DATA_DIR')) {
+		if (!defined(__NAMESPACE__ . '\BIN_DIR')) {
 			die(SysException::ERR23);
 		}
-		if (!is_writable(DATA_DIR)) {
+		if (!defined(__NAMESPACE__ . '\DATA_DIR')) {
 			die(SysException::ERR24);
+		}
+		if (!is_writable(DATA_DIR)) {
+			die(SysException::ERR25);
 		}
 		// DATA_DIR
 		if (!file_exists(ASSETS_DIR)) {
@@ -58,13 +61,6 @@ class SysBoot extends sys {
 		}
 		if (!file_exists(UPLOAD_DIR)) {
 			mkdir(UPLOAD_DIR, 0770, true);
-		}
-		// CLI paths
-		if (!defined(__NAMESPACE__ . '\CLI_BOOTSTRAP')) {
-			die(SysException::ERR25);
-		}
-		if (!defined(__NAMESPACE__ . '\CLI_PHP_BIN')) {
-			die(SysException::ERR26);
 		}
 
 		self::$Sys = new sys();

@@ -22,8 +22,8 @@ class Container {
 	protected array $id2classMap = [];
 	/** Mapping between classes and services IDs */
 	protected array $class2idMap = [];
-	/** initialized namespaces */
-	protected array $namespaces = [];
+	/** initialized contexts */
+	protected array $contexts = [];
 	/** Array of instantiated services (to avoid replication) */
 	protected array $services = [];
 
@@ -47,20 +47,20 @@ class Container {
 	}
 
 	/**
-	 * Initialize namespace
+	 * Initialize context
 	 * @throws ContainerException
 	 */
-	public function init(string $namespace, ?array $containerMaps = null): void {
-		if (in_array($namespace, $this->namespaces)) {
+	public function init(string $context, ?array $containerMaps = null): void {
+		if (in_array($context, $this->contexts)) {
 			return;
 		}
-		//sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Container->init');
-		$this->namespaces[] = $namespace;
-		$maps               = $containerMaps ?? ContainerYamlParser::parseNamespace($namespace);
-		$this->id2classMap  = array_merge($this->id2classMap, $maps['id2class']);
-		$this->class2idMap  = array_merge($this->class2idMap, $maps['class2id']);
+		//sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, 'sys.Container->init');
+		$this->contexts[]  = $context;
+		$maps              = $containerMaps ?? ContainerYamlParser::parse($context);
+		$this->id2classMap = array_merge($this->id2classMap, $maps['id2class']);
+		$this->class2idMap = array_merge($this->class2idMap, $maps['class2id']);
 		if (!$containerMaps) {
-			sys::cache(SYS_CACHE)->set($namespace . '.$services', $maps['services']);
+			sys::cache(SYS_CACHE)->set($context . '.$services', $maps['services']);
 		}
 	}
 
@@ -75,9 +75,9 @@ class Container {
 			return $this->services[$id];
 		}
 		try {
-			$namespace = substr($id, 0, strrpos($id, '.'));
-			if (!in_array($namespace, $this->namespaces)) {
-				$this->init($namespace);
+			$context = substr($id, 0, strrpos($id, '.'));
+			if (!in_array($context, $this->contexts)) {
+				$this->init($context);
 			}
 			if (!$this->has($id)) {
 				throw new ContainerException(1, [$this->_, $id]);
@@ -86,7 +86,7 @@ class Container {
 				throw new ContainerException(2, [$this->_, $id, $class]);
 			}
 			if (!$Obj = sys::cache(SYS_CACHE)->get($id)) {
-				$obj = sys::cache(SYS_CACHE)->get($namespace . '.$services')[$id];
+				$obj = sys::cache(SYS_CACHE)->get($context . '.$services')[$id];
 				$Obj = $this->build($id, $obj['class'], $obj['constructor'], $obj['properties']);
 				sys::cache(SYS_CACHE)->set($id, $Obj);
 			}
