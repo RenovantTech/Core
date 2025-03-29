@@ -20,8 +20,8 @@ class Context {
 	/** EventDispatcher instance
 	 * @var EventDispatcher */
 	protected $EventDispatcher;
-	/** initialized namespaces */
-	protected array $namespaces = [];
+	/** initialized contexts */
+	protected array $contexts = [];
 	/** Array of instantiated services (to avoid replication) */
 	protected array $services = [];
 
@@ -43,31 +43,31 @@ class Context {
 	}
 
 	/**
-	 * Initialize namespace
-	 * @param string $namespace Context namespace
+	 * Initialize context
+	 * @param string $context Context space
 	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 */
-	public function init(string $namespace) {
-		if (in_array($namespace, $this->namespaces)) {
+	public function init(string $context) {
+		if (in_array($context, $this->contexts)) {
 			return;
 		}
-		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, 'sys.Context->init');
-		$this->namespaces[] = $namespace;
-		if (!$context = sys::cache(SYS_CACHE)->get($namespace . '.$context')) {
-			$context              = [];
-			$context['includes']  = ContextYamlParser::parseNamespace($namespace);
-			$context['container'] = ContainerYamlParser::parseNamespace($namespace);
-			$context['events']    = EventYamlParser::parseNamespace($namespace);
-			$services             = $context['container']['services'];
-			unset($context['container']['services']);
-			sys::cache(SYS_CACHE)->set($namespace . '.$context', $context);
-			sys::cache(SYS_CACHE)->set($namespace . '.$services', $services);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, 'sys.Context->init');
+		$this->contexts[] = $context;
+		if (!$data = sys::cache(SYS_CACHE)->get($context . '.$context')) {
+			$data              = [];
+			$data['includes']  = ContextYamlParser::parse($context);
+			$data['container'] = ContainerYamlParser::parse($context);
+			$data['events']    = EventYamlParser::parse($context);
+			$services          = $data['container']['services'];
+			unset($data['container']['services']);
+			sys::cache(SYS_CACHE)->set($context . '.$context', $data);
+			sys::cache(SYS_CACHE)->set($context . '.$services', $services);
 		}
-		$this->Container->init($namespace, $context['container']);
-		$this->EventDispatcher->init($namespace, $context['events']);
-		foreach ($context['includes'] as $ns) {
+		$this->Container->init($context, $data['container']);
+		$this->EventDispatcher->init($context, $data['events']);
+		foreach ($data['includes'] as $ns) {
 			$this->init($ns);
 		}
 	}

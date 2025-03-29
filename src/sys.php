@@ -99,15 +99,15 @@ class sys {
 	 * * set global php settings (TimeZone, charset);
 	 * * initialize classes auto-loading;
 	 * - register error & exception handlers.
-	 * @param string $sys the system namespace to initialize
-	 * @param string $namespace an optional additional namespace to initialize
+	 * @param string $sys the system context to initialize
+	 * @param string $context an optional additional Context to initialize
 	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 * @throws util\yaml\YamlException
 	 */
-	public static function init(string $sys = 'sys', ?string $namespace = null) {
+	public static function init(string $sys = 'sys', ?string $context = null) {
 		self::$traceFn = __METHOD__;
 		self::trace();
 		set_exception_handler(__NAMESPACE__ . '\trace\Tracer::onException');
@@ -146,8 +146,8 @@ class sys {
 		self::$EventDispatcher = new EventDispatcher();
 		self::$Context         = new Context(self::$Container, self::$EventDispatcher);
 		self::$Context->init($sys);
-		if ($namespace) {
-			self::$Context->init($namespace);
+		if ($context) {
+			self::$Context->init($context);
 		}
 		self::$EventDispatcher->trigger(self::EVENT_INIT);
 	}
@@ -186,26 +186,26 @@ class sys {
 	}
 
 	/**
-	 * @param string $namespace the APP namespace to initialize
+	 * @param string $context the APP context to initialize
 	 * @throws ContainerException
 	 * @throws ContextException
 	 * @throws EventDispatcherException
 	 * @throws \ReflectionException
 	 * @throws util\yaml\YamlException
 	 */
-	public static function run(string $namespace) {
+	public static function run(string $context) {
 		switch (PHP_SAPI) {
 			case 'cli':
-				self::trace(LOG_DEBUG, T_INFO, 'CLI app namespace "' . $namespace . '"', null, __METHOD__);
+				self::trace(LOG_DEBUG, T_INFO, 'CLI app context "' . $context . '"', null, __METHOD__);
 				self::$Req = new console\Request();
 				self::$Res = new console\Response();
-				self::$Context->get($namespace . '.AppCLI')->run(self::$Req, self::$Res);
+				self::$Context->get($context . '.AppCLI')->run(self::$Req, self::$Res);
 				break;
 			default: // HTTP
-				self::trace(LOG_DEBUG, T_INFO, 'HTTP app namespace "' . $namespace . '"', null, __METHOD__);
+				self::trace(LOG_DEBUG, T_INFO, 'HTTP app context "' . $context . '"', null, __METHOD__);
 				self::$Req = new http\Request();
 				self::$Res = new http\Response();
-				self::$Context->get($namespace . '.AppHTTP')->run(self::$Req, self::$Res);
+				self::$Context->get($context . '.AppHTTP')->run(self::$Req, self::$Res);
 		}
 	}
 

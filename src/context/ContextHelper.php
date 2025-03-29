@@ -8,28 +8,28 @@ use renovant\core\sys;
  */
 class ContextHelper extends sys {
 	/**
-	 * Get all contexts namespaces
+	 * Get all contexts spaces
 	 * @return array
 	 * @throws \renovant\core\container\ContainerException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 * @throws ContextException
 	 */
 	public static function getAllContexts(): array {
-		$ctxNamespaces = [];
+		$contexts = [];
 		// scan global namespaces
 		$files = scandir(\renovant\core\BASE_DIR);
 		foreach ($files as $file) {
 			if (is_file(\renovant\core\BASE_DIR . $file) && substr($file, -4) == '.yml') {
-				$namespace       = substr($file, 0, -4);
-				$ctxNamespaces[] = $namespace;
+				$namespace  = substr($file, 0, -4);
+				$contexts[] = $namespace;
 				//sys::context()->init($namespace);
 			}
 		}
 		// iterate on namespaces directories
 		foreach (self::$namespaces as $namespace => $nsDir) {
-			self::scanNamespaceDir($namespace, $nsDir, $ctxNamespaces);
+			self::scanNamespaceDir($namespace, $nsDir, $contexts);
 		}
-		return $ctxNamespaces;
+		return $contexts;
 	}
 
 	/**
@@ -40,14 +40,14 @@ class ContextHelper extends sys {
 	 * @throws \renovant\core\container\ContainerException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	private static function scanNamespaceDir(string $namespace, string $dir, array &$ctxNamespaces) {
+	private static function scanNamespaceDir(string $namespace, string $dir, array &$contexts) {
 		$files = scandir($dir);
 		foreach ($files as $file) {
 			if (is_file($dir . '/' . $file) && $file == 'context.yml') {
-				$ctxNamespaces[] = str_replace('\\', '.', $namespace);
+				$contexts[] = str_replace('\\', '.', $namespace);
 				//sys::context()->init(str_replace('\\', '.', $namespace));
 			} elseif (is_dir($dir . '/' . $file) && !in_array($file, ['.', '..'])) {
-				self::scanNamespaceDir($namespace . '\\' . $file, $dir . '/' . $file, $ctxNamespaces);
+				self::scanNamespaceDir($namespace . '\\' . $file, $dir . '/' . $file, $contexts);
 			}
 		}
 	}

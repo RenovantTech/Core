@@ -1,6 +1,8 @@
 <?php
 namespace renovant\core;
 
+use renovant\core\util\reflection\ReflectionObject;
+
 /**
  * Util functions to parse class or namespace
  */
@@ -31,7 +33,11 @@ class sysinfo extends sys {
 	}
 
 	protected static function parse(string|object $obj): array {
-		$obj  = is_object($obj) ? $obj->_ : $obj;
+		if (is_object($obj)) {
+			$RObj = new ReflectionObject($obj);
+			$obj  = $RObj->getProperty('_')->getValue($obj);
+		}
+
 		$path = str_replace('.', '\\', $obj);
 		if (false === $i = strrpos($path, '\\')) {
 			$namespace = '';

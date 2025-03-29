@@ -9,22 +9,22 @@ use const renovant\core\trace\T_DEPINJ;
 class Yaml {
 	/**
 	 * YAML Context parser utility, supporting PHAR & ENVIRONMENT switch
-	 * @param string $namespace Context namespace
+	 * @param string $context Context name
 	 * @param string|null $section optional YAML section to be parsed
 	 * @param array $callbacks content handlers for YAML nodes
 	 * @return mixed|null
 	 * @throws YamlException
 	 */
-	public static function parseContext($namespace, $section = null, array $callbacks = []) {
-		$dirName = sysinfo::dir($namespace . '.Context');
-		if ($namespace == 'sys') {
+	public static function parseContext($context, $section = null, array $callbacks = []) {
+		$dirName = sysinfo::dir($context . '.Context');
+		if ($context == 'sys') {
 			$yamlPath = BASE_DIR . SYS_YAML;
 		} elseif (empty($dirName)) {
-			$yamlPath = BASE_DIR . $namespace . '.yml';
+			$yamlPath = BASE_DIR . $context . '.yml';
 		} else {
 			$yamlPath = $dirName . DIRECTORY_SEPARATOR . 'context.yml';
 		}
-		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+		sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, __METHOD__);
 		if (!file_exists($yamlPath)) {
 			throw new YamlException(1, [__METHOD__, $yamlPath]);
 		}

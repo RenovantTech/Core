@@ -9,25 +9,25 @@ use const renovant\core\trace\T_EVENT;
 class EventDispatcher {
 	/** registered listeners (callbacks) */
 	protected array $listeners = [];
-	/** initialized namespaces */
-	protected array $namespaces = [];
+	/** initialized contexts */
+	protected array $contexts = [];
 	/** shutdown events queue */
 	protected static array $queue = [];
 
 	/**
-	 * Initialize namespace
-	 * @param string $namespace Container namespace
+	 * Initialize context
+	 * @param string $context Container context
 	 * @param array|null $eventsMaps
 	 * @throws EventDispatcherException
 	 */
-	public function init(string $namespace, array $eventsMaps = null) {
-		if (in_array($namespace, $this->namespaces)) {
+	public function init(string $context, array $eventsMaps = null) {
+		if (in_array($context, $this->contexts)) {
 			return;
 		}
-		//sys::trace(LOG_DEBUG, T_EVENT, $namespace, null, 'sys.EventDispatcher->init');
-		$this->namespaces[] = $namespace;
-		$listeners          = $eventsMaps ?? EventYamlParser::parseNamespace($namespace);
-		$this->listeners    = array_merge($this->listeners, $listeners);
+		//sys::trace(LOG_DEBUG, T_EVENT, $context, null, 'sys.EventDispatcher->init');
+		$this->contexts[] = $context;
+		$listeners        = $eventsMaps ?? EventYamlParser::parse($context);
+		$this->listeners  = array_merge($this->listeners, $listeners);
 		krsort($this->listeners, SORT_NUMERIC);
 	}
 

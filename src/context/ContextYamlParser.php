@@ -11,15 +11,15 @@ use const renovant\core\trace\T_DEPINJ;
  */
 class ContextYamlParser {
 	/**
-	 * Parse YAML namespace config
-	 * @param string $namespace
+	 * Parse YAML context config
+	 * @param string $context
 	 * @throws ContextException
 	 */
-	public static function parseNamespace(string $namespace): array {
-		sys::trace(LOG_DEBUG, T_DEPINJ, $namespace, null, __METHOD__);
+	public static function parse(string $context): array {
+		sys::trace(LOG_DEBUG, T_DEPINJ, $context, null, __METHOD__);
 		$includes = [];
 		try {
-			$yaml = Yaml::parseContext($namespace);
+			$yaml = Yaml::parseContext($context);
 
 			// @TODO verify YAML content
 			/*
@@ -36,18 +36,18 @@ class ContextYamlParser {
 				$includes = $yaml['includes'];
 			}
 
-			// verify Context namespaces
+			// verify Context contexts
 			if (isset($yaml['services']) && is_array($yaml['services'])) {
-				$availableNamespaces = implode(', ', array_merge((array)$namespace, $includes));
+				$availableNamespaces = implode(', ', array_merge((array)$context, $includes));
 				foreach ($yaml['services'] as $id => $objYAML) {
-					if (strpos($id, $namespace) !== 0) {
-						throw new ContextException(14, [__METHOD__, $id, $namespace]);
+					if (strpos($id, $context) !== 0) {
+						throw new ContextException(14, [__METHOD__, $id, $context]);
 					}
 					if (isset($objYAML['constructor'])) {
 						foreach ($objYAML['constructor'] as $arg) {
 							if (is_string($arg) && substr($arg, 0, 4) == '!obj') {
 								$id = substr($arg, 5);
-								if (strpos($id, $namespace . '.') === 0) {
+								if (strpos($id, $context . '.') === 0) {
 									continue;
 								}
 								foreach ($includes as $ns) {
@@ -63,7 +63,7 @@ class ContextYamlParser {
 						foreach ($objYAML['properties'] as $prop => $propYAML) {
 							if (is_string($propYAML) && substr($propYAML, 0, 4) == '!obj') {
 								$id = substr($propYAML, 5);
-								if (strpos($id, $namespace . '.') === 0) {
+								if (strpos($id, $context . '.') === 0) {
 									continue;
 								}
 								foreach ($includes as $ns) {
@@ -80,9 +80,9 @@ class ContextYamlParser {
 		} catch (YamlException $Ex) {
 			switch ($Ex->getCode()) {
 				case 1:
-					throw new ContextException(11, [__METHOD__, $namespace]);
+					throw new ContextException(11, [__METHOD__, $context]);
 				case 2:
-					throw new ContextException(12, [__METHOD__, $namespace]);
+					throw new ContextException(12, [__METHOD__, $context]);
 			}
 		}
 		return $includes;
