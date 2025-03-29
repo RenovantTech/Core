@@ -27,7 +27,7 @@ class Exception extends \Exception {
 			}
 		}
 		parent::__construct((string)$message, (int)$code);
-		$class = sys::info(get_class($this), sys::INFO_CLASS);
+		$class = sysinfo::class(get_class($this));
 		sys::trace(LOG_DEBUG, T_INFO, '[' . $class . ':' . $this->getCode() . '] ' . $this->getMessage());
 	}
 

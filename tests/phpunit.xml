@@ -54,6 +54,7 @@
 		</testsuite>
 		<testsuite name="sys">
 			<file>ExceptionTest.php</file>
+			<file>sysinfoTest.php</file>
 			<file>sysTest.php</file>
 		</testsuite>
 	</testsuites>

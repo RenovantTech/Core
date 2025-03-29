@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\util\yaml;
 
-use renovant\core\{CoreProxy, sys};
+use renovant\core\{CoreProxy, sys, sysinfo};
 
 use const renovant\core\{BASE_DIR, ENVIRONMENT, TMP_DIR, SYS_YAML};
 use const renovant\core\trace\T_DEPINJ;
@@ -16,7 +16,7 @@ class Yaml {
 	 * @throws YamlException
 	 */
 	public static function parseContext($namespace, $section = null, array $callbacks = []) {
-		$dirName = sys::info($namespace . '.Context', sys::INFO_PATH_DIR);
+		$dirName = sysinfo::dir($namespace . '.Context');
 		if ($namespace == 'sys') {
 			$yamlPath = BASE_DIR . SYS_YAML;
 		} elseif (empty($dirName)) {

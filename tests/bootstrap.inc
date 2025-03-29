@@ -27,6 +27,7 @@ require __DIR__ . '/../src/constants.inc.php';
 require __DIR__ . '/../src/CoreProxy.php';
 require __DIR__ . '/../src/CoreTrait.php';
 require __DIR__ . '/../src/sys.php';
+require __DIR__ . '/../src/sysinfo.php';
 require __DIR__ . '/../vendor/autoload.php';
 
 // prepare BIN_DIR

@@ -22,11 +22,6 @@ class sys {
 	public const SYS_YAML_CACHE = CACHE_DIR . SYS_YAML . '.php';
 	public const EVENT_INIT     = 'sys:init';
 	public const EVENT_SHUTDOWN = 'sys:shutdown';
-	public const INFO_NAMESPACE = 1;
-	public const INFO_CLASS     = 2;
-	public const INFO_PATH      = 3;
-	public const INFO_PATH_DIR  = 4;
-	public const INFO_PATH_FILE = 5;
 	public const PDO_DEFAULT    = 'master';
 	/** Namespace definitions, used by __autoload()
 	 * @var array */
@@ -219,7 +214,7 @@ class sys {
 	 * @param string $class class name
 	 */
 	public static function autoload(string $class) {
-		if (@file_exists($file = self::info($class, self::INFO_PATH) . '.php')) {
+		if (@file_exists($file = sysinfo::path($class) . '.php')) {
 			self::trace(LOG_DEBUG, T_AUTOLOAD, $class, null, __METHOD__);
 			require $file;
 			if (in_array(\renovant\core\db\orm\EntityTrait::class, class_uses($class))) {
@@ -292,39 +287,6 @@ class sys {
 	 */
 	public static function event(): EventDispatcher {
 		return self::$EventDispatcher;
-	}
-
-	/**
-	 * Parse class or namespace, returning: namespace, class name (without namespace), full path, directory, file
-	 * @param string $path
-	 * @param int|null $return
-	 * @return array|string|false
-	 */
-	public static function info(string $path, $return = null) {
-		$path = str_replace('.', '\\', $path);
-		if (false === $i = strrpos($path, '\\')) {
-			$namespace = '';
-			$class     = $path;
-		} else {
-			$namespace = substr($path, 0, $i);
-			$class     = substr($path, $i + 1);
-		}
-		$realPath = '';
-		foreach (self::$namespaces as $baseName => $baseDir) {
-			if (0 === strpos($path, $baseName)) {
-				$realPath = $baseDir . str_replace(['\\', '_'], DIRECTORY_SEPARATOR, substr($namespace, strlen($baseName)) . DIRECTORY_SEPARATOR . $class);
-				//				$realPath = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR, $realPath);
-				break;
-			}
-		}
-		switch ($return) {
-			case self::INFO_NAMESPACE: return $namespace;
-			case self::INFO_CLASS: return $class;
-			case self::INFO_PATH: return $realPath;
-			case self::INFO_PATH_DIR: return dirname($realPath);
-			case self::INFO_PATH_FILE: return basename($realPath);
-			default: return [$namespace, $class, dirname($realPath), basename($realPath)];
-		}
 	}
 
 	/**
