@@ -5,9 +5,14 @@ services:
         properties:
             name: TEST-APP
             modules:
-                MOD1:
-                    url: /
-                    namespace: test.http
+                MOD2:
+                    url: /api/mod2/
+                    context: test.http.mod2
+                MOD3:
+                    url: /api/mod3/
+                '':
+                    url: /api/
+
     # Dispatcher
     test.http.Dispatcher:
         class: renovant\core\http\Dispatcher
