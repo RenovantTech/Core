@@ -17,7 +17,7 @@ class PDOStatement extends \PDOStatement {
 	 * @return PDOStatement
 	 */
 	#[\ReturnTypeWillChange]
-	public function execute(array $params = null, int $traceLevel = LOG_INFO) {
+	public function execute(array $params = null, int $traceLevel = LOG_INFO): PDOStatement {
 		PDO::trace($this->_id, $traceLevel, $this->queryString, $params);
 		parent::execute($params);
 		return $this;

@@ -68,6 +68,7 @@ class PDO extends \PDO {
 	}
 
 	/**
+	 * @return PDOStatement
 	 * @throws \PDOException
 	 */
 	public function prepare(string $query, array $options = []): PDOStatement {
