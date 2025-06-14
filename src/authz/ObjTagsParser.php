@@ -1,7 +1,7 @@
 <?php
 namespace renovant\core\authz;
 
-use renovant\core\util\reflection\{ReflectionClass, ReflectionMethod, ReflectionObject};
+use renovant\core\util\reflection\{DocComment, ReflectionClass, ReflectionMethod, ReflectionObject};
 
 /**
  * @internal
@@ -13,10 +13,16 @@ class ObjTagsParser {
 	 */
 	public static function parse(object $Obj): ObjAuthz {
 		$RefClass = new ReflectionClass($Obj);
-		$roles    = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
+
+		$allows = $roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
 
 		// class annotations
-		$DocComment   = $RefClass->getDocComment();
+		$DocComment = $RefClass->getDocComment();
+
+		$a = self::parseAllows($DocComment);
+		if (!empty($a)) {
+			$allows['_'] = $a;
+		}
 		list($r, $op) = self::parseRoles($DocComment);
 		if (!empty($r)) {
 			$roles['_']    = $r;
@@ -35,8 +41,13 @@ class ObjTagsParser {
 
 		// methods annotations
 		foreach ($RefClass->getMethods() as $RefMethod) {
-			$methodName   = $RefMethod->getName();
-			$DocComment   = $RefMethod->getDocComment();
+			$methodName = $RefMethod->getName();
+			$DocComment = $RefMethod->getDocComment();
+
+			$a = self::parseAllows($DocComment);
+			if (!empty($a)) {
+				$allows[$methodName] = $a;
+			}
 			list($r, $op) = self::parseRoles($DocComment);
 			if (!empty($r)) {
 				$roles[$methodName]    = $r;
@@ -78,10 +89,27 @@ class ObjTagsParser {
 		$RProp = (new ReflectionObject($Obj))->getProperty('_');
 		$RProp->setAccessible(true);
 		$id = $RProp->getValue($Obj);
-		return new ObjAuthz($id, $methodsParams, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls);
+		return new ObjAuthz($id, $methodsParams, $allows, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls);
 	}
 
-	protected static function parseRoles($DocComment): array {
+	protected static function parseAllows(DocComment $DocComment): ?array {
+		$allows = null;
+		if ($DocComment->hasTag('authz-allow-roles')) {
+			$tag = $DocComment->getTag('authz-allow-roles');
+			foreach ($tag as $k => $v) {
+				$allows['roles'][] = $k;
+			}
+		}
+		if ($DocComment->hasTag('authz-allow-permissions')) {
+			$tag = $DocComment->getTag('authz-allow-permissions');
+			foreach ($tag as $k => $v) {
+				$allows['permissions'][] = $k;
+			}
+		}
+		return $allows;
+	}
+
+	protected static function parseRoles(DocComment $DocComment): array {
 		$roles = $op = null;
 		if ($DocComment->hasTag('authz-role')) {
 			$op  = ObjAuthz::OP_ONE;
@@ -107,7 +135,7 @@ class ObjTagsParser {
 		return [$roles, $op];
 	}
 
-	protected static function parsePermissions($DocComment): array {
+	protected static function parsePermissions(DocComment $DocComment): array {
 		$perms = $op = null;
 		if ($DocComment->hasTag('authz-permission')) {
 			$op  = ObjAuthz::OP_ONE;
@@ -133,7 +161,7 @@ class ObjTagsParser {
 		return [$perms, $op];
 	}
 
-	protected static function parseAcls($DocComment): array {
+	protected static function parseAcls(DocComment $DocComment): array {
 		$acls = $op = null;
 		if ($DocComment->hasTag('authz-acl')) {
 			$op  = ObjAuthz::OP_ONE;

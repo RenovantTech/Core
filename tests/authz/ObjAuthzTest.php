@@ -1,19 +1,20 @@
 <?php
 namespace test\authz;
+
+use renovant\core\sys;
+use renovant\core\authz\Authz,
+renovant\core\authz\AuthzException,
+renovant\core\authz\AuthzService,
+renovant\core\util\reflection\ReflectionClass;
+
 use const renovant\core\SYS_CACHE;
-use renovant\core\sys,
-	renovant\core\authz\Authz,
-	renovant\core\authz\AuthzException,
-	renovant\core\authz\AuthzService,
-	renovant\core\util\reflection\ReflectionClass;
 
 class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
+	public static $AuthService;
+	public static $AuthzService;
+	public static $TraitMockService;
 
-	static $AuthService;
-	static $AuthzService;
-	static $TraitMockService;
-
-	static function setUpBeforeClass():void {
+	public static function setUpBeforeClass(): void {
 		sys::cache('sys')->delete('sys.AUTHZ');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_authz_rules;
@@ -23,13 +24,13 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 		');
 
 		self::$AuthzService = new AuthzService('mysql', [
-			'authz'	=> 'sys_authz',
-			'users'	=> 'sys_users'
+			'authz' => 'sys_authz',
+			'users' => 'sys_users'
 		]);
 		sys::pdo('mysql')->exec(file_get_contents(__DIR__ . '/ObjAuthzTest.sql'));
 	}
 
-	static function tearDownAfterClass():void {
+	public static function tearDownAfterClass(): void {
 		sys::cache('sys')->delete('sys.AUTHZ');
 		sys::pdo('mysql')->exec('
 			DROP TABLE IF EXISTS sys_authz_rules;
@@ -39,12 +40,12 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 		');
 	}
 
-	static protected function authenticate($userId) {
+	protected static function authenticate($userId) {
 		$RefClass = new ReflectionClass(Authz::class);
-		$RefProp = $RefClass->getProperty('_Authz');
+		$RefProp  = $RefClass->getProperty('_Authz');
 		$RefProp->setAccessible(true);
 		$RefProp->setValue(null);
-		sys::cache(SYS_CACHE)->delete(AuthzService::CACHE_PREFIX.$userId);
+		sys::cache(SYS_CACHE)->delete(AuthzService::CACHE_PREFIX . $userId);
 
 		try {
 			$AuthService = sys::context()->get('sys.AUTH');
@@ -52,7 +53,6 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 			$AuthzService = sys::context()->get('sys.AUTHZ');
 			$AuthzService->init();
 		} catch (\Exception) {
-
 		}
 	}
 
@@ -62,7 +62,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @throws \renovant\core\context\ContextException
 	 * @throws \renovant\core\event\EventDispatcherException
 	 */
-	function testConstruct() {
+	public function testConstruct() {
 		/** @var ObjAuthzMock $ObjAuthzMock */
 		$ObjAuthzMock = sys::context()->get('test.authz.ObjAuthzMock');
 		$this->assertInstanceOf(\renovant\core\CoreProxy::class, $ObjAuthzMock);
@@ -74,7 +74,15 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRole($ObjAuthzMock) {
+	public function testRole($ObjAuthzMock) {
+		// GLOBAL Authz
+		self::authenticate(6);
+		$this->assertEquals('allow-roles', $ObjAuthzMock->allowRoles());
+		$this->assertEquals('role', $ObjAuthzMock->role());
+
+		self::authenticate(1);
+		$this->assertEquals('allow-roles', $ObjAuthzMock->allowRoles());
+
 		self::authenticate(1);
 		$this->assertEquals(0, sys::authz()->verified());
 		$this->assertEquals('role', $ObjAuthzMock->role());
@@ -91,10 +99,13 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRoleException($ObjAuthzMock) {
+	public function testRoleException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(300);
 		$this->expectExceptionMessage('[ROLE] "role.service"');
+
+		self::authenticate(2);
+		$this->assertEquals('allow-roles', $ObjAuthzMock->allowRoles());
 
 		self::authenticate(4);
 		$this->assertEquals('role', $ObjAuthzMock->role());
@@ -104,7 +115,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRolesAllException($ObjAuthzMock) {
+	public function testRolesAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo"');
@@ -117,7 +128,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzRolesAnyException($ObjAuthzMock) {
+	public function testRolesAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(301);
 		$this->expectExceptionMessage('[ROLE] "role.service.foo, role.service.bar"');
@@ -131,7 +142,13 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermission($ObjAuthzMock) {
+	public function testPermission($ObjAuthzMock) {
+		// GLOBAL Authz
+		self::authenticate(6);
+		$this->assertEquals('permission', $ObjAuthzMock->permission());
+		$this->assertEquals('permissions-all', $ObjAuthzMock->permissionsAll());
+		$this->assertEquals('permissions-any', $ObjAuthzMock->permissionsAny());
+
 		self::authenticate(1);
 		$this->assertEquals('permission', $ObjAuthzMock->permission());
 
@@ -146,7 +163,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionException($ObjAuthzMock) {
+	public function testPermissionException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
@@ -159,7 +176,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionsAllException($ObjAuthzMock) {
+	public function testPermissionsAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo"');
@@ -172,7 +189,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzPermissionsAnyException($ObjAuthzMock) {
+	public function testPermissionsAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(401);
 		$this->expectExceptionMessage('[PERMISSION] "perm.service.foo, perm.service.bar"');
@@ -186,7 +203,13 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @throws AuthzException
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAcl($ObjAuthzMock) {
+	public function testAcl($ObjAuthzMock) {
+		// GLOBAL Authz
+		self::authenticate(6);
+		$this->assertEquals('acl-12-34-123', $ObjAuthzMock->acl(12, 34, 123));
+		$this->assertEquals('acl-all-1-1-123', $ObjAuthzMock->aclAll(1, 1, 123));
+		$this->assertEquals('acl-any-1-9-123', $ObjAuthzMock->aclAny(1, 9, 123));
+
 		self::authenticate(1);
 		$this->assertEquals('acl-12-34-123', $ObjAuthzMock->acl(12, 34, 123));
 		$this->assertEquals('acl-12-34-456', $ObjAuthzMock->acl(12, 34, 456));
@@ -204,7 +227,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclException($ObjAuthzMock) {
+	public function testAclException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.foo"');
@@ -217,7 +240,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclAllException($ObjAuthzMock) {
+	public function testAclAllException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.district"');
@@ -230,7 +253,7 @@ class ObjAuthzTest extends \PHPUnit\Framework\TestCase {
 	 * @depends testConstruct
 	 * @throws \ReflectionException
 	 */
-	function testAuthzAclAnyException($ObjAuthzMock) {
+	public function testAclAnyException($ObjAuthzMock) {
 		$this->expectException(AuthzException::class);
 		$this->expectExceptionCode(101);
 		$this->expectExceptionMessage('[ACL] "acl.area, acl.district"');

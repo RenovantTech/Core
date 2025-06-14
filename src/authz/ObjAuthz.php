@@ -7,16 +7,18 @@ use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 
 class ObjAuthz {
-	public const CACHE_SUFFIX = ':authz';
+	public const string CACHE_SUFFIX = ':authz';
+	public const string METHOD_ALL   = '_';
 
-	public const OP_ONE = 1;
-	public const OP_ALL = 2;
-	public const OP_ANY = 3;
+	public const int OP_ONE = 1;
+	public const int OP_ALL = 2;
+	public const int OP_ANY = 3;
 
 	/** OID (Object Identifier) */
 	protected string $_;
 	protected ?array $methodsParams;
 
+	protected ?array $allows;
 	protected ?array $roles;
 	protected ?array $perms;
 	protected ?array $acls;
@@ -25,9 +27,10 @@ class ObjAuthz {
 	protected ?array $op_perms;
 	protected ?array $op_acls;
 
-	public function __construct($id, $methodsParams, $roles, $perms, $acls, $op_roles, $op_perms, $op_acls) {
+	public function __construct($id, $methodsParams, ?array $allows, ?array $roles, ?array $perms, ?array $acls, ?array $op_roles, ?array $op_perms, ?array $op_acls) {
 		$this->_             = $id;
 		$this->methodsParams = $methodsParams;
+		$this->allows        = $allows;
 		$this->roles         = $roles;
 		$this->perms         = $perms;
 		$this->acls          = $acls;
@@ -44,36 +47,65 @@ class ObjAuthz {
 		$Authz   = sys::authz();
 		$checked = [];
 		try {
-			// check RBAC roles
-			if (isset($this->roles['_'])) {
-				$this->checkRoles($Authz, $checked);
-			}
-			if (isset($this->roles[$method])) {
-				$this->checkRoles($Authz, $checked, $method);
-			}
-
-			// check RBAC permissions
-			if (isset($this->perms['_'])) {
-				$this->checkPermissions($Authz, $checked);
-			}
-			if (isset($this->perms[$method])) {
-				$this->checkPermissions($Authz, $checked, $method);
-			}
-
-			// check ACL
-			if (isset($this->acls['_']) || isset($this->acls[$method])) {
-				$this->checkAcls($Authz, $checked, $method, $args);
-			}
-
-			if (empty($checked)) {
-				sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
+			// check ALLOWS
+			if (
+				(isset($this->allows[self::METHOD_ALL]) && $this->checkAllows($Authz, $checked, self::METHOD_ALL))
+				||
+				(isset($this->allows[$method]) && $this->checkAllows($Authz, $checked, $method))
+			) {
+				sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] allow OK', $checked);
 			} else {
-				sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+				// check RBAC roles
+				if (isset($this->roles['_'])) {
+					$this->checkRoles($Authz, $checked);
+				}
+				if (isset($this->roles[$method])) {
+					$this->checkRoles($Authz, $checked, $method);
+				}
+
+				// check RBAC permissions
+				if (isset($this->perms['_'])) {
+					$this->checkPermissions($Authz, $checked);
+				}
+				if (isset($this->perms[$method])) {
+					$this->checkPermissions($Authz, $checked, $method);
+				}
+
+				// check ACL
+				if (isset($this->acls['_']) || isset($this->acls[$method])) {
+					$this->checkAcls($Authz, $checked, $method, $args);
+				}
+
+				if (empty($checked)) {
+					sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] empty checks');
+				} else {
+					sys::trace(LOG_DEBUG, T_INFO, '[AUTHZ] check OK', $checked);
+				}
 			}
 		} catch (AuthzException $Ex) {
 			sys::trace(LOG_WARNING, T_INFO, '[AUTHZ] check FAILED');
 			throw $Ex;
 		}
+	}
+
+	protected function checkAllows(Authz $Authz, array &$checked, string $method): bool {
+		if (isset($this->allows[$method]['roles'])) {
+			foreach ($this->allows[$method]['roles'] as $role) {
+				if ($Authz->role($role)) {
+					$checked['ROLES'][] = $role;
+					return true;
+				}
+			}
+		}
+		if (isset($this->allows[$method]['permissions'])) {
+			foreach ($this->allows[$method]['permissions'] as $perm) {
+				if ($Authz->permission($perm)) {
+					$checked['PERMISSIONS'][] = $perm;
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/** @throws AuthzException */

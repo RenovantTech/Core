@@ -11,8 +11,9 @@ class OrmTagsParser {
 		try {
 			$RefClass   = new ReflectionClass($entityClass);
 			$DocComment = $RefClass->getDocComment();
-			$allows     = $roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
-			$actions    = [
+
+			$allows  = $roles = $perms = $acls = $op_roles = $op_perms = $op_acls = null;
+			$actions = [
 				OrmAuthz::ACTION_ALL,
 				OrmAuthz::ACTION_INSERT,
 				OrmAuthz::ACTION_SELECT,

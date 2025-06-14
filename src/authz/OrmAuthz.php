@@ -8,18 +8,18 @@ use const renovant\core\ENVIRONMENT;
 use const renovant\core\trace\T_INFO;
 
 class OrmAuthz {
-	public const CACHE_TAG = 'orm:authz';
+	public const string CACHE_TAG = 'orm:authz';
 
-	public const OP_ALLOW = 'ALLOW';
-	public const OP_ONE   = 'ONE';
-	public const OP_ALL   = 'ALL';
-	public const OP_ANY   = 'ANY';
+	public const string OP_ALLOW = 'ALLOW';
+	public const string OP_ONE   = 'ONE';
+	public const string OP_ALL   = 'ALL';
+	public const string OP_ANY   = 'ANY';
 
-	public const ACTION_ALL    = '_';
-	public const ACTION_INSERT = 'INSERT';
-	public const ACTION_SELECT = 'SELECT';
-	public const ACTION_UPDATE = 'UPDATE';
-	public const ACTION_DELETE = 'DELETE';
+	public const string ACTION_ALL    = '_';
+	public const string ACTION_INSERT = 'INSERT';
+	public const string ACTION_SELECT = 'SELECT';
+	public const string ACTION_UPDATE = 'UPDATE';
+	public const string ACTION_DELETE = 'DELETE';
 
 	/** OID (Object Identifier) */
 	protected string $_;
