@@ -133,11 +133,15 @@ class Dispatcher {
 			}
 			sys::trace(LOG_DEBUG, T_INFO, null, null, $this->_ . '->' . __FUNCTION__);
 			// detect View class
-			$viewClass = (array_key_exists($viewEngine, $this->viewEngines)) ? $this->viewEngines[$viewEngine] : $viewEngine;
-			if (!class_exists($viewClass) || $viewClass instanceof ViewInterface) {
-				throw new Exception(12, $viewEngine);
+			if ($viewEngine instanceof ViewInterface) {
+				$View = $viewEngine;
+			} else {
+				$viewClass = (array_key_exists($viewEngine, $this->viewEngines)) ? $this->viewEngines[$viewEngine] : $viewEngine;
+				if (!class_exists($viewClass) || $viewClass instanceof ViewInterface) {
+					throw new Exception(12, $viewEngine);
+				}
+				$View = new $viewClass();
 			}
-			$View = new $viewClass();
 			$Event->setView($View);
 			// detect resource
 			if (!empty($view)) {
