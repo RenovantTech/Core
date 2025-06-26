@@ -40,7 +40,9 @@ class DataMapper {
 				case 'microdatetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u');
 					break;
 				case 'array':
-				case 'object': $data[$k] = serialize($Entity->$k);
+					$data[$k] = $Entity->$k;
+					break;
+				case 'object': $data[$k] = json_encode($Entity->$k);
 					break;
 			}
 		}
