@@ -70,6 +70,6 @@ class PhpTALView implements ViewInterface {
 			$PhpTAL->set($k, $v);
 		}
 		// execute
-		$PhpTAL->echoExecute();
+		echo $PhpTAL->execute();
 	}
 }
