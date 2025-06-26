@@ -25,26 +25,14 @@ class DataMapper {
 			if ($fetchSubset && !str_contains($Entity::metadata()->fetchSubset($fetchSubset), $k)) {
 				continue;
 			}
-			switch ($v['type']) {
-				case 'string':
-				case 'integer':
-				case 'float':
-				case 'boolean':
-				case 'time':
-					$data[$k] = $Entity->$k;
-					break;
-				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d');
-					break;
-				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format(DateTime::W3C);
-					break;
-				case 'microdatetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u');
-					break;
-				case 'array':
-					$data[$k] = $Entity->$k;
-					break;
-				case 'object': $data[$k] = json_encode($Entity->$k);
-					break;
-			}
+			$data[$k] = match ($v['type']) {
+				'string','integer','float','boolean','time' => $Entity->$k,
+				'date'          => (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'),
+				'datetime'      => (is_null($Entity->$k)) ? null : $Entity->$k->format(DateTime::W3C),
+				'microdatetime' => (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u'),
+				'array'         => $Entity->$k,
+				'object'        => json_encode($Entity->$k)
+			};
 		}
 		return $data;
 	}
@@ -59,25 +47,14 @@ class DataMapper {
 			if ($Entity::metadata()->property($k)['readonly']) {
 				continue;
 			}
-			switch ($v['type']) {
-				case 'string':
-				case 'integer':
-				case 'float':
-				case 'time':
-					$data[$k] = $Entity->$k;
-					break;
-				case 'boolean': $data[$k] = (int)$Entity->$k;
-					break;
-				case 'date': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d');
-					break;
-				case 'datetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s');
-					break;
-				case 'microdatetime': $data[$k] = (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u');
-					break;
-				case 'array':
-				case 'object': $data[$k] = serialize($Entity->$k);
-					break;
-			}
+			$data[$k] = match ($v['type']) {
+				'string','integer','float','time' => $Entity->$k,
+				'boolean'       => (int)$Entity->$k,
+				'date'          => (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d'),
+				'datetime'      => (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s'),
+				'microdatetime' => (is_null($Entity->$k)) ? null : $Entity->$k->format('Y-m-d H:i:s.u'),
+				'array','object' => serialize($Entity->$k)
+			};
 		}
 		return $data;
 	}
@@ -91,25 +68,16 @@ class DataMapper {
 			if ($props[$k]['null'] && is_null($v)) {
 				continue;
 			}
-			switch ($props[$k]['type']) {
-				case 'string':
-				case 'time': break;
-				case 'integer': $v = (int) $v;
-					break;
-				case 'float': $v = (float) $v;
-					break;
-				case 'boolean': $v = (bool) $v;
-					break;
-				case 'date': $v = new Date($v);
-					break;
-				case 'datetime': $v = new DateTime($v);
-					break;
-				case 'microdatetime': $v = DateTime::createFromFormat('Y-m-d H:i:s.u', $v);
-					break;
-				case 'array':
-				case 'object': $v = unserialize($v);
-					break;
-			}
+			$v = match ($props[$k]['type']) {
+				'string','time' => $v,
+				'integer'       => (int) $v,
+				'float'         => (float) $v,
+				'boolean'       => (bool) $v,
+				'date'          => new Date($v),
+				'datetime'      => new DateTime($v),
+				'microdatetime' => DateTime::createFromFormat('Y-m-d H:i:s.u', $v),
+				'array','object' => unserialize($v)
+			};
 		}
 		return $data;
 	}
@@ -123,24 +91,15 @@ class DataMapper {
 			if ($props[$k]['null'] && is_null($v)) {
 				continue;
 			}
-			switch ($props[$k]['type']) {
-				case 'date':
-				case 'time':
-				case 'string': break;
-				case 'integer': $v = (int) $v;
-					break;
-				case 'float': $v = (float) $v;
-					break;
-				case 'boolean': $v = (bool) $v;
-					break;
-				case 'datetime': $v = is_string($v) ? date(DateTime::W3C, strtotime($v)) : null;
-					break;
-				case 'microdatetime': $v = (string) $v;
-					break;
-				case 'array':
-				case 'object': $v = unserialize($v);
-					break;
-			}
+			$v = match ($props[$k]['type']) {
+				'string','time','date' => $v,
+				'integer'       => (int) $v,
+				'float'         => (float) $v,
+				'boolean'       => (bool) $v,
+				'datetime'      => is_string($v) ? date(DateTime::W3C, strtotime($v)) : null,
+				'microdatetime' => (string) $v,
+				'array','object' => unserialize($v)
+			};
 		}
 		return $data;
 	}

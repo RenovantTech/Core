@@ -55,27 +55,21 @@ abstract class AbstractController implements \renovant\core\http\ControllerInter
 		if (isset($this->_config['params'])) {
 			foreach ($this->_config['params'] as $i => $param) {
 				if (!is_null($param['class'])) {
-					switch ($param['class']) {
-						case Request::class: $args[$i] = $Req;
-							break;
-						case Response::class: $args[$i] = $Res;
-							break;
-						case Auth::class: $args[$i] = Auth::instance();
-							break;
-						default: $args[$i] = new $param['class']($Req);
-					}
+					$args[$i] = match ($param['class']) {
+						Request::class  => $Req,
+						Response::class => $Res,
+						Auth::class     => Auth::instance(),
+						default         => new $param['class']($Req)
+					};
 				} elseif (isset($param['type'])) {
-					switch ($param['type']) {
-						case 'boolean': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (bool) $v;
-							break;
-						case 'int': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (int) $v;
-							break;
-						case 'string': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (string) $v;
-							break;
-						case 'array': $args[$i] = (is_null($v = $Req->get($param['name']))) ? $param['default'] : (array) $v;
-							break;
-						default: $args[$i] = (is_null($v = $Req->get($param['name']))) ? null : $v;
-					}
+					$args[$i] = match ($param['type']) {
+						'boolean' => (is_null($v = $Req->get($param['name']))) ? $param['default'] : (bool) $v,
+						'int'     => (is_null($v = $Req->get($param['name']))) ? $param['default'] : (int) $v,
+						'float'   => (is_null($v = $Req->get($param['name']))) ? $param['default'] : (float) $v,
+						'string'  => (is_null($v = $Req->get($param['name']))) ? $param['default'] : (string) $v,
+						'array'   => (is_null($v = $Req->get($param['name']))) ? $param['default'] : (array) $v,
+						default   => (is_null($v = $Req->get($param['name']))) ? $param['default'] : $v
+					};
 				}
 			}
 		}

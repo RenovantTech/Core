@@ -79,26 +79,17 @@ trait EntityTrait {
 			} elseif ($prop['null'] && (is_null($v) || $v === '')) {
 				$v = null;
 			} else {
-				switch ($prop['type']) {
-					case 'string': $v = (string) $v;
-						break;
-					case 'integer': $v = (int) $v;
-						break;
-					case 'float': $v = (float) $v;
-						break;
-					case 'boolean': $v = (bool) $v;
-						break;
-					case 'date': $v = empty($v) ? null : (($v instanceof \DateTime) ? $v : new Date($v));
-						break;
-					case 'datetime': $v = empty($v) ? null : (($v instanceof \DateTime) ? $v : new DateTime($v));
-						break;
-					case 'microdatetime': $v = empty($v) ? null : (($v instanceof \DateTime) ? $v : DateTime::createFromFormat('Y-m-d H:i:s.u', $v));
-						break;
-					case 'object': $v = (is_object($v)) ? $v : unserialize($v);
-						break;
-					case 'array': $v = (is_array($v)) ? $v : unserialize($v);
-						break;
-				}
+				$v = match ($prop['type']) {
+					'string'        => (string) $v,
+					'integer'       => (int) $v,
+					'float'         => (float) $v,
+					'boolean'       => (bool) $v,
+					'date'          => empty($v) ? null : (($v instanceof \DateTime) ? $v : new Date($v)),
+					'datetime'      => empty($v) ? null : (($v instanceof \DateTime) ? $v : new DateTime($v)),
+					'microdatetime' => empty($v) ? null : (($v instanceof \DateTime) ? $v : DateTime::createFromFormat('Y-m-d H:i:s.u', $v)),
+					'object'        => (is_object($v)) ? $v : unserialize($v),
+					'array'         => $v = (is_array($v)) ? $v : unserialize($v)
+				};
 			}
 			$this->$k = $v;
 		}
