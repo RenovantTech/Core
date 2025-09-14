@@ -106,6 +106,24 @@ class Mailer {
 		}
 	}
 
+	public function setFrom(string $email, string $name): self {
+		$this->debug['from'] = [$email, $name];
+		$this->Mailer->setFrom($email, $name);
+		return $this;
+	}
+
+	public function setSubject(string $subject): self {
+		$this->debug['subject'] = $subject;
+		$this->Mailer->Subject  = $subject;
+		return $this;
+	}
+
+	public function setReplyTo(string $email, string $name): self {
+		$this->debug['replyTo'] = [$email, $name];
+		$this->Mailer->addReplyTo($email, $name);
+		return $this;
+	}
+
 	public function addTo(string $email, ?string $name = null): self {
 		$this->debug['to'][] = [$email, $name];
 		$this->Mailer->addAddress($email, $name);
@@ -135,22 +153,15 @@ class Mailer {
 		return $this;
 	}
 
-	public function setFrom(string $email, string $name): self {
-		$this->debug['from'] = [$email, $name];
-		$this->Mailer->setFrom($email, $name);
-		return $this;
-	}
-
-	public function setSubject(string $subject): self {
-		$this->debug['subject'] = $subject;
-		$this->Mailer->Subject  = $subject;
-		return $this;
-	}
-
-	public function setReplyTo(string $email, string $name): self {
-		$this->debug['replyTo'] = [$email, $name];
-		$this->Mailer->addReplyTo($email, $name);
-		return $this;
+	public function addImage(string $path, string $name, string $ext = 'png'): void {
+		if ($path[0] != '/') {
+			$src  = $path;
+			$path = $this->templateDir . 'images/' . $path;
+		} else {
+			$src = $name . '.' . $ext;
+		}
+		$this->Mailer->addEmbeddedImage($path, $name, $name);
+		$this->replaceHTML([$src => 'cid:' . $name]);
 	}
 
 	/**
