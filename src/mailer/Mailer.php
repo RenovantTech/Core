@@ -173,15 +173,15 @@ class Mailer {
 	public function send(): bool {
 		try {
 			if ($this->Mailer->send()) {
-				sys::trace(LOG_DEBUG, T_INFO, 'OK: Mail successfully sent!');
+				sys::trace(LOG_DEBUG, T_INFO, '[OK] Mail successfully sent!');
 				return true;
 			} else {
-				sys::trace(LOG_DEBUG, T_ERROR, 'ERROR: Mail not sent!', $this->Mailer->ErrorInfo);
+				sys::trace(LOG_DEBUG, T_ERROR, '[ERROR] Mail not sent: ' . $this->Mailer->ErrorInfo, $this->Mailer->ErrorInfo);
 				trigger_error($this->Mailer->ErrorInfo, E_USER_WARNING);
 				return false;
 			}
 		} catch (\Exception $Ex) {
-			sys::trace(LOG_DEBUG, T_ERROR, 'ERROR: Mail not sent!', $Ex->getMessage());
+			sys::trace(LOG_DEBUG, T_ERROR, '[EXCEPTION] Mail not sent: ' . $Ex->getMessage(), $Ex->getMessage());
 			trigger_error($Ex->getMessage(), E_USER_WARNING);
 			return false;
 		}
