@@ -192,16 +192,16 @@ class Mailer {
 		$engine ??= $this->templateEngineHTML;
 
 		$this->Mailer->Body = match ($engine) {
-			self::TPL_ENGINE_PHP    => (new parser\PhpParser())->parse($template, $model),
+			self::TPL_ENGINE_PHP    => (new parser\PhpParser($this->templateDir))->parse($template, $model),
 			self::TPL_ENGINE_PHPTAL => (new parser\PhpTALParser($this->templateDir, $this->cacheDir))->parse($template, $model),
 		};
 	}
 
 	public function parseTXT(string $template, array $model = [], ?string $engine = null) {
-		$engine ??= $this->templateEngineHTML;
+		$engine ??= $this->templateEngineTXT;
 
 		$this->Mailer->AltBody = match ($engine) {
-			self::TPL_ENGINE_PHP    => (new parser\PhpParser())->parse($template, $model),
+			self::TPL_ENGINE_PHP    => (new parser\PhpParser($this->templateDir))->parse($template, $model),
 			self::TPL_ENGINE_PHPTAL => (new parser\PhpTALParser($this->templateDir, $this->cacheDir))->parse($template, $model),
 		};
 	}
