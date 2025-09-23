@@ -124,15 +124,36 @@ class Mailer {
 		return $this;
 	}
 
+	public function setTo(string $email, ?string $name = null): self {
+		$this->debug['to'] = [[$email, $name]];
+		$this->Mailer->clearAddresses();
+		$this->Mailer->addAddress($email, $name);
+		return $this;
+	}
+
 	public function addTo(string $email, ?string $name = null): self {
 		$this->debug['to'][] = [$email, $name];
 		$this->Mailer->addAddress($email, $name);
 		return $this;
 	}
 
+	public function setCC(string $email, ?string $name = null): self {
+		$this->debug['cc'] = [[$email, $name]];
+		$this->Mailer->clearCCs();
+		$this->Mailer->addCC($email, $name);
+		return $this;
+	}
+
 	public function addCC(string $email, ?string $name = null): self {
 		$this->debug['cc'][] = [$email, $name];
 		$this->Mailer->addCC($email, $name);
+		return $this;
+	}
+
+	public function setBCC(string $email, ?string $name = null): self {
+		$this->debug['bcc'] = [[$email, $name]];
+		$this->Mailer->clearBCCs();
+		$this->Mailer->addBCC($email, $name);
 		return $this;
 	}
 
