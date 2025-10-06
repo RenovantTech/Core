@@ -35,6 +35,7 @@ class PhpTALParser {
 			$template = str_replace('crossorigin', 'crossorigin=""', $template);
 			$template = preg_replace('/<meta ([^>]+)">/', '<meta $1" />', $template);
 			$template = preg_replace('/<link ([^>]+)">/', '<link $1" />', $template);
+			$template = preg_replace('/<img ([^>]+) alt ([^>]+)">/', '<img $1 alt="" $2">', $template);
 			$template = preg_replace('/<img ([^>]+)">/', '<img $1" />', $template);
 			$template = preg_replace('/<input ([^>]+)">/', '<input $1" />', $template);
 			$template = preg_replace('/<br(\s+)">/', '<br />', $template);
