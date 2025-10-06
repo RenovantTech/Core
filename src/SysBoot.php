@@ -3,6 +3,7 @@ namespace renovant\core;
 
 use renovant\core\container\Container;
 use renovant\core\util\yaml\Yaml;
+use Symfony\Component\Dotenv\Dotenv;
 
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\T_INFO;
@@ -142,17 +143,31 @@ class SysBoot extends sys {
 			self::$Sys->cnfServices = array_merge(self::$Sys->cnfServices, $config['sys']['services']);
 		}
 
+		// load .env
+		$__env = $_ENV;
+		sys::trace(LOG_DEBUG, T_INFO, 'init ENV', $_ENV, __METHOD__);
+		$Dotenv = new Dotenv();
+		$Dotenv->load(BASE_DIR . '/.env');
+		unset($_ENV['SYMFONY_DOTENV_VARS']);
+		$__env = array_diff($_ENV, $__env);
+		sys::trace(LOG_DEBUG, T_INFO, 'loaded ENV', $__env, __METHOD__);
+
 		// initialize
 		self::$Cache = (new Container())->build(OBJ_ID_PREFIX . strtoupper(SYS_CACHE), $sysCacheConf['class'], $sysCacheConf['constructor'], $sysCacheConf['properties']);
 
 		// write into SYS_YAML_CACHE file
 		$Sys        = serialize(self::$Sys);
 		$namespaces = var_export(self::$namespaces, true);
+		$envs       = var_export($__env, true);
 		$Cache      = serialize(self::$Cache);
 		$cache      = <<<CACHE
 <?php
 self::\$Sys = unserialize('$Sys');
 self::\$namespaces = $namespaces;
+\$envs = $envs;
+foreach (\$envs as \$k => \$v) {
+	\$_ENV[\$k] = \$v;
+}
 self::\$Cache = unserialize('$Cache');
 CACHE;
 		file_put_contents(TMP_DIR . 'core-sys', $cache, LOCK_EX);
