@@ -13,6 +13,7 @@ const LOG_DIR    = '/tmp/renovant-core/log/';
 const RUN_DIR    = '/tmp/renovant-core/run/';
 const TMP_DIR    = '/tmp/renovant-core/tmp/';
 const UPLOAD_DIR = '/tmp/renovant-core/upload/';
+const VENDOR_DIR = __DIR__ . '/../vendor/';
 // environment
 const SYS_YAML    = 'sys.yml';
 const ENVIRONMENT = 'PHPUNIT';

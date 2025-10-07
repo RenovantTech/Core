@@ -3,6 +3,7 @@ namespace renovant\core;
 
 use renovant\core\container\Container;
 use renovant\core\util\yaml\Yaml;
+use Symfony\Component\Dotenv\Dotenv;
 
 use const renovant\core\cache\OBJ_ID_PREFIX;
 use const renovant\core\trace\T_INFO;
@@ -37,8 +38,11 @@ class SysBoot extends sys {
 		if (!defined(__NAMESPACE__ . '\DATA_DIR')) {
 			die(SysException::ERR24);
 		}
-		if (!is_writable(DATA_DIR)) {
+		if (!defined(__NAMESPACE__ . '\VENDOR_DIR')) {
 			die(SysException::ERR25);
+		}
+		if (!is_writable(DATA_DIR)) {
+			die(SysException::ERR26);
 		}
 		// DATA_DIR
 		if (!file_exists(ASSETS_DIR)) {
@@ -62,6 +66,14 @@ class SysBoot extends sys {
 		if (!file_exists(UPLOAD_DIR)) {
 			mkdir(UPLOAD_DIR, 0770, true);
 		}
+
+		// load .env
+		self::$namespaces['Symfony\Component\Dotenv'] = VENDOR_DIR . 'symfony/dotenv';
+		$__env                                        = $_ENV;
+		$Dotenv                                       = new Dotenv();
+		$Dotenv->load(BASE_DIR . '/.env');
+		unset($_ENV['SYMFONY_DOTENV_VARS']);
+		$__env = array_diff($_ENV, $__env);
 
 		self::$Sys = new sys();
 
@@ -148,11 +160,16 @@ class SysBoot extends sys {
 		// write into SYS_YAML_CACHE file
 		$Sys        = serialize(self::$Sys);
 		$namespaces = var_export(self::$namespaces, true);
+		$envs       = var_export($__env, true);
 		$Cache      = serialize(self::$Cache);
 		$cache      = <<<CACHE
 <?php
 self::\$Sys = unserialize('$Sys');
 self::\$namespaces = $namespaces;
+\$envs = $envs;
+foreach (\$envs as \$k => \$v) {
+	\$_ENV[\$k] = \$v;
+}
 self::\$Cache = unserialize('$Cache');
 CACHE;
 		file_put_contents(TMP_DIR . 'core-sys', $cache, LOCK_EX);
