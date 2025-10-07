@@ -38,8 +38,11 @@ class SysBoot extends sys {
 		if (!defined(__NAMESPACE__ . '\DATA_DIR')) {
 			die(SysException::ERR24);
 		}
-		if (!is_writable(DATA_DIR)) {
+		if (!defined(__NAMESPACE__ . '\VENDOR_DIR')) {
 			die(SysException::ERR25);
+		}
+		if (!is_writable(DATA_DIR)) {
+			die(SysException::ERR26);
 		}
 		// DATA_DIR
 		if (!file_exists(ASSETS_DIR)) {

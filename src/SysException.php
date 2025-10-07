@@ -7,7 +7,9 @@ class SysException extends Exception {
 	public const ERR22 = 'FATAL ERROR: const BASE_DIR not defined in your boostrap php file';
 	public const ERR23 = 'FATAL ERROR: const BIN_DIR not defined in your boostrap php file';
 	public const ERR24 = 'FATAL ERROR: const DATA_DIR not defined in your boostrap php file';
-	public const ERR25 = 'FATAL ERROR: const DATA_DIR "{1}" is NOT writable!';
+	public const ERR25 = 'FATAL ERROR: const VENDOR_DIR not defined in your boostrap php file';
+	public const ERR26 = 'FATAL ERROR: const DATA_DIR "{1}" is NOT writable!';
+
 	public const ERR29 = 'FATAL ERROR: please set magic_quotes_gpc Off in your php.ini';
 
 	// constructor
