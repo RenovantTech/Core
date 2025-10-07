@@ -70,12 +70,10 @@ class SysBoot extends sys {
 		// load .env
 		self::$namespaces['Symfony\Component\Dotenv'] = VENDOR_DIR . 'symfony/dotenv';
 		$__env                                        = $_ENV;
-		sys::trace(LOG_DEBUG, T_INFO, 'init ENV', $_ENV, __METHOD__);
-		$Dotenv = new Dotenv();
+		$Dotenv                                       = new Dotenv();
 		$Dotenv->load(BASE_DIR . '/.env');
 		unset($_ENV['SYMFONY_DOTENV_VARS']);
 		$__env = array_diff($_ENV, $__env);
-		sys::trace(LOG_DEBUG, T_INFO, 'loaded ENV', $__env, __METHOD__);
 
 		self::$Sys = new sys();
 
