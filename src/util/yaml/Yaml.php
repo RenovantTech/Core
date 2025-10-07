@@ -101,20 +101,17 @@ class Yaml {
 	}
 
 	/**
-	 * Add support for YAML inside PHAR
+	 * Parse YAML replacing ENV variables
+	 * NOTE: yaml_parse_file() do NOT support reading inside .phars, use file_get_contents()
 	 * @param string $file YAML file path
 	 * @param array $callbacks content handlers for YAML nodes
 	 * @return array parsed YAML
 	 */
 	protected static function _parseFile($file, array $callbacks = []) {
-		if (strpos($file, 'phar://') !== false) {
-			$tmp = tempnam(TMP_DIR, 'yaml-');
-			file_put_contents($tmp, file_get_contents($file));
-			$yaml = \yaml_parse_file($tmp, 0, $n, $callbacks);
-			unlink($tmp);
-		} else {
-			$yaml = \yaml_parse_file($file, 0, $n, $callbacks);
+		$yaml = file_get_contents($file);
+		foreach ($_ENV as $k => $v) {
+			$yaml = str_replace('ENV(' . $k . ')', $v, $yaml);
 		}
-		return $yaml;
+		return \yaml_parse($yaml, 0, $n, $callbacks);
 	}
 }
