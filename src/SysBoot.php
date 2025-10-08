@@ -67,13 +67,14 @@ class SysBoot extends sys {
 			mkdir(UPLOAD_DIR, 0770, true);
 		}
 
-		// load .env
 		self::$namespaces['Symfony\Component\Dotenv'] = VENDOR_DIR . 'symfony/dotenv';
-		$__env                                        = $_ENV;
-		$Dotenv                                       = new Dotenv();
-		$Dotenv->load(BASE_DIR . '/.env');
+		// load .env
+		$__env  = $_ENV;
+		$Dotenv = new Dotenv();
+		$Dotenv->load(DATA_DIR . '/.env');
 		unset($_ENV['SYMFONY_DOTENV_VARS']);
 		$__env = array_diff($_ENV, $__env);
+		unset(self::$namespaces['Symfony\Component\Dotenv']);
 
 		self::$Sys = new sys();
 
